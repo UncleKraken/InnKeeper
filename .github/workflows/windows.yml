@@ -2,12 +2,18 @@ name: windows-installer
 
 # Builds InnKeeper-Setup-<version>.exe.
 #  - On every push to v2/master: build and attach the installer to the run (Actions → this run → Artifacts).
-#  - On a tag like v2.1.0: also publish it as a GitHub Release, which the app's update notice points to.
+#  - On a tag like v2.1.0, or when run by hand with a release tag: also publish it as a GitHub Release,
+#    which the app's update notice points to.
 on:
   push:
     branches: [v2, master, main]
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Publish a release with this tag (e.g. v2.1.0). Leave empty to only build."
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -83,9 +89,11 @@ jobs:
           path: dist/installer/*.exe
 
       - name: Publish release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
         uses: softprops/action-gh-release@v3
         with:
+          tag_name: ${{ inputs.release_tag || github.ref_name }}
+          target_commitish: ${{ github.sha }}
           files: dist/installer/*.exe
           name: InnKeeper ${{ steps.version.outputs.version }}
           body_path: CHANGELOG.md
