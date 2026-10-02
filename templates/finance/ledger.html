@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Ledger" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'finance:dashboard' %}?from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}">{% icon "back" %} {% translate "Reports" %}</a></div><h1>{% translate "Ledger" %}</h1></div>
+  <div class="actions">
+    {% include "finance/_range.html" %}
+    <a class="btn" href="?type={{ kind }}&from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}&format=csv">{% translate "Export CSV" %}</a>
+  </div>
+</div>
+<nav class="tabs">
+  <a href="?type=charges&from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}" class="{% if kind == 'charges' %}active{% endif %}">{% translate "Revenue" %}</a>
+  <a href="?type=payments&from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}" class="{% if kind == 'payments' %}active{% endif %}">{% translate "Payments" %}</a>
+</nav>
+<div class="card card-flush">
+  <div class="table-wrap"><table class="table table-sm">
+    {% if kind == "payments" %}
+      <thead><tr><th>{% translate "Date" %}</th><th>{% translate "Method" %}</th><th>{% translate "For" %}</th><th>{% translate "Staff" %}</th><th class="num">{% translate "Amount" %}</th></tr></thead>
+      <tbody>
+      {% for p in rows %}
+        <tr class="{% if p.voided %}voided{% endif %}"><td>{{ p.business_date|date:"d.m.Y" }}</td><td>{{ p.get_method_display }}</td>
+          <td>{% if p.folio_id %}<a href="{% url 'frontdesk:reservation_detail' p.folio.reservation_id %}#folio">{{ p.folio.number }}</a> · {{ p.folio.reservation.guest }}{% elif p.order_id %}<a href="{% url 'outlets:receipt' p.order_id %}">{{ p.order.outlet }} #{{ p.order.number }}</a>{% endif %}</td>
+          <td>{{ p.created_by|default:"—" }}</td><td class="num">{{ p.amount|money }}</td></tr>
+      {% empty %}<tr><td colspan="5" class="empty">{% translate "Nothing in this period." %}</td></tr>{% endfor %}
+      </tbody>
+    {% else %}
+      <thead><tr><th>{% translate "Date" %}</th><th>{% translate "Department" %}</th><th>{% translate "Description" %}</th><th>{% translate "Staff" %}</th><th class="num">{% translate "Amount" %}</th></tr></thead>
+      <tbody>
+      {% for c in rows %}
+        <tr class="{% if c.voided %}voided{% endif %}"><td>{{ c.business_date|date:"d.m.Y" }}</td><td>{{ c.department }}</td>
+          <td>{% if c.folio_id %}<a href="{% url 'frontdesk:reservation_detail' c.folio.reservation_id %}#folio">{{ c.description }}</a>{% elif c.order_id %}<a href="{% url 'outlets:receipt' c.order_id %}">{{ c.description }}</a>{% else %}{{ c.description }}{% endif %}</td>
+          <td>{{ c.created_by|default:"—" }}</td><td class="num">{{ c.amount|money }}</td></tr>
+      {% empty %}<tr><td colspan="5" class="empty">{% translate "Nothing in this period." %}</td></tr>{% endfor %}
+      </tbody>
+    {% endif %}
+  </table></div>
+  {% if count > 500 %}<div class="card-footer muted">{% blocktranslate %}Showing the latest 500 of {{ count }}. Export CSV for everything.{% endblocktranslate %}</div>{% endif %}
+</div>
+{% endblock %}

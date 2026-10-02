@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ guest }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'frontdesk:guest_list' %}">{% icon "back" %} {% translate "Guests" %}</a></div><h1>{{ guest }} {% if guest.is_vip %}<span class="badge b-vip badge-plain">VIP</span>{% endif %}</h1></div>
+  <div class="actions">
+    <a class="btn btn-secondary" href="{% url 'frontdesk:guest_edit' guest.pk %}">{% icon "edit" %} {% translate "Edit" %}</a>
+    {% if "frontdesk" in modules %}<a class="btn" href="{% url 'frontdesk:reservation_create' %}?guest={{ guest.pk }}">{% icon "plus" %} {% translate "New reservation" %}</a>{% endif %}
+  </div>
+</div>
+<div class="grid grid-main">
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "Stays" %}</h2></div>
+    <div class="table-wrap"><table class="table">
+      <tbody>
+      {% for r in stays %}
+        <tr><td class="mono"><a href="{% url 'frontdesk:reservation_detail' r.pk %}">{{ r.code }}</a></td><td>{% translate "Room" %} {{ r.room.number }}</td><td>{{ r.arrival|date:"d.m.Y" }} → {{ r.departure|date:"d.m.Y" }}</td><td>{% status_badge r.status r.get_status_display %}</td></tr>
+      {% empty %}
+        <tr><td class="empty">{% translate "No stays yet." %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+  <section class="card">
+    <div class="card-header"><h3>{% translate "Details" %}</h3></div>
+    <div class="card-body"><dl class="dl">
+      <dt>{% translate "Phone" %}</dt><dd>{{ guest.phone|default:"—" }}</dd>
+      <dt>{% translate "Email" %}</dt><dd>{{ guest.email|default:"—" }}</dd>
+      <dt>{% translate "Nationality" %}</dt><dd>{{ guest.nationality|default:"—" }}</dd>
+      <dt>{% translate "Date of birth" %}</dt><dd>{{ guest.date_of_birth|date:"d.m.Y"|default:"—" }}</dd>
+      <dt>{% translate "Document" %}</dt><dd>{% if guest.document_number %}{{ guest.get_document_type_display }} {{ guest.document_number }}{% else %}—{% endif %}</dd>
+      <dt>{% translate "Company" %}</dt><dd>{{ guest.company|default:"—" }}</dd>
+      <dt>{% translate "Address" %}</dt><dd>{{ guest.address|default:"—" }}</dd>
+    </dl>{% if guest.notes %}<p style="margin:1rem 0 0; white-space:pre-line">{{ guest.notes }}</p>{% endif %}</div>
+  </section>
+</div>
+{% endblock %}

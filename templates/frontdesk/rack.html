@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Room rack" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Front desk" %}</div><h1>{% translate "Room rack" %}</h1><p>{% translate "Click an empty day to book that room." %}</p></div>
+  <div class="actions">
+    <a class="btn btn-secondary btn-sm" href="?start={{ prev|date:'Y-m-d' }}&days={{ days }}" aria-label="{% translate 'Previous week' %}">{% icon "back" %}</a>
+    <a class="btn btn-secondary btn-sm" href="?days={{ days }}">{% translate "Today" %}</a>
+    <a class="btn btn-secondary btn-sm" href="?start={{ next|date:'Y-m-d' }}&days={{ days }}" aria-label="{% translate 'Next week' %}">{% icon "next" %}</a>
+    <form method="get" class="row" style="gap:.4rem">
+      <input class="input" type="date" name="start" value="{{ start|date:'Y-m-d' }}" style="width:auto" onchange="this.form.submit()">
+      <select class="input" name="days" style="width:auto" onchange="this.form.submit()">
+        <option value="14" {% if days == 14 %}selected{% endif %}>14 {% translate "days" %}</option>
+        <option value="21" {% if days == 21 %}selected{% endif %}>21 {% translate "days" %}</option>
+        <option value="31" {% if days == 31 %}selected{% endif %}>31 {% translate "days" %}</option>
+      </select>
+    </form>
+    <a class="btn" href="{% url 'frontdesk:reservation_create' %}">{% icon "plus" %} {% translate "New reservation" %}</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="rack-wrap">
+    <table class="rack">
+      <thead>
+        <tr>
+          <th class="room-col">{% translate "Room" %}</th>
+          {% for d in dates %}
+            <th class="{% if d == today %}today{% elif d.weekday >= 5 %}weekend{% endif %}">{{ d|date:"D" }}<br>{{ d|date:"d.m" }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          <tr>
+            <th class="room-col"><strong>{{ row.room.number }}</strong><small class="muted">{{ row.room.room_type.code }}</small>
+              {% if row.room.out_of_order %} {% translate "OOO" as l %}{% status_badge "ooo" l %}{% elif row.room.hk_status == "dirty" %} <span title="{% translate 'Dirty' %}" style="color:var(--warning)">●</span>{% endif %}
+            </th>
+            {% for c in row.cells %}
+              {% if c.kind == "stay" %}
+                <td class="stay" colspan="{{ c.span }}"><a class="bar {{ c.res.status }}" href="{% url 'frontdesk:reservation_detail' c.res.pk %}" title="{{ c.res.guest }} · {{ c.res.arrival|date:'d.m' }}–{{ c.res.departure|date:'d.m' }}">{{ c.res.guest }}</a></td>
+              {% elif c.blocked %}
+                <td class="blocked" title="{% translate 'Out of order' %}"></td>
+              {% else %}
+                <td class="free{% if c.today %} today{% endif %}"><a href="{% url 'frontdesk:reservation_create' %}?room={{ row.room.pk }}&arrival={{ c.date|date:'Y-m-d' }}" aria-label="{% blocktranslate with room=row.room.number d=c.date|date:'d.m.Y' %}Book room {{ room }} on {{ d }}{% endblocktranslate %}"></a></td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% empty %}
+          <tr><td class="empty" colspan="{{ days|add:1 }}">{% translate "No rooms yet. A manager can add them under Rooms & rates." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card-footer legend">
+    <span><i style="background:var(--info)"></i>{% translate "Booked" %}</span>
+    <span><i style="background:var(--success)"></i>{% translate "In house" %}</span>
+    <span><i style="background:#9aa1ab"></i>{% translate "Checked out" %}</span>
+    <span><i style="background:#f7dcd8"></i>{% translate "Out of order" %}</span>
+  </div>
+</div>
+{% endblock %}

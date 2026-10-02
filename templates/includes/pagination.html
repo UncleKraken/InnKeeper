@@ -1,0 +1,10 @@
+{% load i18n innkeeper %}
+{% if page_obj.has_other_pages %}
+<div class="card-footer row" style="justify-content:space-between">
+  <span class="muted">{% blocktranslate with a=page_obj.start_index b=page_obj.end_index n=page_obj.paginator.count %}{{ a }}–{{ b }} of {{ n }}{% endblocktranslate %}</span>
+  <span class="row" style="gap:.4rem">
+    {% if page_obj.has_previous %}<a class="btn btn-secondary btn-sm" href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">{% icon "back" %}</a>{% endif %}
+    {% if page_obj.has_next %}<a class="btn btn-secondary btn-sm" href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">{% icon "next" %}</a>{% endif %}
+  </span>
+</div>
+{% endif %}

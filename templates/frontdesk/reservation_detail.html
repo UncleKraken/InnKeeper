@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ r.code }} · {{ r.guest }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="eyebrow"><a href="{% url 'frontdesk:reservation_list' %}">{% icon "back" %} {% translate "Reservations" %}</a> · <span class="mono">{{ r.code }}</span></div>
+    <h1>{{ r.guest }} {% if r.guest.is_vip %}<span class="badge b-vip badge-plain">VIP</span>{% endif %}</h1>
+    <p>{% translate "Room" %} <strong>{{ r.room.number }}</strong> · {{ r.room.room_type.name }} · {{ r.arrival|date:"d.m.Y" }} → {{ r.departure|date:"d.m.Y" }} ({{ r.nights }} {% translate "nights" %})</p>
+  </div>
+  <div class="actions">
+    {% status_badge r.status r.get_status_display %}
+    {% if r.is_active %}<a class="btn btn-secondary" href="{% url 'frontdesk:reservation_edit' r.pk %}">{% icon "edit" %} {% translate "Edit" %}</a>{% endif %}
+    <a class="btn btn-secondary" href="{% url 'frontdesk:invoice' r.pk %}" target="_blank">{% icon "print" %} {% translate "Invoice" %}</a>
+    {% if r.status == "booked" %}
+      <form method="post" action="{% url 'frontdesk:check_in' r.pk %}" class="inline">{% csrf_token %}<button class="btn">{% icon "login" %} {% translate "Check in" %}</button></form>
+    {% elif r.status == "checked_in" %}
+      <form method="post" action="{% url 'frontdesk:check_out' r.pk %}" class="inline">{% csrf_token %}<button class="btn">{% icon "logout" %} {% translate "Check out" %}</button></form>
+    {% endif %}
+  </div>
+</div>
+
+{% if r.status == "booked" and not r.room.is_ready %}
+  <div class="alert alert-warning" style="margin-bottom:1.25rem">{% if r.room.out_of_order %}{% translate "This room is out of order. Move the guest to another room before check-in." %}{% else %}{% translate "This room is not clean yet." %}{% endif %}</div>
+{% endif %}
+
+<div class="grid grid-main">
+  <div class="stack">
+    <section class="card card-flush" id="folio">
+      <div class="card-header">
+        <h2>{% translate "Bill" %} <span class="muted mono" style="font-weight:400">{{ folio.number }}</span></h2>
+        {% status_badge folio.status folio.get_status_display %}
+      </div>
+      <div class="table-wrap"><table class="table">
+        <thead><tr><th>{% translate "Date" %}</th><th>{% translate "Description" %}</th><th class="num">{% translate "Qty" %}</th><th class="num">{% translate "Amount" %}</th><th></th></tr></thead>
+        <tbody>
+        {% for c in charges %}
+          <tr class="{% if c.voided %}voided{% endif %}">
+            <td class="nowrap">{{ c.business_date|date:"d.m" }}</td>
+            <td>{{ c.description }}{% if c.voided %}<br><small>{% translate "Voided" %}: {{ c.void_reason }}</small>{% endif %}</td>
+            <td class="num">{{ c.quantity }}</td>
+            <td class="num">{{ c.amount|money }}</td>
+            <td class="num">{% if request.user.is_manager and not c.voided and folio.status == "open" %}
+              <form method="post" action="{% url 'frontdesk:void_entry' r.pk 'charge' c.pk %}" class="inline void-form">{% csrf_token %}<input type="hidden" name="reason"><button class="btn btn-ghost btn-sm" title="{% translate 'Void' %}">{% icon "x" %}</button></form>
+            {% endif %}</td>
+          </tr>
+        {% endfor %}
+        {% if pending_nights %}
+          <tr><td></td><td class="muted">{% translate "Accommodation not yet posted" %} ({{ pending_nights }} × {{ r.rate|money }})</td><td class="num muted">{{ pending_nights }}</td><td class="num muted">{{ pending_amount|money }}</td><td></td></tr>
+        {% endif %}
+        {% for p in payments %}
+          <tr class="{% if p.voided %}voided{% endif %}">
+            <td class="nowrap">{{ p.business_date|date:"d.m" }}</td>
+            <td>{% if p.amount < 0 %}{% translate "Refund" %}{% else %}{% translate "Payment" %}{% endif %} · {{ p.get_method_display }}{% if p.reference %} <small>({{ p.reference }})</small>{% endif %}{% if p.voided %}<br><small>{% translate "Voided" %}: {{ p.void_reason }}</small>{% endif %}</td>
+            <td></td>
+            <td class="num" style="color:var(--success)">{% if p.amount < 0 %}+{{ p.amount|absval|money }}{% else %}−{{ p.amount|money }}{% endif %}</td>
+            <td class="num">{% if request.user.is_manager and not p.voided and folio.status == "open" %}
+              <form method="post" action="{% url 'frontdesk:void_entry' r.pk 'payment' p.pk %}" class="inline void-form">{% csrf_token %}<input type="hidden" name="reason"><button class="btn btn-ghost btn-sm" title="{% translate 'Void' %}">{% icon "x" %}</button></form>
+            {% endif %}</td>
+          </tr>
+        {% endfor %}
+        {% if not charges and not payments and not pending_nights %}
+          <tr><td colspan="5" class="empty">{% translate "No charges yet." %}</td></tr>
+        {% endif %}
+        </tbody>
+        <tfoot>
+          <tr><td></td><td>{% translate "Balance now" %}</td><td></td><td class="num">{{ folio.balance|money }}</td><td></td></tr>
+          {% if pending_nights %}<tr><td></td><td class="muted">{% translate "Expected at check-out" %}</td><td></td><td class="num muted">{{ expected_balance|money }}</td><td></td></tr>{% endif %}
+        </tfoot>
+      </table></div>
+    </section>
+
+    {% if folio.status == "open" %}
+    <div class="grid grid-2">
+      <form method="post" action="{% url 'frontdesk:add_payment' r.pk %}" class="card" novalidate>{% csrf_token %}
+        <div class="card-header"><h3>{% translate "Take payment" %}</h3></div>
+        <div class="card-body">{% include "includes/form_fields.html" with form=payment_form %}</div>
+        <div class="card-footer"><button class="btn btn-block">{% icon "money" %} {% translate "Record payment" %}</button></div>
+      </form>
+      <form method="post" action="{% url 'frontdesk:add_charge' r.pk %}" class="card" novalidate>{% csrf_token %}
+        <div class="card-header"><h3>{% translate "Add a charge" %}</h3></div>
+        <div class="card-body">{% include "includes/form_fields.html" with form=charge_form %}<div class="help" style="margin-top:.6rem">{% translate "Restaurant, bar and spa orders charged to the room appear here automatically." %}</div></div>
+        <div class="card-footer"><button class="btn btn-secondary btn-block">{% icon "plus" %} {% translate "Add charge" %}</button></div>
+      </form>
+    </div>
+    {% endif %}
+
+    {% if r.status == "checked_in" and request.user.is_manager and folio.balance > 0 %}
+      <form method="post" action="{% url 'frontdesk:check_out' r.pk %}" class="card card-body row" data-confirm="{% translate 'Check out and leave the balance unpaid?' %}">{% csrf_token %}
+        <input type="hidden" name="allow_balance" value="1">
+        <div class="spacer"><strong>{% translate "Manager override" %}</strong><br><small>{% translate "Check out now and leave the balance open, e.g. for company invoices paid by bank transfer." %}</small></div>
+        <button class="btn btn-secondary">{% translate "Check out with balance" %}</button>
+      </form>
+    {% endif %}
+  </div>
+
+  <aside class="stack">
+    <section class="card">
+      <div class="card-header"><h3>{% translate "Guest" %}</h3><a href="{% url 'frontdesk:guest_detail' r.guest.pk %}">{% translate "Profile" %}</a></div>
+      <div class="card-body"><dl class="dl">
+        <dt>{% translate "Phone" %}</dt><dd>{{ r.guest.phone|default:"—" }}</dd>
+        <dt>{% translate "Email" %}</dt><dd>{{ r.guest.email|default:"—" }}</dd>
+        <dt>{% translate "Nationality" %}</dt><dd>{{ r.guest.nationality|default:"—" }}</dd>
+        <dt>{% translate "Document" %}</dt><dd>{% if r.guest.document_number %}{{ r.guest.get_document_type_display }} {{ r.guest.document_number }}{% else %}<span style="color:var(--warning)">{% translate "Missing" %}</span>{% endif %}</dd>
+      </dl></div>
+    </section>
+    <section class="card">
+      <div class="card-header"><h3>{% translate "Stay details" %}</h3></div>
+      <div class="card-body"><dl class="dl">
+        <dt>{% translate "Guests" %}</dt><dd>{{ r.adults }} {% translate "adults" %}{% if r.children %}, {{ r.children }} {% translate "children" %}{% endif %}</dd>
+        <dt>{% translate "Rate" %}</dt><dd>{{ r.rate|money }} / {% translate "night" %}</dd>
+        <dt>{% translate "Source" %}</dt><dd>{{ r.get_source_display }}{% if r.external_ref %} · {{ r.external_ref }}{% endif %}</dd>
+        <dt>{% translate "Booked" %}</dt><dd>{{ r.created_at|date:"d.m.Y H:i" }}{% if r.created_by %} · {{ r.created_by }}{% endif %}</dd>
+        {% if r.checked_in_at %}<dt>{% translate "Checked in" %}</dt><dd>{{ r.checked_in_at|date:"d.m.Y H:i" }}</dd>{% endif %}
+        {% if r.checked_out_at %}<dt>{% translate "Checked out" %}</dt><dd>{{ r.checked_out_at|date:"d.m.Y H:i" }}</dd>{% endif %}
+      </dl>
+      {% if r.notes %}<p style="margin:1rem 0 0; white-space:pre-line">{{ r.notes }}</p>{% endif %}
+      </div>
+    </section>
+    {% if r.status == "booked" %}
+    <section class="card card-body">
+      <div class="row">
+        <form method="post" action="{% url 'frontdesk:cancel' r.pk %}" class="inline" data-confirm="{% translate 'Cancel this reservation?' %}">{% csrf_token %}<button class="btn btn-secondary btn-sm">{% translate "Cancel reservation" %}</button></form>
+        {% if r.arrival <= today %}<form method="post" action="{% url 'frontdesk:cancel' r.pk %}" class="inline" data-confirm="{% translate 'Mark as no-show?' %}">{% csrf_token %}<input type="hidden" name="no_show" value="1"><button class="btn btn-ghost btn-sm">{% translate "No-show" %}</button></form>{% endif %}
+      </div>
+    </section>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.querySelectorAll('.void-form').forEach(function (f) {
+    f.addEventListener('submit', function (e) {
+      var reason = window.prompt('{{ _("Why is this entry being voided?")|escapejs }}');
+      if (!reason) { e.preventDefault(); return; }
+      f.querySelector('[name=reason]').value = reason;
+    });
+  });
+</script>
+{% endblock %}

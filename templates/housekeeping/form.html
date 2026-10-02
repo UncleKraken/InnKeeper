@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="eyebrow"><a href="javascript:history.back()">{% icon "back" %} {% translate "Back" %}</a></div><h1>{{ title }}</h1></div></div>
+<form method="post" class="card" style="max-width:860px" novalidate>{% csrf_token %}
+  <div class="card-body">{% include "includes/form_fields.html" %}</div>
+  <div class="card-footer form-actions" style="margin-top:0"><button class="btn" type="submit">{% icon "check" %} {% translate "Save" %}</button></div>
+</form>
+{% endblock %}

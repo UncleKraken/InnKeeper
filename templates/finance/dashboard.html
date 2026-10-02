@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Reports" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Finance" %}</div><h1>{% translate "Reports" %}</h1><p>{{ start|date:"d.m.Y" }} – {{ end|date:"d.m.Y" }}</p></div>
+  <div class="actions">
+    {% include "finance/_range.html" %}
+    <a class="btn btn-secondary" href="{% url 'finance:ledger' %}?from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}">{% icon "list" %} {% translate "Ledger" %}</a>
+  </div>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:1.25rem">
+  <div class="card stat"><div class="stat-label">{% translate "Revenue" %}</div><div class="stat-value">{{ total|money }}</div><div class="stat-note">{% translate "All departments" %}</div></div>
+  <div class="card stat"><div class="stat-label">{% translate "Payments received" %}</div><div class="stat-value">{{ received|money }}</div><div class="stat-note">{% translate "Cash, card and transfers" %}</div></div>
+  <div class="card stat"><div class="stat-label">{% translate "Occupancy" %}</div><div class="stat-value">{{ kpis.occupancy }}%</div><div class="stat-note">{% blocktranslate with n=kpis.nights_sold %}{{ n }} room nights{% endblocktranslate %}</div></div>
+  <div class="card stat"><div class="stat-label">{% translate "Average rate (ADR)" %}</div><div class="stat-value">{{ kpis.adr|money }}</div><div class="stat-note">RevPAR {{ kpis.revpar|money }}</div></div>
+</div>
+
+<section class="card" style="margin-bottom:1.25rem">
+  <div class="card-header"><h2>{% translate "Revenue per day" %}</h2></div>
+  <div class="card-body">
+    <div class="bars">
+      {% for d in daily %}
+        <div class="bar-col" title="{{ d.date|date:'d.m.Y' }}: {{ d.amount|money }}">
+          <div class="bar-fill" style="height:{{ d.amount|percent_of:daily_max }}%"></div>
+          {% if show_day_labels %}<div class="bar-label">{{ d.date|date:"d" }}</div>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<div class="grid grid-2">
+  <section class="card">
+    <div class="card-header"><h2>{% translate "By department" %}</h2></div>
+    <div class="card-body">
+      {% if departments %}
+      <div class="hbar">
+        {% for d in departments %}
+          <span>{{ d.name }}</span>
+          <span class="track"><span class="fill" style="display:block; width:{{ d.amount|percent_of:total }}%"></span></span>
+          <span class="num">{{ d.amount|money }}</span>
+        {% endfor %}
+      </div>
+      {% else %}<div class="empty">{% translate "No revenue in this period." %}</div>{% endif %}
+    </div>
+  </section>
+  <section class="card">
+    <div class="card-header"><h2>{% translate "Payments by method" %}</h2></div>
+    <div class="card-body">
+      {% if by_method %}
+      <div class="hbar">
+        {% for m in by_method %}
+          <span>{{ m.label }}</span>
+          <span class="track"><span class="fill" style="display:block; width:{{ m.t|percent_of:received }}%; background:var(--accent)"></span></span>
+          <span class="num">{{ m.t|money }}</span>
+        {% endfor %}
+      </div>
+      {% else %}<div class="empty">{% translate "No payments in this period." %}</div>{% endif %}
+    </div>
+  </section>
+</div>
+
+<section class="card card-flush" style="margin-top:1.25rem">
+  <div class="card-header"><h2>{% translate "Unpaid bills" %}</h2><strong>{{ outstanding_total|money }}</strong></div>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Bill" %}</th><th>{% translate "Guest" %}</th><th>{% translate "Room" %}</th><th>{% translate "Status" %}</th><th class="num">{% translate "Balance" %}</th></tr></thead>
+    <tbody>
+    {% for o in outstanding %}{% with r=o.folio.reservation %}
+      <tr><td class="mono"><a href="{% url 'frontdesk:reservation_detail' r.pk %}#folio">{{ o.folio.number }}</a></td><td>{{ r.guest }}</td><td>{{ r.room.number }}</td><td>{% status_badge r.status r.get_status_display %}</td><td class="num"><strong>{{ o.balance|money }}</strong></td></tr>
+    {% endwith %}{% empty %}
+      <tr><td colspan="5" class="empty">{% translate "Every bill is settled." %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</section>
+{% endblock %}

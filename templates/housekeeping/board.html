@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Housekeeping" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Operations" %}</div><h1>{% translate "Housekeeping" %}</h1>
+    <p>{% blocktranslate with d=counts.dirty a=counts.arriving o=counts.occupied %}{{ d }} to clean · {{ a }} arriving today · {{ o }} occupied{% endblocktranslate %}</p></div>
+  <div class="actions">
+    <a class="btn btn-secondary" href="{% url 'housekeeping:ticket_create' %}">{% icon "wrench" %} {% translate "Report a problem" %}</a>
+    <a class="btn" href="{% url 'housekeeping:task_create' %}">{% icon "plus" %} {% translate "New task" %}</a>
+  </div>
+</div>
+<div class="grid grid-main">
+  <div>
+    <nav class="tabs" style="margin-bottom:0">
+      <a href="?show=all" class="{% if show == 'all' %}active{% endif %}">{% translate "All rooms" %}</a>
+      <a href="?show=dirty" class="{% if show == 'dirty' %}active{% endif %}">{% translate "To clean" %} ({{ counts.dirty }})</a>
+    </nav>
+    {% for floor, items in floors %}
+      <div class="floor-label">{% blocktranslate %}Floor {{ floor }}{% endblocktranslate %}</div>
+      <div class="tiles">
+        {% for it in items %}{% with room=it.room %}
+          <div class="tile {% if room.out_of_order %}ooo{% else %}{{ room.hk_status }}{% endif %}">
+            <div class="tile-num">{{ room.number }}
+              {% if room.out_of_order %}{% translate "Out of order" as l %}{% status_badge "ooo" l %}{% else %}{% status_badge room.hk_status room.get_hk_status_display %}{% endif %}
+            </div>
+            <div class="tile-meta">{{ room.room_type.code }} · {% if it.occupied %}{% translate "Occupied" %}{% else %}{% translate "Vacant" %}{% endif %}{% if it.arriving %} · <strong style="color:var(--info)">{% translate "Arrival today" %}</strong>{% endif %}</div>
+            {% if not room.out_of_order %}
+            <div class="btn-row">
+              {% if room.hk_status == "dirty" %}
+                <form method="post" action="{% url 'housekeeping:room_status' room.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-sm" name="status" value="clean">{% icon "check" %} {% translate "Mark clean" %}</button></form>
+              {% else %}
+                {% if room.hk_status == "clean" %}<form method="post" action="{% url 'housekeeping:room_status' room.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-secondary btn-sm" name="status" value="inspected">{% translate "Mark inspected" %}</button></form>{% endif %}
+                <form method="post" action="{% url 'housekeeping:room_status' room.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-ghost btn-sm" name="status" value="dirty">{% translate "Mark dirty" %}</button></form>
+              {% endif %}
+            </div>
+            {% endif %}
+          </div>
+        {% endwith %}{% endfor %}
+      </div>
+    {% empty %}
+      <div class="card empty" style="margin-top:1rem"><strong>{% translate "No rooms to show." %}</strong></div>
+    {% endfor %}
+  </div>
+
+  <aside>
+    <section class="card card-flush">
+      <div class="card-header"><h2>{% translate "Tasks" %}</h2></div>
+      {% for t in tasks %}
+        <div class="line" style="align-items:flex-start">
+          <div class="line-name">
+            <strong>{% translate "Room" %} {{ t.room.number }}</strong> · {{ t.get_kind_display }}
+            <small class="muted">{% if t.notes %}{{ t.notes }} · {% endif %}{{ t.due_date|date:"d.m" }}</small>
+            {% if request.user.role != "housekeeping" %}
+              <form method="post" action="{% url 'housekeeping:task_assign' t.pk %}" style="margin-top:.35rem">{% csrf_token %}
+                <select class="input" name="assigned_to" onchange="this.form.submit()" style="padding:.25rem .4rem; font-size:.82rem">
+                  <option value="">{% translate "Unassigned" %}</option>
+                  {% for s in staff %}<option value="{{ s.pk }}" {% if t.assigned_to_id == s.pk %}selected{% endif %}>{{ s }}</option>{% endfor %}
+                </select>
+              </form>
+            {% elif t.assigned_to %}<small>{{ t.assigned_to }}</small>{% endif %}
+          </div>
+          <form method="post" action="{% url 'housekeeping:task_advance' t.pk %}" class="inline">{% csrf_token %}
+            {% if t.status == "pending" %}<button class="btn btn-secondary btn-sm">{% translate "Start" %}</button>
+            {% else %}<button class="btn btn-sm">{% icon "check" %} {% translate "Done" %}</button>{% endif %}
+          </form>
+        </div>
+      {% empty %}
+        <div class="empty">{% translate "No open tasks." %}</div>
+      {% endfor %}
+    </section>
+  </aside>
+</div>
+{% endblock %}

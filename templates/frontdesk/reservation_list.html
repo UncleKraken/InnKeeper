@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Reservations" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Front desk" %}</div><h1>{% translate "Reservations" %}</h1></div>
+  <div class="actions">
+    <form method="get" class="search"><input type="hidden" name="view" value="{{ view }}">{% icon "search" %}<input class="input" type="search" name="q" value="{{ q }}" placeholder="{% translate 'Guest, phone, room or code…' %}"></form>
+    <a class="btn" href="{% url 'frontdesk:reservation_create' %}">{% icon "plus" %} {% translate "New reservation" %}</a>
+  </div>
+</div>
+<nav class="tabs">{% for key, label in views.items %}<a href="?view={{ key }}" class="{% if key == view %}active{% endif %}">{{ label }}</a>{% endfor %}</nav>
+<div class="card card-flush">
+  {% if object_list %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Code" %}</th><th>{% translate "Guest" %}</th><th>{% translate "Room" %}</th><th>{% translate "Stay" %}</th><th>{% translate "Source" %}</th><th>{% translate "Status" %}</th><th class="num">{% translate "Rate" %}</th><th></th></tr></thead>
+    <tbody>
+    {% for r in object_list %}
+      <tr>
+        <td class="mono"><a href="{% url 'frontdesk:reservation_detail' r.pk %}">{{ r.code }}</a></td>
+        <td><strong>{{ r.guest }}</strong>{% if r.guest.is_vip %} <span class="badge b-vip badge-plain">VIP</span>{% endif %}<br><small>{{ r.guest.phone }}</small></td>
+        <td><strong>{{ r.room.number }}</strong> <small>{{ r.room.room_type.code }}</small></td>
+        <td class="nowrap">{{ r.arrival|date:"d.m.Y" }} → {{ r.departure|date:"d.m.Y" }}<br><small>{{ r.nights }} {% translate "nights" %} · {{ r.adults }}+{{ r.children }}</small></td>
+        <td>{{ r.get_source_display }}</td>
+        <td>{% status_badge r.status r.get_status_display %}</td>
+        <td class="num">{{ r.rate|money }}</td>
+        <td class="num">
+          {% if view == "arrivals" and r.status == "booked" %}
+            <form method="post" action="{% url 'frontdesk:check_in' r.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-sm">{% translate "Check in" %}</button></form>
+          {% else %}
+            <a class="btn btn-ghost btn-sm" href="{% url 'frontdesk:reservation_detail' r.pk %}">{% translate "Open" %}</a>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% include "includes/pagination.html" %}
+  {% else %}
+    <div class="empty"><strong>{% translate "No reservations found" %}</strong>{% if q %}{% translate "Try a different search." %}{% endif %}</div>
+  {% endif %}
+</div>
+{% endblock %}

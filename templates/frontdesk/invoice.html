@@ -1,0 +1,48 @@
+{% load static i18n innkeeper %}<!doctype html>
+{% get_current_language as LANG %}
+<html lang="{{ LANG }}">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% translate "Invoice" %} {{ folio.number }} · {{ hotel.name }}</title>
+  <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
+</head>
+<body style="background:#eceae6">
+<div class="no-print" style="text-align:center; padding:1rem"><button class="btn" onclick="window.print()">{% translate "Print" %}</button></div>
+<div class="doc card">
+  <div class="doc-head">
+    <div>
+      <div class="doc-title">{{ hotel.legal_name|default:hotel.name }}</div>
+      <div class="muted">{{ hotel.address }}<br>{% if hotel.phone %}{{ hotel.phone }} · {% endif %}{{ hotel.email }}{% if hotel.tax_id %}<br>NIPT: {{ hotel.tax_id }}{% endif %}</div>
+    </div>
+    <div style="text-align:right">
+      <div class="doc-title">{% if folio.status == "closed" %}{% translate "Invoice" %}{% else %}{% translate "Pro-forma bill" %}{% endif %}</div>
+      <div class="mono">{{ folio.number }}</div>
+      <div class="muted">{{ printed_at|date:"d.m.Y H:i" }}</div>
+    </div>
+  </div>
+  <div class="grid grid-2" style="margin-bottom:1.5rem">
+    <div><div class="muted">{% translate "Guest" %}</div><strong>{{ r.guest }}</strong>{% if r.guest.company %}<br>{{ r.guest.company }}{% endif %}{% if r.guest.address %}<br>{{ r.guest.address }}{% endif %}</div>
+    <div><div class="muted">{% translate "Stay" %}</div>{% translate "Room" %} {{ r.room.number }} · {{ r.arrival|date:"d.m.Y" }} → {{ r.departure|date:"d.m.Y" }}<br><span class="mono">{{ r.code }}</span></div>
+  </div>
+  <table class="table">
+    <thead><tr><th>{% translate "Date" %}</th><th>{% translate "Description" %}</th><th class="num">{% translate "Qty" %}</th><th class="num">{% translate "Price" %}</th><th class="num">{% translate "Amount" %}</th></tr></thead>
+    <tbody>
+      {% for c in charges %}<tr><td>{{ c.business_date|date:"d.m.Y" }}</td><td>{{ c.description }}</td><td class="num">{{ c.quantity }}</td><td class="num">{{ c.unit_price|money }}</td><td class="num">{{ c.amount|money }}</td></tr>{% endfor %}
+    </tbody>
+    <tfoot>
+      <tr><td colspan="4">{% translate "Total" %}</td><td class="num">{{ folio.total_charges|money }}</td></tr>
+    </tfoot>
+  </table>
+  {% if payments %}
+  <table class="table table-sm" style="margin-top:1.5rem">
+    <tbody>
+      {% for p in payments %}<tr><td>{{ p.business_date|date:"d.m.Y" }}</td><td>{% translate "Payment" %} · {{ p.get_method_display }}</td><td class="num">{% if p.amount < 0 %}+{{ p.amount|absval|money }}{% else %}−{{ p.amount|money }}{% endif %}</td></tr>{% endfor %}
+    </tbody>
+    <tfoot><tr><td colspan="2">{% translate "Balance due" %}</td><td class="num">{{ folio.balance|money }}</td></tr></tfoot>
+  </table>
+  {% endif %}
+  <p class="muted" style="margin-top:1.5rem; font-size:.85rem">{% blocktranslate with rate=hotel.vat_rate %}Prices include VAT ({{ rate }}%).{% endblocktranslate %}</p>
+  {% if hotel.invoice_footer %}<p class="muted" style="white-space:pre-line; font-size:.85rem">{{ hotel.invoice_footer }}</p>{% endif %}
+</div>
+</body>
+</html>

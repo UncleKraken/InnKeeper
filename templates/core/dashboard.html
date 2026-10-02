@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Dashboard" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="eyebrow">{{ today|date:"l, d F Y" }}</div>
+    <h1>{% blocktranslate with name=request.user.first_name|default:request.user.username %}Hello, {{ name }}{% endblocktranslate %}</h1>
+  </div>
+  <div class="actions">
+    {% if "frontdesk" in modules %}<a class="btn" href="{% url 'frontdesk:reservation_create' %}">{% icon "plus" %} {% translate "New reservation" %}</a>{% endif %}
+    {% if "outlets" in modules %}<a class="btn btn-secondary" href="{% url 'outlets:home' %}">{% icon "utensils" %} {% translate "Open POS" %}</a>{% endif %}
+  </div>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:1.25rem">
+  {% if "frontdesk" in modules %}
+    <a class="card stat" href="{% url 'frontdesk:reservation_list' %}?view=arrivals"><div class="stat-label">{% translate "Arrivals today" %}</div><div class="stat-value">{{ arrivals|length }}</div><div class="stat-note">{% blocktranslate count n=upcoming %}{{ n }} more this week{% plural %}{{ n }} more this week{% endblocktranslate %}</div></a>
+    <a class="card stat" href="{% url 'frontdesk:reservation_list' %}?view=departures"><div class="stat-label">{% translate "Departures today" %}</div><div class="stat-value">{{ departures|length }}</div><div class="stat-note">{% translate "Guests due to leave" %}</div></a>
+    <a class="card stat" href="{% url 'frontdesk:reservation_list' %}?view=in_house"><div class="stat-label">{% translate "Occupancy" %}</div><div class="stat-value">{{ occupancy }}%</div><div class="stat-note">{% blocktranslate with a=in_house_count b=rooms_total %}{{ a }} of {{ b }} rooms{% endblocktranslate %}</div></a>
+  {% endif %}
+  {% if "housekeeping" in modules %}
+    <a class="card stat" href="{% url 'housekeeping:board' %}"><div class="stat-label">{% translate "Rooms to clean" %}</div><div class="stat-value">{{ dirty_rooms }}</div><div class="stat-note">{% translate "Marked dirty" %}</div></a>
+  {% endif %}
+  {% if "maintenance" in modules and "frontdesk" not in modules %}
+    <a class="card stat" href="{% url 'housekeeping:ticket_list' %}"><div class="stat-label">{% translate "Open maintenance" %}</div><div class="stat-value">{{ open_tickets }}</div><div class="stat-note">{% blocktranslate count n=ooo_rooms %}{{ n }} room out of order{% plural %}{{ n }} rooms out of order{% endblocktranslate %}</div></a>
+  {% endif %}
+  {% if "outlets" in modules %}
+    <a class="card stat" href="{% url 'outlets:home' %}"><div class="stat-label">{% translate "Open orders" %}</div><div class="stat-value">{{ open_orders }}</div><div class="stat-note">{% translate "Across all outlets" %}</div></a>
+  {% endif %}
+  {% if "finance" in modules %}
+    <a class="card stat" href="{% url 'finance:dashboard' %}"><div class="stat-label">{% translate "Revenue today" %}</div><div class="stat-value">{{ revenue_today|money }}</div><div class="stat-note">{% translate "All departments" %}</div></a>
+  {% endif %}
+</div>
+
+<div class="grid grid-2">
+  {% if "frontdesk" in modules %}
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "Arrivals" %}</h2><a href="{% url 'frontdesk:reservation_list' %}?view=arrivals">{% translate "All" %}</a></div>
+    <div class="table-wrap"><table class="table">
+      <tbody>
+      {% for r in arrivals %}
+        <tr>
+          <td><a href="{% url 'frontdesk:reservation_detail' r.pk %}"><strong>{{ r.guest }}</strong></a>{% if r.guest.is_vip %} <span class="badge b-vip badge-plain">VIP</span>{% endif %}<br><small>{{ r.nights }} {% translate "nights" %} · {{ r.adults }}+{{ r.children }}</small></td>
+          <td>{% translate "Room" %} <strong>{{ r.room.number }}</strong><br>{% if r.room.is_ready %}{% translate "Ready" as l %}{% status_badge "clean" l %}{% elif r.room.out_of_order %}{% translate "Out of order" as l %}{% status_badge "ooo" l %}{% else %}{% translate "Not clean" as l %}{% status_badge "dirty" l %}{% endif %}</td>
+          <td class="num"><form method="post" action="{% url 'frontdesk:check_in' r.pk %}" class="inline">{% csrf_token %}<button class="btn btn-sm">{% icon "login" %} {% translate "Check in" %}</button></form></td>
+        </tr>
+      {% empty %}
+        <tr><td class="empty">{% translate "No arrivals left today." %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "Departures" %}</h2><a href="{% url 'frontdesk:reservation_list' %}?view=departures">{% translate "All" %}</a></div>
+    <div class="table-wrap"><table class="table">
+      <tbody>
+      {% for r in departures %}
+        <tr>
+          <td><a href="{% url 'frontdesk:reservation_detail' r.pk %}"><strong>{{ r.guest }}</strong></a><br><small>{% translate "Room" %} {{ r.room.number }}{% if r.departure < today %} · <span style="color:var(--danger)">{% translate "overdue" %}</span>{% endif %}</small></td>
+          <td class="num"><a class="btn btn-secondary btn-sm" href="{% url 'frontdesk:reservation_detail' r.pk %}#folio">{% icon "money" %} {% translate "Bill & check out" %}</a></td>
+        </tr>
+      {% empty %}
+        <tr><td class="empty">{% translate "No departures due." %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+  {% endif %}
+
+  {% if "housekeeping" in modules %}
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "Housekeeping tasks" %}</h2><a href="{% url 'housekeeping:board' %}">{% translate "Board" %}</a></div>
+    <div class="table-wrap"><table class="table">
+      <tbody>
+      {% for t in hk_tasks %}
+        <tr><td><strong>{% translate "Room" %} {{ t.room.number }}</strong><br><small>{{ t.get_kind_display }}{% if t.notes %} · {{ t.notes }}{% endif %}</small></td>
+            <td>{{ t.assigned_to|default:"—" }}</td>
+            <td class="num">{% status_badge t.status t.get_status_display %}</td></tr>
+      {% empty %}
+        <tr><td class="empty">{% translate "All rooms are done." %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

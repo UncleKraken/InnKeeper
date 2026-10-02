@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ order.display_name }} · {{ outlet.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'outlets:floor' outlet.pk %}">{% icon "back" %} {{ outlet.name }}</a></div><h1>{{ order.display_name }}</h1></div>
+  <div class="actions">
+    <a class="btn btn-secondary" href="{% url 'outlets:receipt' order.pk %}" target="_blank">{% icon "print" %} {% translate "Print bill" %}</a>
+  </div>
+</div>
+
+<div class="pos">
+  <section>
+    <div class="row" style="margin-bottom:.9rem">
+      <div class="search spacer">{% icon "search" %}<input class="input" type="search" id="item-search" placeholder="{% translate 'Search the menu…' %}" autocomplete="off"></div>
+    </div>
+    <div class="cat-tabs" id="cat-tabs">
+      <button type="button" data-cat="all" class="active">{% translate "All" %}</button>
+      {% for m in menu %}<button type="button" data-cat="{{ m.category.pk }}">{{ m.category.name }}</button>{% endfor %}
+    </div>
+    <div class="items" id="items">
+      {% for m in menu %}{% for item in m.items %}
+        <form method="post" action="{% url 'outlets:add_item' order.pk %}" data-cat="{{ m.category.pk }}" data-name="{{ item.name|lower }}">{% csrf_token %}
+          <input type="hidden" name="item" value="{{ item.pk }}">
+          <button class="item-btn" type="submit">
+            <span class="i-name">{{ item.name }}{% if item.duration_minutes %} <small class="muted">· {{ item.duration_minutes }}′</small>{% endif %}</span>
+            <span class="i-price">{{ item.price|money }}</span>
+          </button>
+        </form>
+      {% endfor %}{% empty %}
+        <div class="card empty" style="grid-column:1/-1">{% translate "This outlet has no items yet. A manager can add them under Outlets & menus." %}</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <aside class="card ticket">
+    <form method="post" action="{% url 'outlets:update_order' order.pk %}" class="card-header" style="gap:.5rem">{% csrf_token %}
+      <span class="muted mono">#{{ order.number }}</span>
+      <label class="row" style="gap:.35rem; font-size:.85rem">{% translate "Guests" %}
+        <input class="input" type="number" name="guests" min="1" value="{{ order.guests }}" style="width:70px; padding:.3rem .5rem" onchange="this.form.submit()">
+      </label>
+      <input type="hidden" name="note" value="{{ order.note }}">
+    </form>
+    <div class="ticket-lines">
+      {% for line in lines %}
+        <div class="line">
+          <div class="line-name">{{ line.name }}<small class="muted">{{ line.unit_price|money }}{% if line.note %} · {{ line.note }}{% endif %}</small></div>
+          <div class="qty">
+            <form method="post" action="{% url 'outlets:change_line' order.pk line.pk %}" class="inline">{% csrf_token %}<button name="delta" value="-1" aria-label="{% translate 'Less' %}">−</button></form>
+            <span>{{ line.quantity }}</span>
+            <form method="post" action="{% url 'outlets:change_line' order.pk line.pk %}" class="inline">{% csrf_token %}<button name="delta" value="1" aria-label="{% translate 'More' %}">+</button></form>
+          </div>
+          <div class="num" style="min-width:80px"><strong>{{ line.line_total|money }}</strong></div>
+        </div>
+      {% empty %}
+        <div class="empty">{% translate "Tap items on the left to add them." %}</div>
+      {% endfor %}
+    </div>
+    <form method="post" action="{% url 'outlets:update_order' order.pk %}" style="padding:.75rem 1.15rem 0">{% csrf_token %}
+      <input type="hidden" name="guests" value="{{ order.guests }}">
+      <input class="input" name="note" value="{{ order.note }}" placeholder="{% translate 'Note for the order (allergies, timing…)' %}" onchange="this.form.submit()">
+    </form>
+    <div class="ticket-total"><span>{% translate "Total" %}</span><span class="amount">{{ order.total|money }}</span></div>
+
+    {% if lines %}
+    <div class="settle">
+      <div class="grid grid-2" style="gap:.6rem">
+        <form method="post" action="{% url 'outlets:settle' order.pk %}">{% csrf_token %}<button class="btn btn-lg btn-block" name="how" value="cash">{% icon "money" %} {% translate "Cash" %}</button></form>
+        <form method="post" action="{% url 'outlets:settle' order.pk %}">{% csrf_token %}<button class="btn btn-lg btn-block" name="how" value="card">{% translate "Card" %}</button></form>
+      </div>
+      {% if in_house %}
+      <form method="post" action="{% url 'outlets:settle' order.pk %}" class="row" style="gap:.5rem; flex-wrap:nowrap">{% csrf_token %}
+        <input type="hidden" name="how" value="room">
+        <select class="input" name="reservation" required>
+          <option value="">{% translate "Charge to room…" %}</option>
+          {% for r in in_house %}<option value="{{ r.pk }}">{{ r.room.number }} · {{ r.guest }}</option>{% endfor %}
+        </select>
+        <button class="btn btn-accent">{% icon "bed" %} {% translate "Charge" %}</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endif %}
+    <div class="card-footer row" style="justify-content:space-between">
+      <a href="{% url 'outlets:floor' outlet.pk %}">{% icon "back" %} {% translate "Keep open" %}</a>
+      {% if not lines or request.user.is_manager %}
+      <form method="post" action="{% url 'outlets:cancel' order.pk %}" class="inline" data-confirm="{% translate 'Cancel this order?' %}">{% csrf_token %}<button class="btn btn-ghost btn-sm" style="color:var(--danger)">{% translate "Cancel order" %}</button></form>
+      {% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var tabs = document.querySelectorAll('#cat-tabs button');
+  var items = document.querySelectorAll('#items form');
+  var search = document.getElementById('item-search');
+  var key = 'innkeeper-cat-{{ outlet.pk }}';
+  function apply(cat) {
+    var q = (search.value || '').trim().toLowerCase();
+    tabs.forEach(function (t) { t.classList.toggle('active', t.dataset.cat === cat); });
+    items.forEach(function (f) {
+      var okCat = q || cat === 'all' || f.dataset.cat === cat;
+      var okText = !q || f.dataset.name.indexOf(q) !== -1;
+      f.classList.toggle('hidden', !(okCat && okText));
+    });
+    try { sessionStorage.setItem(key, cat); } catch (e) {}
+  }
+  var current = 'all';
+  try { current = sessionStorage.getItem(key) || 'all'; } catch (e) {}
+  if (!document.querySelector('#cat-tabs button[data-cat="' + current + '"]')) current = 'all';
+  tabs.forEach(function (t) { t.addEventListener('click', function () { current = t.dataset.cat; apply(current); }); });
+  search.addEventListener('input', function () { apply(current); });
+  apply(current);
+})();
+</script>
+{% endblock %}

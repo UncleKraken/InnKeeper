@@ -1,0 +1,44 @@
+{% load static i18n %}<!doctype html>
+{% get_current_language as LANG %}
+<html lang="{{ LANG }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% translate "Sign in" %} · {{ hotel.name }}</title>
+  <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+</head>
+<body>
+<div class="auth">
+  <section class="auth-art">
+    <div class="brand" style="padding:0"><span class="brand-mark">{{ hotel.name|slice:":1"|upper }}</span><span>{{ hotel.name }}<small>InnKeeper</small></span></div>
+    <div>
+      <h2>{% translate "Reception, rooms, restaurant, bar and every service — in one place." %}</h2>
+      <p>{% translate "Sign in with the account your manager gave you. Each team sees only the tools it needs." %}</p>
+    </div>
+    <small style="color:#7d8899">InnKeeper</small>
+  </section>
+  <section class="auth-form">
+    <div class="auth-card">
+      <div class="row" style="justify-content:flex-end; margin-bottom:2rem">{% include "includes/lang_switch.html" %}</div>
+      <h1>{% translate "Sign in" %}</h1>
+      <p class="muted">{% translate "Welcome back." %}</p>
+      <form method="post" novalidate style="margin-top:1.5rem">{% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-error" style="margin-bottom:1rem">{{ form.non_field_errors.0 }}</div>{% endif %}
+        <div class="field" style="margin-bottom:1rem">
+          <label for="id_username">{% translate "Username" %}</label>
+          {{ form.username }}
+        </div>
+        <div class="field" style="margin-bottom:1.5rem">
+          <label for="id_password">{% translate "Password" %}</label>
+          {{ form.password }}
+        </div>
+        <input type="hidden" name="next" value="{{ next }}">
+        <button class="btn btn-lg btn-block" type="submit">{% translate "Sign in" %}</button>
+      </form>
+      <p class="muted" style="margin-top:1.5rem; font-size:.85rem">{% translate "Forgot your password? Ask a manager to set a new one." %}</p>
+    </div>
+  </section>
+</div>
+</body>
+</html>

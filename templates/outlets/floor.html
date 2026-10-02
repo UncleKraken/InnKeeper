@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ outlet.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'outlets:home' %}">{% icon "back" %} {% translate "Outlets" %}</a></div><h1>{{ outlet.name }}</h1></div>
+  <form method="post" action="{% url 'outlets:new_order' outlet.pk %}" class="row" style="gap:.5rem">{% csrf_token %}
+    <input class="input" name="label" placeholder="{% if outlet.uses_tables %}{% translate 'Takeaway / customer name' %}{% else %}{% translate 'Customer name or room' %}{% endif %}" style="width:240px">
+    <button class="btn">{% icon "plus" %} {% translate "New order" %}</button>
+  </form>
+</div>
+
+{% if outlet.uses_tables %}
+  <div class="floor">
+    {% for t in tables %}
+      <a class="table-tile {% if t.order %}busy{% endif %}" href="{% url 'outlets:open_table' outlet.pk t.table.pk %}">
+        <div>
+          <div class="t-name">{{ t.table.name }}</div>
+          <div class="t-meta">{% blocktranslate count n=t.table.seats %}{{ n }} seat{% plural %}{{ n }} seats{% endblocktranslate %}</div>
+        </div>
+        {% if t.order %}
+          <div><div class="t-total">{{ t.order.total|money }}</div><div class="t-meta">{{ t.order.opened_by|default:"" }} · {{ t.order.opened_at|time:"H:i" }}</div></div>
+        {% else %}
+          <div class="t-meta">{% translate "Free" %}</div>
+        {% endif %}
+      </a>
+    {% empty %}
+      <div class="card empty" style="grid-column:1/-1">{% translate "No tables set up for this outlet." %}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% if loose_orders or not outlet.uses_tables %}
+<section class="card card-flush" style="margin-top:1.5rem">
+  <div class="card-header"><h2>{% translate "Open orders" %}</h2></div>
+  <div class="table-wrap"><table class="table">
+    <tbody>
+    {% for o in loose_orders %}
+      <tr><td><a href="{% url 'outlets:order' o.pk %}"><strong>{{ o.display_name }}</strong></a><br><small>#{{ o.number }} · {{ o.opened_at|time:"H:i" }} · {{ o.opened_by|default:"" }}</small></td><td class="num"><strong>{{ o.total|money }}</strong></td><td class="num"><a class="btn btn-secondary btn-sm" href="{% url 'outlets:order' o.pk %}">{% translate "Open" %}</a></td></tr>
+    {% empty %}
+      <tr><td class="empty">{% translate "No open orders." %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</section>
+{% endif %}
+{% endblock %}

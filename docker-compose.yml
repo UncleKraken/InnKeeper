@@ -1,0 +1,50 @@
+# Production-style setup: InnKeeper + PostgreSQL.
+#   cp .env.example .env   (fill it in, keep DATABASE_URL as below)
+#   docker compose up -d
+#   docker compose exec web python manage.py createsuperuser
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: innkeeper
+      POSTGRES_USER: innkeeper
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U innkeeper"]
+      interval: 5s
+      retries: 10
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://innkeeper:${POSTGRES_PASSWORD:-change-me}@db:5432/innkeeper
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  # Posts each in-house guest's room charge for the night just gone, daily at 03:00.
+  night-audit:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://innkeeper:${POSTGRES_PASSWORD:-change-me}@db:5432/innkeeper
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c 'while true; do
+        now=$$(date +%s); next=$$(date -d "tomorrow 03:00" +%s);
+        sleep $$((next - now));
+        python manage.py night_audit;
+      done'
+
+volumes:
+  pgdata:

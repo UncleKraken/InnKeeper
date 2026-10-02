@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Guests" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Front desk" %}</div><h1>{% translate "Guests" %}</h1></div>
+  <div class="actions">
+    <form method="get" class="search">{% icon "search" %}<input class="input" type="search" name="q" value="{{ q }}" placeholder="{% translate 'Name, phone, email, document…' %}"></form>
+    <a class="btn" href="{% url 'frontdesk:guest_create' %}">{% icon "plus" %} {% translate "New guest" %}</a>
+  </div>
+</div>
+<div class="card card-flush">
+  {% if object_list %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Phone" %}</th><th>{% translate "Email" %}</th><th>{% translate "Nationality" %}</th><th>{% translate "Company" %}</th></tr></thead>
+    <tbody>
+    {% for g in object_list %}
+      <tr><td><a href="{% url 'frontdesk:guest_detail' g.pk %}"><strong>{{ g }}</strong></a>{% if g.is_vip %} <span class="badge b-vip badge-plain">VIP</span>{% endif %}</td><td>{{ g.phone|default:"—" }}</td><td>{{ g.email|default:"—" }}</td><td>{{ g.nationality|default:"—" }}</td><td>{{ g.company|default:"—" }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% include "includes/pagination.html" %}
+  {% else %}
+    <div class="empty"><strong>{% translate "No guests found" %}</strong></div>
+  {% endif %}
+</div>
+{% endblock %}

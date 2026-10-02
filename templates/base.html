@@ -1,0 +1,100 @@
+{% load static i18n innkeeper %}<!doctype html>
+{% get_current_language as LANG %}
+<html lang="{{ LANG }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %} · {{ hotel.name }}</title>
+  <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  {% block head %}{% endblock %}
+</head>
+<body>
+{% include "includes/icons.svg" %}
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="{% url 'core:dashboard' %}">
+      <span class="brand-mark">{{ hotel.name|slice:":1"|upper }}</span>
+      <span>{{ hotel.name }}<small>InnKeeper</small></span>
+    </a>
+    <nav class="nav" aria-label="{% translate 'Main' %}">
+      <a href="{% url 'core:dashboard' %}" class="{% if request.path == '/' %}active{% endif %}">{% icon "home" %} {% translate "Dashboard" %}</a>
+
+      {% if "frontdesk" in modules %}
+        <div class="nav-section">{% translate "Front desk" %}</div>
+        <a href="{% url 'frontdesk:rack' %}" class="{% active '/front-desk/rack' %}">{% icon "calendar" %} {% translate "Room rack" %}</a>
+        <a href="{% url 'frontdesk:reservation_list' %}" class="{% active '/front-desk/reservations' %}">{% icon "list" %} {% translate "Reservations" %}</a>
+      {% endif %}
+      {% if "guests" in modules %}
+        <a href="{% url 'frontdesk:guest_list' %}" class="{% active '/front-desk/guests' %}">{% icon "users" %} {% translate "Guests" %}</a>
+      {% endif %}
+
+      {% if "housekeeping" in modules or "maintenance" in modules %}
+        <div class="nav-section">{% translate "Operations" %}</div>
+        {% if "housekeeping" in modules %}
+          <a href="{% url 'housekeeping:board' %}" class="{% active '/housekeeping/board' '/housekeeping/tasks' %}">{% icon "broom" %} {% translate "Housekeeping" %}</a>
+        {% endif %}
+        <a href="{% url 'housekeeping:ticket_list' %}" class="{% active '/housekeeping/maintenance' %}">{% icon "wrench" %} {% translate "Maintenance" %}</a>
+      {% endif %}
+
+      {% if "outlets" in modules %}
+        <div class="nav-section">{% translate "Services" %}</div>
+        <a href="{% url 'outlets:home' %}" class="{% if request.path|slice:':9' == '/outlets/' and '/outlets/setup' not in request.path %}active{% endif %}">{% icon "utensils" %} {% translate "Restaurant, bar & services" %}</a>
+      {% endif %}
+
+      {% if "finance" in modules %}
+        <div class="nav-section">{% translate "Finance" %}</div>
+        <a href="{% url 'finance:dashboard' %}" class="{% active '/finance/' %}">{% icon "chart" %} {% translate "Reports" %}</a>
+      {% endif %}
+
+      {% if "management" in modules %}
+        <div class="nav-section">{% translate "Management" %}</div>
+        <a href="{% url 'frontdesk:room_list' %}" class="{% active '/front-desk/setup' %}">{% icon "bed" %} {% translate "Rooms & rates" %}</a>
+        <a href="{% url 'outlets:setup' %}" class="{% active '/outlets/setup' %}">{% icon "store" %} {% translate "Outlets & menus" %}</a>
+        <a href="{% url 'accounts:staff_list' %}" class="{% active '/accounts/staff' %}">{% icon "staff" %} {% translate "Staff" %}</a>
+        <a href="{% url 'core:settings' %}" class="{% active '/settings' %}">{% icon "settings" %} {% translate "Hotel settings" %}</a>
+        <a href="{% url 'core:audit_log' %}" class="{% active '/audit' %}">{% icon "history" %} {% translate "Activity log" %}</a>
+      {% endif %}
+    </nav>
+    <div class="sidebar-foot">
+      <div class="who">{{ request.user }}</div>
+      <div class="muted" style="color:#7d8899">{{ request.user.get_role_display }}</div>
+      <div class="row" style="margin-top:.6rem; justify-content:space-between">
+        {% include "includes/lang_switch.html" %}
+        <span class="row" style="gap:.6rem">
+          <a href="{% url 'accounts:password_change' %}" title="{% translate 'Change password' %}">{% icon "key" %}</a>
+          <form method="post" action="{% url 'accounts:logout' %}" class="inline">{% csrf_token %}
+            <button type="submit" class="btn-ghost" style="background:none;border:0;color:inherit;cursor:pointer;padding:0" title="{% translate 'Sign out' %}">{% icon "logout" %}</button>
+          </form>
+        </span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" type="button" aria-label="{% translate 'Menu' %}" onclick="document.getElementById('sidebar').classList.toggle('open')">{% icon "menu" %}</button>
+      <a class="brand" href="{% url 'core:dashboard' %}"><span class="brand-mark">{{ hotel.name|slice:":1"|upper }}</span>{{ hotel.name }}</a>
+      <span style="width:28px"></span>
+    </header>
+    <main class="content">
+      {% include "includes/messages.html" %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+<script>
+  // Close the mobile menu when tapping outside it.
+  document.addEventListener('click', function (e) {
+    var s = document.getElementById('sidebar');
+    if (s.classList.contains('open') && !s.contains(e.target) && !e.target.closest('.menu-toggle')) s.classList.remove('open');
+  });
+  // Ask before destructive actions: <form data-confirm="...">
+  document.addEventListener('submit', function (e) {
+    var msg = e.target.getAttribute('data-confirm');
+    if (msg && !window.confirm(msg)) e.preventDefault();
+  });
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

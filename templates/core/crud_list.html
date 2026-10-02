@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Management" %}</div><h1>{{ title }}</h1></div>
+  <div class="actions">
+    {% if searchable %}
+    <form method="get" class="search">{% icon "search" %}<input class="input" type="search" name="q" value="{{ q }}" placeholder="{% translate 'Search…' %}"></form>
+    {% endif %}
+    {% if create_url %}<a class="btn" href="{{ create_url }}">{% icon "plus" %} {% blocktranslate %}Add {{ singular }}{% endblocktranslate %}</a>{% endif %}
+  </div>
+</div>
+{% if tabs %}<nav class="tabs">{% for url, label, is_active in tabs %}<a href="{{ url }}" class="{% if is_active %}active{% endif %}">{{ label }}</a>{% endfor %}</nav>{% endif %}
+<div class="card card-flush">
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr>{% for attr, label, kind in columns %}<th{% if kind == 'money' %} class="num"{% endif %}>{{ label }}</th>{% endfor %}<th></th></tr></thead>
+    <tbody>
+    {% for obj, edit_url, cells in rows %}
+      <tr>
+        {% for value, kind in cells %}
+          {% if kind == "money" %}<td class="num">{{ value|money }}</td>
+          {% elif kind == "bool" %}<td>{% if value %}{% translate "Yes" as yes %}{% status_badge "success" yes %}{% else %}{% translate "No" as no %}{% status_badge "closed" no %}{% endif %}</td>
+          {% elif forloop.first %}<td><a href="{{ edit_url }}"><strong>{{ value|default:"—" }}</strong></a></td>
+          {% else %}<td>{{ value|default_if_none:"—" }}</td>{% endif %}
+        {% endfor %}
+        <td class="num"><a class="btn btn-ghost btn-sm" href="{{ edit_url }}">{% icon "edit" %} {% translate "Edit" %}</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% include "includes/pagination.html" %}
+  {% else %}
+    <div class="empty"><strong>{% translate "Nothing here yet" %}</strong>{% if create_url %}<a href="{{ create_url }}">{% blocktranslate %}Add {{ singular }}{% endblocktranslate %}</a>{% endif %}</div>
+  {% endif %}
+</div>
+{% endblock %}

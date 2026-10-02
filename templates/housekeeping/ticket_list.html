@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Maintenance" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Operations" %}</div><h1>{% translate "Maintenance" %}</h1></div>
+  <div class="actions"><a class="btn" href="{% url 'housekeeping:ticket_create' %}">{% icon "plus" %} {% translate "Report a problem" %}</a></div>
+</div>
+<nav class="tabs">
+  <a href="?show=open" class="{% if show == 'open' %}active{% endif %}">{% translate "Open" %}</a>
+  <a href="?show=resolved" class="{% if show == 'resolved' %}active{% endif %}">{% translate "Resolved" %}</a>
+  <a href="?show=all" class="{% if show == 'all' %}active{% endif %}">{% translate "All" %}</a>
+</nav>
+<div class="card card-flush">
+  {% if object_list %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Problem" %}</th><th>{% translate "Where" %}</th><th>{% translate "Priority" %}</th><th>{% translate "Assigned to" %}</th><th>{% translate "Reported" %}</th><th>{% translate "Status" %}</th><th></th></tr></thead>
+    <tbody>
+    {% for t in object_list %}
+      <tr>
+        <td><a href="{% url 'housekeeping:ticket_edit' t.pk %}"><strong>{{ t.title }}</strong></a>{% if t.blocks_room and t.status != "resolved" %}<br>{% translate "Room blocked" as l %}{% status_badge "ooo" l %}{% endif %}{% if t.resolution %}<br><small>{{ t.resolution }}</small>{% endif %}</td>
+        <td>{{ t.where }}</td>
+        <td>{% status_badge t.priority t.get_priority_display %}</td>
+        <td>{{ t.assigned_to|default:"—" }}</td>
+        <td class="nowrap">{{ t.created_at|date:"d.m H:i" }}<br><small>{{ t.reported_by|default:"" }}</small></td>
+        <td>{% status_badge t.status t.get_status_display %}</td>
+        <td class="num">
+          {% if t.status == "open" %}
+            <form method="post" action="{% url 'housekeeping:ticket_status' t.pk %}" class="inline">{% csrf_token %}<button class="btn btn-secondary btn-sm" name="action" value="start">{% translate "Start" %}</button></form>
+          {% endif %}
+          {% if t.status != "resolved" %}
+            <form method="post" action="{% url 'housekeeping:ticket_status' t.pk %}" class="inline resolve-form">{% csrf_token %}<input type="hidden" name="resolution"><button class="btn btn-sm" name="action" value="resolve">{% icon "check" %} {% translate "Resolve" %}</button></form>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% include "includes/pagination.html" %}
+  {% else %}
+    <div class="empty"><strong>{% translate "Nothing to fix" %}</strong></div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.querySelectorAll('.resolve-form').forEach(function (f) {
+    f.addEventListener('submit', function (e) {
+      var note = window.prompt('{{ _("What was done? (optional)")|escapejs }}', '');
+      if (note === null) { e.preventDefault(); return; }
+      f.querySelector('[name=resolution]').value = note;
+      if (!f.querySelector('input[name=action]')) { var a = document.createElement('input'); a.type='hidden'; a.name='action'; a.value='resolve'; f.appendChild(a); }
+    });
+  });
+</script>
+{% endblock %}

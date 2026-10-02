@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% if object %}{{ object.code }}{% else %}{% translate "New reservation" %}{% endif %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="eyebrow">{% if object %}<a href="{% url 'frontdesk:reservation_detail' object.pk %}">{% icon "back" %} {{ object.code }}</a>{% else %}<a href="{% url 'frontdesk:reservation_list' %}">{% icon "back" %} {% translate "Reservations" %}</a>{% endif %}</div>
+    <h1>{% if object %}{% blocktranslate with g=object.guest %}Edit stay · {{ g }}{% endblocktranslate %}{% else %}{% translate "New reservation" %}{% endif %}</h1>
+  </div>
+</div>
+<form method="post" novalidate style="max-width:900px">{% csrf_token %}
+  {% if form.non_field_errors %}<div class="alert alert-error" style="margin-bottom:1rem">{% for e in form.non_field_errors %}{{ e }}<br>{% endfor %}</div>{% endif %}
+  {% if form.guest %}
+  <div class="card" style="margin-bottom:1.25rem">
+    <div class="card-header"><h2>{% translate "Guest" %}</h2></div>
+    <div class="card-body">
+      <div class="form-grid">
+        {% with field=form.guest %}<div class="field full{% if field.errors %} has-error{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}<div class="help">{{ field.help_text }}</div></div>{% endwith %}
+        {% for field in form %}{% if field.name in "new_first_name new_last_name new_phone new_email" %}
+          <div class="field{% if field.errors %} has-error{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for e in field.errors %}<div class="error">{{ e }}</div>{% endfor %}</div>
+        {% endif %}{% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  <div class="card">
+    <div class="card-header"><h2>{% translate "Stay" %}</h2></div>
+    <div class="card-body">
+      <div class="form-grid">
+        {% for field in form %}{% if field.name not in "guest new_first_name new_last_name new_phone new_email" %}
+          <div class="field{% if field.errors %} has-error{% endif %}{% if field.name == 'notes' %} full{% endif %}">
+            <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span style="color:var(--danger)">*</span>{% endif %}</label>
+            {{ field }}
+            {% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}
+            {% for e in field.errors %}<div class="error">{{ e }}</div>{% endfor %}
+          </div>
+        {% endif %}{% endfor %}
+      </div>
+    </div>
+    <div class="card-footer form-actions" style="margin-top:0">
+      <a class="btn btn-secondary" href="{% if object %}{% url 'frontdesk:reservation_detail' object.pk %}{% else %}{% url 'frontdesk:rack' %}{% endif %}">{% translate "Cancel" %}</a>
+      <button class="btn" type="submit">{% icon "check" %} {% translate "Save reservation" %}</button>
+    </div>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Restaurant, bar & services" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="eyebrow">{% translate "Services" %}</div><h1>{% translate "Choose an outlet" %}</h1></div></div>
+<div class="grid grid-3">
+  {% for o in outlets %}
+    <a class="card stat" href="{% url 'outlets:floor' o.pk %}">
+      <div class="stat-label">{{ o.get_kind_display }}</div>
+      <div class="stat-value" style="font-size:1.35rem">{{ o.name }}</div>
+      <div class="stat-note">{% blocktranslate count n=o.open_count %}{{ n }} open order{% plural %}{{ n }} open orders{% endblocktranslate %}</div>
+    </a>
+  {% empty %}
+    <div class="card empty" style="grid-column:1/-1"><strong>{% translate "No outlets yet" %}</strong>{% translate "A manager can add the restaurant, bar, spa and other services under Outlets & menus." %}</div>
+  {% endfor %}
+</div>
+{% endblock %}

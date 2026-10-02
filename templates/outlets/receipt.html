@@ -1,0 +1,48 @@
+{% load static i18n innkeeper %}<!doctype html>
+{% get_current_language as LANG %}
+<html lang="{{ LANG }}">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% translate "Receipt" %} #{{ order.number }}</title>
+  <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
+</head>
+<body style="background:#eceae6">
+<div class="no-print" style="text-align:center; padding:1rem; display:flex; gap:.5rem; justify-content:center">
+  <a class="btn btn-secondary" href="{% url 'outlets:floor' order.outlet_id %}">{% translate "Back to" %} {{ order.outlet }}</a>
+  <button class="btn" onclick="window.print()">{% translate "Print" %}</button>
+</div>
+<div class="receipt">
+  <div style="text-align:center">
+    <strong style="font-size:1rem">{{ hotel.legal_name|default:hotel.name }}</strong><br>
+    {{ order.outlet }}<br>
+    {% if hotel.address %}{{ hotel.address }}<br>{% endif %}
+    {% if hotel.tax_id %}NIPT {{ hotel.tax_id }}<br>{% endif %}
+  </div>
+  <hr>
+  #{{ order.number }} · {{ order.display_name }}<br>
+  {{ order.opened_at|date:"d.m.Y H:i" }}{% if order.opened_by %} · {{ order.opened_by }}{% endif %}
+  <hr>
+  <table style="width:100%">
+    {% for l in lines %}
+      <tr><td>{{ l.quantity }} × {{ l.name }}</td><td style="text-align:right">{{ l.line_total|money }}</td></tr>
+    {% endfor %}
+  </table>
+  <hr>
+  <table style="width:100%; font-weight:700; font-size:1rem"><tr><td>{% translate "TOTAL" %}</td><td style="text-align:right">{{ order.total|money }}</td></tr></table>
+  <hr>
+  {% if order.status == "open" %}
+    <div style="text-align:center">{% translate "Bill — not yet paid" %}</div>
+  {% elif order.status == "cancelled" %}
+    <div style="text-align:center">{% translate "CANCELLED" %}</div>
+  {% elif room_charge %}
+    {% translate "Charged to room" %} {{ room_charge.folio.reservation.room.number }}<br>
+    {{ room_charge.folio.reservation.guest }}<br><br>
+    {% translate "Signature" %}: ______________________
+  {% elif payment %}
+    {% translate "Paid" %}: {{ payment.get_method_display }}
+  {% endif %}
+  <hr>
+  <div style="text-align:center">{% blocktranslate with rate=hotel.vat_rate %}Prices include VAT ({{ rate }}%){% endblocktranslate %}<br>{% translate "Thank you!" %}</div>
+</div>
+</body>
+</html>
