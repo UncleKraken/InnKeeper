@@ -52,7 +52,7 @@ jobs:
           if (Test-Path $log) {
             Get-Content $log
             # Also surface the output as annotations so it is visible without opening the full log.
-            if ($p.ExitCode -ne 0) { Get-Content $log | Select-Object -Last 25 | ForEach-Object { Write-Host "::warning title=selftest::$_" } }
+            if ($p.ExitCode -ne 0) { $tail = (Get-Content $log | Select-Object -Last 12) -join "%0A"; Write-Host "::error title=selftest::$tail" }
           } else { Write-Host "::warning title=selftest::no selftest.txt was written" }
           if ($p.ExitCode -ne 0) { throw "Self-test failed with exit code $($p.ExitCode)" }
 
