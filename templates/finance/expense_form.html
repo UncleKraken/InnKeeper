@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Expense" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="eyebrow"><a href="{% url 'finance:expenses' %}">{% icon "back" %} {% translate "Expenses" %}</a></div><h1>{% if object %}{{ object.description }}{% else %}{% translate "Add expense" %}{% endif %}</h1></div></div>
+<form method="post" class="card" style="max-width:820px" novalidate>{% csrf_token %}
+  <div class="card-body">{% include "includes/form_fields.html" %}</div>
+  <div class="card-footer form-actions" style="margin-top:0">
+    <a class="btn btn-secondary" href="{% url 'finance:expenses' %}">{% translate "Cancel" %}</a>
+    {% if not object %}<button class="btn btn-secondary" name="add_another" value="1">{% translate "Save and add another" %}</button>{% endif %}
+    <button class="btn" type="submit">{% icon "check" %} {% translate "Save" %}</button>
+  </div>
+</form>
+{% endblock %}

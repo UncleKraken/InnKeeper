@@ -4,30 +4,47 @@
 {% block content %}
 <div class="page-header">
   <div><div class="eyebrow"><a href="{% url 'outlets:home' %}">{% icon "back" %} {% translate "Outlets" %}</a></div><h1>{{ outlet.name }}</h1></div>
-  <form method="post" action="{% url 'outlets:new_order' outlet.pk %}" class="row" style="gap:.5rem">{% csrf_token %}
-    <input class="input" name="label" placeholder="{% if outlet.uses_tables %}{% translate 'Takeaway / customer name' %}{% else %}{% translate 'Customer name or room' %}{% endif %}" style="width:240px">
-    <button class="btn">{% icon "plus" %} {% translate "New order" %}</button>
-  </form>
+  <div class="actions">
+    {% if request.user.is_manager and outlet.uses_tables %}<a class="btn btn-secondary" href="{% url 'outlets:floor_plan' outlet.pk %}">{% icon "move" %} {% translate "Edit floor plan" %}</a>{% endif %}
+    <form method="post" action="{% url 'outlets:new_order' outlet.pk %}" class="row" style="gap:.5rem">{% csrf_token %}
+      <input class="input" name="label" placeholder="{% if outlet.uses_tables %}{% translate 'Takeaway / customer name' %}{% else %}{% translate 'Customer name or room' %}{% endif %}" style="width:220px">
+      <button class="btn">{% icon "plus" %} {% translate "New order" %}</button>
+    </form>
+  </div>
 </div>
 
 {% if outlet.uses_tables %}
-  <div class="floor">
+  {% if zones|length > 1 %}
+  <nav class="zone-tabs">
+    {% for z in zones %}<a href="?zone={{ z|urlencode }}" class="{% if z == zone %}active{% endif %}">{{ z|default:_("Main") }}{% with n=busy_counts|get_item:z %}{% if n %} · {{ n }}{% endif %}{% endwith %}</a>{% endfor %}
+  </nav>
+  {% endif %}
+  {% if tables %}
+  <div class="card card-body plan-only" style="padding:.75rem">
+    <div class="plan">
+      {% for t in tables %}
+        <a class="plan-table shape-{{ t.table.shape }}{% if t.order %} busy{% endif %}" href="{% url 'outlets:open_table' outlet.pk t.table.pk %}"
+           style="left:{{ t.left|stringformat:'.2f' }}%; top:{{ t.top|stringformat:'.2f' }}%; width:{{ t.width|stringformat:'.2f' }}%; height:{{ t.height|stringformat:'.2f' }}%"
+           title="{{ t.table.name }} · {{ t.table.seats }}">
+          <span class="p-name">{{ t.table.name }}</span>
+          {% if t.order %}<span class="p-total">{{ t.order.total|money }}</span><span class="p-meta">{{ t.order.opened_at|time:"H:i" }}</span>
+          {% else %}<span class="p-meta">{{ t.table.seats }} {% translate "seats" %}</span>{% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="floor list-only">
     {% for t in tables %}
       <a class="table-tile {% if t.order %}busy{% endif %}" href="{% url 'outlets:open_table' outlet.pk t.table.pk %}">
-        <div>
-          <div class="t-name">{{ t.table.name }}</div>
-          <div class="t-meta">{% blocktranslate count n=t.table.seats %}{{ n }} seat{% plural %}{{ n }} seats{% endblocktranslate %}</div>
-        </div>
-        {% if t.order %}
-          <div><div class="t-total">{{ t.order.total|money }}</div><div class="t-meta">{{ t.order.opened_by|default:"" }} · {{ t.order.opened_at|time:"H:i" }}</div></div>
-        {% else %}
-          <div class="t-meta">{% translate "Free" %}</div>
-        {% endif %}
+        <div><div class="t-name">{{ t.table.name }}</div><div class="t-meta">{% blocktranslate count n=t.table.seats %}{{ n }} seat{% plural %}{{ n }} seats{% endblocktranslate %}</div></div>
+        {% if t.order %}<div><div class="t-total">{{ t.order.total|money }}</div><div class="t-meta">{{ t.order.opened_by|default:"" }} · {{ t.order.opened_at|time:"H:i" }}</div></div>
+        {% else %}<div class="t-meta">{% translate "Free" %}</div>{% endif %}
       </a>
-    {% empty %}
-      <div class="card empty" style="grid-column:1/-1">{% translate "No tables set up for this outlet." %}</div>
     {% endfor %}
   </div>
+  {% else %}
+    <div class="card empty">{% translate "No tables set up for this outlet." %}{% if request.user.is_manager %} <a href="{% url 'outlets:floor_plan' outlet.pk %}">{% translate "Edit floor plan" %}</a>{% endif %}</div>
+  {% endif %}
 {% endif %}
 
 {% if loose_orders or not outlet.uses_tables %}

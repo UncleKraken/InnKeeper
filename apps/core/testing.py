@@ -16,7 +16,12 @@ PASSWORD = "a-strong-test-pass-91"
 class HotelTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
+        from apps.core.models import HotelSettings
+
         cls.today = timezone.localdate()
+        hs = HotelSettings.load()
+        hs.setup_completed = True
+        hs.save()
         cls.manager = User.objects.create_user("boss", password=PASSWORD, role=Role.MANAGER)
         cls.reception = User.objects.create_user("desk", password=PASSWORD, role=Role.RECEPTION)
         cls.waiter = User.objects.create_user("waiter", password=PASSWORD, role=Role.OUTLET)

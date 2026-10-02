@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -179,7 +180,13 @@ def reservation_form(request, pk=None):
         else:
             messages.success(request, _("Reservation %(code)s saved.") % {"code": res.code})
             return redirect("frontdesk:reservation_detail", pk=res.pk)
-    return render(request, "frontdesk/reservation_form.html", {"form": form, "object": reservation})
+    guest_id = form["guest"].value() if "guest" in form.fields else None
+    guest = Guest.objects.filter(pk=guest_id).first() if guest_id and str(guest_id).isdigit() else None
+    return render(
+        request,
+        "frontdesk/reservation_form.html",
+        {"form": form, "object": reservation, "initial_guest_name": guest.full_name if guest else ""},
+    )
 
 
 @module_required("frontdesk")
@@ -206,11 +213,32 @@ def reservation_detail(request, pk):
             "pending_amount": pending_amount,
             "expected_balance": folio.balance + pending_amount,
             "charge_form": ChargeForm(),
+            "free_rooms": _free_rooms(res) if res.is_active else [],
             "payment_form": PaymentForm(
                 initial={"amount": max(folio.balance + pending_amount, Decimal("0")).quantize(Decimal("0.01")) or None}
             ),
             "today": timezone.localdate(),
         },
+    )
+
+
+def _free_rooms(res: Reservation) -> list[Room]:
+    busy = (
+        Reservation.objects.filter(
+            status__in=Reservation.ACTIVE_STATUSES,
+            arrival__lt=res.departure,
+            departure__gt=max(res.arrival, timezone.localdate())
+            if res.status == Reservation.Status.CHECKED_IN
+            else res.arrival,
+        )
+        .exclude(pk=res.pk)
+        .values_list("room_id", flat=True)
+    )
+    return list(
+        Room.objects.filter(is_active=True, out_of_order=False)
+        .exclude(pk__in=busy)
+        .exclude(pk=res.room_id)
+        .select_related("room_type")
     )
 
 
@@ -305,10 +333,47 @@ def void_entry(request, pk, kind, entry_id):
     return redirect(reverse("frontdesk:reservation_detail", args=[pk]) + "#folio")
 
 
+@require_POST
+@module_required("frontdesk")
+def move_room(request, pk):
+    res = get_object_or_404(Reservation, pk=pk)
+    room = get_object_or_404(Room, pk=request.POST.get("room"), is_active=True)
+    try:
+        services.move_room(res, room, request.user, use_new_rate=request.POST.get("use_new_rate") == "1")
+        messages.success(request, _("Moved to room %(room)s.") % {"room": room.number})
+    except (BusinessError, ValidationError) as e:
+        _business_error(request, e)
+    return redirect("frontdesk:reservation_detail", pk=pk)
+
+
+@module_required("guests")
+def guest_search(request):
+    """Small JSON search used by the reservation form's guest picker."""
+    q = request.GET.get("q", "").strip()
+    results = []
+    if len(q) >= 2:
+        qs = Guest.objects.filter(
+            Q(first_name__icontains=q)
+            | Q(last_name__icontains=q)
+            | Q(phone__icontains=q)
+            | Q(email__icontains=q)
+            | Q(document_number__icontains=q)
+        )[:15]
+        results = [
+            {"id": g.pk, "name": g.full_name, "detail": " · ".join(x for x in (g.phone, g.email, g.nationality) if x)}
+            for g in qs
+        ]
+    return JsonResponse({"results": results})
+
+
 @module_required("frontdesk")
 def invoice(request, pk):
     res = get_object_or_404(Reservation.objects.select_related("guest", "room"), pk=pk)
     folio, _created = Folio.objects.get_or_create(reservation=res)
+    from apps.core.models import HotelSettings
+
+    total = folio.total_charges
+    vat = (total * HotelSettings.load().vat_fraction).quantize(Decimal("0.01"))
     return render(
         request,
         "frontdesk/invoice.html",
@@ -318,6 +383,8 @@ def invoice(request, pk):
             "charges": folio.charges.active().order_by("business_date", "id"),
             "payments": folio.payments.active().order_by("business_date", "id"),
             "printed_at": timezone.localtime(),
+            "vat": vat,
+            "net": total - vat,
         },
     )
 

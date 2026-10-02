@@ -3,46 +3,87 @@
 <html lang="{{ LANG }}">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% translate "Receipt" %} #{{ order.number }}</title>
+  <title>{% translate "Receipt" %} {{ order.receipt_number|default:order.number }}</title>
   <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
+  <style>
+    @page { size: {{ hotel.receipt_width }}mm auto; margin: 3mm; }
+    .receipt { max-width: {% if hotel.receipt_width == 58 %}230px{% else %}310px{% endif %}; }
+    @media print { .receipt { max-width: none; width: 100%; padding: 0; box-shadow: none; } body { background: #fff !important; } }
+  </style>
 </head>
 <body style="background:#eceae6">
-<div class="no-print" style="text-align:center; padding:1rem; display:flex; gap:.5rem; justify-content:center">
-  <a class="btn btn-secondary" href="{% url 'outlets:floor' order.outlet_id %}">{% translate "Back to" %} {{ order.outlet }}</a>
-  <button class="btn" onclick="window.print()">{% translate "Print" %}</button>
+<div class="no-print receipt-actions">
+  <a class="btn btn-secondary" href="{% url 'outlets:floor' order.outlet_id %}">{% icon "back" %} {{ order.outlet }}</a>
+  <a class="btn btn-secondary" href="{% url 'outlets:receipts' %}">{% icon "receipt" %} {% translate "All receipts" %}</a>
+  <button class="btn" onclick="window.print()">{% icon "print" %} {% translate "Print" %}</button>
+  {% if request.user.is_manager and order.status == "closed" %}
+    <form method="post" action="{% url 'outlets:void_receipt' order.pk %}" class="inline" id="void-form">{% csrf_token %}<input type="hidden" name="reason"><button class="btn btn-ghost" style="color:var(--danger)">{% translate "Void receipt" %}</button></form>
+  {% endif %}
 </div>
+{% include "includes/messages.html" %}
 <div class="receipt">
-  <div style="text-align:center">
-    <strong style="font-size:1rem">{{ hotel.legal_name|default:hotel.name }}</strong><br>
-    {{ order.outlet }}<br>
-    {% if hotel.address %}{{ hotel.address }}<br>{% endif %}
-    {% if hotel.tax_id %}NIPT {{ hotel.tax_id }}<br>{% endif %}
+  <div class="r-center">
+    {% if hotel.logo and hotel.receipt_show_logo %}<img src="{{ hotel.logo }}" alt="" class="r-logo">{% endif %}
+    <strong class="r-title">{{ hotel.legal_name|default:hotel.name }}</strong>
+    {% if hotel.legal_name and hotel.legal_name != hotel.name %}<div>{{ hotel.name }}</div>{% endif %}
+    {% if hotel.address %}<div>{{ hotel.address }}</div>{% endif %}
+    {% if hotel.phone %}<div>{{ hotel.phone }}</div>{% endif %}
+    {% if hotel.tax_id %}<div>NIPT {{ hotel.tax_id }}</div>{% endif %}
+    {% if hotel.receipt_header %}<div class="r-pre">{{ hotel.receipt_header }}</div>{% endif %}
   </div>
   <hr>
-  #{{ order.number }} · {{ order.display_name }}<br>
-  {{ order.opened_at|date:"d.m.Y H:i" }}{% if order.opened_by %} · {{ order.opened_by }}{% endif %}
+  <table class="r-meta">
+    <tr><td>{% if order.status == "open" %}{% translate "Bill" %}{% else %}{% translate "Receipt" %}{% endif %}</td><td>{{ order.receipt_number|default:order.number }}</td></tr>
+    <tr><td>{{ order.outlet }}</td><td>{{ order.display_name }}</td></tr>
+    <tr><td>{% translate "Date" %}</td><td>{{ order.closed_at|default:order.opened_at|date:"d.m.Y H:i" }}</td></tr>
+    {% if order.opened_by %}<tr><td>{% translate "Served by" %}</td><td>{{ order.opened_by }}</td></tr>{% endif %}
+  </table>
   <hr>
-  <table style="width:100%">
+  <table class="r-lines">
     {% for l in lines %}
-      <tr><td>{{ l.quantity }} × {{ l.name }}</td><td style="text-align:right">{{ l.line_total|money }}</td></tr>
+      <tr><td>{{ l.quantity }} × {{ l.name }}{% if l.quantity > 1 %}<br><small>@ {{ l.unit_price|money }}</small>{% endif %}</td><td class="num">{{ l.line_total|money }}</td></tr>
     {% endfor %}
   </table>
   <hr>
-  <table style="width:100%; font-weight:700; font-size:1rem"><tr><td>{% translate "TOTAL" %}</td><td style="text-align:right">{{ order.total|money }}</td></tr></table>
+  <table class="r-totals">
+    {% if order.discount %}
+      <tr><td>{% translate "Subtotal" %}</td><td class="num">{{ order.subtotal|money }}</td></tr>
+      <tr><td>{% translate "Discount" %}</td><td class="num">−{{ order.discount|money }}</td></tr>
+    {% endif %}
+    <tr class="r-grand"><td>{% translate "TOTAL" %}</td><td class="num">{{ order.total|money }}</td></tr>
+    {% if hotel.receipt_show_vat and hotel.vat_rate %}
+      <tr class="r-small"><td>{% translate "Without VAT" %}</td><td class="num">{{ net|money }}</td></tr>
+      <tr class="r-small"><td>{% blocktranslate with r=hotel.vat_rate|floatformat:"-2" %}VAT {{ r }}%{% endblocktranslate %}</td><td class="num">{{ vat|money }}</td></tr>
+    {% endif %}
+  </table>
   <hr>
   {% if order.status == "open" %}
-    <div style="text-align:center">{% translate "Bill — not yet paid" %}</div>
+    <div class="r-center"><strong>{% translate "Bill — not yet paid" %}</strong></div>
   {% elif order.status == "cancelled" %}
-    <div style="text-align:center">{% translate "CANCELLED" %}</div>
-  {% elif room_charge %}
-    {% translate "Charged to room" %} {{ room_charge.folio.reservation.room.number }}<br>
-    {{ room_charge.folio.reservation.guest }}<br><br>
-    {% translate "Signature" %}: ______________________
-  {% elif payment %}
-    {% translate "Paid" %}: {{ payment.get_method_display }}
+    <div class="r-center r-void">{% translate "VOID" %}<br><small>{{ order.note }}</small></div>
+  {% else %}
+    <table class="r-totals">
+      {% for p in payments %}
+        <tr><td>{{ p.get_method_display }}</td><td class="num">{{ p.amount|money }}</td></tr>
+        {% if p.tendered %}<tr class="r-small"><td>{% translate "Cash given" %}</td><td class="num">{{ p.tendered|money }}</td></tr><tr class="r-small"><td>{% translate "Change" %}</td><td class="num">{{ p.change|money }}</td></tr>{% endif %}
+      {% endfor %}
+      {% if room_charge %}
+        <tr><td>{% translate "Charged to room" %} {{ room_charge.folio.reservation.room.number }}</td><td class="num">{{ room_charge.amount|money }}</td></tr>
+      {% endif %}
+    </table>
+    {% if room_charge %}<p style="margin-top:.75rem">{{ room_charge.folio.reservation.guest }}<br><br>{% translate "Signature" %}: ____________________</p>{% endif %}
   {% endif %}
-  <hr>
-  <div style="text-align:center">{% blocktranslate with rate=hotel.vat_rate %}Prices include VAT ({{ rate }}%){% endblocktranslate %}<br>{% translate "Thank you!" %}</div>
+  {% if hotel.receipt_footer %}<hr><div class="r-center r-pre">{{ hotel.receipt_footer }}</div>{% endif %}
+  <div class="r-center r-small" style="margin-top:.6rem">{% translate "This is not a fiscal receipt." %}</div>
 </div>
+<script>
+  {% if auto_print %}window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 250); });{% endif %}
+  var vf = document.getElementById('void-form');
+  if (vf) vf.addEventListener('submit', function (e) {
+    var r = prompt('{{ _("Why is this receipt being voided?")|escapejs }}');
+    if (!r) { e.preventDefault(); return; }
+    vf.querySelector('[name=reason]').value = r;
+  });
+</script>
 </body>
 </html>

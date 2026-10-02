@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load i18n innkeeper humanize %}
+{% block title %}{% translate "Settings" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Management" %}</div><h1>{% translate "Settings" %}</h1></div>
+  <div class="actions"><a class="btn btn-secondary" href="{% url 'core:setup' %}">{% icon "settings" %} {% translate "Run the setup wizard again" %}</a></div>
+</div>
+<div class="settings-layout">
+  <nav class="settings-nav card">
+    <a href="?tab=business" class="{% if tab == 'business' %}active{% endif %}">{% icon "building" %} {% translate "Business details" %}</a>
+    <a href="?tab=receipts" class="{% if tab == 'receipts' %}active{% endif %}">{% icon "receipt" %} {% translate "Receipts & invoices" %}</a>
+    <a href="?tab=modules" class="{% if tab == 'modules' %}active{% endif %}">{% icon "grid" %} {% translate "Modules" %}</a>
+    <a href="?tab=backup" class="{% if tab == 'backup' %}active{% endif %}">{% icon "download" %} {% translate "Backup & restore" %}</a>
+    <div class="settings-nav-sep"></div>
+    {% if hotel.module_rooms %}<a href="{% url 'frontdesk:room_list' %}">{% icon "bed" %} {% translate "Rooms & rates" %}</a>{% endif %}
+    {% if hotel.module_outlets %}<a href="{% url 'outlets:setup' %}">{% icon "store" %} {% translate "Outlets & menus" %}</a>{% endif %}
+    <a href="{% url 'accounts:staff_list' %}">{% icon "staff" %} {% translate "Staff" %}</a>
+    <a href="{% url 'core:audit_log' %}">{% icon "history" %} {% translate "Activity log" %}</a>
+  </nav>
+
+  <div>
+  {% if tab == "business" %}
+    <form method="post" class="card" novalidate>{% csrf_token %}
+      <div class="card-header"><h2>{% translate "Business details" %}</h2></div>
+      <div class="card-body"><p class="muted" style="margin-top:0">{% translate "These details appear on receipts, invoices and the guest menu." %}</p>{% include "includes/form_fields.html" %}</div>
+      <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
+    </form>
+
+  {% elif tab == "receipts" %}
+    <form method="post" enctype="multipart/form-data" class="card" novalidate>{% csrf_token %}
+      <div class="card-header"><h2>{% translate "Receipts & invoices" %}</h2><a class="btn btn-secondary btn-sm" href="#preview">{% translate "Preview" %}</a></div>
+      <div class="card-body">
+        {% if hotel.logo %}<div class="logo-preview"><img src="{{ hotel.logo }}" alt="{% translate 'Logo' %}"></div>{% endif %}
+        {% include "includes/form_fields.html" %}
+      </div>
+      <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
+    </form>
+    <section class="card" id="preview" style="margin-top:1.25rem">
+      <div class="card-header"><h3>{% translate "Receipt preview" %}</h3></div>
+      <div class="card-body" style="background:#eceae6">
+        <div class="receipt" style="margin:0 auto; {% if hotel.receipt_width == 58 %}max-width:230px{% endif %}">
+          <div class="r-center">
+            {% if hotel.logo and hotel.receipt_show_logo %}<img src="{{ hotel.logo }}" alt="" class="r-logo">{% endif %}
+            <strong class="r-title">{{ hotel.legal_name|default:hotel.name }}</strong>
+            {% if hotel.address %}<div>{{ hotel.address }}</div>{% endif %}
+            {% if hotel.tax_id %}<div>NIPT {{ hotel.tax_id }}</div>{% endif %}
+            {% if hotel.receipt_header %}<div class="r-pre">{{ hotel.receipt_header }}</div>{% endif %}
+          </div>
+          <hr>
+          <table><tr><td>2 × Espresso</td><td class="num">{{ 3|money }}</td></tr><tr><td>1 × {% translate "Sandwich" %}</td><td class="num">{{ 5|money }}</td></tr></table>
+          <hr>
+          <table><tr class="r-grand"><td>{% translate "TOTAL" %}</td><td class="num">{{ 8|money }}</td></tr>
+          {% if hotel.receipt_show_vat %}<tr class="r-small"><td>{% translate "VAT" %}</td><td class="num">{{ 1.33|money }}</td></tr>{% endif %}</table>
+          {% if hotel.receipt_footer %}<hr><div class="r-center r-pre">{{ hotel.receipt_footer }}</div>{% endif %}
+        </div>
+      </div>
+    </section>
+
+  {% elif tab == "modules" %}
+    <form method="post" class="card" novalidate>{% csrf_token %}
+      <div class="card-header"><h2>{% translate "Modules" %}</h2></div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0">{% translate "Switch off what your business doesn't use. It disappears for everyone; no data is deleted." %}</p>
+        {% if form.non_field_errors %}<div class="alert alert-error" style="margin-bottom:1rem">{{ form.non_field_errors.0 }}</div>{% endif %}
+        <h3 style="margin:1rem 0 .6rem">{{ form.business_type.label|capfirst }}</h3>
+        <div class="toggle-list">
+          {% for radio in form.business_type %}<label class="toggle-row">{{ radio.tag }}<span><strong>{{ radio.choice_label }}</strong></span></label>{% endfor %}
+        </div>
+        <h3 style="margin:1.5rem 0 .6rem">{% translate "Areas of the app" %}</h3>
+        <div class="toggle-list">
+          {% for f in form %}{% if f.name != "business_type" %}
+            <label class="toggle-row">{{ f }}<span><strong>{{ f.label|capfirst }}</strong>{% if f.help_text %}<small>{{ f.help_text }}</small>{% endif %}</span></label>
+          {% endif %}{% endfor %}
+        </div>
+      </div>
+      <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
+    </form>
+
+  {% elif tab == "backup" %}
+    <div class="grid grid-2">
+      <section class="card">
+        <div class="card-header"><h2>{% translate "Full backup" %}</h2></div>
+        <div class="card-body">
+          <p>{% translate "Everything: settings, rooms, menus, staff accounts, guests, bills, receipts and expenses. Use it to move to a new computer or to keep a safe copy." %}</p>
+          <p class="muted" style="font-size:.85rem">{% translate "The file contains guests' personal data and encrypted passwords. Keep it somewhere safe." %}</p>
+        </div>
+        <div class="card-footer row">
+          <a class="btn" href="{% url 'core:backup_download' 'full' %}">{% icon "download" %} {% translate "Download full backup" %}</a>
+          <form method="post" action="{% url 'core:backup_now' %}" class="inline">{% csrf_token %}<button class="btn btn-secondary">{% translate "Save a copy on this server" %}</button></form>
+        </div>
+      </section>
+      <section class="card">
+        <div class="card-header"><h2>{% translate "Settings only" %}</h2></div>
+        <div class="card-body">
+          <p>{% translate "Business details, rooms and rates, outlets, menus, tables and floor plans — no guests or money. Use it to set up a second location or start fresh with the same setup." %}</p>
+        </div>
+        <div class="card-footer"><a class="btn btn-secondary" href="{% url 'core:backup_download' 'settings' %}">{% icon "download" %} {% translate "Download settings" %}</a></div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:1.25rem">
+      <div class="card-header"><h2>{% translate "Restore or import" %}</h2></div>
+      <form method="post" action="{% url 'core:restore' %}" enctype="multipart/form-data" class="card-body row">{% csrf_token %}
+        <input class="input spacer" type="file" name="file" accept=".innkeeper,.json,.gz" required>
+        <button class="btn">{% icon "upload" %} {% translate "Check file" %}</button>
+      </form>
+      <div class="card-footer muted" style="font-size:.85rem">{% translate "You'll see what's inside the file before anything changes. Restoring a full backup replaces all current data; a copy of the current data is saved first." %}</div>
+    </section>
+
+    <section class="card card-flush" style="margin-top:1.25rem">
+      <div class="card-header"><h2>{% translate "Backups on this server" %}</h2><span class="muted mono" style="font-size:.75rem">{{ backup_dir }}</span></div>
+      <div class="table-wrap"><table class="table table-sm">
+        <tbody>
+        {% for b in disk_backups %}
+          <tr><td class="mono">{{ b.name }}</td><td class="nowrap">{{ b.modified|date:"d.m.Y H:i" }}</td><td class="num">{{ b.size|filesizeformat }}</td>
+            <td class="num nowrap"><a class="btn btn-ghost btn-sm" href="{% url 'core:backup_file' b.name %}">{% icon "download" %}</a> <a class="btn btn-secondary btn-sm" href="{% url 'core:restore' %}?file={{ b.name|urlencode }}">{% translate "Restore" %}</a></td></tr>
+        {% empty %}
+          <tr><td class="empty">{% translate "No backups saved yet." %}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table></div>
+      <div class="card-footer muted" style="font-size:.85rem">{% translate "The Windows app makes an automatic backup every day. On a server, schedule: python manage.py backup" %}</div>
+    </section>
+  {% endif %}
+  </div>
+</div>
+{% endblock %}

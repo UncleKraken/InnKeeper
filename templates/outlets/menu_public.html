@@ -1,0 +1,41 @@
+{% load static i18n innkeeper %}<!doctype html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ outlet.name }} · {{ hotel.name }}</title>
+  <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <meta name="robots" content="noindex">
+</head>
+<body class="menu-page">
+  <header class="menu-hero">
+    <div class="menu-lang">
+      <a href="?lang=sq" class="{% if lang == 'sq' %}active{% endif %}">SQ</a>
+      <a href="?lang=en" class="{% if lang == 'en' %}active{% endif %}">EN</a>
+    </div>
+    {% if hotel.logo %}<img src="{{ hotel.logo }}" alt="{{ hotel.name }}" class="menu-logo">{% endif %}
+    <p class="menu-eyebrow">{{ hotel.name }}</p>
+    <h1>{{ outlet.name }}</h1>
+    {% if outlet.menu_intro %}<p class="menu-intro">{{ outlet.menu_intro }}</p>{% endif %}
+  </header>
+  {% if sections|length > 1 %}
+  <nav class="menu-nav">{% for s in sections %}<a href="#s{{ forloop.counter }}">{{ s.name }}</a>{% endfor %}</nav>
+  {% endif %}
+  <main class="menu-body">
+    {% for s in sections %}
+      <section id="s{{ forloop.counter }}">
+        <h2>{{ s.name }}</h2>
+        {% for i in s.items %}
+          <div class="menu-item">
+            <div><strong>{{ i.name }}</strong>{% if i.duration %} <small>· {{ i.duration }} min</small>{% endif %}{% if i.description %}<p>{{ i.description }}</p>{% endif %}</div>
+            <span class="menu-price">{{ i.price|money }}</span>
+          </div>
+        {% endfor %}
+      </section>
+    {% empty %}
+      <p class="empty">{% translate "The menu is being updated. Please ask our staff." %}</p>
+    {% endfor %}
+    <p class="menu-foot">{% blocktranslate with rate=hotel.vat_rate|floatformat:"-2" %}Prices include VAT ({{ rate }}%){% endblocktranslate %}{% if hotel.address %} · {{ hotel.address }}{% endif %}</p>
+  </main>
+</body>
+</html>

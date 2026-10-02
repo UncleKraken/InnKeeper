@@ -1,3 +1,4 @@
+import secrets
 from decimal import Decimal
 
 from django.conf import settings
@@ -39,6 +40,11 @@ class Outlet(models.Model):
     )
     sort_order = models.PositiveSmallIntegerField(_("order"), default=0)
     is_active = models.BooleanField(_("active"), default=True)
+    menu_public = models.BooleanField(
+        _("public menu"), default=True, help_text=_("Guests can open this menu on their phone by scanning a QR code.")
+    )
+    menu_intro = models.CharField(_("menu introduction"), max_length=255, blank=True)
+    menu_token = models.CharField(max_length=24, unique=True, editable=False, default="")
 
     class Meta:
         verbose_name = _("outlet")
@@ -47,6 +53,11 @@ class Outlet(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.menu_token:
+            self.menu_token = secrets.token_urlsafe(9)
+        super().save(*args, **kwargs)
 
     def user_can_use(self, user) -> bool:
         if user.is_manager or user.role != "outlet":
@@ -57,6 +68,7 @@ class Outlet(models.Model):
 class Category(models.Model):
     outlet = models.ForeignKey(Outlet, on_delete=models.CASCADE, related_name="categories", verbose_name=_("outlet"))
     name = models.CharField(_("name"), max_length=80)
+    name_en = models.CharField(_("name in English"), max_length=80, blank=True)
     sort_order = models.PositiveSmallIntegerField(_("order"), default=0)
 
     class Meta:
@@ -73,7 +85,9 @@ class Item(models.Model):
 
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="items", verbose_name=_("category"))
     name = models.CharField(_("name"), max_length=120)
+    name_en = models.CharField(_("name in English"), max_length=120, blank=True)
     description = models.CharField(_("description"), max_length=255, blank=True)
+    description_en = models.CharField(_("description in English"), max_length=255, blank=True)
     price = models.DecimalField(_("price"), validators=[MinValueValidator(0)], **MONEY)
     duration_minutes = models.PositiveSmallIntegerField(
         _("duration (minutes)"), null=True, blank=True, help_text=_("For services such as a massage.")
@@ -95,9 +109,21 @@ class Item(models.Model):
 
 
 class Table(models.Model):
+    class Shape(models.TextChoices):
+        SQUARE = "square", _("Square")
+        ROUND = "round", _("Round")
+        LONG = "long", _("Long")
+
     outlet = models.ForeignKey(Outlet, on_delete=models.CASCADE, related_name="tables", verbose_name=_("outlet"))
     name = models.CharField(_("name"), max_length=30, help_text=_("e.g. 1, 2, Terrace 4, Sunbed 12"))
     seats = models.PositiveSmallIntegerField(_("seats"), default=4)
+    zone = models.CharField(_("area"), max_length=40, blank=True, help_text=_("e.g. Inside, Terrace, Garden"))
+    shape = models.CharField(_("shape"), max_length=8, choices=Shape.choices, default=Shape.SQUARE)
+    # Position on the floor plan, in plan units (the plan is 1000 × 640).
+    pos_x = models.PositiveSmallIntegerField(default=0)
+    pos_y = models.PositiveSmallIntegerField(default=0)
+    width = models.PositiveSmallIntegerField(default=90)
+    height = models.PositiveSmallIntegerField(default=90)
     sort_order = models.PositiveSmallIntegerField(_("order"), default=0)
     is_active = models.BooleanField(_("active"), default=True)
 
@@ -135,6 +161,9 @@ class Order(models.Model):
     note = models.CharField(_("note"), max_length=255, blank=True)
     status = models.CharField(_("status"), max_length=12, choices=Status.choices, default=Status.OPEN, db_index=True)
     settlement = models.CharField(_("settlement"), max_length=8, choices=Settlement.choices, blank=True)
+    discount = models.DecimalField(_("discount"), default=Decimal("0.00"), **MONEY)
+    discount_reason = models.CharField(_("discount reason"), max_length=120, blank=True)
+    receipt_number = models.CharField(_("receipt number"), max_length=20, blank=True, db_index=True)
 
     opened_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+", verbose_name=_("opened by")
@@ -169,9 +198,22 @@ class Order(models.Model):
         return self.label or _("Order #%(n)s") % {"n": self.number}
 
     @property
-    def total(self) -> Decimal:
+    def subtotal(self) -> Decimal:
         value = self.lines.aggregate(t=Sum(F("unit_price") * F("quantity")))["t"]
         return (value or Decimal("0")).quantize(Decimal("0.01"))
+
+    @property
+    def total(self) -> Decimal:
+        return max(self.subtotal - self.discount, Decimal("0.00"))
+
+    @property
+    def paid(self) -> Decimal:
+        value = self.payments.filter(voided=False).aggregate(t=Sum("amount"))["t"]
+        return value or Decimal("0.00")
+
+    @property
+    def remaining(self) -> Decimal:
+        return max(self.total - self.paid, Decimal("0.00"))
 
     @property
     def is_open(self) -> bool:

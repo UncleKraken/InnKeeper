@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Restore" %}{% endblock %}
+{% block content %}
+<div class="wizard">
+<div class="page-header"><div><div class="eyebrow"><a href="{% url 'core:settings' %}?tab=backup">{% icon "back" %} {% translate "Backup & restore" %}</a></div>
+  <h1>{% if summary.kind == "full" %}{% translate "Restore full backup" %}{% else %}{% translate "Import settings" %}{% endif %}</h1></div></div>
+<section class="card">
+  <div class="card-body">
+    <dl class="dl">
+      <dt>{% translate "Business" %}</dt><dd>{{ summary.name|default:"—" }}</dd>
+      <dt>{% translate "Created" %}</dt><dd>{{ summary.created|slice:":16"|cut:"T"|default:"—" }}</dd>
+      <dt>{% translate "Version" %}</dt><dd>{{ summary.version }}</dd>
+    </dl>
+    <table class="table table-sm" style="margin-top:1rem"><tbody>
+      {% for model, n in summary.counts.items %}<tr><td class="mono">{{ model }}</td><td class="num">{{ n }}</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+  <form method="post" action="{% url 'core:restore_confirm' %}" class="card-footer">{% csrf_token %}
+    <input type="hidden" name="file" value="{{ file }}">
+    {% if summary.kind == "full" %}
+      <div class="alert alert-warning" style="margin-bottom:1rem">{% translate "This replaces ALL current data with the backup. Everyone will be signed out. A copy of the current data is saved first." %}</div>
+      <div class="field"><label for="ct">{% translate "Type RESTORE to confirm" %}</label><input class="input" id="ct" name="confirm_text" autocomplete="off" required></div>
+      <div class="form-actions"><a class="btn btn-secondary" href="{% url 'core:settings' %}?tab=backup">{% translate "Cancel" %}</a><button class="btn btn-danger">{% translate "Restore backup" %}</button></div>
+    {% else %}
+      <p class="muted">{% translate "Rooms, outlets, menu items and tables with the same names are updated; new ones are added. Nothing is deleted. Guests and money are not touched." %}</p>
+      <div class="form-actions"><a class="btn btn-secondary" href="{% url 'core:settings' %}?tab=backup">{% translate "Cancel" %}</a><button class="btn">{% translate "Import settings" %}</button></div>
+    {% endif %}
+  </form>
+</section>
+</div>
+{% endblock %}

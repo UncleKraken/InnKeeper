@@ -5,7 +5,16 @@
 <div class="page-header">
   <div><div class="eyebrow"><a href="{% url 'outlets:floor' outlet.pk %}">{% icon "back" %} {{ outlet.name }}</a></div><h1>{{ order.display_name }}</h1></div>
   <div class="actions">
-    <a class="btn btn-secondary" href="{% url 'outlets:receipt' order.pk %}" target="_blank">{% icon "print" %} {% translate "Print bill" %}</a>
+    {% if move_tables %}
+    <form method="post" action="{% url 'outlets:move' order.pk %}" class="row" style="gap:.4rem">{% csrf_token %}
+      <select class="input" name="table" required style="width:auto">
+        <option value="">{% translate "Move to table…" %}</option>
+        {% for t in move_tables %}<option value="{{ t.pk }}">{{ t.name }}{% if t.zone %} · {{ t.zone }}{% endif %}</option>{% endfor %}
+      </select>
+      <button class="btn btn-secondary" title="{% translate 'Move or merge' %}">{% icon "swap" %}</button>
+    </form>
+    {% endif %}
+    <a class="btn btn-secondary" href="{% url 'outlets:receipt' order.pk %}?print=1" target="_blank">{% icon "print" %} {% translate "Print bill" %}</a>
   </div>
 </div>
 
@@ -20,7 +29,7 @@
     </div>
     <div class="items" id="items">
       {% for m in menu %}{% for item in m.items %}
-        <form method="post" action="{% url 'outlets:add_item' order.pk %}" data-cat="{{ m.category.pk }}" data-name="{{ item.name|lower }}">{% csrf_token %}
+        <form method="post" action="{% url 'outlets:add_item' order.pk %}" data-cat="{{ m.category.pk }}" data-name="{{ item.name|lower }} {{ item.name_en|lower }}">{% csrf_token %}
           <input type="hidden" name="item" value="{{ item.pk }}">
           <button class="item-btn" type="submit">
             <span class="i-name">{{ item.name }}{% if item.duration_minutes %} <small class="muted">· {{ item.duration_minutes }}′</small>{% endif %}</span>
@@ -60,26 +69,90 @@
       <input type="hidden" name="guests" value="{{ order.guests }}">
       <input class="input" name="note" value="{{ order.note }}" placeholder="{% translate 'Note for the order (allergies, timing…)' %}" onchange="this.form.submit()">
     </form>
-    <div class="ticket-total"><span>{% translate "Total" %}</span><span class="amount">{{ order.total|money }}</span></div>
+
+    <div class="totals">
+      {% if order.discount or payments %}
+        <div class="t-row"><span>{% translate "Subtotal" %}</span><span>{{ order.subtotal|money }}</span></div>
+      {% endif %}
+      {% if order.discount %}
+        <div class="t-row t-discount"><span>{% translate "Discount" %}{% if order.discount_reason %} <small>({{ order.discount_reason }})</small>{% endif %}</span><span>−{{ order.discount|money }}</span></div>
+      {% endif %}
+      <div class="t-row t-total"><span>{% translate "Total" %}</span><span class="amount">{{ order.total|money }}</span></div>
+      {% for p in payments %}
+        <div class="t-row t-paid">
+          <span>{% translate "Paid" %} · {{ p.get_method_display }}
+            {% if request.user.is_manager %}<form method="post" action="{% url 'outlets:void_payment' order.pk p.pk %}" class="inline void-form">{% csrf_token %}<input type="hidden" name="reason"><button class="link-btn" title="{% translate 'Void' %}">{% icon "x" %}</button></form>{% endif %}
+          </span><span>−{{ p.amount|money }}</span>
+        </div>
+      {% endfor %}
+      {% if payments %}<div class="t-row t-total"><span>{% translate "Left to pay" %}</span><span class="amount">{{ order.remaining|money }}</span></div>{% endif %}
+    </div>
 
     {% if lines %}
-    <div class="settle">
-      <div class="grid grid-2" style="gap:.6rem">
-        <form method="post" action="{% url 'outlets:settle' order.pk %}">{% csrf_token %}<button class="btn btn-lg btn-block" name="how" value="cash">{% icon "money" %} {% translate "Cash" %}</button></form>
-        <form method="post" action="{% url 'outlets:settle' order.pk %}">{% csrf_token %}<button class="btn btn-lg btn-block" name="how" value="card">{% translate "Card" %}</button></form>
+    <div class="settle" id="settle" data-remaining="{{ order.remaining|stringformat:'.2f' }}">
+      <div class="seg" role="tablist">
+        <button type="button" class="active" data-pane="cash">{% icon "money" %} {% translate "Cash" %}</button>
+        <button type="button" data-pane="card">{% translate "Card" %}</button>
+        {% if in_house %}<button type="button" data-pane="room">{% icon "bed" %} {% translate "Room" %}</button>{% endif %}
+        <button type="button" data-pane="more">{% icon "percent" %}</button>
       </div>
+
+      <form method="post" action="{% url 'outlets:settle' order.pk %}" class="pane" data-pane="cash">{% csrf_token %}
+        <input type="hidden" name="how" value="cash">
+        <div class="form-grid" style="grid-template-columns:1fr 1fr; gap:.6rem">
+          <div class="field"><label>{% translate "Amount" %}</label><input class="input pay-amount" name="amount" inputmode="decimal" value="{{ order.remaining|stringformat:'.2f' }}"></div>
+          <div class="field"><label>{% translate "Cash given" %}</label><input class="input" name="tendered" inputmode="decimal" id="tendered" placeholder="{{ order.remaining|stringformat:'.2f' }}"></div>
+        </div>
+        <div class="quick" id="quick-cash"></div>
+        <div class="change-due hidden" id="change-due">{% translate "Change" %}: <strong></strong></div>
+        <div class="split">{% translate "Split" %}: <button type="button" data-split="2">÷2</button><button type="button" data-split="3">÷3</button><button type="button" data-split="4">÷4</button></div>
+        <div class="row" style="gap:.5rem">
+          <button class="btn btn-lg spacer">{% translate "Take cash" %}</button>
+          <button class="btn btn-lg btn-secondary" name="print" value="1" title="{% translate 'Pay and print receipt' %}">{% icon "print" %}</button>
+        </div>
+      </form>
+
+      <form method="post" action="{% url 'outlets:settle' order.pk %}" class="pane hidden" data-pane="card">{% csrf_token %}
+        <input type="hidden" name="how" value="card">
+        <div class="form-grid" style="grid-template-columns:1fr 1fr; gap:.6rem">
+          <div class="field"><label>{% translate "Amount" %}</label><input class="input pay-amount" name="amount" inputmode="decimal" value="{{ order.remaining|stringformat:'.2f' }}"></div>
+          <div class="field"><label>{% translate "Reference" %}</label><input class="input" name="reference" placeholder="{% translate 'optional' %}"></div>
+        </div>
+        <div class="split">{% translate "Split" %}: <button type="button" data-split="2">÷2</button><button type="button" data-split="3">÷3</button><button type="button" data-split="4">÷4</button></div>
+        <div class="row" style="gap:.5rem">
+          <button class="btn btn-lg spacer">{% translate "Card payment" %}</button>
+          <button class="btn btn-lg btn-secondary" name="print" value="1" title="{% translate 'Pay and print receipt' %}">{% icon "print" %}</button>
+        </div>
+      </form>
+
       {% if in_house %}
-      <form method="post" action="{% url 'outlets:settle' order.pk %}" class="row" style="gap:.5rem; flex-wrap:nowrap">{% csrf_token %}
+      <form method="post" action="{% url 'outlets:settle' order.pk %}" class="pane hidden" data-pane="room">{% csrf_token %}
         <input type="hidden" name="how" value="room">
-        <select class="input" name="reservation" required>
-          <option value="">{% translate "Charge to room…" %}</option>
-          {% for r in in_house %}<option value="{{ r.pk }}">{{ r.room.number }} · {{ r.guest }}</option>{% endfor %}
-        </select>
-        <button class="btn btn-accent">{% icon "bed" %} {% translate "Charge" %}</button>
+        <div class="field"><label>{% translate "Guest" %}</label>
+          <select class="input" name="reservation" required>
+            <option value="">{% translate "Choose room…" %}</option>
+            {% for r in in_house %}<option value="{{ r.pk }}">{{ r.room.number }} · {{ r.guest }}</option>{% endfor %}
+          </select>
+        </div>
+        <button class="btn btn-lg btn-accent btn-block" style="margin-top:.6rem">{% blocktranslate with a=order.remaining|money %}Charge {{ a }} to room{% endblocktranslate %}</button>
       </form>
       {% endif %}
+
+      <form method="post" action="{% url 'outlets:discount' order.pk %}" class="pane hidden" data-pane="more">{% csrf_token %}
+        <div class="form-grid" style="grid-template-columns:1fr 1fr; gap:.6rem">
+          <div class="field"><label>{% translate "Discount" %}</label><input class="input" name="value" inputmode="decimal" value="{% if order.discount %}{{ order.discount|stringformat:'.2f' }}{% endif %}" placeholder="10"></div>
+          <div class="field"><label>{% translate "As" %}</label><select class="input" name="kind"><option value="percent">%</option><option value="amount" {% if order.discount %}selected{% endif %}>{{ hotel.currency_symbol }}</option></select></div>
+        </div>
+        <div class="field" style="margin-top:.6rem"><label>{% translate "Reason" %}</label><input class="input" name="reason" value="{{ order.discount_reason }}" placeholder="{% translate 'e.g. regular customer, staff meal' %}"></div>
+        <div class="row" style="gap:.5rem; margin-top:.6rem">
+          <button class="btn spacer">{% translate "Apply discount" %}</button>
+          {% if order.discount %}<button class="btn btn-ghost" name="value" value="0">{% translate "Remove" %}</button>{% endif %}
+        </div>
+        {% if not request.user.is_manager %}<p class="help muted" style="margin-top:.5rem">{% if hotel.max_staff_discount %}{% blocktranslate with p=hotel.max_staff_discount %}You can give up to {{ p }}%. More needs a manager.{% endblocktranslate %}{% else %}{% translate "Only a manager can give discounts." %}{% endif %}</p>{% endif %}
+      </form>
     </div>
     {% endif %}
+
     <div class="card-footer row" style="justify-content:space-between">
       <a href="{% url 'outlets:floor' outlet.pk %}">{% icon "back" %} {% translate "Keep open" %}</a>
       {% if not lines or request.user.is_manager %}
@@ -112,6 +185,55 @@
   tabs.forEach(function (t) { t.addEventListener('click', function () { current = t.dataset.cat; apply(current); }); });
   search.addEventListener('input', function () { apply(current); });
   apply(current);
+
+  // Payment panel
+  var settle = document.getElementById('settle');
+  if (!settle) return;
+  var remaining = parseFloat(settle.dataset.remaining);
+  settle.querySelectorAll('.seg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      settle.querySelectorAll('.seg button').forEach(function (x) { x.classList.toggle('active', x === b); });
+      settle.querySelectorAll('.pane').forEach(function (p) { p.classList.toggle('hidden', p.dataset.pane !== b.dataset.pane); });
+    });
+  });
+  function num(v) { var n = parseFloat(String(v).replace(',', '.')); return isNaN(n) ? 0 : n; }
+  var cashForm = settle.querySelector('.pane[data-pane=cash]');
+  var amountIn = cashForm.querySelector('.pay-amount'), tendered = document.getElementById('tendered');
+  var changeBox = document.getElementById('change-due');
+  function updateChange() {
+    var t = num(tendered.value), a = num(amountIn.value);
+    changeBox.classList.toggle('hidden', !(t > a));
+    changeBox.querySelector('strong').textContent = (t - a).toFixed(2) + ' {{ hotel.currency_symbol|escapejs }}';
+  }
+  function quickButtons() {
+    var a = num(amountIn.value), box = document.getElementById('quick-cash'), notes = [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
+    var picks = [a];
+    notes.forEach(function (n) { var v = Math.ceil(a / n) * n; if (v > a && picks.indexOf(v) === -1 && picks.length < 5) picks.push(v); });
+    box.innerHTML = '';
+    picks.forEach(function (v, i) {
+      var b = document.createElement('button'); b.type = 'button';
+      b.textContent = i === 0 ? '{{ _("Exact")|escapejs }}' : v.toFixed(v % 1 ? 2 : 0);
+      b.onclick = function () { tendered.value = v.toFixed(2); updateChange(); };
+      box.appendChild(b);
+    });
+  }
+  tendered.addEventListener('input', updateChange);
+  amountIn.addEventListener('input', function () { quickButtons(); updateChange(); });
+  settle.querySelectorAll('[data-split]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var part = Math.ceil(remaining / parseInt(b.dataset.split, 10) * 100) / 100;
+      b.closest('form').querySelector('.pay-amount').value = Math.min(part, remaining).toFixed(2);
+      quickButtons(); updateChange();
+    });
+  });
+  quickButtons();
+  document.querySelectorAll('.void-form').forEach(function (f) {
+    f.addEventListener('submit', function (e) {
+      var reason = window.prompt('{{ _("Why is this entry being voided?")|escapejs }}');
+      if (!reason) { e.preventDefault(); return; }
+      f.querySelector('[name=reason]').value = reason;
+    });
+  });
 })();
 </script>
 {% endblock %}

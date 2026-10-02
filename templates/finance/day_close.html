@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Day close" %} {{ day|date:"d.m.Y" }}{% endblock %}
+{% block content %}
+<div class="page-header no-print">
+  <div><div class="eyebrow">{% translate "Finance" %}</div><h1>{% translate "Day close" %}</h1><p>{% translate "Count the cash at the end of the day and compare it with what the system expects." %}</p></div>
+  <div class="actions">
+    <form method="get" class="row" style="gap:.4rem"><input class="input" type="date" name="date" value="{{ day|date:'Y-m-d' }}" onchange="this.form.submit()" style="width:auto"></form>
+    <button class="btn btn-secondary" onclick="window.print()">{% icon "print" %} {% translate "Print Z report" %}</button>
+  </div>
+</div>
+<div class="no-print">{% include "finance/_tabs.html" %}</div>
+
+<div class="grid grid-main">
+  <div class="stack">
+    <section class="card z-report">
+      <div class="card-header"><h2>{% blocktranslate with d=day|date:"l, d.m.Y" %}Z report · {{ d }}{% endblocktranslate %}</h2>{% if existing %}{% translate "Closed" as l %}{% status_badge "success" l %}{% else %}{% translate "Open" as l %}{% status_badge "info" l %}{% endif %}</div>
+      <div class="card-body">
+        <div class="print-only" style="margin-bottom:1rem"><strong>{{ hotel.legal_name|default:hotel.name }}</strong>{% if hotel.tax_id %} · NIPT {{ hotel.tax_id }}{% endif %}</div>
+        <div class="grid grid-3" style="gap:1rem; margin-bottom:1.25rem">
+          <div><div class="stat-label">{% translate "Revenue" %}</div><div class="stat-value" style="font-size:1.4rem">{{ s.revenue|money }}</div></div>
+          <div><div class="stat-label">{% translate "Payments received" %}</div><div class="stat-value" style="font-size:1.4rem">{{ s.received|money }}</div></div>
+          <div><div class="stat-label">{% translate "Receipts" %}</div><div class="stat-value" style="font-size:1.4rem">{{ s.receipt_count }}</div><div class="stat-note">{% if s.voids %}{% blocktranslate count n=s.voids %}{{ n }} voided{% plural %}{{ n }} voided{% endblocktranslate %}{% endif %}</div></div>
+        </div>
+        <div class="grid grid-2" style="gap:1.5rem">
+          <div>
+            <h3 style="margin-bottom:.5rem">{% translate "By payment method" %}</h3>
+            <table class="table table-sm"><tbody>
+              {% for label, amount in s.method_rows %}<tr><td>{{ label }}</td><td class="num">{{ amount|money }}</td></tr>{% empty %}<tr><td class="muted">{% translate "No payments." %}</td></tr>{% endfor %}
+            </tbody></table>
+          </div>
+          <div>
+            <h3 style="margin-bottom:.5rem">{% translate "By department" %}</h3>
+            <table class="table table-sm"><tbody>
+              {% for name, amount in s.departments %}<tr><td>{{ name }}</td><td class="num">{{ amount|money }}</td></tr>{% empty %}<tr><td class="muted">{% translate "No revenue." %}</td></tr>{% endfor %}
+              {% if s.discounts %}<tr><td class="muted">{% translate "Discounts given" %}</td><td class="num muted">{{ s.discounts|money }}</td></tr>{% endif %}
+            </tbody></table>
+          </div>
+        </div>
+        {% if s.staff %}
+        <h3 style="margin:1.25rem 0 .5rem">{% translate "Taken by staff" %}</h3>
+        <table class="table table-sm"><tbody>
+          {% for r in s.staff %}<tr><td>{{ r.name }}</td><td class="num muted">{{ r.count }} ×</td><td class="num">{{ r.total|money }}</td></tr>{% endfor %}
+        </tbody></table>
+        {% endif %}
+        {% if existing %}
+        <h3 style="margin:1.25rem 0 .5rem">{% translate "Cash drawer" %}</h3>
+        <table class="table table-sm"><tbody>
+          <tr><td>{% translate "Opening float" %}</td><td class="num">{{ existing.opening_float|money }}</td></tr>
+          <tr><td>+ {% translate "Cash received" %}</td><td class="num">{{ existing.cash_sales|money }}</td></tr>
+          <tr><td>− {% translate "Cash paid out" %}</td><td class="num">{{ existing.cash_expenses|money }}</td></tr>
+          <tr><td><strong>{% translate "Expected in drawer" %}</strong></td><td class="num"><strong>{{ existing.expected_cash|money }}</strong></td></tr>
+          <tr><td>{% translate "Counted" %}</td><td class="num">{{ existing.counted_cash|money }}</td></tr>
+          <tr><td><strong>{% translate "Difference" %}</strong></td><td class="num"><strong style="color:{% if existing.difference < 0 %}var(--danger){% elif existing.difference > 0 %}var(--warning){% else %}var(--success){% endif %}">{{ existing.difference|money }}</strong></td></tr>
+        </tbody></table>
+        <p class="muted" style="font-size:.85rem; margin-top:.75rem">{% blocktranslate with who=existing.closed_by t=existing.closed_at|date:"d.m.Y H:i" %}Closed by {{ who }} at {{ t }}.{% endblocktranslate %}{% if existing.notes %} {{ existing.notes }}{% endif %}</p>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+
+  <aside class="stack no-print">
+    {% if not existing or request.user.is_manager %}
+    <form method="post" class="card" novalidate>{% csrf_token %}
+      <div class="card-header"><h3>{% if existing %}{% translate "Close again" %}{% else %}{% translate "Count the cash" %}{% endif %}</h3></div>
+      <div class="card-body">
+        <dl class="dl" style="margin-bottom:1rem">
+          <dt>{% translate "Cash received" %}</dt><dd>{{ s.cash|money }}</dd>
+          <dt>{% translate "Cash paid out" %}</dt><dd>{{ s.cash_expenses|money }}</dd>
+        </dl>
+        {% include "includes/form_fields.html" %}
+        <div class="alert alert-info" style="margin-top:1rem" id="expected-box">{% translate "Expected in drawer" %}: <strong id="expected">{{ expected_now|money }}</strong></div>
+      </div>
+      <div class="card-footer"><button class="btn btn-block">{% icon "lock" %} {% translate "Close the day" %}</button></div>
+    </form>
+    {% endif %}
+    <section class="card card-flush">
+      <div class="card-header"><h3>{% translate "Recent days" %}</h3></div>
+      <table class="table table-sm"><tbody>
+        {% for d in history %}
+          <tr><td><a href="?date={{ d.business_date|date:'Y-m-d' }}">{{ d.business_date|date:"D d.m" }}</a></td><td class="num">{{ d.revenue_total|money }}</td><td class="num" style="color:{% if d.difference < 0 %}var(--danger){% elif d.difference > 0 %}var(--warning){% else %}var(--success){% endif %}">{{ d.difference|money }}</td></tr>
+        {% empty %}<tr><td class="muted">{% translate "No days closed yet." %}</td></tr>{% endfor %}
+      </tbody></table>
+    </section>
+  </aside>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var f = document.getElementById('id_opening_float'); if (!f) return;
+  var cash = {{ s.cash|stringformat:".2f" }}, out = {{ s.cash_expenses|stringformat:".2f" }};
+  function upd() { var v = parseFloat(String(f.value).replace(',', '.')) || 0; document.getElementById('expected').textContent = (v + cash - out).toFixed(2) + ' {{ hotel.currency_symbol|escapejs }}'; }
+  f.addEventListener('input', upd); upd();
+})();
+</script>
+{% endblock %}

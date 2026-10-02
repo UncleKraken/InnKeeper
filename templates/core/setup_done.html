@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "You're all set" %}{% endblock %}
+{% block content %}
+<div class="wizard">
+  <div class="card card-body" style="text-align:center; padding:2.5rem 1.5rem">
+    <div class="success-mark">{% icon "check" %}</div>
+    <h1 style="margin-top:1rem">{% translate "You're all set" %}</h1>
+    <p class="muted" style="max-width:52ch; margin:0.5rem auto 0">
+      {% if hotel.module_rooms %}{% blocktranslate count n=rooms with name=hotel.name %}{{ name }} is ready with {{ n }} room.{% plural %}{{ name }} is ready with {{ n }} rooms.{% endblocktranslate %}{% else %}{% blocktranslate with name=hotel.name %}{{ name }} is ready.{% endblocktranslate %}{% endif %}
+      {% if outlets %}{% blocktranslate count n=outlets|length %}{{ n }} outlet was created.{% plural %}{{ n }} outlets were created.{% endblocktranslate %}{% endif %}
+    </p>
+  </div>
+
+  <h2 style="margin:2rem 0 1rem">{% translate "Next steps" %}</h2>
+  <div class="grid grid-2">
+    <a class="card stat next-step" href="{% url 'accounts:staff_create' %}">
+      <div class="stat-label">1</div><h3>{% translate "Add your staff" %}</h3>
+      <p class="muted">{% translate "Give each person their own login and role." %}</p>
+    </a>
+    {% if hotel.module_outlets %}
+    <a class="card stat next-step" href="{% url 'outlets:item_list' %}">
+      <div class="stat-label">2</div><h3>{% translate "Fill in your menu" %}</h3>
+      <p class="muted">{% translate "Add dishes, drinks and services with prices." %}</p>
+    </a>
+    {% for o in outlets %}{% if o.uses_tables and forloop.first %}
+    <a class="card stat next-step" href="{% url 'outlets:floor_plan' o.pk %}">
+      <div class="stat-label">3</div><h3>{% translate "Arrange your tables" %}</h3>
+      <p class="muted">{% translate "Drag tables to match your real room, rename and resize them." %}</p>
+    </a>
+    {% endif %}{% endfor %}
+    {% endif %}
+    {% if hotel.module_rooms %}
+    <a class="card stat next-step" href="{% url 'frontdesk:room_list' %}">
+      <div class="stat-label">{% if hotel.module_outlets %}4{% else %}2{% endif %}</div><h3>{% translate "Check your rooms and rates" %}</h3>
+      <p class="muted">{% translate "Add room types such as Double or Suite and set prices." %}</p>
+    </a>
+    {% endif %}
+    <a class="card stat next-step" href="{% url 'core:settings' %}">
+      <div class="stat-label">✦</div><h3>{% translate "Add your logo and receipt text" %}</h3>
+      <p class="muted">{% translate "Make receipts and invoices look like yours." %}</p>
+    </a>
+  </div>
+  <div class="form-actions"><a class="btn btn-lg" href="{% url 'core:dashboard' %}">{% translate "Go to the dashboard" %} {% icon "next" %}</a></div>
+</div>
+{% endblock %}

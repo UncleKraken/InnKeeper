@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-02 02:00+0200\n"
+"POT-Creation-Date: 2026-10-02 02:53+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,10 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: apps/accounts/apps.py:8 apps/accounts/views.py:70 apps/accounts/views.py:89
-#: apps/accounts/views.py:97 templates/base.html:54
-#: templates/core/audit_log.html:11 templates/finance/ledger.html:19
-#: templates/finance/ledger.html:28
+#: apps/accounts/apps.py:8 apps/accounts/views.py:75 apps/accounts/views.py:94
+#: apps/accounts/views.py:102 templates/base.html:57
+#: templates/core/audit_log.html:11 templates/core/settings_hub.html:18
+#: templates/finance/ledger.html:20 templates/finance/ledger.html:29
+#: templates/finance/sales.html:31 templates/outlets/receipts.html:19
 msgid "Staff"
 msgstr "Stafi"
 
@@ -40,22 +41,41 @@ msgid "Inactive staff cannot sign in. Use this instead of deleting accounts."
 msgstr ""
 "Stafi joaktiv nuk mund të hyjë. Përdore këtë në vend që të fshish llogari."
 
-#: apps/accounts/forms.py:58 templates/accounts/login.html:33
-#: templates/accounts/staff_form.html:6
+#: apps/accounts/forms.py:58 apps/accounts/forms.py:106
+#: templates/accounts/login.html:33 templates/accounts/staff_form.html:6
 msgid "Password"
 msgstr "Fjalëkalimi"
 
 #: apps/accounts/forms.py:59 apps/accounts/forms.py:83
+#: apps/accounts/forms.py:107
 msgid "Repeat password"
 msgstr "Përsërit fjalëkalimin"
 
 #: apps/accounts/forms.py:65 apps/accounts/forms.py:93
+#: apps/accounts/forms.py:118
 msgid "The passwords do not match."
 msgstr "Fjalëkalimet nuk përputhen."
 
 #: apps/accounts/forms.py:82
 msgid "New password"
 msgstr "Fjalëkalimi i ri"
+
+#: apps/accounts/forms.py:103
+msgid "Your first name"
+msgstr "Emri juaj"
+
+#: apps/accounts/forms.py:104
+msgid "Your last name"
+msgstr "Mbiemri juaj"
+
+#: apps/accounts/forms.py:105 apps/accounts/views.py:83
+#: templates/accounts/login.html:29
+msgid "Username"
+msgstr "Emri i përdoruesit"
+
+#: apps/accounts/forms.py:105
+msgid "What you'll type to sign in, e.g. arta."
+msgstr "Ajo që do të shkruani për të hyrë, p.sh. arta."
 
 #: apps/accounts/models.py:7
 msgid "Manager"
@@ -65,13 +85,13 @@ msgstr "Menaxher"
 msgid "Reception"
 msgstr "Recepsioni"
 
-#: apps/accounts/models.py:9 apps/housekeeping/apps.py:8
+#: apps/accounts/models.py:9 apps/core/forms.py:43 apps/housekeeping/apps.py:8
 #: templates/base.html:35 templates/housekeeping/board.html:3
 #: templates/housekeeping/board.html:6
 msgid "Housekeeping"
 msgstr "Pastrimi"
 
-#: apps/accounts/models.py:10 templates/base.html:37
+#: apps/accounts/models.py:10 apps/core/forms.py:44 templates/base.html:37
 #: templates/housekeeping/ticket_list.html:3
 #: templates/housekeeping/ticket_list.html:6
 msgid "Maintenance"
@@ -81,8 +101,9 @@ msgstr "Mirëmbajtja"
 msgid "Service staff (restaurant, bar, spa…)"
 msgstr "Staf shërbimi (restorant, bar, spa…)"
 
-#: apps/accounts/models.py:12 apps/finance/apps.py:8 templates/base.html:46
-#: templates/finance/dashboard.html:6
+#: apps/accounts/models.py:12 apps/finance/apps.py:8 templates/base.html:47
+#: templates/finance/dashboard.html:6 templates/finance/day_close.html:6
+#: templates/finance/expenses.html:6 templates/finance/sales.html:6
 msgid "Finance"
 msgstr "Financa"
 
@@ -90,7 +111,7 @@ msgstr "Financa"
 msgid "role"
 msgstr "roli"
 
-#: apps/accounts/models.py:19 apps/core/models.py:16
+#: apps/accounts/models.py:19 apps/core/models.py:22
 #: apps/frontdesk/models.py:75
 msgid "phone"
 msgstr "telefoni"
@@ -99,11 +120,11 @@ msgstr "telefoni"
 msgid "language"
 msgstr "gjuha"
 
-#: apps/accounts/models.py:24 config/settings.py:127
+#: apps/accounts/models.py:24 apps/core/models.py:56 config/settings.py:130
 msgid "Albanian"
 msgstr "Shqip"
 
-#: apps/accounts/models.py:24 config/settings.py:128
+#: apps/accounts/models.py:24 apps/core/models.py:56 config/settings.py:131
 msgid "English"
 msgstr "Anglisht"
 
@@ -114,62 +135,58 @@ msgstr ""
 "Gjuha e ndërfaqes për këtë përdorues. Lëre bosh për gjuhën e paracaktuar të "
 "hotelit."
 
-#: apps/accounts/models.py:29 apps/accounts/views.py:71
-#: apps/accounts/views.py:90 apps/accounts/views.py:98
+#: apps/accounts/models.py:29 apps/accounts/views.py:76
+#: apps/accounts/views.py:95 apps/accounts/views.py:103
 msgid "staff member"
 msgstr "anëtar stafi"
 
-#: apps/accounts/models.py:30 apps/outlets/models.py:37
+#: apps/accounts/models.py:30 apps/outlets/models.py:38
 msgid "staff"
 msgstr "stafi"
 
-#: apps/accounts/views.py:60
+#: apps/accounts/views.py:65
 msgid "Your password was changed."
 msgstr "Fjalëkalimi juaj u ndryshua."
 
-#: apps/accounts/views.py:77 apps/frontdesk/views.py:413
-#: apps/outlets/views.py:234 apps/outlets/views.py:267
-#: apps/outlets/views.py:313 apps/outlets/views.py:347
+#: apps/accounts/views.py:82 apps/frontdesk/views.py:468
+#: apps/outlets/views.py:393 apps/outlets/views.py:426
+#: apps/outlets/views.py:482 apps/outlets/views.py:516
 #: templates/frontdesk/guest_list.html:15
 msgid "Name"
 msgstr "Emri"
 
-#: apps/accounts/views.py:78 templates/accounts/login.html:29
-msgid "Username"
-msgstr "Emri i përdoruesit"
-
-#: apps/accounts/views.py:79
+#: apps/accounts/views.py:84
 msgid "Role"
 msgstr "Roli"
 
-#: apps/accounts/views.py:80 apps/frontdesk/forms.py:53
+#: apps/accounts/views.py:85 apps/core/forms.py:53 apps/frontdesk/forms.py:54
 #: apps/frontdesk/models.py:110 templates/frontdesk/guest_detail.html:28
 #: templates/frontdesk/guest_list.html:15
 #: templates/frontdesk/reservation_detail.html:101
 msgid "Phone"
 msgstr "Telefoni"
 
-#: apps/accounts/views.py:81
+#: apps/accounts/views.py:86
 msgid "Last sign-in"
 msgstr "Hyrja e fundit"
 
-#: apps/accounts/views.py:82 apps/frontdesk/views.py:384
-#: apps/frontdesk/views.py:418 apps/outlets/views.py:237
-#: apps/outlets/views.py:350
+#: apps/accounts/views.py:87 apps/frontdesk/views.py:439
+#: apps/frontdesk/views.py:473 apps/outlets/views.py:396
+#: apps/outlets/views.py:519
 msgid "Active"
 msgstr "Aktiv"
 
-#: apps/accounts/views.py:104
+#: apps/accounts/views.py:109
 msgid "You cannot deactivate your own account."
 msgstr "Nuk mund të çaktivizoni llogarinë tuaj."
 
-#: apps/accounts/views.py:118
+#: apps/accounts/views.py:123
 #, python-format
 msgid "New password set for %(name)s. Tell them in person, not by message."
 msgstr ""
 "U vendos fjalëkalim i ri për %(name)s. Tregojani personalisht, jo me mesazh."
 
-#: apps/accounts/views.py:127
+#: apps/accounts/views.py:132
 msgid "Set password"
 msgstr "Vendos fjalëkalim"
 
@@ -177,96 +194,374 @@ msgstr "Vendos fjalëkalim"
 msgid "Core"
 msgstr "Bazë"
 
-#: apps/core/crud.py:91
+#: apps/core/crud.py:98
 #, python-format
 msgid "Saved %(obj)s."
 msgstr "U ruajt: %(obj)s."
 
-#: apps/core/models.py:12
-msgid "hotel name"
-msgstr "emri i hotelit"
+#: apps/core/forms.py:42
+#| msgid "rooms & front desk"
+msgid "Rooms & front desk"
+msgstr "Dhoma & recepsion"
 
-#: apps/core/models.py:13
-msgid "legal name"
-msgstr "emri ligjor"
+#: apps/core/forms.py:45 templates/base.html:42 templates/outlets/home.html:3
+msgid "Restaurant, bar & services"
+msgstr "Restorant, bar & shërbime"
 
-#: apps/core/models.py:14
-msgid "tax ID (NIPT)"
+#: apps/core/forms.py:49
+#| msgid "Business"
+msgid "Business name"
+msgstr "Emri i biznesit"
+
+#: apps/core/forms.py:50
+#| msgid "language"
+msgid "Main language"
+msgstr "Gjuha kryesore"
+
+#: apps/core/forms.py:51 templates/frontdesk/guest_detail.html:34
+msgid "Address"
+msgstr "Adresa"
+
+#: apps/core/forms.py:52
+#| msgid "tax ID (NIPT)"
+msgid "Tax ID (NIPT)"
 msgstr "NIPT"
 
-#: apps/core/models.py:15 apps/frontdesk/models.py:80
-msgid "address"
-msgstr "adresa"
+#: apps/core/forms.py:54 apps/frontdesk/forms.py:55
+#: apps/frontdesk/models.py:111 templates/frontdesk/guest_detail.html:29
+#: templates/frontdesk/guest_list.html:15
+#: templates/frontdesk/reservation_detail.html:102
+msgid "Email"
+msgstr "Email"
 
-#: apps/core/models.py:17 apps/frontdesk/models.py:74
-msgid "email"
-msgstr "email"
+#: apps/core/forms.py:56
+#| msgid "currency code"
+msgid "Currency"
+msgstr "Monedha"
 
-#: apps/core/models.py:18
-msgid "currency code"
-msgstr "kodi i monedhës"
-
-#: apps/core/models.py:19
-msgid "currency symbol"
-msgstr "simboli i monedhës"
-
-#: apps/core/models.py:20
-msgid "standard check-in time"
-msgstr "ora standarde e hyrjes"
-
-#: apps/core/models.py:21
-msgid "standard check-out time"
-msgstr "ora standarde e largimit"
-
-#: apps/core/models.py:23
+#: apps/core/forms.py:59 apps/core/models.py:29
 msgid "VAT rate (%)"
 msgstr "norma e TVSH-së (%)"
 
+#: apps/core/forms.py:61 templates/core/setup.html:63
+msgid "What do you use?"
+msgstr "Çfarë përdorni?"
+
+#: apps/core/forms.py:63
+#| msgid "Floor"
+msgid "Floors"
+msgstr "Katet"
+
+#: apps/core/forms.py:64
+#| msgid "Floor %(floor)s"
+msgid "Rooms per floor"
+msgstr "Dhoma për kat"
+
+#: apps/core/forms.py:65
+#| msgid "nightly rate"
+msgid "Standard nightly rate"
+msgstr "Çmimi standard për natë"
+
+#: apps/core/forms.py:67
+msgid "Your outlets and services"
+msgstr "Pikat dhe shërbimet tuaja"
+
+#: apps/core/forms.py:81 templates/core/setup.html:159
+msgid "Choose at least one area of the app to use."
+msgstr "Zgjidhni të paktën një pjesë të aplikacionit."
+
+#: apps/core/models.py:18
+msgid "hotel name"
+msgstr "emri i hotelit"
+
+#: apps/core/models.py:19
+msgid "legal name"
+msgstr "emri ligjor"
+
+#: apps/core/models.py:20
+msgid "tax ID (NIPT)"
+msgstr "NIPT"
+
+#: apps/core/models.py:21 apps/frontdesk/models.py:80
+msgid "address"
+msgstr "adresa"
+
+#: apps/core/models.py:23 apps/frontdesk/models.py:74
+msgid "email"
+msgstr "email"
+
+#: apps/core/models.py:24
+msgid "currency code"
+msgstr "kodi i monedhës"
+
+#: apps/core/models.py:25
+msgid "currency symbol"
+msgstr "simboli i monedhës"
+
+#: apps/core/models.py:26
+msgid "standard check-in time"
+msgstr "ora standarde e hyrjes"
+
 #: apps/core/models.py:27
+msgid "standard check-out time"
+msgstr "ora standarde e largimit"
+
+#: apps/core/models.py:33
 msgid ""
 "Prices are entered including VAT. Used to show the VAT portion on invoices."
 msgstr "Çmimet futen me TVSH. Përdoret për të treguar TVSH-në në fatura."
 
-#: apps/core/models.py:29
+#: apps/core/models.py:35
 msgid "invoice footer"
 msgstr "shënim në fund të faturës"
 
-#: apps/core/models.py:32 apps/core/models.py:33
+#: apps/core/models.py:38
+msgid "Hotel with restaurant, bar and services"
+msgstr "Hotel me restorant, bar dhe shërbime"
+
+#: apps/core/models.py:39
+msgid "Guesthouse, B&B, hostel or apartments"
+msgstr "Bujtinë, B&B, hostel ose apartamente"
+
+#: apps/core/models.py:40
+msgid "Restaurant, bar or café (no rooms)"
+msgstr "Restorant, bar ose kafene (pa dhoma)"
+
+#: apps/core/models.py:43
+msgid "type of business"
+msgstr "lloji i biznesit"
+
+#: apps/core/models.py:46
+msgid "rooms & front desk"
+msgstr "dhoma & recepsion"
+
+#: apps/core/models.py:46
+msgid "Reservations, room rack, guests and guest bills."
+msgstr "Rezervime, tabela e dhomave, mysafirë dhe llogaritë e tyre."
+
+#: apps/core/models.py:48
+msgid "housekeeping"
+msgstr "pastrimi"
+
+#: apps/core/models.py:49
+msgid "maintenance"
+msgstr "mirëmbajtja"
+
+#: apps/core/models.py:51
+msgid "restaurant, bar & services"
+msgstr "restorant, bar & shërbime"
+
+#: apps/core/models.py:51
+msgid "Point of sale for restaurant, bar, spa and other services."
+msgstr "Arka për restorantin, barin, spa-n dhe shërbime të tjera."
+
+#: apps/core/models.py:56
+msgid "default language"
+msgstr "gjuha e paracaktuar"
+
+#: apps/core/models.py:60
+msgid "logo"
+msgstr "logoja"
+
+#: apps/core/models.py:60
+msgid "Stored inside the database so it moves with backups."
+msgstr "Ruhet në bazën e të dhënave, ndaj kalon bashkë me kopjet rezervë."
+
+#: apps/core/models.py:61
+msgid "receipt header"
+msgstr "teksti sipër kuponit"
+
+#: apps/core/models.py:61
+msgid "Extra lines under the name, e.g. opening hours or Wi-Fi password."
+msgstr "Rreshta shtesë nën emër, p.sh. orari ose fjalëkalimi i Wi-Fi."
+
+#: apps/core/models.py:62
+msgid "receipt footer"
+msgstr "teksti poshtë kuponit"
+
+#: apps/core/models.py:64
+msgid "receipt paper width"
+msgstr "gjerësia e letrës së kuponit"
+
+#: apps/core/models.py:66
+msgid "show logo on receipts"
+msgstr "shfaq logon në kupona"
+
+#: apps/core/models.py:67
+msgid "show VAT breakdown on receipts"
+msgstr "shfaq TVSH-në në kupona"
+
+#: apps/core/models.py:69
+msgid "maximum discount for service staff (%)"
+msgstr "zbritja maksimale për stafin e shërbimit (%)"
+
+#: apps/core/models.py:71
+msgid "0 means only managers can give discounts."
+msgstr "0 do të thotë që vetëm menaxherët japin zbritje."
+
+#: apps/core/models.py:76 apps/core/models.py:77
 msgid "hotel settings"
 msgstr "cilësimet e hotelit"
 
-#: apps/core/models.py:63
+#: apps/core/models.py:140
 msgid "action"
 msgstr "veprimi"
 
-#: apps/core/models.py:64 apps/finance/models.py:106
-#: apps/frontdesk/models.py:18 apps/outlets/models.py:76
+#: apps/core/models.py:141 apps/finance/models.py:107
+#: apps/finance/models.py:175 apps/frontdesk/models.py:18
+#: apps/outlets/models.py:89
 msgid "description"
 msgstr "përshkrimi"
 
-#: apps/core/models.py:67
+#: apps/core/models.py:144
 msgid "time"
 msgstr "koha"
 
-#: apps/core/models.py:70
+#: apps/core/models.py:147
 msgid "audit entry"
 msgstr "regjistrim aktiviteti"
 
-#: apps/core/models.py:71
+#: apps/core/models.py:148
 msgid "audit log"
 msgstr "regjistri i aktivitetit"
 
-#: apps/core/views.py:106
+#: apps/core/settings_views.py:55 templates/core/settings_hub.html:34
+msgid "Logo"
+msgstr "Logoja"
+
+#: apps/core/settings_views.py:55
+msgid ""
+"PNG, JPG, WEBP or SVG, up to 400 KB. Shown on receipts, invoices and the "
+"menu."
+msgstr ""
+"PNG, JPG, WEBP ose SVG, deri në 400 KB. Shfaqet në kupona, fatura dhe menu."
+
+#: apps/core/settings_views.py:57
+msgid "Remove the current logo"
+msgstr "Hiq logon aktuale"
+
+#: apps/core/settings_views.py:76
+msgid "The logo is too large. Use an image under 400 KB."
+msgstr "Logoja është shumë e madhe. Përdorni një imazh nën 400 KB."
+
+#: apps/core/settings_views.py:78
+msgid "Use a PNG, JPG, WEBP or SVG image."
+msgstr "Përdorni një imazh PNG, JPG, WEBP ose SVG."
+
+#: apps/core/settings_views.py:102
+msgid "Switch on at least one area."
+msgstr "Aktivizoni të paktën një pjesë."
+
+#: apps/core/settings_views.py:119
 msgid "Settings saved."
 msgstr "Cilësimet u ruajtën."
 
+#: apps/core/settings_views.py:149
+#, python-format
+msgid "Backup saved: %(name)s"
+msgstr "Kopja rezervë u ruajt: %(name)s"
+
+#: apps/core/settings_views.py:169 apps/core/settings_views.py:181
+msgid "This file is not an InnKeeper backup."
+msgstr "Ky skedar nuk është kopje rezervë e InnKeeper-it."
+
+#: apps/core/settings_views.py:199
+#, python-format
+msgid ""
+"Settings imported: %(o)s outlets, %(i)s menu items, %(t)s tables, %(r)s "
+"rooms."
+msgstr ""
+"Cilësimet u importuan: %(o)s pika, %(i)s artikuj menuje, %(t)s tavolina, "
+"%(r)s dhoma."
+
+#: apps/core/settings_views.py:207
+msgid "Type RESTORE to confirm."
+msgstr "Shkruani RESTORE për të konfirmuar."
+
+#: apps/core/settings_views.py:216
+#, python-format
+msgid ""
+"Backup restored. Sign in with an account from the restored data. A copy of "
+"the previous data was saved as %(name)s."
+msgstr ""
+"Kopja rezervë u rikthye. Hyni me një llogari nga të dhënat e rikthyera. Një "
+"kopje e të dhënave të mëparshme u ruajt si %(name)s."
+
+#: apps/core/setup.py:18 apps/outlets/models.py:17
+msgid "Restaurant"
+msgstr "Restoranti"
+
+#: apps/core/setup.py:19 apps/outlets/models.py:18
+msgid "Bar"
+msgstr "Bari"
+
+#: apps/core/setup.py:20 apps/outlets/models.py:19
+msgid "Café"
+msgstr "Kafeneja"
+
+#: apps/core/setup.py:21 apps/outlets/models.py:20
+msgid "Room service"
+msgstr "Shërbim në dhomë"
+
+#: apps/core/setup.py:22 apps/outlets/models.py:22
+msgid "Spa & wellness"
+msgstr "Spa & mirëqenie"
+
+#: apps/core/setup.py:23 apps/outlets/models.py:23
+msgid "Pool / beach"
+msgstr "Pishinë / plazh"
+
+#: apps/core/setup.py:24 apps/outlets/models.py:21
+msgid "Minibar"
+msgstr "Minibari"
+
+#: apps/core/setup.py:25 apps/outlets/models.py:24
+msgid "Laundry"
+msgstr "Lavanderia"
+
+#: apps/core/setup.py:26 apps/outlets/models.py:25
+msgid "Transfers & tours"
+msgstr "Transferta & ture"
+
+#: apps/core/setup.py:91
+msgid "Standard"
+msgstr "Standard"
+
+#: apps/core/views.py:207 templates/core/setup.html:3
+#: templates/core/setup.html:9
+msgid "Set up your business"
+msgstr "Konfiguroni biznesin"
+
+#: apps/core/views.py:208 templates/core/setup_done.html:18
+msgid "Add your staff"
+msgstr "Shtoni stafin"
+
+#: apps/core/views.py:211 templates/core/setup_done.html:35
+msgid "Check your rooms and rates"
+msgstr "Kontrolloni dhomat dhe çmimet"
+
+#: apps/core/views.py:213 templates/core/setup_done.html:23
+msgid "Fill in your menu"
+msgstr "Plotësoni menunë"
+
+#: apps/core/views.py:215 templates/core/setup_done.html:40
+msgid "Add your logo and receipt text"
+msgstr "Shtoni logon dhe tekstin e kuponit"
+
+#: apps/core/views.py:217
+msgid "Download your first backup"
+msgstr "Shkarkoni kopjen e parë rezervë"
+
 #: apps/finance/models.py:28 apps/housekeeping/models.py:62
-#: apps/outlets/models.py:119 templates/frontdesk/reservation_list.html:31
-#: templates/housekeeping/ticket_list.html:10 templates/outlets/floor.html:39
+#: apps/outlets/models.py:145 templates/finance/day_close.html:17
+#: templates/frontdesk/reservation_list.html:31
+#: templates/housekeeping/ticket_list.html:10 templates/outlets/floor.html:56
+#: templates/outlets/menu_admin.html:44
 msgid "Open"
 msgstr "Hapur"
 
-#: apps/finance/models.py:29 apps/outlets/models.py:120
+#: apps/finance/models.py:29 apps/outlets/models.py:146
+#: templates/finance/day_close.html:17
 msgid "Closed"
 msgstr "Mbyllur"
 
@@ -276,112 +571,272 @@ msgstr "rezervimi"
 
 #: apps/finance/models.py:34 apps/frontdesk/models.py:128
 #: apps/housekeeping/models.py:24 apps/housekeeping/models.py:80
-#: apps/outlets/models.py:136
+#: apps/outlets/models.py:162
 msgid "status"
 msgstr "statusi"
 
-#: apps/finance/models.py:39
+#: apps/finance/models.py:35
+msgid "invoice number"
+msgstr "numri i faturës"
+
+#: apps/finance/models.py:40
 msgid "folio"
 msgstr "llogaria"
 
-#: apps/finance/models.py:40
+#: apps/finance/models.py:41
 msgid "folios"
 msgstr "llogaritë"
 
-#: apps/finance/models.py:73
+#: apps/finance/models.py:74 apps/finance/models.py:193
 msgid "date"
 msgstr "data"
 
-#: apps/finance/models.py:76
+#: apps/finance/models.py:77
 msgid "voided"
 msgstr "anuluar"
 
-#: apps/finance/models.py:77
+#: apps/finance/models.py:78
 msgid "void reason"
 msgstr "arsyeja e anulimit"
 
-#: apps/finance/models.py:91 apps/finance/models.py:126
-#: apps/finance/views.py:56
+#: apps/finance/models.py:92 apps/finance/models.py:127
+#: apps/finance/reports.py:115 apps/finance/views.py:56
 msgid "Accommodation"
 msgstr "Akomodimi"
 
-#: apps/finance/models.py:92 apps/outlets/views.py:267
-#: apps/outlets/views.py:314 apps/outlets/views.py:348
+#: apps/finance/models.py:93 apps/outlets/views.py:426
+#: apps/outlets/views.py:483 apps/outlets/views.py:517
+#: templates/finance/sales.html:20 templates/outlets/receipts.html:10
+#: templates/outlets/receipts.html:19
 msgid "Outlet"
 msgstr "Pika e shërbimit"
 
-#: apps/finance/models.py:93
+#: apps/finance/models.py:94
 msgid "Extra"
 msgstr "Shtesë"
 
-#: apps/finance/models.py:103 apps/outlets/models.py:44
-#: apps/outlets/models.py:58 apps/outlets/models.py:98
-#: apps/outlets/models.py:127 apps/outlets/views.py:228
-#: apps/outlets/views.py:245
+#: apps/finance/models.py:104 apps/outlets/models.py:50
+#: apps/outlets/models.py:69 apps/outlets/models.py:117
+#: apps/outlets/models.py:153 apps/outlets/views.py:383
+#: apps/outlets/views.py:404
 msgid "outlet"
 msgstr "pika e shërbimit"
 
-#: apps/finance/models.py:105 apps/housekeeping/models.py:23
-#: apps/outlets/models.py:29
+#: apps/finance/models.py:106 apps/housekeeping/models.py:23
+#: apps/outlets/models.py:30
 msgid "type"
 msgstr "lloji"
 
-#: apps/finance/models.py:107 apps/outlets/models.py:187
+#: apps/finance/models.py:108 apps/outlets/models.py:229
 msgid "quantity"
 msgstr "sasia"
 
-#: apps/finance/models.py:108 apps/outlets/models.py:186
+#: apps/finance/models.py:109 apps/outlets/models.py:228
 msgid "unit price"
 msgstr "çmimi për njësi"
 
-#: apps/finance/models.py:109 apps/finance/models.py:142
+#: apps/finance/models.py:110 apps/finance/models.py:143
+#: apps/finance/models.py:177
 msgid "amount"
 msgstr "shuma"
 
-#: apps/finance/models.py:112
+#: apps/finance/models.py:113
 msgid "charge"
 msgstr "detyrim"
 
-#: apps/finance/models.py:113
+#: apps/finance/models.py:114
 msgid "charges"
 msgstr "detyrime"
 
-#: apps/finance/models.py:129 apps/finance/views.py:67
+#: apps/finance/models.py:130 apps/finance/reports.py:120
+#: apps/finance/views.py:67
 msgid "Extras"
 msgstr "Shtesa"
 
-#: apps/finance/models.py:134 templates/outlets/order.html:68
+#: apps/finance/models.py:135 templates/outlets/order.html:94
 msgid "Cash"
 msgstr "Para në dorë"
 
-#: apps/finance/models.py:135 templates/outlets/order.html:69
+#: apps/finance/models.py:136 templates/outlets/order.html:95
 msgid "Card"
 msgstr "Kartë"
 
-#: apps/finance/models.py:136
+#: apps/finance/models.py:137
 msgid "Bank transfer"
 msgstr "Transfertë bankare"
 
-#: apps/finance/models.py:137 apps/frontdesk/models.py:70
-#: apps/frontdesk/models.py:117
+#: apps/finance/models.py:138 apps/finance/models.py:172
+#: apps/frontdesk/models.py:70 apps/frontdesk/models.py:117
 msgid "Other"
 msgstr "Tjetër"
 
-#: apps/finance/models.py:141
+#: apps/finance/models.py:142
 msgid "method"
 msgstr "mënyra"
 
-#: apps/finance/models.py:143
+#: apps/finance/models.py:144
 msgid "reference"
 msgstr "referenca"
 
-#: apps/finance/models.py:146
+#: apps/finance/models.py:145
+msgid "cash given"
+msgstr "para të dhëna"
+
+#: apps/finance/models.py:148
 msgid "payment"
 msgstr "pagesa"
 
-#: apps/finance/models.py:147
+#: apps/finance/models.py:149
 msgid "payments"
 msgstr "pagesat"
+
+#: apps/finance/models.py:164
+msgid "Food & drink stock"
+msgstr "Mallra ushqimore & pije"
+
+#: apps/finance/models.py:165
+msgid "Supplies & cleaning"
+msgstr "Materiale & pastrim"
+
+#: apps/finance/models.py:166
+msgid "Salaries"
+msgstr "Paga"
+
+#: apps/finance/models.py:167
+msgid "Electricity, water, internet"
+msgstr "Energji, ujë, internet"
+
+#: apps/finance/models.py:168
+msgid "Rent"
+msgstr "Qira"
+
+#: apps/finance/models.py:169
+msgid "Repairs & maintenance"
+msgstr "Riparime & mirëmbajtje"
+
+#: apps/finance/models.py:170
+msgid "Marketing & commissions"
+msgstr "Marketing & komisione"
+
+#: apps/finance/models.py:171
+msgid "Taxes & fees"
+msgstr "Taksa & tarifa"
+
+#: apps/finance/models.py:174 apps/outlets/models.py:75
+#: apps/outlets/models.py:86 apps/outlets/views.py:420
+#: apps/outlets/views.py:433
+msgid "category"
+msgstr "kategoria"
+
+#: apps/finance/models.py:176
+msgid "supplier"
+msgstr "furnitori"
+
+#: apps/finance/models.py:178
+msgid "paid with"
+msgstr "paguar me"
+
+#: apps/finance/models.py:179
+msgid "invoice / reference"
+msgstr "fatura / referenca"
+
+#: apps/finance/models.py:182
+msgid "expense"
+msgstr "shpenzim"
+
+#: apps/finance/models.py:183
+msgid "expenses"
+msgstr "shpenzime"
+
+#: apps/finance/models.py:194
+msgid "opening float"
+msgstr "paratë në fillim"
+
+#: apps/finance/models.py:195
+msgid "cash received"
+msgstr "para të marra"
+
+#: apps/finance/models.py:196
+msgid "cash paid out"
+msgstr "para të paguara"
+
+#: apps/finance/models.py:197
+msgid "expected in drawer"
+msgstr "të pritshme në arkë"
+
+#: apps/finance/models.py:198
+msgid "counted"
+msgstr "të numëruara"
+
+#: apps/finance/models.py:199
+msgid "card"
+msgstr "kartë"
+
+#: apps/finance/models.py:200
+msgid "bank & other"
+msgstr "bankë & tjetër"
+
+#: apps/finance/models.py:201
+msgid "revenue"
+msgstr "të ardhura"
+
+#: apps/finance/models.py:202 apps/frontdesk/models.py:46
+#: apps/frontdesk/models.py:83 apps/frontdesk/models.py:131
+#: apps/housekeeping/models.py:34
+msgid "notes"
+msgstr "shënime"
+
+#: apps/finance/models.py:207
+msgid "day close"
+msgstr "mbyllje dite"
+
+#: apps/finance/models.py:208
+msgid "day closes"
+msgstr "mbyllje ditësh"
+
+#: apps/finance/reports.py:34
+msgid "Enter an amount above zero."
+msgstr "Shkruani një shumë mbi zero."
+
+#: apps/finance/reports.py:72
+msgid "Expense saved."
+msgstr "Shpenzimi u ruajt."
+
+#: apps/finance/reports.py:85 apps/frontdesk/services.py:224
+#: apps/frontdesk/views.py:319 apps/outlets/services.py:251
+#: apps/outlets/services.py:265
+msgid "Give a reason for the void."
+msgstr "Jep një arsye për anulimin."
+
+#: apps/finance/reports.py:95 apps/frontdesk/views.py:321
+#: apps/outlets/views.py:275
+msgid "Entry voided."
+msgstr "Regjistrimi u anulua."
+
+#: apps/finance/reports.py:148
+msgid "Cash in the drawer at the start of the day"
+msgstr "Paratë në arkë në fillim të ditës"
+
+#: apps/finance/reports.py:149
+msgid "Cash counted now"
+msgstr "Paratë e numëruara tani"
+
+#: apps/finance/reports.py:150
+msgid "Notes"
+msgstr "Shënime"
+
+#: apps/finance/reports.py:169
+msgid "This day is already closed. Only a manager can close it again."
+msgstr "Kjo ditë është mbyllur tashmë. Vetëm menaxheri mund ta mbyllë sërish."
+
+#: apps/finance/reports.py:190
+msgid "Day closed. The cash matches exactly."
+msgstr "Dita u mbyll. Paratë përputhen saktësisht."
+
+#: apps/finance/reports.py:192
+#, python-format
+msgid "Day closed with a difference of %(d)s."
+msgstr "Dita u mbyll me diferencë %(d)s."
 
 #: apps/frontdesk/apps.py:8 templates/base.html:24
 #: templates/frontdesk/guest_list.html:6 templates/frontdesk/rack.html:6
@@ -393,97 +848,94 @@ msgstr "Recepsioni"
 msgid "Existing guest"
 msgstr "Mysafir ekzistues"
 
-#: apps/frontdesk/forms.py:49
-msgid "Choose a returning guest, or fill in the new guest's name below."
+#: apps/frontdesk/forms.py:50
+msgid "Search for a returning guest, or fill in the new guest's name below."
 msgstr ""
-"Zgjidh një mysafir që ka ardhur më parë, ose plotëso emrin e mysafirit të ri"
-" më poshtë."
+"Kërkoni një mysafir që ka ardhur më parë, ose plotësoni emrin e mysafirit të"
+" ri më poshtë."
 
-#: apps/frontdesk/forms.py:51
+#: apps/frontdesk/forms.py:52
 msgid "First name"
 msgstr "Emri"
 
-#: apps/frontdesk/forms.py:52
+#: apps/frontdesk/forms.py:53
 msgid "Last name"
 msgstr "Mbiemri"
 
-#: apps/frontdesk/forms.py:54 apps/frontdesk/models.py:111
-#: templates/frontdesk/guest_detail.html:29
-#: templates/frontdesk/guest_list.html:15
-#: templates/frontdesk/reservation_detail.html:102
-msgid "Email"
-msgstr "Email"
-
-#: apps/frontdesk/forms.py:55 apps/frontdesk/views.py:379
-#: templates/core/dashboard.html:45 templates/core/dashboard.html:61
-#: templates/core/dashboard.html:78 templates/finance/dashboard.html:68
+#: apps/frontdesk/forms.py:56 apps/frontdesk/views.py:434
+#: templates/core/dashboard.html:61 templates/core/dashboard.html:77
+#: templates/core/dashboard.html:111 templates/finance/dashboard.html:87
 #: templates/frontdesk/guest_detail.html:18
-#: templates/frontdesk/invoice.html:25 templates/frontdesk/rack.html:28
+#: templates/frontdesk/invoice.html:26 templates/frontdesk/rack.html:28
 #: templates/frontdesk/reservation_detail.html:9
 #: templates/frontdesk/reservation_list.html:16
-#: templates/housekeeping/board.html:52
+#: templates/housekeeping/board.html:52 templates/outlets/order.html:96
 msgid "Room"
 msgstr "Dhoma"
 
-#: apps/frontdesk/forms.py:57 apps/frontdesk/views.py:415
+#: apps/frontdesk/forms.py:58 apps/frontdesk/views.py:470
 msgid "Nightly rate"
 msgstr "Çmimi për natë"
 
-#: apps/frontdesk/forms.py:61
+#: apps/frontdesk/forms.py:62
 msgid "Leave empty to use the room type's standard rate."
 msgstr "Lëre bosh për të përdorur çmimin standard të llojit të dhomës."
 
-#: apps/frontdesk/forms.py:84
+#: apps/frontdesk/forms.py:85
 msgid "Choose an existing guest or enter the new guest's first and last name."
 msgstr ""
 "Zgjidh një mysafir ekzistues ose shkruaj emrin dhe mbiemrin e mysafirit të "
 "ri."
 
-#: apps/frontdesk/forms.py:105 templates/finance/ledger.html:28
-#: templates/frontdesk/invoice.html:28
+#: apps/frontdesk/forms.py:106 templates/finance/expenses.html:21
+#: templates/finance/ledger.html:29 templates/frontdesk/invoice.html:29
 #: templates/frontdesk/reservation_detail.html:35
 msgid "Description"
 msgstr "Përshkrimi"
 
-#: apps/frontdesk/forms.py:106 templates/frontdesk/invoice.html:28
+#: apps/frontdesk/forms.py:107 templates/finance/sales.html:20
+#: templates/frontdesk/invoice.html:29
 #: templates/frontdesk/reservation_detail.html:35
 msgid "Qty"
 msgstr "Sasia"
 
-#: apps/frontdesk/forms.py:107 apps/outlets/views.py:316
-#: templates/frontdesk/invoice.html:28
+#: apps/frontdesk/forms.py:108 apps/outlets/views.py:485
+#: templates/frontdesk/invoice.html:29
 msgid "Price"
 msgstr "Çmimi"
 
-#: apps/frontdesk/forms.py:111 templates/finance/ledger.html:19
-#: templates/finance/ledger.html:28 templates/frontdesk/invoice.html:28
+#: apps/frontdesk/forms.py:112 templates/finance/expenses.html:21
+#: templates/finance/ledger.html:20 templates/finance/ledger.html:29
+#: templates/frontdesk/invoice.html:29
 #: templates/frontdesk/reservation_detail.html:35
+#: templates/outlets/order.html:103 templates/outlets/order.html:118
 msgid "Amount"
 msgstr "Shuma"
 
-#: apps/frontdesk/forms.py:111
+#: apps/frontdesk/forms.py:112
 msgid "Use a negative amount for a refund."
 msgstr "Përdor shumë negative për rimbursim."
 
-#: apps/frontdesk/forms.py:112 templates/finance/ledger.html:19
+#: apps/frontdesk/forms.py:113 templates/finance/ledger.html:20
 msgid "Method"
 msgstr "Mënyra"
 
-#: apps/frontdesk/forms.py:113
+#: apps/frontdesk/forms.py:114 templates/outlets/order.html:119
 msgid "Reference"
 msgstr "Referenca"
 
-#: apps/frontdesk/forms.py:118 apps/frontdesk/services.py:198
+#: apps/frontdesk/forms.py:119 apps/frontdesk/services.py:207
+#: apps/outlets/services.py:134
 msgid "Enter an amount."
 msgstr "Shkruaj një shumë."
 
-#: apps/frontdesk/forms.py:130
+#: apps/frontdesk/forms.py:131
 msgid "Inactive rooms are hidden from the rack and cannot be booked."
 msgstr "Dhomat joaktive fshihen nga tabela dhe nuk mund të rezervohen."
 
-#: apps/frontdesk/models.py:16 apps/outlets/models.py:28
-#: apps/outlets/models.py:59 apps/outlets/models.py:75
-#: apps/outlets/models.py:99 apps/outlets/models.py:185
+#: apps/frontdesk/models.py:16 apps/outlets/models.py:29
+#: apps/outlets/models.py:70 apps/outlets/models.py:87
+#: apps/outlets/models.py:118 apps/outlets/models.py:227
 msgid "name"
 msgstr "emri"
 
@@ -508,12 +960,12 @@ msgid "max children"
 msgstr "maksimumi i fëmijëve"
 
 #: apps/frontdesk/models.py:22 apps/frontdesk/models.py:47
-#: apps/outlets/models.py:41 apps/outlets/models.py:102
+#: apps/outlets/models.py:42 apps/outlets/models.py:128
 msgid "active"
 msgstr "aktiv"
 
 #: apps/frontdesk/models.py:25 apps/frontdesk/models.py:40
-#: apps/frontdesk/views.py:407 apps/frontdesk/views.py:426
+#: apps/frontdesk/views.py:462 apps/frontdesk/views.py:481
 msgid "room type"
 msgstr "lloj dhome"
 
@@ -549,13 +1001,8 @@ msgstr "statusi i pastrimit"
 msgid "out of order"
 msgstr "jashtë përdorimit"
 
-#: apps/frontdesk/models.py:46 apps/frontdesk/models.py:83
-#: apps/frontdesk/models.py:131 apps/housekeeping/models.py:34
-msgid "notes"
-msgstr "shënime"
-
 #: apps/frontdesk/models.py:50 apps/frontdesk/models.py:122
-#: apps/frontdesk/views.py:372 apps/frontdesk/views.py:392
+#: apps/frontdesk/views.py:427 apps/frontdesk/views.py:447
 #: apps/housekeeping/models.py:21 apps/housekeeping/models.py:72
 msgid "room"
 msgstr "dhomë"
@@ -612,7 +1059,7 @@ msgstr "VIP"
 msgid "guest"
 msgstr "mysafir"
 
-#: apps/frontdesk/models.py:88 apps/outlets/models.py:134
+#: apps/frontdesk/models.py:88 apps/outlets/models.py:160
 msgid "guests"
 msgstr "mysafirë"
 
@@ -621,7 +1068,7 @@ msgstr "mysafirë"
 msgid "Booked"
 msgstr "Rezervuar"
 
-#: apps/frontdesk/models.py:103 apps/frontdesk/views.py:111
+#: apps/frontdesk/models.py:103 apps/frontdesk/views.py:112
 #: templates/frontdesk/rack.html:58
 msgid "In house"
 msgstr "Në hotel"
@@ -631,12 +1078,12 @@ msgstr "Në hotel"
 msgid "Checked out"
 msgstr "Larguar"
 
-#: apps/frontdesk/models.py:105 apps/outlets/models.py:121
+#: apps/frontdesk/models.py:105 apps/outlets/models.py:147
 msgid "Cancelled"
 msgstr "Anuluar"
 
 #: apps/frontdesk/models.py:106
-#: templates/frontdesk/reservation_detail.html:124
+#: templates/frontdesk/reservation_detail.html:139
 msgid "No-show"
 msgstr "Nuk u paraqit"
 
@@ -709,7 +1156,8 @@ msgstr ""
 msgid "This room type allows at most %(a)s adults and %(c)s children."
 msgstr "Ky lloj dhome lejon më së shumti %(a)s të rritur dhe %(c)s fëmijë."
 
-#: apps/frontdesk/services.py:28 apps/frontdesk/views.py:154
+#: apps/frontdesk/services.py:28 apps/frontdesk/services.py:244
+#: apps/frontdesk/views.py:155
 msgid "Closed or cancelled reservations cannot be changed."
 msgstr "Rezervimet e mbyllura ose të anuluara nuk mund të ndryshohen."
 
@@ -729,12 +1177,12 @@ msgstr ""
 msgid "The departure date has already passed. Update the dates first."
 msgstr "Data e largimit ka kaluar. Përditëso datat fillimisht."
 
-#: apps/frontdesk/services.py:58
+#: apps/frontdesk/services.py:58 apps/frontdesk/services.py:249
 #, python-format
 msgid "Room %(n)s is out of order."
 msgstr "Dhoma %(n)s është jashtë përdorimit."
 
-#: apps/frontdesk/services.py:61
+#: apps/frontdesk/services.py:61 apps/frontdesk/services.py:256
 #, python-format
 msgid "Room %(n)s is still occupied by %(g)s."
 msgstr "Dhoma %(n)s është ende e zënë nga %(g)s."
@@ -753,136 +1201,135 @@ msgstr "Vetëm mysafirët që janë në hotel mund të largohen."
 msgid "The guest still owes %(amount)s. Take payment before checking out."
 msgstr "Mysafiri ka ende detyrim %(amount)s. Merr pagesën para largimit."
 
-#: apps/frontdesk/services.py:153
+#: apps/frontdesk/services.py:151
 msgid "Only booked reservations can be cancelled."
 msgstr "Vetëm rezervimet aktive mund të anulohen."
 
-#: apps/frontdesk/services.py:168
+#: apps/frontdesk/services.py:177
 msgid "This bill is closed."
 msgstr "Kjo llogari është e mbyllur."
 
-#: apps/frontdesk/services.py:178
+#: apps/frontdesk/services.py:187
 msgid "Quantity must be at least 1 and the price cannot be negative."
 msgstr "Sasia duhet të jetë të paktën 1 dhe çmimi nuk mund të jetë negativ."
 
-#: apps/frontdesk/services.py:215
+#: apps/frontdesk/services.py:222 apps/outlets/services.py:249
+#: apps/outlets/services.py:263
 msgid "Only a manager can void entries."
 msgstr "Vetëm menaxheri mund të anulojë regjistrime."
 
-#: apps/frontdesk/services.py:217 apps/frontdesk/views.py:300
-msgid "Give a reason for the void."
-msgstr "Jep një arsye për anulimin."
-
-#: apps/frontdesk/services.py:220
+#: apps/frontdesk/services.py:227
 msgid "Already voided."
 msgstr "Është anuluar tashmë."
 
-#: apps/frontdesk/views.py:109
+#: apps/frontdesk/views.py:110
 msgid "Upcoming"
 msgstr "Në vijim"
 
-#: apps/frontdesk/views.py:110 templates/core/dashboard.html:18
+#: apps/frontdesk/views.py:111 templates/core/dashboard.html:34
 msgid "Arrivals today"
 msgstr "Mbërritje sot"
 
-#: apps/frontdesk/views.py:112 templates/core/dashboard.html:56
+#: apps/frontdesk/views.py:113 templates/core/dashboard.html:72
 msgid "Departures"
 msgstr "Largime"
 
-#: apps/frontdesk/views.py:113 templates/core/dashboard.html:39
-#: templates/core/dashboard.html:56 templates/housekeeping/ticket_list.html:12
-#: templates/outlets/order.html:18
+#: apps/frontdesk/views.py:114 templates/core/dashboard.html:55
+#: templates/core/dashboard.html:72 templates/finance/expenses.html:11
+#: templates/housekeeping/ticket_list.html:12 templates/outlets/order.html:27
+#: templates/outlets/receipts.html:10
 msgid "All"
 msgstr "Të gjitha"
 
-#: apps/frontdesk/views.py:180
+#: apps/frontdesk/views.py:181
 #, python-format
 msgid "Reservation %(code)s saved."
 msgstr "Rezervimi %(code)s u ruajt."
 
-#: apps/frontdesk/views.py:231
+#: apps/frontdesk/views.py:250
 #, python-format
 msgid "%(guest)s checked in to room %(room)s."
 msgstr "%(guest)s hyri në dhomën %(room)s."
 
-#: apps/frontdesk/views.py:242
+#: apps/frontdesk/views.py:261
 #, python-format
 msgid "%(guest)s checked out. Room %(room)s sent to housekeeping."
 msgstr "%(guest)s u largua. Dhoma %(room)s iu dërgua pastrimit."
 
-#: apps/frontdesk/views.py:251
+#: apps/frontdesk/views.py:270
 #, python-format
 msgid "Marked %(guest)s as a no-show."
 msgstr "%(guest)s u shënua si i paparaqitur."
 
-#: apps/frontdesk/views.py:251
+#: apps/frontdesk/views.py:270
 #, python-format
 msgid "Reservation for %(guest)s cancelled."
 msgstr "Rezervimi për %(guest)s u anulua."
 
-#: apps/frontdesk/views.py:263
+#: apps/frontdesk/views.py:282
 msgid "Charge added."
 msgstr "Detyrimi u shtua."
 
-#: apps/frontdesk/views.py:267
+#: apps/frontdesk/views.py:286
 msgid "Check the charge details."
 msgstr "Kontrollo të dhënat e detyrimit."
 
-#: apps/frontdesk/views.py:279
+#: apps/frontdesk/views.py:298
 msgid "Payment recorded."
 msgstr "Pagesa u regjistrua."
 
-#: apps/frontdesk/views.py:302
-msgid "Entry voided."
-msgstr "Regjistrimi u anulua."
+#: apps/frontdesk/views.py:334
+#, python-format
+msgid "Moved to room %(room)s."
+msgstr "U kalua në dhomën %(room)s."
 
-#: apps/frontdesk/views.py:358
+#: apps/frontdesk/views.py:413
 msgid "Guest saved."
 msgstr "Mysafiri u ruajt."
 
-#: apps/frontdesk/views.py:365
+#: apps/frontdesk/views.py:420 templates/core/setup.html:82
 msgid "Rooms"
 msgstr "Dhomat"
 
-#: apps/frontdesk/views.py:365
+#: apps/frontdesk/views.py:420
 msgid "Room types & rates"
 msgstr "Llojet e dhomave & çmimet"
 
-#: apps/frontdesk/views.py:371 apps/frontdesk/views.py:391
-#: apps/frontdesk/views.py:406 apps/frontdesk/views.py:425
-#: templates/base.html:52
+#: apps/frontdesk/views.py:426 apps/frontdesk/views.py:446
+#: apps/frontdesk/views.py:461 apps/frontdesk/views.py:480
+#: templates/base.html:55 templates/core/settings_hub.html:16
 msgid "Rooms & rates"
 msgstr "Dhoma & çmime"
 
-#: apps/frontdesk/views.py:380 apps/outlets/views.py:235
+#: apps/frontdesk/views.py:435 apps/outlets/views.py:394
 msgid "Type"
 msgstr "Lloji"
 
-#: apps/frontdesk/views.py:381
+#: apps/frontdesk/views.py:436
 msgid "Floor"
 msgstr "Kati"
 
-#: apps/frontdesk/views.py:382 templates/finance/dashboard.html:68
+#: apps/frontdesk/views.py:437 templates/finance/dashboard.html:87
 #: templates/frontdesk/reservation_list.html:16
 #: templates/housekeeping/ticket_list.html:17
 msgid "Status"
 msgstr "Statusi"
 
-#: apps/frontdesk/views.py:383 templates/core/dashboard.html:45
+#: apps/frontdesk/views.py:438 templates/core/dashboard.html:61
 #: templates/frontdesk/rack.html:44 templates/frontdesk/rack.html:60
 #: templates/housekeeping/board.html:25
 msgid "Out of order"
 msgstr "Jashtë përdorimit"
 
-#: apps/frontdesk/views.py:414 templates/frontdesk/reservation_list.html:16
+#: apps/frontdesk/views.py:469 templates/frontdesk/reservation_list.html:16
 msgid "Code"
 msgstr "Kodi"
 
-#: apps/frontdesk/views.py:416
+#: apps/frontdesk/views.py:471
 msgid "Max adults"
 msgstr "Maks. të rritur"
 
-#: apps/frontdesk/views.py:417
+#: apps/frontdesk/views.py:472
 msgid "Max children"
 msgstr "Maks. fëmijë"
 
@@ -1036,64 +1483,69 @@ msgstr "Raporto një problem"
 msgid "Ticket resolved."
 msgstr "Kërkesa u zgjidh."
 
-#: apps/outlets/apps.py:8 apps/outlets/views.py:205
+#: apps/outlets/apps.py:8 apps/outlets/views.py:360
 #: templates/outlets/floor.html:6
 msgid "Outlets"
 msgstr "Pikat e shërbimit"
 
-#: apps/outlets/models.py:16
-msgid "Restaurant"
-msgstr "Restoranti"
+#: apps/outlets/floorplan.py:69
+msgid "The plan could not be read."
+msgstr "Plani nuk u lexua dot."
 
-#: apps/outlets/models.py:17
-msgid "Bar"
-msgstr "Bari"
+#: apps/outlets/floorplan.py:73
+msgid "Every table needs a name or number."
+msgstr "Çdo tavolinë duhet të ketë emër ose numër."
 
-#: apps/outlets/models.py:18
-msgid "Café"
-msgstr "Kafeneja"
+#: apps/outlets/floorplan.py:77
+#, python-format
+msgid "These names are used twice: %(names)s"
+msgstr "Këta emra përdoren dy herë: %(names)s"
 
-#: apps/outlets/models.py:19
-msgid "Room service"
-msgstr "Shërbim në dhomë"
+#: apps/outlets/floorplan.py:88
+#, python-format
+msgid "Close the open orders first: table %(names)s"
+msgstr "Mbyllni fillimisht porositë e hapura: tavolina %(names)s"
 
-#: apps/outlets/models.py:20
-msgid "Minibar"
-msgstr "Minibari"
+#: apps/outlets/floorplan.py:95 apps/outlets/models.py:197
+#, python-format
+msgid "Table %(name)s"
+msgstr "Tavolina %(name)s"
 
-#: apps/outlets/models.py:21
-msgid "Spa & wellness"
-msgstr "Spa & mirëqenie"
+#: apps/outlets/floorplan.py:114
+msgid "Floor plan saved."
+msgstr "Plani i sallës u ruajt."
 
-#: apps/outlets/models.py:22
-msgid "Pool / beach"
-msgstr "Pishinë / plazh"
+#: apps/outlets/menu.py:102
+#, python-format
+msgid "%(item)s is available again."
+msgstr "%(item)s është sërish në dispozicion."
 
-#: apps/outlets/models.py:23
-msgid "Laundry"
-msgstr "Lavanderia"
+#: apps/outlets/menu.py:102
+#, python-format
+msgid "%(item)s is marked as sold out."
+msgstr "%(item)s u shënua i mbaruar."
 
-#: apps/outlets/models.py:24
-msgid "Transfers & tours"
-msgstr "Transferta & ture"
+#: apps/outlets/menu.py:114
+msgid "New menu link created. Print the new QR code."
+msgstr "U krijua lidhje e re për menunë. Printoni kodin e ri QR."
 
-#: apps/outlets/models.py:25
+#: apps/outlets/models.py:26
 msgid "Events & conferences"
 msgstr "Evente & konferenca"
 
-#: apps/outlets/models.py:26
+#: apps/outlets/models.py:27
 msgid "Other service"
 msgstr "Shërbim tjetër"
 
-#: apps/outlets/models.py:31
+#: apps/outlets/models.py:32
 msgid "uses tables"
 msgstr "përdor tavolina"
 
-#: apps/outlets/models.py:31
+#: apps/outlets/models.py:32
 msgid "Turn off for services without tables, e.g. spa or laundry."
 msgstr "Çaktivizoje për shërbime pa tavolina, p.sh. spa ose lavanderi."
 
-#: apps/outlets/models.py:38
+#: apps/outlets/models.py:39
 msgid ""
 "Service staff who can use this outlet. Leave empty to allow all service "
 "staff."
@@ -1101,197 +1553,371 @@ msgstr ""
 "Stafi i shërbimit që mund ta përdorë këtë pikë. Lëre bosh për të lejuar të "
 "gjithë stafin e shërbimit."
 
-#: apps/outlets/models.py:40 apps/outlets/models.py:60
-#: apps/outlets/models.py:81 apps/outlets/models.py:101
-#: apps/outlets/models.py:149
+#: apps/outlets/models.py:41 apps/outlets/models.py:72
+#: apps/outlets/models.py:95 apps/outlets/models.py:127
+#: apps/outlets/models.py:178
 msgid "order"
 msgstr "renditja"
 
-#: apps/outlets/models.py:45
+#: apps/outlets/models.py:44
+msgid "public menu"
+msgstr "menu publike"
+
+#: apps/outlets/models.py:44
+msgid "Guests can open this menu on their phone by scanning a QR code."
+msgstr "Mysafirët e hapin këtë menu në telefon duke skanuar një kod QR."
+
+#: apps/outlets/models.py:46
+msgid "menu introduction"
+msgstr "hyrja e menusë"
+
+#: apps/outlets/models.py:51
 msgid "outlets"
 msgstr "pikat e shërbimit"
 
-#: apps/outlets/models.py:63 apps/outlets/models.py:74
-#: apps/outlets/views.py:261 apps/outlets/views.py:274
-msgid "category"
-msgstr "kategoria"
+#: apps/outlets/models.py:71 apps/outlets/models.py:88
+msgid "name in English"
+msgstr "emri në anglisht"
 
-#: apps/outlets/models.py:64
+#: apps/outlets/models.py:76
 msgid "categories"
 msgstr "kategoritë"
 
-#: apps/outlets/models.py:77
+#: apps/outlets/models.py:90
+msgid "description in English"
+msgstr "përshkrimi në anglisht"
+
+#: apps/outlets/models.py:91
 msgid "price"
 msgstr "çmimi"
 
-#: apps/outlets/models.py:79
+#: apps/outlets/models.py:93
 msgid "duration (minutes)"
 msgstr "kohëzgjatja (minuta)"
 
-#: apps/outlets/models.py:79
+#: apps/outlets/models.py:93
 msgid "For services such as a massage."
 msgstr "Për shërbime si masazhi."
 
-#: apps/outlets/models.py:82
+#: apps/outlets/models.py:96
 msgid "available"
 msgstr "në dispozicion"
 
-#: apps/outlets/models.py:85 apps/outlets/views.py:306
-#: apps/outlets/views.py:325
+#: apps/outlets/models.py:99 apps/outlets/views.py:475
+#: apps/outlets/views.py:494
 msgid "item"
 msgstr "artikull"
 
-#: apps/outlets/models.py:86
+#: apps/outlets/models.py:100
 msgid "items"
 msgstr "artikuj"
 
-#: apps/outlets/models.py:99
+#: apps/outlets/models.py:113
+msgid "Square"
+msgstr "Katror"
+
+#: apps/outlets/models.py:114
+msgid "Round"
+msgstr "Rrumbullak"
+
+#: apps/outlets/models.py:115
+msgid "Long"
+msgstr "E gjatë"
+
+#: apps/outlets/models.py:118
 msgid "e.g. 1, 2, Terrace 4, Sunbed 12"
 msgstr "p.sh. 1, 2, Tarraca 4, Shezlong 12"
 
-#: apps/outlets/models.py:100
+#: apps/outlets/models.py:119 templates/outlets/floor.html:31
+#: templates/outlets/floor_plan.html:68
 msgid "seats"
 msgstr "vende"
 
-#: apps/outlets/models.py:105 apps/outlets/models.py:129
-#: apps/outlets/views.py:341 apps/outlets/views.py:358
+#: apps/outlets/models.py:120
+msgid "area"
+msgstr "zona"
+
+#: apps/outlets/models.py:120
+msgid "e.g. Inside, Terrace, Garden"
+msgstr "p.sh. Brenda, Tarraca, Kopshti"
+
+#: apps/outlets/models.py:121
+msgid "shape"
+msgstr "forma"
+
+#: apps/outlets/models.py:131 apps/outlets/models.py:155
+#: apps/outlets/views.py:510 apps/outlets/views.py:527
 msgid "table"
 msgstr "tavolinë"
 
-#: apps/outlets/models.py:106
+#: apps/outlets/models.py:132
 msgid "tables"
 msgstr "tavolina"
 
-#: apps/outlets/models.py:124 templates/outlets/receipt.html:42
+#: apps/outlets/models.py:150 templates/outlets/order.html:83
 msgid "Paid"
 msgstr "Paguar"
 
-#: apps/outlets/models.py:125 templates/outlets/receipt.html:38
+#: apps/outlets/models.py:151 templates/outlets/receipt.html:71
 msgid "Charged to room"
 msgstr "Kaluar në dhomë"
 
-#: apps/outlets/models.py:132
+#: apps/outlets/models.py:158
 msgid "label"
 msgstr "etiketa"
 
-#: apps/outlets/models.py:132
+#: apps/outlets/models.py:158
 msgid "Customer name or note for orders without a table."
 msgstr "Emri i klientit ose shënim për porosi pa tavolinë."
 
-#: apps/outlets/models.py:135 apps/outlets/models.py:188
+#: apps/outlets/models.py:161 apps/outlets/models.py:230
 msgid "note"
 msgstr "shënim"
 
-#: apps/outlets/models.py:137
+#: apps/outlets/models.py:163
 msgid "settlement"
 msgstr "mbyllja"
 
-#: apps/outlets/models.py:140
+#: apps/outlets/models.py:164
+msgid "discount"
+msgstr "zbritja"
+
+#: apps/outlets/models.py:165
+msgid "discount reason"
+msgstr "arsyeja e zbritjes"
+
+#: apps/outlets/models.py:166
+msgid "receipt number"
+msgstr "numri i kuponit"
+
+#: apps/outlets/models.py:169
 msgid "opened by"
 msgstr "hapur nga"
 
-#: apps/outlets/models.py:150
+#: apps/outlets/models.py:179
 msgid "orders"
 msgstr "porosi"
 
-#: apps/outlets/models.py:168
-#, python-format
-msgid "Table %(name)s"
-msgstr "Tavolina %(name)s"
-
-#: apps/outlets/models.py:169
+#: apps/outlets/models.py:198
 #, python-format
 msgid "Order #%(n)s"
 msgstr "Porosia #%(n)s"
 
-#: apps/outlets/services.py:17
+#: apps/outlets/services.py:19
 msgid "This order is already closed."
 msgstr "Kjo porosi është mbyllur tashmë."
 
-#: apps/outlets/services.py:22
+#: apps/outlets/services.py:24
 msgid "This outlet is closed."
 msgstr "Kjo pikë shërbimi është e mbyllur."
 
-#: apps/outlets/services.py:25
+#: apps/outlets/services.py:27 apps/outlets/services.py:204
 msgid "That table belongs to another outlet."
 msgstr "Ajo tavolinë i përket një pike tjetër."
 
-#: apps/outlets/services.py:44
+#: apps/outlets/services.py:46
 msgid "That item is not sold here."
 msgstr "Ai artikull nuk shitet këtu."
 
-#: apps/outlets/services.py:46
+#: apps/outlets/services.py:48
 #, python-format
 msgid "%(item)s is not available."
 msgstr "%(item)s nuk është në dispozicion."
 
-#: apps/outlets/services.py:84 apps/outlets/services.py:106
+#: apps/outlets/services.py:73
+msgid ""
+"Part of this bill is already paid. Void the payment before removing items."
+msgstr ""
+"Një pjesë e kësaj llogarie është paguar. Anuloni pagesën para se të hiqni "
+"artikuj."
+
+#: apps/outlets/services.py:95
+msgid "The discount must be between 0 and the bill total."
+msgstr "Zbritja duhet të jetë nga 0 deri te totali i llogarisë."
+
+#: apps/outlets/services.py:99
+#, python-format
+msgid "Discounts above %(p)s%% need a manager."
+msgstr "Zbritjet mbi %(p)s%% kërkojnë menaxherin."
+
+#: apps/outlets/services.py:101
+msgid ""
+"Part of this bill is already paid. The total cannot go below the amount "
+"paid."
+msgstr ""
+"Një pjesë e kësaj llogarie është paguar. Totali nuk mund të bjerë nën shumën"
+" e paguar."
+
+#: apps/outlets/services.py:103
+msgid "Give a reason for the discount."
+msgstr "Jepni një arsye për zbritjen."
+
+#: apps/outlets/services.py:128 apps/outlets/services.py:166
 msgid "The order is empty."
 msgstr "Porosia është bosh."
 
-#: apps/outlets/services.py:108
+#: apps/outlets/services.py:136
+#, python-format
+msgid "Only %(left)s is left to pay."
+msgstr "Mbeten vetëm %(left)s për t'u paguar."
+
+#: apps/outlets/services.py:142
+msgid "The cash given is less than the amount."
+msgstr "Paratë e dhëna janë më pak se shuma."
+
+#: apps/outlets/services.py:168
 msgid "Only in-house guests can charge to their room."
 msgstr "Vetëm mysafirët në hotel mund ta kalojnë në dhomë."
 
-#: apps/outlets/services.py:111
+#: apps/outlets/services.py:171
 msgid "This guest's bill is closed."
 msgstr "Llogaria e këtij mysafiri është e mbyllur."
 
-#: apps/outlets/services.py:132
+#: apps/outlets/services.py:215
+msgid ""
+"This bill has payments, so it can't be merged. Move it to a free table "
+"instead."
+msgstr ""
+"Kjo llogari ka pagesa, ndaj nuk mund të bashkohet. Kalojeni në një tavolinë "
+"të lirë."
+
+#: apps/outlets/services.py:221
+#, python-format
+msgid "Merged into #%(n)s"
+msgstr "U bashkua me #%(n)s"
+
+#: apps/outlets/services.py:234
 msgid "Only a manager can cancel an order that has items."
 msgstr "Vetëm menaxheri mund të anulojë një porosi me artikuj."
 
-#: apps/outlets/views.py:162
+#: apps/outlets/services.py:236
+msgid "This bill has payments. Void them first."
+msgstr "Kjo llogari ka pagesa. Anulojini fillimisht."
+
+#: apps/outlets/services.py:268
+msgid "Only closed bills can be voided."
+msgstr "Vetëm llogaritë e mbyllura mund të anulohen."
+
+#: apps/outlets/services.py:272
+msgid "This was charged to a guest bill that is already closed."
+msgstr "Kjo u kalua në një llogari mysafiri që është mbyllur tashmë."
+
+#: apps/outlets/services.py:277
+#, python-format
+msgid "Voided: %(r)s"
+msgstr "Anuluar: %(r)s"
+
+#: apps/outlets/views.py:194
+msgid "Enter a valid amount."
+msgstr "Shkruani një shumë të vlefshme."
+
+#: apps/outlets/views.py:206
 #, python-format
 msgid "Charged to room %(room)s."
 msgstr "U kalua në dhomën %(room)s."
 
-#: apps/outlets/views.py:165
+#: apps/outlets/views.py:219
+#, python-format
+msgid "%(amount)s received. %(left)s left to pay."
+msgstr "U morën %(amount)s. Mbeten %(left)s për t'u paguar."
+
+#: apps/outlets/views.py:223
+#, python-format
+msgid "Paid. Give back %(change)s change."
+msgstr "U pagua. Kthejini %(change)s kusur."
+
+#: apps/outlets/views.py:225
 msgid "Paid. The table is free again."
 msgstr "U pagua. Tavolina është e lirë përsëri."
 
-#: apps/outlets/views.py:167
+#: apps/outlets/views.py:227
 msgid "Choose how the bill is settled."
 msgstr "Zgjidh si do të paguhet llogaria."
 
-#: apps/outlets/views.py:180
+#: apps/outlets/views.py:261
+#, python-format
+msgid "Moved to table %(name)s."
+msgstr "U kalua në tavolinën %(name)s."
+
+#: apps/outlets/views.py:287
+msgid "Receipt voided."
+msgstr "Kuponi u anulua."
+
+#: apps/outlets/views.py:299
 msgid "Order cancelled."
 msgstr "Porosia u anulua."
 
-#: apps/outlets/views.py:206
+#: apps/outlets/views.py:361
 msgid "Categories"
 msgstr "Kategoritë"
 
-#: apps/outlets/views.py:207
+#: apps/outlets/views.py:362
 msgid "Menu & services"
 msgstr "Menuja & shërbimet"
 
-#: apps/outlets/views.py:208 apps/outlets/views.py:236
+#: apps/outlets/views.py:363 apps/outlets/views.py:395
 msgid "Tables"
 msgstr "Tavolinat"
 
-#: apps/outlets/views.py:227 apps/outlets/views.py:244
-#: apps/outlets/views.py:260 apps/outlets/views.py:273
-#: apps/outlets/views.py:305 apps/outlets/views.py:324
-#: apps/outlets/views.py:340 apps/outlets/views.py:357 templates/base.html:53
+#: apps/outlets/views.py:382 apps/outlets/views.py:403
+#: apps/outlets/views.py:419 apps/outlets/views.py:432
+#: apps/outlets/views.py:474 apps/outlets/views.py:493
+#: apps/outlets/views.py:509 apps/outlets/views.py:526 templates/base.html:56
+#: templates/core/settings_hub.html:17 templates/outlets/floor_plan.html:7
+#: templates/outlets/menu_admin.html:6
 msgid "Outlets & menus"
 msgstr "Pikat & menutë"
 
-#: apps/outlets/views.py:267
+#: apps/outlets/views.py:389 templates/outlets/floor_plan.html:3
+#: templates/outlets/floor_plan.html:8
+msgid "Floor plan"
+msgstr "Plani i sallës"
+
+#: apps/outlets/views.py:390 templates/outlets/menu_admin.html:3
+#: templates/outlets/menu_admin.html:6
+msgid "Menu & QR"
+msgstr "Menuja & QR"
+
+#: apps/outlets/views.py:426
 msgid "Order"
 msgstr "Renditja"
 
-#: apps/outlets/views.py:315
+#: apps/outlets/views.py:484 templates/finance/expenses.html:11
+#: templates/finance/expenses.html:21
 msgid "Category"
 msgstr "Kategoria"
 
-#: apps/outlets/views.py:317
+#: apps/outlets/views.py:486
 msgid "Available"
 msgstr "Në dispozicion"
 
-#: apps/outlets/views.py:349
+#: apps/outlets/views.py:518 templates/outlets/floor_plan.html:40
 msgid "Seats"
 msgstr "Vende"
+
+#: templates/accounts/first_run.html:6 templates/core/setup.html:8
+msgid "Welcome to InnKeeper"
+msgstr "Mirë se vini në InnKeeper"
+
+#: templates/accounts/first_run.html:15
+msgid "Welcome! Let's create your manager account."
+msgstr "Mirë se vini! Le të krijojmë llogarinë tuaj të menaxherit."
+
+#: templates/accounts/first_run.html:16
+msgid ""
+"This is the first account on this installation. It can do everything, "
+"including adding your staff. Choose a strong password and keep it safe."
+msgstr ""
+"Kjo është llogaria e parë në këtë instalim. Mund të bëjë gjithçka, përfshirë"
+" shtimin e stafit. Zgjidhni një fjalëkalim të fortë dhe ruajeni mirë."
+
+#: templates/accounts/first_run.html:23
+msgid "Create your account"
+msgstr "Krijoni llogarinë"
+
+#: templates/accounts/first_run.html:32
+msgid "Create account and continue"
+msgstr "Krijo llogarinë dhe vazhdo"
 
 #: templates/accounts/login.html:7 templates/accounts/login.html:24
 #: templates/accounts/login.html:37
@@ -1319,7 +1945,7 @@ msgstr "Harrove fjalëkalimin? Kërkoji menaxherit të vendosë një të ri."
 
 #: templates/accounts/password_change.html:3
 #: templates/accounts/password_change.html:5
-#: templates/accounts/password_change.html:8 templates/base.html:65
+#: templates/accounts/password_change.html:8 templates/base.html:68
 msgid "Change password"
 msgstr "Ndrysho fjalëkalimin"
 
@@ -1339,7 +1965,8 @@ msgstr ""
 "Fjalëkalimet ruhen të enkriptuara dhe nuk mund të shihen kurrë — vetëm të "
 "zëvendësohen."
 
-#: templates/base.html:20
+#: templates/base.html:20 templates/outlets/floor.html:19
+#: templates/outlets/floor_plan.html:62
 msgid "Main"
 msgstr "Kryesore"
 
@@ -1363,7 +1990,7 @@ msgstr "Rezervimet"
 #: templates/frontdesk/guest_form.html:5 templates/frontdesk/guest_list.html:3
 #: templates/frontdesk/guest_list.html:6
 #: templates/frontdesk/reservation_detail.html:110
-#: templates/outlets/order.html:39
+#: templates/outlets/order.html:48
 msgid "Guests"
 msgstr "Mysafirët"
 
@@ -1373,40 +2000,66 @@ msgid "Operations"
 msgstr "Operacionet"
 
 #: templates/base.html:41 templates/outlets/home.html:5
+#: templates/outlets/receipts.html:6
 msgid "Services"
 msgstr "Shërbimet"
 
-#: templates/base.html:42 templates/outlets/home.html:3
-msgid "Restaurant, bar & services"
-msgstr "Restorant, bar & shërbime"
+#: templates/base.html:43 templates/finance/day_close.html:23
+#: templates/outlets/receipts.html:3 templates/outlets/receipts.html:6
+msgid "Receipts"
+msgstr "Kuponat"
 
-#: templates/base.html:47 templates/finance/dashboard.html:3
+#: templates/base.html:48 templates/finance/dashboard.html:3
 #: templates/finance/dashboard.html:6 templates/finance/ledger.html:6
 msgid "Reports"
 msgstr "Raportet"
 
-#: templates/base.html:51 templates/core/audit_log.html:6
-#: templates/core/crud_list.html:6 templates/core/settings.html:5
+#: templates/base.html:49 templates/finance/_tabs.html:4
+#: templates/finance/day_close.html:3 templates/finance/day_close.html:6
+msgid "Day close"
+msgstr "Mbyllja e ditës"
+
+#: templates/base.html:50 templates/finance/_tabs.html:5
+#: templates/finance/dashboard.html:15 templates/finance/expense_form.html:5
+#: templates/finance/expenses.html:3 templates/finance/expenses.html:6
+msgid "Expenses"
+msgstr "Shpenzimet"
+
+#: templates/base.html:54 templates/core/audit_log.html:6
+#: templates/core/crud_list.html:6 templates/core/settings_hub.html:6
 msgid "Management"
 msgstr "Menaxhimi"
 
-#: templates/base.html:55 templates/core/settings.html:3
-#: templates/core/settings.html:5
-msgid "Hotel settings"
-msgstr "Cilësimet e hotelit"
+#: templates/base.html:58 templates/core/settings_hub.html:3
+#: templates/core/settings_hub.html:6 templates/core/setup.html:8
+msgid "Settings"
+msgstr "Cilësimet"
 
-#: templates/base.html:56 templates/core/audit_log.html:3
-#: templates/core/audit_log.html:6
-msgid "Activity log"
-msgstr "Regjistri i aktivitetit"
+#: templates/base.html:60 templates/help/help.html:3
+msgid "Help"
+msgstr "Ndihmë"
 
-#: templates/base.html:67
+#: templates/base.html:70
 msgid "Sign out"
 msgstr "Dil"
 
-#: templates/base.html:76
+#: templates/base.html:79 templates/outlets/menu_print.html:5
 msgid "Menu"
 msgstr "Menuja"
+
+#: templates/base.html:84
+#, python-format
+msgid "A new version of InnKeeper (%(v)s) is available."
+msgstr "Ka dalë një version i ri i InnKeeper-it (%(v)s)."
+
+#: templates/base.html:84
+msgid "See what's new and download"
+msgstr "Shihni çfarë ka të re dhe shkarkojeni"
+
+#: templates/core/audit_log.html:3 templates/core/audit_log.html:6
+#: templates/core/settings_hub.html:19
+msgid "Activity log"
+msgstr "Regjistri i aktivitetit"
 
 #: templates/core/audit_log.html:6
 msgid "Every check-in, payment, void and change, with who did it."
@@ -1416,7 +2069,7 @@ msgstr "Çdo hyrje, pagesë, anulim dhe ndryshim, me personin që e bëri."
 msgid "Search…"
 msgstr "Kërko…"
 
-#: templates/core/audit_log.html:11
+#: templates/core/audit_log.html:11 templates/outlets/receipts.html:19
 msgid "Time"
 msgstr "Koha"
 
@@ -1424,7 +2077,8 @@ msgstr "Koha"
 msgid "Action"
 msgstr "Veprimi"
 
-#: templates/core/audit_log.html:11 templates/frontdesk/guest_detail.html:26
+#: templates/core/audit_log.html:11 templates/core/setup.html:16
+#: templates/frontdesk/guest_detail.html:26
 msgid "Details"
 msgstr "Detajet"
 
@@ -1438,12 +2092,16 @@ msgstr "Ende asnjë aktivitet."
 msgid "Add %(singular)s"
 msgstr "Shto %(singular)s"
 
-#: templates/core/crud_form.html:16
-#: templates/frontdesk/reservation_form.html:41
+#: templates/core/crud_form.html:16 templates/core/restore_confirm.html:24
+#: templates/core/restore_confirm.html:27
+#: templates/finance/expense_form.html:9
+#: templates/frontdesk/reservation_form.html:50
 msgid "Cancel"
 msgstr "Anulo"
 
-#: templates/core/crud_form.html:17 templates/core/settings.html:8
+#: templates/core/crud_form.html:17 templates/core/settings_hub.html:27
+#: templates/core/settings_hub.html:37 templates/core/settings_hub.html:77
+#: templates/finance/expense_form.html:11
 #: templates/frontdesk/guest_form.html:8 templates/housekeeping/form.html:8
 msgid "Save"
 msgstr "Ruaj"
@@ -1482,233 +2140,820 @@ msgstr "Rezervim i ri"
 msgid "Open POS"
 msgstr "Hap arkën"
 
-#: templates/core/dashboard.html:18
+#: templates/core/dashboard.html:19
+msgid "Getting started"
+msgstr "Si të filloni"
+
+#: templates/core/dashboard.html:19
+#, python-format
+msgid "%(a)s of %(b)s done"
+msgstr "%(a)s nga %(b)s të kryera"
+
+#: templates/core/dashboard.html:20
+msgid "Hide"
+msgstr "Fshih"
+
+#: templates/core/dashboard.html:28
+msgid "New to InnKeeper?"
+msgstr "I ri në InnKeeper?"
+
+#: templates/core/dashboard.html:28
+msgid "Read the short guide"
+msgstr "Lexoni udhëzuesin e shkurtër"
+
+#: templates/core/dashboard.html:34
 #, python-format
 msgid "%(n)s more this week"
 msgid_plural "%(n)s more this week"
 msgstr[0] "Edhe %(n)s këtë javë"
 msgstr[1] "Edhe %(n)s këtë javë"
 
-#: templates/core/dashboard.html:19
+#: templates/core/dashboard.html:35
 msgid "Departures today"
 msgstr "Largime sot"
 
-#: templates/core/dashboard.html:19
+#: templates/core/dashboard.html:35
 msgid "Guests due to leave"
 msgstr "Mysafirë që largohen"
 
-#: templates/core/dashboard.html:20 templates/finance/dashboard.html:16
+#: templates/core/dashboard.html:36 templates/finance/dashboard.html:21
 msgid "Occupancy"
 msgstr "Zënia"
 
-#: templates/core/dashboard.html:20
+#: templates/core/dashboard.html:36
 #, python-format
 msgid "%(a)s of %(b)s rooms"
 msgstr "%(a)s nga %(b)s dhoma"
 
-#: templates/core/dashboard.html:23
+#: templates/core/dashboard.html:39
 msgid "Rooms to clean"
 msgstr "Dhoma për pastrim"
 
-#: templates/core/dashboard.html:23
+#: templates/core/dashboard.html:39
 msgid "Marked dirty"
 msgstr "Të shënuara të papastra"
 
-#: templates/core/dashboard.html:26
+#: templates/core/dashboard.html:42
 msgid "Open maintenance"
 msgstr "Mirëmbajtje e hapur"
 
-#: templates/core/dashboard.html:26
+#: templates/core/dashboard.html:42
 #, python-format
 msgid "%(n)s room out of order"
 msgid_plural "%(n)s rooms out of order"
 msgstr[0] "%(n)s dhomë jashtë përdorimit"
 msgstr[1] "%(n)s dhoma jashtë përdorimit"
 
-#: templates/core/dashboard.html:29 templates/outlets/floor.html:35
+#: templates/core/dashboard.html:42
+msgid "Repairs to do"
+msgstr "Riparime për t'u bërë"
+
+#: templates/core/dashboard.html:45 templates/core/dashboard.html:90
+#: templates/outlets/floor.html:52
 msgid "Open orders"
 msgstr "Porosi të hapura"
 
-#: templates/core/dashboard.html:29
+#: templates/core/dashboard.html:45
 msgid "Across all outlets"
 msgstr "Në të gjitha pikat"
 
-#: templates/core/dashboard.html:32
+#: templates/core/dashboard.html:48
 msgid "Revenue today"
 msgstr "Të ardhurat sot"
 
-#: templates/core/dashboard.html:32 templates/finance/dashboard.html:14
+#: templates/core/dashboard.html:48 templates/finance/dashboard.html:14
 msgid "All departments"
 msgstr "Të gjitha departamentet"
 
-#: templates/core/dashboard.html:39
+#: templates/core/dashboard.html:55
 msgid "Arrivals"
 msgstr "Mbërritjet"
 
-#: templates/core/dashboard.html:44
+#: templates/core/dashboard.html:60
 #: templates/frontdesk/reservation_detail.html:9
 #: templates/frontdesk/reservation_list.html:23
 msgid "nights"
 msgstr "netë"
 
-#: templates/core/dashboard.html:45
+#: templates/core/dashboard.html:61
 msgid "Ready"
 msgstr "Gati"
 
-#: templates/core/dashboard.html:45
+#: templates/core/dashboard.html:61
 msgid "Not clean"
 msgstr "Jo e pastër"
 
-#: templates/core/dashboard.html:46
+#: templates/core/dashboard.html:62
 #: templates/frontdesk/reservation_detail.html:16
 #: templates/frontdesk/reservation_list.html:29
 msgid "Check in"
 msgstr "Regjistro hyrjen"
 
-#: templates/core/dashboard.html:49
+#: templates/core/dashboard.html:65
 msgid "No arrivals left today."
 msgstr "Nuk ka më mbërritje sot."
 
-#: templates/core/dashboard.html:61
+#: templates/core/dashboard.html:77
 msgid "overdue"
 msgstr "me vonesë"
 
-#: templates/core/dashboard.html:62
+#: templates/core/dashboard.html:78
 msgid "Bill & check out"
 msgstr "Llogaria & largimi"
 
-#: templates/core/dashboard.html:65
+#: templates/core/dashboard.html:81
 msgid "No departures due."
 msgstr "Nuk ka largime."
 
-#: templates/core/dashboard.html:74
+#: templates/core/dashboard.html:90
+msgid "POS"
+msgstr "Arka"
+
+#: templates/core/dashboard.html:98 templates/outlets/floor.html:58
+msgid "No open orders."
+msgstr "Asnjë porosi e hapur."
+
+#: templates/core/dashboard.html:107
 msgid "Housekeeping tasks"
 msgstr "Detyrat e pastrimit"
 
-#: templates/core/dashboard.html:74
+#: templates/core/dashboard.html:107
 msgid "Board"
 msgstr "Tabela"
 
-#: templates/core/dashboard.html:82
+#: templates/core/dashboard.html:115
 msgid "All rooms are done."
 msgstr "Të gjitha dhomat janë gati."
 
-#: templates/core/settings.html:5
-msgid "These details appear on invoices and receipts."
-msgstr "Këto të dhëna shfaqen në fatura dhe kupona."
+#: templates/core/restore_confirm.html:3 templates/core/settings_hub.html:117
+msgid "Restore"
+msgstr "Rikthe"
 
-#: templates/finance/_range.html:4
+#: templates/core/restore_confirm.html:6 templates/core/settings_hub.html:14
+msgid "Backup & restore"
+msgstr "Kopje rezervë & rikthim"
+
+#: templates/core/restore_confirm.html:7
+msgid "Restore full backup"
+msgstr "Rikthe kopjen e plotë"
+
+#: templates/core/restore_confirm.html:7
+#: templates/core/restore_confirm.html:27
+msgid "Import settings"
+msgstr "Importo cilësimet"
+
+#: templates/core/restore_confirm.html:11 templates/core/setup.html:15
+msgid "Business"
+msgstr "Biznesi"
+
+#: templates/core/restore_confirm.html:12
+msgid "Created"
+msgstr "Krijuar"
+
+#: templates/core/restore_confirm.html:13
+msgid "Version"
+msgstr "Versioni"
+
+#: templates/core/restore_confirm.html:22
+msgid ""
+"This replaces ALL current data with the backup. Everyone will be signed out."
+" A copy of the current data is saved first."
+msgstr ""
+"Kjo zëvendëson TË GJITHA të dhënat aktuale me kopjen rezervë. Të gjithë do "
+"të dalin nga llogaria. Fillimisht ruhet një kopje e të dhënave aktuale."
+
+#: templates/core/restore_confirm.html:23
+msgid "Type RESTORE to confirm"
+msgstr "Shkruani RESTORE për të konfirmuar"
+
+#: templates/core/restore_confirm.html:24
+msgid "Restore backup"
+msgstr "Rikthe kopjen"
+
+#: templates/core/restore_confirm.html:26
+msgid ""
+"Rooms, outlets, menu items and tables with the same names are updated; new "
+"ones are added. Nothing is deleted. Guests and money are not touched."
+msgstr ""
+"Dhomat, pikat, artikujt dhe tavolinat me të njëjtin emër përditësohen; të "
+"rejat shtohen. Asgjë nuk fshihet. Mysafirët dhe paratë nuk preken."
+
+#: templates/core/settings_hub.html:7
+msgid "Run the setup wizard again"
+msgstr "Rinis udhëzuesin e konfigurimit"
+
+#: templates/core/settings_hub.html:11 templates/core/settings_hub.html:25
+#: templates/core/setup.html:51
+msgid "Business details"
+msgstr "Të dhënat e biznesit"
+
+#: templates/core/settings_hub.html:12 templates/core/settings_hub.html:32
+msgid "Receipts & invoices"
+msgstr "Kuponat & faturat"
+
+#: templates/core/settings_hub.html:13 templates/core/settings_hub.html:62
+msgid "Modules"
+msgstr "Modulet"
+
+#: templates/core/settings_hub.html:26
+msgid "These details appear on receipts, invoices and the guest menu."
+msgstr "Këto të dhëna shfaqen në kupona, fatura dhe menunë e mysafirëve."
+
+#: templates/core/settings_hub.html:32
+msgid "Preview"
+msgstr "Paraqitja"
+
+#: templates/core/settings_hub.html:40
+msgid "Receipt preview"
+msgstr "Paraqitja e kuponit"
+
+#: templates/core/settings_hub.html:51
+msgid "Sandwich"
+msgstr "Sanduiç"
+
+#: templates/core/settings_hub.html:53 templates/outlets/receipt.html:53
+msgid "TOTAL"
+msgstr "TOTALI"
+
+#: templates/core/settings_hub.html:54
+msgid "VAT"
+msgstr "TVSH"
+
+#: templates/core/settings_hub.html:64
+msgid ""
+"Switch off what your business doesn't use. It disappears for everyone; no "
+"data is deleted."
+msgstr ""
+"Çaktivizoni atë që biznesi nuk përdor. Zhduket për të gjithë; asnjë e dhënë "
+"nuk fshihet."
+
+#: templates/core/settings_hub.html:70
+msgid "Areas of the app"
+msgstr "Pjesët e aplikacionit"
+
+#: templates/core/settings_hub.html:83
+msgid "Full backup"
+msgstr "Kopje e plotë"
+
+#: templates/core/settings_hub.html:85
+msgid ""
+"Everything: settings, rooms, menus, staff accounts, guests, bills, receipts "
+"and expenses. Use it to move to a new computer or to keep a safe copy."
+msgstr ""
+"Gjithçka: cilësimet, dhomat, menutë, llogaritë e stafit, mysafirët, "
+"llogaritë, kuponat dhe shpenzimet. Përdoreni për të kaluar në kompjuter "
+"tjetër ose për të mbajtur një kopje të sigurt."
+
+#: templates/core/settings_hub.html:86
+msgid ""
+"The file contains guests' personal data and encrypted passwords. Keep it "
+"somewhere safe."
+msgstr ""
+"Skedari përmban të dhëna personale të mysafirëve dhe fjalëkalime të "
+"enkriptuara. Ruajeni në vend të sigurt."
+
+#: templates/core/settings_hub.html:89
+msgid "Download full backup"
+msgstr "Shkarko kopjen e plotë"
+
+#: templates/core/settings_hub.html:90
+msgid "Save a copy on this server"
+msgstr "Ruaj një kopje në këtë server"
+
+#: templates/core/settings_hub.html:94
+msgid "Settings only"
+msgstr "Vetëm cilësimet"
+
+#: templates/core/settings_hub.html:96
+msgid ""
+"Business details, rooms and rates, outlets, menus, tables and floor plans — "
+"no guests or money. Use it to set up a second location or start fresh with "
+"the same setup."
+msgstr ""
+"Të dhënat e biznesit, dhomat dhe çmimet, pikat, menutë, tavolinat dhe planet"
+" e sallës — pa mysafirë dhe para. Përdoreni për një vendndodhje të dytë ose "
+"për të nisur nga e para me të njëjtin konfigurim."
+
+#: templates/core/settings_hub.html:98
+msgid "Download settings"
+msgstr "Shkarko cilësimet"
+
+#: templates/core/settings_hub.html:103
+msgid "Restore or import"
+msgstr "Rikthe ose importo"
+
+#: templates/core/settings_hub.html:106
+msgid "Check file"
+msgstr "Kontrollo skedarin"
+
+#: templates/core/settings_hub.html:108
+msgid ""
+"You'll see what's inside the file before anything changes. Restoring a full "
+"backup replaces all current data; a copy of the current data is saved first."
+msgstr ""
+"Do të shihni përmbajtjen e skedarit para se të ndryshojë diçka. Rikthimi i "
+"një kopjeje të plotë zëvendëson të gjitha të dhënat aktuale; fillimisht "
+"ruhet një kopje e tyre."
+
+#: templates/core/settings_hub.html:112
+msgid "Backups on this server"
+msgstr "Kopjet rezervë në këtë server"
+
+#: templates/core/settings_hub.html:119
+msgid "No backups saved yet."
+msgstr "Ende asnjë kopje rezervë."
+
+#: templates/core/settings_hub.html:123
+msgid ""
+"The Windows app makes an automatic backup every day. On a server, schedule: "
+"python manage.py backup"
+msgstr ""
+"Aplikacioni për Windows bën çdo ditë një kopje automatike. Në server, "
+"planifikoni: python manage.py backup"
+
+#: templates/core/setup.html:10
+msgid "Four quick steps. You can change everything later in Settings."
+msgstr ""
+"Katër hapa të shpejtë. Gjithçka mund ta ndryshoni më vonë te Cilësimet."
+
+#: templates/core/setup.html:17
+msgid "What you use"
+msgstr "Çfarë përdorni"
+
+#: templates/core/setup.html:18 templates/housekeeping/board.html:64
+#: templates/housekeeping/ticket_list.html:29
+msgid "Start"
+msgstr "Fillo"
+
+#: templates/core/setup.html:31
+msgid "What kind of business is it?"
+msgstr "Çfarë lloj biznesi është?"
+
+#: templates/core/setup.html:38
+msgid "Rooms, front desk, housekeeping, restaurant, bar, spa and more."
+msgstr "Dhoma, recepsion, pastrim, restorant, bar, spa dhe më shumë."
+
+#: templates/core/setup.html:38
+msgid "Rooms, reservations, cleaning and guest bills. Simple and light."
+msgstr ""
+"Dhoma, rezervime, pastrim dhe llogaritë e mysafirëve. E thjeshtë dhe e "
+"lehtë."
+
+#: templates/core/setup.html:38
+msgid "Tables, menu, orders, receipts and daily cash — no rooms."
+msgstr "Tavolina, menu, porosi, kupona dhe arka ditore — pa dhoma."
+
+#: templates/core/setup.html:52
+msgid "Printed on receipts and invoices."
+msgstr "Printohen në kupona dhe fatura."
+
+#: templates/core/setup.html:64
+msgid "Areas you don't use are hidden from everyone. Switch them on any time."
+msgstr ""
+"Pjesët që nuk përdorni fshihen për të gjithë. Aktivizojini kur të doni."
+
+#: templates/core/setup.html:69
+msgid "Room rack, reservations, check-in/out, guest bills"
+msgstr "Tabela e dhomave, rezervime, hyrje/largime, llogaritë e mysafirëve"
+
+#: templates/core/setup.html:69
+msgid "Room cleaning board and tasks"
+msgstr "Tabela e pastrimit dhe detyrat"
+
+#: templates/core/setup.html:69
+msgid "Report and track repairs"
+msgstr "Raportimi dhe ndjekja e riparimeve"
+
+#: templates/core/setup.html:69
+msgid "Point of sale with tables, menus and receipts"
+msgstr "Arka me tavolina, menu dhe kupona"
+
+#: templates/core/setup.html:78
+msgid "Get a head start"
+msgstr "Nisni shpejt"
+
+#: templates/core/setup.html:79
+msgid "We'll create these for you. Rename, add or remove anything afterwards."
+msgstr "Do t'i krijojmë për ju. Mund t'i riemërtoni, shtoni ose hiqni më pas."
+
+#: templates/core/setup.html:84
+msgid "You already have rooms, so none will be added."
+msgstr "Keni tashmë dhoma, ndaj nuk do të shtohen të tjera."
+
+#: templates/core/setup.html:91
+msgid "Rooms are numbered by floor: 101, 102… 201, 202…"
+msgstr "Dhomat numërohen sipas katit: 101, 102… 201, 202…"
+
+#: templates/core/setup.html:105
+msgid ""
+"Each one gets tables (if it uses them) and menu categories ready for your "
+"items."
+msgstr ""
+"Secila merr tavolina (nëse i përdor) dhe kategori menuje gati për artikujt "
+"tuaj."
+
+#: templates/core/setup.html:111 templates/housekeeping/form.html:5
+#: templates/outlets/menu_qr_cards.html:8
+msgid "Back"
+msgstr "Prapa"
+
+#: templates/core/setup.html:113
+msgid "Next"
+msgstr "Vazhdo"
+
+#: templates/core/setup.html:114
+msgid "Finish setup"
+msgstr "Përfundo konfigurimin"
+
+#: templates/core/setup.html:156
+msgid "Choose the type of business."
+msgstr "Zgjidhni llojin e biznesit."
+
+#: templates/core/setup_done.html:3 templates/core/setup_done.html:8
+msgid "You're all set"
+msgstr "Gati!"
+
+#: templates/core/setup_done.html:10
+#, python-format
+msgid "%(name)s is ready with %(n)s room."
+msgid_plural "%(name)s is ready with %(n)s rooms."
+msgstr[0] "%(name)s është gati me %(n)s dhomë."
+msgstr[1] "%(name)s është gati me %(n)s dhoma."
+
+#: templates/core/setup_done.html:10
+#, python-format
+msgid "%(name)s is ready."
+msgstr "%(name)s është gati."
+
+#: templates/core/setup_done.html:11
+#, python-format
+msgid "%(n)s outlet was created."
+msgid_plural "%(n)s outlets were created."
+msgstr[0] "U krijua %(n)s pikë."
+msgstr[1] "U krijuan %(n)s pika."
+
+#: templates/core/setup_done.html:15
+msgid "Next steps"
+msgstr "Hapat e ardhshëm"
+
+#: templates/core/setup_done.html:19
+msgid "Give each person their own login and role."
+msgstr "Jepini secilit llogarinë dhe rolin e vet."
+
+#: templates/core/setup_done.html:24
+msgid "Add dishes, drinks and services with prices."
+msgstr "Shtoni pjata, pije dhe shërbime me çmime."
+
+#: templates/core/setup_done.html:28
+msgid "Arrange your tables"
+msgstr "Vendosni tavolinat"
+
+#: templates/core/setup_done.html:29
+msgid "Drag tables to match your real room, rename and resize them."
+msgstr ""
+"Tërhiqni tavolinat që të përputhen me sallën tuaj, riemërtojini dhe "
+"ndryshoni madhësinë."
+
+#: templates/core/setup_done.html:36
+msgid "Add room types such as Double or Suite and set prices."
+msgstr "Shtoni lloje dhomash si Dyshe ose Suitë dhe vendosni çmimet."
+
+#: templates/core/setup_done.html:41
+msgid "Make receipts and invoices look like yours."
+msgstr "Bëni kuponat dhe faturat me pamjen tuaj."
+
+#: templates/core/setup_done.html:44
+msgid "Go to the dashboard"
+msgstr "Shko te paneli"
+
+#: templates/finance/_range.html:4 templates/finance/expenses.html:9
 msgid "From"
 msgstr "Nga"
 
-#: templates/finance/_range.html:5
+#: templates/finance/_range.html:5 templates/finance/expenses.html:10
 msgid "To"
 msgstr "Deri"
 
-#: templates/finance/_range.html:6
+#: templates/finance/_range.html:6 templates/finance/expenses.html:12
+#: templates/outlets/receipts.html:13
 msgid "Show"
 msgstr "Shfaq"
 
-#: templates/finance/dashboard.html:9 templates/finance/ledger.html:3
+#: templates/finance/_tabs.html:3
+msgid "Overview"
+msgstr "Përmbledhje"
+
+#: templates/finance/_tabs.html:6 templates/finance/sales.html:3
+#: templates/finance/sales.html:6 templates/finance/sales.html:20
+#: templates/finance/sales.html:31
+msgid "Sales"
+msgstr "Shitjet"
+
+#: templates/finance/_tabs.html:7 templates/finance/ledger.html:3
 #: templates/finance/ledger.html:6
 msgid "Ledger"
 msgstr "Libri i llogarive"
 
-#: templates/finance/dashboard.html:14 templates/finance/ledger.html:13
+#: templates/finance/dashboard.html:14 templates/finance/day_close.html:21
+#: templates/finance/ledger.html:14
 msgid "Revenue"
 msgstr "Të ardhurat"
 
 #: templates/finance/dashboard.html:15
+msgid "Recorded costs"
+msgstr "Kosto të regjistruara"
+
+#: templates/finance/dashboard.html:16
+msgid "Profit"
+msgstr "Fitimi"
+
+#: templates/finance/dashboard.html:16
+msgid "Revenue minus expenses"
+msgstr "Të ardhurat minus shpenzimet"
+
+#: templates/finance/dashboard.html:17 templates/finance/day_close.html:22
 msgid "Payments received"
 msgstr "Pagesa të marra"
 
-#: templates/finance/dashboard.html:15
+#: templates/finance/dashboard.html:17
 msgid "Cash, card and transfers"
 msgstr "Para në dorë, kartë dhe transferta"
 
-#: templates/finance/dashboard.html:16
+#: templates/finance/dashboard.html:21
 #, python-format
 msgid "%(n)s room nights"
 msgstr "%(n)s netë dhome"
 
-#: templates/finance/dashboard.html:17
+#: templates/finance/dashboard.html:22
 msgid "Average rate (ADR)"
 msgstr "Çmimi mesatar (ADR)"
 
-#: templates/finance/dashboard.html:21
+#: templates/finance/dashboard.html:22
+msgid "Room revenue per night sold"
+msgstr "Të ardhura nga dhomat për natë të shitur"
+
+#: templates/finance/dashboard.html:23
+msgid "Room revenue per available room"
+msgstr "Të ardhura nga dhomat për dhomë në dispozicion"
+
+#: templates/finance/dashboard.html:28
 msgid "Revenue per day"
 msgstr "Të ardhurat në ditë"
 
-#: templates/finance/dashboard.html:36
+#: templates/finance/dashboard.html:43 templates/finance/day_close.html:33
 msgid "By department"
 msgstr "Sipas departamentit"
 
-#: templates/finance/dashboard.html:46
+#: templates/finance/dashboard.html:53
 msgid "No revenue in this period."
 msgstr "Asnjë e ardhur në këtë periudhë."
 
-#: templates/finance/dashboard.html:50
+#: templates/finance/dashboard.html:57
 msgid "Payments by method"
 msgstr "Pagesat sipas mënyrës"
 
-#: templates/finance/dashboard.html:60
+#: templates/finance/dashboard.html:67
 msgid "No payments in this period."
 msgstr "Asnjë pagesë në këtë periudhë."
 
-#: templates/finance/dashboard.html:66
+#: templates/finance/dashboard.html:73
+msgid "Expenses by category"
+msgstr "Shpenzimet sipas kategorisë"
+
+#: templates/finance/dashboard.html:73 templates/finance/expense_form.html:5
+#: templates/finance/expenses.html:14 templates/finance/expenses.html:38
+msgid "Add expense"
+msgstr "Shto shpenzim"
+
+#: templates/finance/dashboard.html:79 templates/finance/expenses.html:38
+msgid "No expenses recorded in this period."
+msgstr "Asnjë shpenzim në këtë periudhë."
+
+#: templates/finance/dashboard.html:85
 msgid "Unpaid bills"
 msgstr "Llogari të papaguara"
 
-#: templates/finance/dashboard.html:68
+#: templates/finance/dashboard.html:87
 #: templates/frontdesk/reservation_detail.html:31
+#: templates/outlets/receipt.html:36
 msgid "Bill"
 msgstr "Llogaria"
 
-#: templates/finance/dashboard.html:68 templates/frontdesk/invoice.html:24
+#: templates/finance/dashboard.html:87 templates/frontdesk/invoice.html:25
 #: templates/frontdesk/reservation_detail.html:99
 #: templates/frontdesk/reservation_form.html:15
 #: templates/frontdesk/reservation_list.html:16
+#: templates/outlets/order.html:131
 msgid "Guest"
 msgstr "Mysafiri"
 
-#: templates/finance/dashboard.html:68
+#: templates/finance/dashboard.html:87
 msgid "Balance"
 msgstr "Bilanci"
 
-#: templates/finance/dashboard.html:73
+#: templates/finance/dashboard.html:92
 msgid "Every bill is settled."
 msgstr "Të gjitha llogaritë janë shlyer."
+
+#: templates/finance/day_close.html:6
+msgid ""
+"Count the cash at the end of the day and compare it with what the system "
+"expects."
+msgstr "Numëroni paratë në fund të ditës dhe krahasojini me sa pret sistemi."
+
+#: templates/finance/day_close.html:9
+msgid "Print Z report"
+msgstr "Printo raportin Z"
+
+#: templates/finance/day_close.html:17
+#, python-format
+msgid "Z report · %(d)s"
+msgstr "Raporti Z · %(d)s"
+
+#: templates/finance/day_close.html:23
+#, python-format
+msgid "%(n)s voided"
+msgid_plural "%(n)s voided"
+msgstr[0] "%(n)s i anuluar"
+msgstr[1] "%(n)s të anuluar"
+
+#: templates/finance/day_close.html:27
+msgid "By payment method"
+msgstr "Sipas mënyrës së pagesës"
+
+#: templates/finance/day_close.html:29
+msgid "No payments."
+msgstr "Asnjë pagesë."
+
+#: templates/finance/day_close.html:35
+msgid "No revenue."
+msgstr "Asnjë e ardhur."
+
+#: templates/finance/day_close.html:36 templates/finance/sales.html:14
+msgid "Discounts given"
+msgstr "Zbritje të dhëna"
+
+#: templates/finance/day_close.html:41
+msgid "Taken by staff"
+msgstr "Marrë nga stafi"
+
+#: templates/finance/day_close.html:47
+msgid "Cash drawer"
+msgstr "Arka"
+
+#: templates/finance/day_close.html:49
+msgid "Opening float"
+msgstr "Paratë në fillim"
+
+#: templates/finance/day_close.html:50 templates/finance/day_close.html:68
+msgid "Cash received"
+msgstr "Para të marra"
+
+#: templates/finance/day_close.html:51 templates/finance/day_close.html:69
+msgid "Cash paid out"
+msgstr "Para të paguara"
+
+#: templates/finance/day_close.html:52 templates/finance/day_close.html:72
+msgid "Expected in drawer"
+msgstr "Të pritshme në arkë"
+
+#: templates/finance/day_close.html:53
+msgid "Counted"
+msgstr "Të numëruara"
+
+#: templates/finance/day_close.html:54
+msgid "Difference"
+msgstr "Diferenca"
+
+#: templates/finance/day_close.html:56
+#, python-format
+msgid "Closed by %(who)s at %(t)s."
+msgstr "Mbyllur nga %(who)s më %(t)s."
+
+#: templates/finance/day_close.html:65
+msgid "Close again"
+msgstr "Mbyll sërish"
+
+#: templates/finance/day_close.html:65
+msgid "Count the cash"
+msgstr "Numëroni paratë"
+
+#: templates/finance/day_close.html:74
+msgid "Close the day"
+msgstr "Mbyll ditën"
+
+#: templates/finance/day_close.html:78
+msgid "Recent days"
+msgstr "Ditët e fundit"
+
+#: templates/finance/day_close.html:82
+msgid "No days closed yet."
+msgstr "Ende asnjë ditë e mbyllur."
+
+#: templates/finance/expense_form.html:3
+msgid "Expense"
+msgstr "Shpenzim"
+
+#: templates/finance/expense_form.html:10
+msgid "Save and add another"
+msgstr "Ruaj dhe shto tjetër"
+
+#: templates/finance/expenses.html:21 templates/finance/ledger.html:20
+#: templates/finance/ledger.html:29 templates/frontdesk/invoice.html:29
+#: templates/frontdesk/reservation_detail.html:35
+#: templates/outlets/receipt.html:38 templates/outlets/receipts.html:8
+msgid "Date"
+msgstr "Data"
+
+#: templates/finance/expenses.html:21
+msgid "Supplier"
+msgstr "Furnitori"
+
+#: templates/finance/expenses.html:21
+msgid "Paid with"
+msgstr "Paguar me"
+
+#: templates/finance/expenses.html:26
+#: templates/frontdesk/reservation_detail.html:40
+#: templates/frontdesk/reservation_detail.html:54
+#: templates/outlets/receipts.html:28
+msgid "Voided"
+msgstr "Anuluar"
+
+#: templates/finance/expenses.html:31
+#: templates/frontdesk/reservation_detail.html:44
+#: templates/frontdesk/reservation_detail.html:58
+#: templates/outlets/order.html:84
+msgid "Void"
+msgstr "Anulo"
+
+#: templates/finance/expenses.html:46
+#: templates/frontdesk/reservation_detail.html:150
+#: templates/outlets/order.html:232
+msgid "Why is this entry being voided?"
+msgstr "Pse po anulohet ky regjistrim?"
 
 #: templates/finance/ledger.html:9
 msgid "Export CSV"
 msgstr "Eksporto CSV"
 
-#: templates/finance/ledger.html:14
+#: templates/finance/ledger.html:15
 msgid "Payments"
 msgstr "Pagesat"
 
-#: templates/finance/ledger.html:19 templates/finance/ledger.html:28
-#: templates/frontdesk/invoice.html:28
-#: templates/frontdesk/reservation_detail.html:35
-msgid "Date"
-msgstr "Data"
-
-#: templates/finance/ledger.html:19
+#: templates/finance/ledger.html:20
 msgid "For"
 msgstr "Për"
 
-#: templates/finance/ledger.html:25 templates/finance/ledger.html:34
+#: templates/finance/ledger.html:26 templates/finance/ledger.html:35
 msgid "Nothing in this period."
 msgstr "Asgjë në këtë periudhë."
 
-#: templates/finance/ledger.html:28
+#: templates/finance/ledger.html:29
 msgid "Department"
 msgstr "Departamenti"
 
-#: templates/finance/ledger.html:38
+#: templates/finance/ledger.html:39
 #, python-format
 msgid "Showing the latest 500 of %(count)s. Export CSV for everything."
 msgstr "Shfaqen 500 të fundit nga %(count)s. Eksporto CSV për të gjitha."
+
+#: templates/finance/sales.html:11
+msgid "Outlet sales"
+msgstr "Shitjet e pikave"
+
+#: templates/finance/sales.html:12 templates/finance/sales.html:31
+msgid "Bills"
+msgstr "Llogari"
+
+#: templates/finance/sales.html:13
+msgid "Average bill"
+msgstr "Llogaria mesatare"
+
+#: templates/finance/sales.html:18
+msgid "Best sellers"
+msgstr "Më të shiturat"
+
+#: templates/finance/sales.html:20
+msgid "Item"
+msgstr "Artikulli"
+
+#: templates/finance/sales.html:23 templates/finance/sales.html:34
+#: templates/finance/sales.html:45
+msgid "No sales in this period."
+msgstr "Asnjë shitje në këtë periudhë."
+
+#: templates/finance/sales.html:29
+msgid "By staff"
+msgstr "Sipas stafit"
+
+#: templates/finance/sales.html:31
+msgid "Average"
+msgstr "Mesatarja"
+
+#: templates/finance/sales.html:39
+msgid "Busiest hours"
+msgstr "Orët më të ngarkuara"
 
 #: templates/frontdesk/guest_detail.html:14
 msgid "Stays"
@@ -1738,10 +2983,6 @@ msgstr "Dokumenti"
 msgid "Company"
 msgstr "Kompania"
 
-#: templates/frontdesk/guest_detail.html:34
-msgid "Address"
-msgstr "Adresa"
-
 #: templates/frontdesk/guest_form.html:3 templates/frontdesk/guest_form.html:5
 #: templates/frontdesk/guest_list.html:9
 msgid "New guest"
@@ -1755,42 +2996,57 @@ msgstr "Emër, telefon, email, dokument…"
 msgid "No guests found"
 msgstr "Nuk u gjet asnjë mysafir"
 
-#: templates/frontdesk/invoice.html:6 templates/frontdesk/invoice.html:18
+#: templates/frontdesk/invoice.html:6 templates/frontdesk/invoice.html:19
 #: templates/frontdesk/reservation_detail.html:14
 msgid "Invoice"
 msgstr "Fatura"
 
-#: templates/frontdesk/invoice.html:10 templates/outlets/receipt.html:12
+#: templates/frontdesk/invoice.html:10 templates/help/help.html:9
+#: templates/outlets/menu_print.html:13 templates/outlets/menu_qr_cards.html:8
+#: templates/outlets/receipt.html:18
 msgid "Print"
 msgstr "Printo"
 
-#: templates/frontdesk/invoice.html:18
+#: templates/frontdesk/invoice.html:19
 msgid "Pro-forma bill"
 msgstr "Llogari pro-forma"
 
-#: templates/frontdesk/invoice.html:25
-#: templates/frontdesk/reservation_form.html:27
+#: templates/frontdesk/invoice.html:20
+msgid "No."
+msgstr "Nr."
+
+#: templates/frontdesk/invoice.html:26
+#: templates/frontdesk/reservation_form.html:36
 #: templates/frontdesk/reservation_list.html:16
 msgid "Stay"
 msgstr "Qëndrimi"
 
-#: templates/frontdesk/invoice.html:33 templates/outlets/order.html:63
+#: templates/frontdesk/invoice.html:35 templates/outlets/receipt.html:55
+msgid "Without VAT"
+msgstr "Pa TVSH"
+
+#: templates/frontdesk/invoice.html:36 templates/outlets/receipt.html:56
+#, python-format
+msgid "VAT %(r)s%%"
+msgstr "TVSH %(r)s%%"
+
+#: templates/frontdesk/invoice.html:38 templates/outlets/order.html:80
+#: templates/outlets/receipts.html:19
 msgid "Total"
 msgstr "Totali"
 
-#: templates/frontdesk/invoice.html:39
+#: templates/frontdesk/invoice.html:44
 #: templates/frontdesk/reservation_detail.html:54
 msgid "Payment"
 msgstr "Pagesë"
 
-#: templates/frontdesk/invoice.html:41
+#: templates/frontdesk/invoice.html:46
 msgid "Balance due"
 msgstr "Shuma për t'u paguar"
 
-#: templates/frontdesk/invoice.html:44
-#, python-format
-msgid "Prices include VAT (%(rate)s%%)."
-msgstr "Çmimet përfshijnë TVSH (%(rate)s%%)."
+#: templates/frontdesk/invoice.html:49
+msgid "This is not a fiscal invoice."
+msgstr "Kjo nuk është faturë fiskale."
 
 #: templates/frontdesk/rack.html:6
 msgid "Click an empty day to book that room."
@@ -1840,16 +3096,6 @@ msgstr ""
 #: templates/frontdesk/reservation_detail.html:24
 msgid "This room is not clean yet."
 msgstr "Kjo dhomë nuk është pastruar ende."
-
-#: templates/frontdesk/reservation_detail.html:40
-#: templates/frontdesk/reservation_detail.html:54
-msgid "Voided"
-msgstr "Anuluar"
-
-#: templates/frontdesk/reservation_detail.html:44
-#: templates/frontdesk/reservation_detail.html:58
-msgid "Void"
-msgstr "Anulo"
 
 #: templates/frontdesk/reservation_detail.html:49
 msgid "Accommodation not yet posted"
@@ -1945,30 +3191,74 @@ msgstr "Burimi"
 msgid "Checked in"
 msgstr "Hyri"
 
+#: templates/frontdesk/reservation_detail.html:122
+msgid "Move room"
+msgstr "Ndrysho dhomën"
+
 #: templates/frontdesk/reservation_detail.html:123
+msgid "Move the guest to the selected room?"
+msgstr "Të kalohet mysafiri në dhomën e zgjedhur?"
+
+#: templates/frontdesk/reservation_detail.html:126
+msgid "Choose a free room…"
+msgstr "Zgjidhni një dhomë të lirë…"
+
+#: templates/frontdesk/reservation_detail.html:127
+msgid "not clean"
+msgstr "jo e pastër"
+
+#: templates/frontdesk/reservation_detail.html:129
+msgid "Use the new room's rate"
+msgstr "Përdor çmimin e dhomës së re"
+
+#: templates/frontdesk/reservation_detail.html:130
+msgid "Move"
+msgstr "Kalo"
+
+#: templates/frontdesk/reservation_detail.html:131
+msgid "No other room is free for these dates."
+msgstr "Asnjë dhomë tjetër nuk është e lirë për këto data."
+
+#: templates/frontdesk/reservation_detail.html:138
 msgid "Cancel this reservation?"
 msgstr "Të anulohet ky rezervim?"
 
-#: templates/frontdesk/reservation_detail.html:123
+#: templates/frontdesk/reservation_detail.html:138
 msgid "Cancel reservation"
 msgstr "Anulo rezervimin"
 
-#: templates/frontdesk/reservation_detail.html:124
+#: templates/frontdesk/reservation_detail.html:139
 msgid "Mark as no-show?"
 msgstr "Të shënohet si i paparaqitur?"
-
-#: templates/frontdesk/reservation_detail.html:135
-msgid "Why is this entry being voided?"
-msgstr "Pse po anulohet ky regjistrim?"
 
 #: templates/frontdesk/reservation_form.html:8
 #, python-format
 msgid "Edit stay · %(g)s"
 msgstr "Ndrysho qëndrimin · %(g)s"
 
-#: templates/frontdesk/reservation_form.html:42
+#: templates/frontdesk/reservation_form.html:19
+msgid "Returning guest"
+msgstr "Mysafir që ka ardhur më parë"
+
+#: templates/frontdesk/reservation_form.html:22
+msgid "Clear"
+msgstr "Pastro"
+
+#: templates/frontdesk/reservation_form.html:23
+msgid "Type a name, phone or email…"
+msgstr "Shkruani emër, telefon ose email…"
+
+#: templates/frontdesk/reservation_form.html:26
+msgid "Or leave this empty and enter a new guest below."
+msgstr "Ose lëreni bosh dhe shkruani një mysafir të ri më poshtë."
+
+#: templates/frontdesk/reservation_form.html:51
 msgid "Save reservation"
 msgstr "Ruaj rezervimin"
+
+#: templates/frontdesk/reservation_form.html:77
+msgid "No guest found — enter them as new below."
+msgstr "Nuk u gjet mysafir — shkruajeni si të ri më poshtë."
 
 #: templates/frontdesk/reservation_list.html:8
 msgid "Guest, phone, room or code…"
@@ -1981,6 +3271,18 @@ msgstr "Nuk u gjet asnjë rezervim"
 #: templates/frontdesk/reservation_list.html:40
 msgid "Try a different search."
 msgstr "Provo një kërkim tjetër."
+
+#: templates/help/help.html:6
+msgid "Help & user guide"
+msgstr "Ndihmë & udhëzues"
+
+#: templates/help/help.html:6
+msgid "Short, practical answers for every part of the app."
+msgstr "Përgjigje të shkurtra dhe praktike për çdo pjesë të aplikacionit."
+
+#: templates/help/help.html:8
+msgid "Search the guide…"
+msgstr "Kërko në udhëzues…"
 
 #: templates/housekeeping/board.html:7
 #, python-format
@@ -2017,17 +3319,14 @@ msgid "Arrival today"
 msgstr "Mbërritje sot"
 
 #: templates/housekeeping/board.html:31
-#| msgid "To clean"
 msgid "Mark clean"
 msgstr "Shëno të pastër"
 
 #: templates/housekeeping/board.html:33
-#| msgid "Inspected"
 msgid "Mark inspected"
 msgstr "Shëno të kontrolluar"
 
 #: templates/housekeeping/board.html:34
-#| msgid "Marked dirty"
 msgid "Mark dirty"
 msgstr "Shëno të papastër"
 
@@ -2043,18 +3342,9 @@ msgstr "Detyrat"
 msgid "Unassigned"
 msgstr "Pa caktuar"
 
-#: templates/housekeeping/board.html:64
-#: templates/housekeeping/ticket_list.html:29
-msgid "Start"
-msgstr "Fillo"
-
 #: templates/housekeeping/board.html:69
 msgid "No open tasks."
 msgstr "Asnjë detyrë e hapur."
-
-#: templates/housekeeping/form.html:5
-msgid "Back"
-msgstr "Prapa"
 
 #: templates/housekeeping/ticket_list.html:17
 msgid "Problem"
@@ -2097,36 +3387,122 @@ msgstr "Çfarë u bë? (opsionale)"
 msgid "%(a)s–%(b)s of %(n)s"
 msgstr "%(a)s–%(b)s nga %(n)s"
 
-#: templates/outlets/floor.html:8
+#: templates/outlets/floor.html:8 templates/outlets/floor.html:46
+msgid "Edit floor plan"
+msgstr "Ndrysho planin"
+
+#: templates/outlets/floor.html:10
 msgid "Takeaway / customer name"
 msgstr "Për ta marrë / emri i klientit"
 
-#: templates/outlets/floor.html:8
+#: templates/outlets/floor.html:10
 msgid "Customer name or room"
 msgstr "Emri i klientit ose dhoma"
 
-#: templates/outlets/floor.html:9
+#: templates/outlets/floor.html:11
 msgid "New order"
 msgstr "Porosi e re"
 
-#: templates/outlets/floor.html:19
+#: templates/outlets/floor.html:39
 #, python-format
 msgid "%(n)s seat"
 msgid_plural "%(n)s seats"
 msgstr[0] "%(n)s vend"
 msgstr[1] "%(n)s vende"
 
-#: templates/outlets/floor.html:24
+#: templates/outlets/floor.html:41
 msgid "Free"
 msgstr "E lirë"
 
-#: templates/outlets/floor.html:28
+#: templates/outlets/floor.html:46
 msgid "No tables set up for this outlet."
 msgstr "Nuk ka tavolina për këtë pikë."
 
-#: templates/outlets/floor.html:41
-msgid "No open orders."
-msgstr "Asnjë porosi e hapur."
+#: templates/outlets/floor_plan.html:9
+msgid ""
+"Drag tables to move them. Drag the corner to resize. Click a table to rename"
+" it."
+msgstr ""
+"Tërhiqni tavolinat për t'i lëvizur. Tërhiqni cepin për madhësinë. Klikoni "
+"një tavolinë për ta riemërtuar."
+
+#: templates/outlets/floor_plan.html:17
+msgid "Unsaved changes"
+msgstr "Ndryshime të paruajtura"
+
+#: templates/outlets/floor_plan.html:18
+msgid "Save plan"
+msgstr "Ruaj planin"
+
+#: templates/outlets/floor_plan.html:27 templates/outlets/floor_plan.html:45
+msgid "Area"
+msgstr "Zonë"
+
+#: templates/outlets/floor_plan.html:28
+msgid "Tidy up"
+msgstr "Rregullo"
+
+#: templates/outlets/floor_plan.html:29 templates/outlets/floor_plan.html:35
+msgid "Table"
+msgstr "Tavolinë"
+
+#: templates/outlets/floor_plan.html:36
+msgid "Select a table to edit it, or add a new one."
+msgstr "Zgjidhni një tavolinë për ta ndryshuar, ose shtoni një të re."
+
+#: templates/outlets/floor_plan.html:38
+msgid "Name or number"
+msgstr "Emri ose numri"
+
+#: templates/outlets/floor_plan.html:41
+msgid "Shape"
+msgstr "Forma"
+
+#: templates/outlets/floor_plan.html:42
+msgid "Width"
+msgstr "Gjerësia"
+
+#: templates/outlets/floor_plan.html:43
+msgid "Height"
+msgstr "Lartësia"
+
+#: templates/outlets/floor_plan.html:46
+msgid "In use"
+msgstr "Në përdorim"
+
+#: templates/outlets/floor_plan.html:48
+msgid "Duplicate"
+msgstr "Kopjo"
+
+#: templates/outlets/floor_plan.html:50 templates/outlets/order.html:149
+msgid "Remove"
+msgstr "Hiq"
+
+#: templates/outlets/floor_plan.html:53
+msgid "Tip: arrow keys nudge the selected table. Hold Shift for bigger steps."
+msgstr ""
+"Këshillë: shigjetat e lëvizin tavolinën e zgjedhur. Mbani Shift për hapa më "
+"të mëdhenj."
+
+#: templates/outlets/floor_plan.html:63
+msgid "Name of the new area (e.g. Terrace):"
+msgstr "Emri i zonës së re (p.sh. Tarraca):"
+
+#: templates/outlets/floor_plan.html:64
+msgid "Rename this area:"
+msgstr "Riemërtoni këtë zonë:"
+
+#: templates/outlets/floor_plan.html:65
+msgid "This table has an open order. Close it before removing the table."
+msgstr "Kjo tavolinë ka porosi të hapur. Mbylleni para se ta hiqni tavolinën."
+
+#: templates/outlets/floor_plan.html:66
+msgid "Saved"
+msgstr "U ruajt"
+
+#: templates/outlets/floor_plan.html:67
+msgid "You have unsaved changes."
+msgstr "Keni ndryshime të paruajtura."
 
 #: templates/outlets/home.html:5
 msgid "Choose an outlet"
@@ -2151,85 +3527,298 @@ msgstr ""
 "Menaxheri mund të shtojë restorantin, barin, spa-n dhe shërbime të tjera te "
 "Pikat & menutë."
 
-#: templates/outlets/order.html:8
+#: templates/outlets/menu_admin.html:7
+msgid ""
+"Guests scan the code to see your menu on their phone, in Albanian or "
+"English."
+msgstr ""
+"Mysafirët skanojnë kodin për të parë menunë në telefon, shqip ose anglisht."
+
+#: templates/outlets/menu_admin.html:9
+msgid "Add item"
+msgstr "Shto artikull"
+
+#: templates/outlets/menu_admin.html:10
+msgid "Print menu"
+msgstr "Printo menunë"
+
+#: templates/outlets/menu_admin.html:15
+msgid "Items"
+msgstr "Artikujt"
+
+#: templates/outlets/menu_admin.html:15
+msgid "Sold out items are hidden from guests and the POS."
+msgstr "Artikujt e mbaruar fshihen nga mysafirët dhe nga arka."
+
+#: templates/outlets/menu_admin.html:25
+msgid "Mark sold out"
+msgstr "Shëno të mbaruar"
+
+#: templates/outlets/menu_admin.html:25
+msgid "Available again"
+msgstr "Sërish në dispozicion"
+
+#: templates/outlets/menu_admin.html:29
+msgid "No items yet."
+msgstr "Ende pa artikuj."
+
+#: templates/outlets/menu_admin.html:32
+msgid "No categories yet."
+msgstr "Ende pa kategori."
+
+#: templates/outlets/menu_admin.html:32
+msgid "Add a category"
+msgstr "Shto kategori"
+
+#: templates/outlets/menu_admin.html:37
+msgid "QR code"
+msgstr "Kodi QR"
+
+#: templates/outlets/menu_admin.html:37
+msgid "Public"
+msgstr "Publike"
+
+#: templates/outlets/menu_admin.html:37
+msgid "Hidden"
+msgstr "E fshehur"
+
+#: templates/outlets/menu_admin.html:41
+msgid ""
+"This address only works on this computer. Guests' phones need the address of"
+" your server or website. Open InnKeeper using that address, then come back "
+"here."
+msgstr ""
+"Kjo adresë punon vetëm në këtë kompjuter. Telefonat e mysafirëve kanë nevojë"
+" për adresën e serverit ose faqes suaj. Hapni InnKeeper-in me atë adresë dhe"
+" kthehuni këtu."
+
+#: templates/outlets/menu_admin.html:42
+msgid ""
+"The public menu is switched off for this outlet. Turn it on in the outlet's "
+"settings."
+msgstr ""
+"Menuja publike është e çaktivizuar për këtë pikë. Aktivizojeni te cilësimet "
+"e pikës."
+
+#: templates/outlets/menu_admin.html:45
+msgid "Print table cards"
+msgstr "Printo kartolina për tavolinat"
+
+#: templates/outlets/menu_admin.html:49
+msgid "Old printed QR codes will stop working. Continue?"
+msgstr "Kodet QR të printuara më parë nuk do të punojnë më. Të vazhdohet?"
+
+#: templates/outlets/menu_admin.html:49
+msgid "Make a new link"
+msgstr "Krijo lidhje të re"
+
+#: templates/outlets/menu_print.html:32 templates/outlets/menu_public.html:38
+#, python-format
+msgid "Prices include VAT (%(rate)s%%)"
+msgstr "Çmimet përfshijnë TVSH (%(rate)s%%)"
+
+#: templates/outlets/menu_public.html:36
+msgid "The menu is being updated. Please ask our staff."
+msgstr "Menuja po përditësohet. Ju lutemi pyesni stafin."
+
+#: templates/outlets/order.html:11
+msgid "Move to table…"
+msgstr "Kalo në tavolinë…"
+
+#: templates/outlets/order.html:14
+msgid "Move or merge"
+msgstr "Kalo ose bashko"
+
+#: templates/outlets/order.html:17
 msgid "Print bill"
 msgstr "Printo llogarinë"
 
-#: templates/outlets/order.html:15
+#: templates/outlets/order.html:24
 msgid "Search the menu…"
 msgstr "Kërko në menu…"
 
-#: templates/outlets/order.html:31
+#: templates/outlets/order.html:40
 msgid ""
 "This outlet has no items yet. A manager can add them under Outlets & menus."
 msgstr ""
 "Kjo pikë nuk ka ende artikuj. Menaxheri mund t'i shtojë te Pikat & menutë."
 
-#: templates/outlets/order.html:49
+#: templates/outlets/order.html:58
 msgid "Less"
 msgstr "Më pak"
 
-#: templates/outlets/order.html:51
+#: templates/outlets/order.html:60
 msgid "More"
 msgstr "Më shumë"
 
-#: templates/outlets/order.html:56
+#: templates/outlets/order.html:65
 msgid "Tap items on the left to add them."
 msgstr "Prek artikujt në të majtë për t'i shtuar."
 
-#: templates/outlets/order.html:61
+#: templates/outlets/order.html:70
 msgid "Note for the order (allergies, timing…)"
 msgstr "Shënim për porosinë (alergji, koha…)"
 
-#: templates/outlets/order.html:75
-msgid "Charge to room…"
-msgstr "Kaloje në dhomë…"
+#: templates/outlets/order.html:75 templates/outlets/receipt.html:50
+msgid "Subtotal"
+msgstr "Nëntotali"
 
-#: templates/outlets/order.html:78
-msgid "Charge"
-msgstr "Kaloje"
+#: templates/outlets/order.html:78 templates/outlets/order.html:143
+#: templates/outlets/receipt.html:51
+msgid "Discount"
+msgstr "Zbritja"
 
-#: templates/outlets/order.html:84
+#: templates/outlets/order.html:88
+msgid "Left to pay"
+msgstr "Mbetet për t'u paguar"
+
+#: templates/outlets/order.html:104 templates/outlets/receipt.html:68
+msgid "Cash given"
+msgstr "Para të dhëna"
+
+#: templates/outlets/order.html:107 templates/outlets/receipt.html:68
+msgid "Change"
+msgstr "Kusuri"
+
+#: templates/outlets/order.html:108 templates/outlets/order.html:121
+msgid "Split"
+msgstr "Ndaj"
+
+#: templates/outlets/order.html:110
+msgid "Take cash"
+msgstr "Merr paratë"
+
+#: templates/outlets/order.html:111 templates/outlets/order.html:124
+msgid "Pay and print receipt"
+msgstr "Paguaj dhe printo kuponin"
+
+#: templates/outlets/order.html:119
+msgid "optional"
+msgstr "opsionale"
+
+#: templates/outlets/order.html:123
+msgid "Card payment"
+msgstr "Pagesë me kartë"
+
+#: templates/outlets/order.html:133
+msgid "Choose room…"
+msgstr "Zgjidhni dhomën…"
+
+#: templates/outlets/order.html:137
+#, python-format
+msgid "Charge %(a)s to room"
+msgstr "Kalo %(a)s në dhomë"
+
+#: templates/outlets/order.html:144
+msgid "As"
+msgstr "Si"
+
+#: templates/outlets/order.html:146
+msgid "Reason"
+msgstr "Arsyeja"
+
+#: templates/outlets/order.html:146
+msgid "e.g. regular customer, staff meal"
+msgstr "p.sh. klient i rregullt, vakt stafi"
+
+#: templates/outlets/order.html:148
+msgid "Apply discount"
+msgstr "Apliko zbritjen"
+
+#: templates/outlets/order.html:151
+#, python-format
+msgid "You can give up to %(p)s%%. More needs a manager."
+msgstr "Mund të jepni deri në %(p)s%%. Më shumë kërkon menaxherin."
+
+#: templates/outlets/order.html:151
+msgid "Only a manager can give discounts."
+msgstr "Vetëm menaxheri mund të japë zbritje."
+
+#: templates/outlets/order.html:157
 msgid "Keep open"
 msgstr "Mbaje të hapur"
 
-#: templates/outlets/order.html:86
+#: templates/outlets/order.html:159
 msgid "Cancel this order?"
 msgstr "Të anulohet kjo porosi?"
 
-#: templates/outlets/order.html:86
+#: templates/outlets/order.html:159
 msgid "Cancel order"
 msgstr "Anulo porosinë"
 
-#: templates/outlets/receipt.html:6
+#: templates/outlets/order.html:215
+msgid "Exact"
+msgstr "Saktë"
+
+#: templates/outlets/receipt.html:6 templates/outlets/receipt.html:36
+#: templates/outlets/receipts.html:19
 msgid "Receipt"
 msgstr "Kuponi"
 
-#: templates/outlets/receipt.html:11
-msgid "Back to"
-msgstr "Kthehu te"
+#: templates/outlets/receipt.html:17
+msgid "All receipts"
+msgstr "Të gjithë kuponat"
 
-#: templates/outlets/receipt.html:31
-msgid "TOTAL"
-msgstr "TOTALI"
+#: templates/outlets/receipt.html:20
+msgid "Void receipt"
+msgstr "Anulo kuponin"
 
-#: templates/outlets/receipt.html:34
+#: templates/outlets/receipt.html:39
+msgid "Served by"
+msgstr "Shërbeu"
+
+#: templates/outlets/receipt.html:61
 msgid "Bill — not yet paid"
 msgstr "Llogari — ende e papaguar"
 
-#: templates/outlets/receipt.html:36
-msgid "CANCELLED"
+#: templates/outlets/receipt.html:63
+msgid "VOID"
 msgstr "ANULUAR"
 
-#: templates/outlets/receipt.html:40
+#: templates/outlets/receipt.html:74
 msgid "Signature"
 msgstr "Nënshkrimi"
 
-#: templates/outlets/receipt.html:45
-#, python-format
-msgid "Prices include VAT (%(rate)s%%)"
-msgstr "Çmimet përfshijnë TVSH (%(rate)s%%)"
+#: templates/outlets/receipt.html:77
+msgid "This is not a fiscal receipt."
+msgstr "Ky nuk është kupon fiskal."
 
-#: templates/outlets/receipt.html:45
-msgid "Thank you!"
-msgstr "Faleminderit!"
+#: templates/outlets/receipt.html:83
+msgid "Why is this receipt being voided?"
+msgstr "Pse po anulohet ky kupon?"
+
+#: templates/outlets/receipts.html:6
+msgid "Find, reprint or void past bills."
+msgstr "Gjeni, riprintoni ose anuloni llogaritë e kaluara."
+
+#: templates/outlets/receipts.html:12
+msgid "Number or table"
+msgstr "Numri ose tavolina"
+
+#: templates/outlets/receipts.html:19
+msgid "Table / customer"
+msgstr "Tavolina / klienti"
+
+#: templates/outlets/receipts.html:19
+msgid "Settled"
+msgstr "Mbyllur me"
+
+#: templates/outlets/receipts.html:37
+msgid "No receipts found"
+msgstr "Nuk u gjet asnjë kupon"
+
+#~ msgid "Hotel settings"
+#~ msgstr "Cilësimet e hotelit"
+
+#, python-format
+#~ msgid "Prices include VAT (%(rate)s%%)."
+#~ msgstr "Çmimet përfshijnë TVSH (%(rate)s%%)."
+
+#~ msgid "Charge"
+#~ msgstr "Kaloje"
+
+#~ msgid "CANCELLED"
+#~ msgstr "ANULUAR"
+
+#~ msgid "Thank you!"
+#~ msgstr "Faleminderit!"

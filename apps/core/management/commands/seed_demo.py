@@ -17,8 +17,10 @@ from django.utils import timezone
 
 from apps.accounts.models import Role, User
 from apps.core.models import HotelSettings
+from apps.finance.models import Expense
 from apps.frontdesk import services as fd
 from apps.frontdesk.models import Guest, Reservation, Room, RoomType
+from apps.housekeeping.models import HousekeepingTask, MaintenanceTicket
 from apps.outlets import services as pos
 from apps.outlets.models import Category, Item, Outlet, Table
 
@@ -67,6 +69,21 @@ MENUS = {
     },
 }
 
+CATEGORY_SQ = {
+    "Starters": "Antipasta",
+    "Mains": "Pjata kryesore",
+    "Desserts": "Ëmbëlsira",
+    "Coffee": "Kafe",
+    "Soft drinks": "Pije freskuese",
+    "Wine & spirits": "Verë & pije alkoolike",
+    "Beer": "Birra",
+    "Massages": "Masazhe",
+    "Wellness": "Mirëqenie",
+    "Breakfast": "Mëngjes",
+    "Night menu": "Menu nate",
+    "Wash & iron": "Larje & hekurosje",
+}
+
 GUESTS = [
     ("Ardit", "Gashi", "AL"),
     ("Sara", "Rossi", "IT"),
@@ -107,6 +124,9 @@ class Command(BaseCommand):
         hotel.address = "Rruga e Durrësit, Tiranë"
         hotel.phone = "+355 4 000 0000"
         hotel.email = "info@example.com"
+        hotel.setup_completed = True
+        hotel.receipt_header = "Wi-Fi: HotelDemo · 08:00–23:00"
+        hotel.max_staff_discount = 10
         hotel.save()
 
         users = {}
@@ -140,9 +160,24 @@ class Command(BaseCommand):
             outlet = Outlet.objects.create(name=name, kind=kind, uses_tables=uses_tables, sort_order=len(outlets))
             outlets[name] = outlet
             for t in range(1, n_tables + 1):
-                Table.objects.create(outlet=outlet, name=str(t), seats=2 if t % 3 == 0 else 4, sort_order=t)
+                zone = "Terrace" if t > 8 else "Inside"
+                i = (t - 9) if t > 8 else (t - 1)
+                Table.objects.create(
+                    outlet=outlet,
+                    name=str(t),
+                    seats=2 if t % 3 == 0 else 4,
+                    sort_order=t,
+                    zone=zone if n_tables > 8 else "",
+                    shape="round" if t % 3 == 0 else ("long" if t % 4 == 0 else "square"),
+                    pos_x=80 + (i % 4) * 220,
+                    pos_y=70 + (i // 4) * 250,
+                    width=160 if t % 4 == 0 and t % 3 else 100,
+                    height=100,
+                )
             for c_order, (cat_name, items) in enumerate(cats.items()):
-                cat = Category.objects.create(outlet=outlet, name=cat_name, sort_order=c_order)
+                cat = Category.objects.create(
+                    outlet=outlet, name=CATEGORY_SQ.get(cat_name, cat_name), name_en=cat_name, sort_order=c_order
+                )
                 for i_order, item in enumerate(items):
                     Item.objects.create(
                         category=cat,
@@ -217,7 +252,10 @@ class Command(BaseCommand):
             order = pos.open_order(rest, table=rest.tables.get(name=str(table_no)), user=users["waiter"], guests=2)
             for name in picks:
                 pos.add_item(order, Item.objects.get(name=name, category__outlet=rest), user=users["waiter"])
-            pos.pay_order(order, method="card" if table_no == 1 else "cash", user=users["waiter"])
+            if table_no == 1:
+                pos.pay_order(order, method="card", user=users["waiter"])
+            else:
+                pos.pay_order(order, method="cash", user=users["waiter"], tendered=Decimal("50"))
         order = pos.open_order(bar, table=bar.tables.get(name="2"), user=users["bar"])
         for name in ["Espresso", "Macchiato", "Fresh orange juice"]:
             pos.add_item(order, Item.objects.get(name=name), user=users["bar"])
@@ -231,6 +269,38 @@ class Command(BaseCommand):
             pos.add_item(order, Item.objects.get(name=name), user=users["waiter"])
         order = pos.open_order(bar, table=bar.tables.get(name="5"), user=users["bar"])
         pos.add_item(order, Item.objects.get(name="Birra Korça 0.5L"), user=users["bar"], quantity=2)
+
+        # Housekeeping work for today
+        for room in Room.objects.filter(hk_status=Room.HKStatus.DIRTY):
+            HousekeepingTask.objects.create(
+                room=room, kind=HousekeepingTask.Kind.DEPARTURE, created_by=manager, assigned_to=users["housekeeping"]
+            )
+        HousekeepingTask.objects.create(room=rooms[1], kind=HousekeepingTask.Kind.STAYOVER, created_by=manager)
+        MaintenanceTicket.objects.create(
+            title="Kondicioneri nuk ftoh",
+            room=rooms[22],
+            priority="high",
+            reported_by=users["housekeeping"],
+            blocks_room=True,
+        )
+        Room.objects.filter(pk=rooms[22].pk).update(out_of_order=True)
+
+        # Some running costs
+        for days_ago, cat, desc, supplier, amount, method in [
+            (0, "food_drink", "Fruta & perime", "Tregu Elbasanit", "86.40", "cash"),
+            (1, "supplies", "Detergjentë", "Big Market", "42.00", "card"),
+            (3, "utilities", "Energji elektrike", "OSHEE", "380.00", "bank_transfer"),
+            (5, "food_drink", "Kafe & sheqer", "Lavazza AL", "120.00", "bank_transfer"),
+        ]:
+            Expense.objects.create(
+                business_date=today - timedelta(days=days_ago),
+                category=cat,
+                description=desc,
+                supplier=supplier,
+                amount=Decimal(amount),
+                method=method,
+                created_by=users["finance"],
+            )
 
         self.stdout.write(self.style.SUCCESS("Demo hotel created."))
         self.stdout.write("Staff accounts (all use the same demo password):")

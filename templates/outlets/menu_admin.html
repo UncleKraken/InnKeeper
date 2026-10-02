@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Menu & QR" %} · {{ outlet.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'outlets:setup' %}">{% icon "back" %} {% translate "Outlets & menus" %}</a></div><h1>{% translate "Menu & QR" %} · {{ outlet.name }}</h1>
+  <p>{% translate "Guests scan the code to see your menu on their phone, in Albanian or English." %}</p></div>
+  <div class="actions">
+    <a class="btn btn-secondary" href="{% url 'outlets:item_create' %}">{% icon "plus" %} {% translate "Add item" %}</a>
+    <a class="btn btn-secondary" href="{% url 'menu:print' outlet.menu_token %}" target="_blank">{% icon "print" %} {% translate "Print menu" %}</a>
+  </div>
+</div>
+<div class="grid grid-main">
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "Items" %}</h2><span class="muted">{% translate "Sold out items are hidden from guests and the POS." %}</span></div>
+    {% for c in categories %}
+      <div class="floor-label" style="padding:0 1.15rem">{{ c.name }}{% if c.name_en %} · <span style="text-transform:none">{{ c.name_en }}</span>{% endif %}</div>
+      <table class="table table-sm"><tbody>
+        {% for i in c.items.all %}
+          <tr class="{% if not i.is_active %}voided{% endif %}">
+            <td><a href="{% url 'outlets:item_edit' i.pk %}">{{ i.name }}</a>{% if i.name_en %} <small class="muted">· {{ i.name_en }}</small>{% endif %}</td>
+            <td class="num">{{ i.price|money }}</td>
+            <td class="num" style="width:150px">
+              <form method="post" action="{% url 'outlets:toggle_item' i.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+                {% if i.is_active %}<button class="btn btn-ghost btn-sm">{% translate "Mark sold out" %}</button>{% else %}<button class="btn btn-secondary btn-sm">{% translate "Available again" %}</button>{% endif %}
+              </form>
+            </td>
+          </tr>
+        {% empty %}<tr><td class="muted">{% translate "No items yet." %}</td></tr>{% endfor %}
+      </tbody></table>
+    {% empty %}
+      <div class="empty">{% translate "No categories yet." %} <a href="{% url 'outlets:category_create' %}">{% translate "Add a category" %}</a></div>
+    {% endfor %}
+  </section>
+  <aside class="stack">
+    <section class="card">
+      <div class="card-header"><h3>{% translate "QR code" %}</h3>{% if outlet.menu_public %}{% translate "Public" as l %}{% status_badge "success" l %}{% else %}{% translate "Hidden" as l %}{% status_badge "closed" l %}{% endif %}</div>
+      <div class="card-body" style="text-align:center">
+        <div class="qr-box">{{ qr }}</div>
+        <p class="mono" style="font-size:.75rem; word-break:break-all; margin:.6rem 0">{{ url }}</p>
+        {% if local_only %}<div class="alert alert-warning" style="text-align:left; font-size:.85rem">{% translate "This address only works on this computer. Guests' phones need the address of your server or website. Open InnKeeper using that address, then come back here." %}</div>{% endif %}
+        {% if not outlet.menu_public %}<p class="muted" style="font-size:.85rem">{% translate "The public menu is switched off for this outlet. Turn it on in the outlet's settings." %}</p>{% endif %}
+        <div class="row" style="justify-content:center; margin-top:.6rem">
+          <a class="btn btn-secondary btn-sm" href="{{ url }}" target="_blank">{% translate "Open" %}</a>
+          <a class="btn btn-sm" href="{% url 'outlets:menu_qr_cards' outlet.pk %}" target="_blank">{% icon "print" %} {% translate "Print table cards" %}</a>
+        </div>
+      </div>
+      <div class="card-footer">
+        <form method="post" action="{% url 'outlets:new_menu_link' outlet.pk %}" data-confirm="{% translate 'Old printed QR codes will stop working. Continue?' %}">{% csrf_token %}<button class="btn btn-ghost btn-sm">{% translate "Make a new link" %}</button></form>
+      </div>
+    </section>
+  </aside>
+</div>
+{% endblock %}

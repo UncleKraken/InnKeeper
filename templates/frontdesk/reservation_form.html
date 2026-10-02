@@ -15,7 +15,16 @@
     <div class="card-header"><h2>{% translate "Guest" %}</h2></div>
     <div class="card-body">
       <div class="form-grid">
-        {% with field=form.guest %}<div class="field full{% if field.errors %} has-error{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}<div class="help">{{ field.help_text }}</div></div>{% endwith %}
+        <div class="field full">
+          <label for="guest-search">{% translate "Returning guest" %}</label>
+          {{ form.guest }}
+          <div class="picker" id="guest-picker" data-url="{% url 'frontdesk:guest_search' %}">
+            <div class="picker-chosen hidden" id="guest-chosen"><span></span><button type="button" class="link-btn" id="guest-clear" aria-label="{% translate 'Clear' %}">{% icon "x" %}</button></div>
+            <div class="search" id="guest-search-box">{% icon "search" %}<input class="input" id="guest-search" autocomplete="off" placeholder="{% translate 'Type a name, phone or email…' %}"></div>
+            <div class="picker-results hidden" id="guest-results"></div>
+          </div>
+          <div class="help">{% translate "Or leave this empty and enter a new guest below." %}</div>
+        </div>
         {% for field in form %}{% if field.name in "new_first_name new_last_name new_phone new_email" %}
           <div class="field{% if field.errors %} has-error{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for e in field.errors %}<div class="error">{{ e }}</div>{% endfor %}</div>
         {% endif %}{% endfor %}
@@ -43,4 +52,42 @@
     </div>
   </div>
 </form>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var hidden = document.querySelector('input[name=guest]'); if (!hidden) return;
+  var box = document.getElementById('guest-search-box'), input = document.getElementById('guest-search');
+  var results = document.getElementById('guest-results'), chosen = document.getElementById('guest-chosen');
+  var url = document.getElementById('guest-picker').dataset.url, timer = null;
+  var initialName = '{{ initial_guest_name|escapejs }}';
+  function choose(id, name) {
+    hidden.value = id || '';
+    chosen.querySelector('span').textContent = name || '';
+    chosen.classList.toggle('hidden', !id); box.classList.toggle('hidden', !!id); results.classList.add('hidden');
+    document.querySelectorAll('[name^=new_]').forEach(function (el) { el.closest('.field').style.opacity = id ? .45 : 1; el.disabled = !!id; });
+  }
+  input.addEventListener('input', function () {
+    clearTimeout(timer);
+    var q = input.value.trim();
+    if (q.length < 2) { results.classList.add('hidden'); return; }
+    timer = setTimeout(function () {
+      fetch(url + '?q=' + encodeURIComponent(q)).then(function (r) { return r.json(); }).then(function (d) {
+        results.innerHTML = '';
+        if (!d.results.length) { results.innerHTML = '<div class="picker-empty">{{ _("No guest found — enter them as new below.")|escapejs }}</div>'; }
+        d.results.forEach(function (g) {
+          var b = document.createElement('button'); b.type = 'button';
+          b.innerHTML = '<strong></strong><small></small>';
+          b.querySelector('strong').textContent = g.name; b.querySelector('small').textContent = g.detail;
+          b.onclick = function () { choose(g.id, g.name); };
+          results.appendChild(b);
+        });
+        results.classList.remove('hidden');
+      });
+    }, 200);
+  });
+  document.getElementById('guest-clear').onclick = function () { choose('', ''); input.value = ''; input.focus(); };
+  if (hidden.value && initialName) choose(hidden.value, initialName);
+})();
+</script>
 {% endblock %}

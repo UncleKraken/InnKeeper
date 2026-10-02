@@ -17,7 +17,7 @@
   <div class="table-wrap"><table class="table">
     <thead><tr>{% for attr, label, kind in columns %}<th{% if kind == 'money' %} class="num"{% endif %}>{{ label }}</th>{% endfor %}<th></th></tr></thead>
     <tbody>
-    {% for obj, edit_url, cells in rows %}
+    {% for obj, edit_url, cells, actions in rows %}
       <tr>
         {% for value, kind in cells %}
           {% if kind == "money" %}<td class="num">{{ value|money }}</td>
@@ -25,7 +25,7 @@
           {% elif forloop.first %}<td><a href="{{ edit_url }}"><strong>{{ value|default:"—" }}</strong></a></td>
           {% else %}<td>{{ value|default_if_none:"—" }}</td>{% endif %}
         {% endfor %}
-        <td class="num"><a class="btn btn-ghost btn-sm" href="{{ edit_url }}">{% icon "edit" %} {% translate "Edit" %}</a></td>
+        <td class="num nowrap">{% for label, url, ic in actions %}<a class="btn btn-secondary btn-sm" href="{{ url }}">{% icon ic %} {{ label }}</a> {% endfor %}<a class="btn btn-ghost btn-sm" href="{{ edit_url }}">{% icon "edit" %} {% translate "Edit" %}</a></td>
       </tr>
     {% endfor %}
     </tbody>

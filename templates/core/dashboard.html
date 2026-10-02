@@ -13,6 +13,22 @@
   </div>
 </div>
 
+{% if onboarding %}
+<section class="card onboarding" style="margin-bottom:1.25rem">
+  <div class="card-header">
+    <div><h2>{% translate "Getting started" %}</h2><span class="muted" style="font-size:.85rem">{% blocktranslate with a=onboarding_done b=onboarding|length %}{{ a }} of {{ b }} done{% endblocktranslate %}</span></div>
+    <form method="post" action="{% url 'core:dismiss_onboarding' %}" class="inline">{% csrf_token %}<button class="btn btn-ghost btn-sm">{% translate "Hide" %}</button></form>
+  </div>
+  <div class="progress"><span style="width:{{ onboarding_done|percent_of:onboarding_total }}%"></span></div>
+  <div class="checklist">
+    {% for s in onboarding %}
+      <a href="{{ s.url }}" class="check-item{% if s.done %} done{% endif %}"><span class="tick">{% if s.done %}{% icon "check" %}{% else %}{{ forloop.counter }}{% endif %}</span>{{ s.label }}</a>
+    {% endfor %}
+  </div>
+  <div class="card-footer muted" style="font-size:.85rem">{% icon "help" %} {% translate "New to InnKeeper?" %} <a href="{% url 'core:help' %}">{% translate "Read the short guide" %}</a></div>
+</section>
+{% endif %}
+
 <div class="grid grid-4" style="margin-bottom:1.25rem">
   {% if "frontdesk" in modules %}
     <a class="card stat" href="{% url 'frontdesk:reservation_list' %}?view=arrivals"><div class="stat-label">{% translate "Arrivals today" %}</div><div class="stat-value">{{ arrivals|length }}</div><div class="stat-note">{% blocktranslate count n=upcoming %}{{ n }} more this week{% plural %}{{ n }} more this week{% endblocktranslate %}</div></a>
@@ -23,7 +39,7 @@
     <a class="card stat" href="{% url 'housekeeping:board' %}"><div class="stat-label">{% translate "Rooms to clean" %}</div><div class="stat-value">{{ dirty_rooms }}</div><div class="stat-note">{% translate "Marked dirty" %}</div></a>
   {% endif %}
   {% if "maintenance" in modules and "frontdesk" not in modules %}
-    <a class="card stat" href="{% url 'housekeeping:ticket_list' %}"><div class="stat-label">{% translate "Open maintenance" %}</div><div class="stat-value">{{ open_tickets }}</div><div class="stat-note">{% blocktranslate count n=ooo_rooms %}{{ n }} room out of order{% plural %}{{ n }} rooms out of order{% endblocktranslate %}</div></a>
+    <a class="card stat" href="{% url 'housekeeping:ticket_list' %}"><div class="stat-label">{% translate "Open maintenance" %}</div><div class="stat-value">{{ open_tickets }}</div><div class="stat-note">{% if hotel.module_rooms %}{% blocktranslate count n=ooo_rooms %}{{ n }} room out of order{% plural %}{{ n }} rooms out of order{% endblocktranslate %}{% else %}{% translate "Repairs to do" %}{% endif %}</div></a>
   {% endif %}
   {% if "outlets" in modules %}
     <a class="card stat" href="{% url 'outlets:home' %}"><div class="stat-label">{% translate "Open orders" %}</div><div class="stat-value">{{ open_orders }}</div><div class="stat-note">{% translate "Across all outlets" %}</div></a>
@@ -63,6 +79,23 @@
         </tr>
       {% empty %}
         <tr><td class="empty">{% translate "No departures due." %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+  {% endif %}
+
+  {% if "outlets" in modules %}
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "Open orders" %}</h2><a href="{% url 'outlets:home' %}">{% translate "POS" %}</a></div>
+    <div class="table-wrap"><table class="table">
+      <tbody>
+      {% for o in open_order_list %}
+        <tr><td><a href="{% url 'outlets:order' o.pk %}"><strong>{{ o.display_name }}</strong></a><br><small>{{ o.outlet }} · {{ o.opened_by|default:"" }}</small></td>
+            <td class="nowrap muted">{{ o.opened_at|time:"H:i" }}</td>
+            <td class="num"><strong>{{ o.total|money }}</strong></td></tr>
+      {% empty %}
+        <tr><td class="empty">{% translate "No open orders." %}</td></tr>
       {% endfor %}
       </tbody>
     </table></div>

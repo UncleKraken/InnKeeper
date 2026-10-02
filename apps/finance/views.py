@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.accounts.permissions import module_required
 from apps.frontdesk.models import Reservation, Room
 
-from .models import ZERO, Charge, Folio, Payment
+from .models import ZERO, Charge, Expense, Folio, Payment
 
 
 def _range(request) -> tuple[date, date]:
@@ -91,6 +91,14 @@ def dashboard(request):
         "nights_sold": nights_sold,
     }
 
+    expenses = Expense.objects.active().filter(business_date__range=(start, end))
+    expenses_total = expenses.aggregate(t=Sum("amount"))["t"] or ZERO
+    category_labels = dict(Expense.Category.choices)
+    expense_rows = [
+        {"label": category_labels.get(r["category"], r["category"]), "amount": r["t"]}
+        for r in expenses.values("category").annotate(t=Sum("amount")).order_by("-t")
+    ]
+
     outstanding = []
     for folio in Folio.objects.filter(status=Folio.Status.OPEN).select_related(
         "reservation__guest", "reservation__room"
@@ -116,6 +124,9 @@ def dashboard(request):
             "outstanding": outstanding[:25],
             "outstanding_total": sum((o["balance"] for o in outstanding), ZERO),
             "show_day_labels": days <= 31,
+            "expenses_total": expenses_total,
+            "expense_rows": expense_rows,
+            "profit": total - expenses_total,
         },
     )
 

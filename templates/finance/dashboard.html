@@ -6,16 +6,23 @@
   <div><div class="eyebrow">{% translate "Finance" %}</div><h1>{% translate "Reports" %}</h1><p>{{ start|date:"d.m.Y" }} – {{ end|date:"d.m.Y" }}</p></div>
   <div class="actions">
     {% include "finance/_range.html" %}
-    <a class="btn btn-secondary" href="{% url 'finance:ledger' %}?from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}">{% icon "list" %} {% translate "Ledger" %}</a>
   </div>
 </div>
 
+{% include "finance/_tabs.html" %}
 <div class="grid grid-4" style="margin-bottom:1.25rem">
   <div class="card stat"><div class="stat-label">{% translate "Revenue" %}</div><div class="stat-value">{{ total|money }}</div><div class="stat-note">{% translate "All departments" %}</div></div>
+  <a class="card stat" href="{% url 'finance:expenses' %}?from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}"><div class="stat-label">{% translate "Expenses" %}</div><div class="stat-value">{{ expenses_total|money }}</div><div class="stat-note">{% translate "Recorded costs" %}</div></a>
+  <div class="card stat"><div class="stat-label">{% translate "Profit" %}</div><div class="stat-value" style="color:{% if profit < 0 %}var(--danger){% else %}var(--success){% endif %}">{{ profit|money }}</div><div class="stat-note">{% translate "Revenue minus expenses" %}</div></div>
   <div class="card stat"><div class="stat-label">{% translate "Payments received" %}</div><div class="stat-value">{{ received|money }}</div><div class="stat-note">{% translate "Cash, card and transfers" %}</div></div>
-  <div class="card stat"><div class="stat-label">{% translate "Occupancy" %}</div><div class="stat-value">{{ kpis.occupancy }}%</div><div class="stat-note">{% blocktranslate with n=kpis.nights_sold %}{{ n }} room nights{% endblocktranslate %}</div></div>
-  <div class="card stat"><div class="stat-label">{% translate "Average rate (ADR)" %}</div><div class="stat-value">{{ kpis.adr|money }}</div><div class="stat-note">RevPAR {{ kpis.revpar|money }}</div></div>
 </div>
+{% if hotel.module_rooms %}
+<div class="grid grid-3" style="margin-bottom:1.25rem">
+  <div class="card stat"><div class="stat-label">{% translate "Occupancy" %}</div><div class="stat-value">{{ kpis.occupancy }}%</div><div class="stat-note">{% blocktranslate with n=kpis.nights_sold %}{{ n }} room nights{% endblocktranslate %}</div></div>
+  <div class="card stat"><div class="stat-label">{% translate "Average rate (ADR)" %}</div><div class="stat-value">{{ kpis.adr|money }}</div><div class="stat-note">{% translate "Room revenue per night sold" %}</div></div>
+  <div class="card stat"><div class="stat-label">RevPAR</div><div class="stat-value">{{ kpis.revpar|money }}</div><div class="stat-note">{% translate "Room revenue per available room" %}</div></div>
+</div>
+{% endif %}
 
 <section class="card" style="margin-bottom:1.25rem">
   <div class="card-header"><h2>{% translate "Revenue per day" %}</h2></div>
@@ -62,6 +69,18 @@
   </section>
 </div>
 
+<section class="card" style="margin-top:1.25rem">
+  <div class="card-header"><h2>{% translate "Expenses by category" %}</h2><a href="{% url 'finance:expense_create' %}">{% icon "plus" %} {% translate "Add expense" %}</a></div>
+  <div class="card-body">
+    {% if expense_rows %}
+    <div class="hbar">
+      {% for e in expense_rows %}<span>{{ e.label }}</span><span class="track"><span class="fill" style="display:block; width:{{ e.amount|percent_of:expenses_total }}%; background:var(--danger)"></span></span><span class="num">{{ e.amount|money }}</span>{% endfor %}
+    </div>
+    {% else %}<div class="empty">{% translate "No expenses recorded in this period." %}</div>{% endif %}
+  </div>
+</section>
+
+{% if hotel.module_rooms %}
 <section class="card card-flush" style="margin-top:1.25rem">
   <div class="card-header"><h2>{% translate "Unpaid bills" %}</h2><strong>{{ outstanding_total|money }}</strong></div>
   <div class="table-wrap"><table class="table">
@@ -75,4 +94,5 @@
     </tbody>
   </table></div>
 </section>
+{% endif %}
 {% endblock %}

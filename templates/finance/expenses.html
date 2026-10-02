@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Expenses" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Finance" %}</div><h1>{% translate "Expenses" %}</h1><p>{{ start|date:"d.m.Y" }} – {{ end|date:"d.m.Y" }} · <strong>{{ total|money }}</strong></p></div>
+  <div class="actions">
+    <form method="get" class="filters">
+      <div class="field"><label for="from">{% translate "From" %}</label><input class="input" type="date" id="from" name="from" value="{{ start|date:'Y-m-d' }}"></div>
+      <div class="field"><label for="to">{% translate "To" %}</label><input class="input" type="date" id="to" name="to" value="{{ end|date:'Y-m-d' }}"></div>
+      <div class="field"><label for="c">{% translate "Category" %}</label><select class="input" id="c" name="category"><option value="">{% translate "All" %}</option>{% for v, l in categories %}<option value="{{ v }}" {% if v == category %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+      <button class="btn btn-secondary">{% translate "Show" %}</button>
+    </form>
+    <a class="btn" href="{% url 'finance:expense_create' %}">{% icon "plus" %} {% translate "Add expense" %}</a>
+  </div>
+</div>
+{% include "finance/_tabs.html" %}
+<div class="card card-flush">
+  {% if object_list %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Date" %}</th><th>{% translate "Description" %}</th><th>{% translate "Category" %}</th><th>{% translate "Supplier" %}</th><th>{% translate "Paid with" %}</th><th class="num">{% translate "Amount" %}</th><th></th></tr></thead>
+    <tbody>
+    {% for e in object_list %}
+      <tr class="{% if e.voided %}voided{% endif %}">
+        <td class="nowrap">{{ e.business_date|date:"d.m.Y" }}</td>
+        <td>{% if e.voided %}{{ e.description }}<br><small>{% translate "Voided" %}: {{ e.void_reason }}</small>{% else %}<a href="{% url 'finance:expense_edit' e.pk %}">{{ e.description }}</a>{% endif %}{% if e.reference %}<br><small class="muted">{{ e.reference }}</small>{% endif %}</td>
+        <td>{{ e.get_category_display }}</td>
+        <td>{{ e.supplier|default:"—" }}</td>
+        <td>{{ e.get_method_display }}</td>
+        <td class="num">{{ e.amount|money }}</td>
+        <td class="num">{% if not e.voided %}<form method="post" action="{% url 'finance:expense_void' e.pk %}" class="inline void-form">{% csrf_token %}<input type="hidden" name="reason"><button class="btn btn-ghost btn-sm" title="{% translate 'Void' %}">{% icon "x" %}</button></form>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% include "includes/pagination.html" %}
+  {% else %}
+    <div class="empty"><strong>{% translate "No expenses recorded in this period." %}</strong><a href="{% url 'finance:expense_create' %}">{% translate "Add expense" %}</a></div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.querySelectorAll('.void-form').forEach(function (f) {
+  f.addEventListener('submit', function (e) {
+    var r = prompt('{{ _("Why is this entry being voided?")|escapejs }}'); if (!r) { e.preventDefault(); return; }
+    f.querySelector('[name=reason]').value = r;
+  });
+});
+</script>
+{% endblock %}

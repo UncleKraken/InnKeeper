@@ -97,3 +97,30 @@ class SetPasswordStaffForm(StyledFormMixin, forms.Form):
             except forms.ValidationError as e:
                 self.add_error("password1", e)
         return cleaned
+
+
+class FirstRunForm(StyledFormMixin, forms.Form):
+    first_name = forms.CharField(label=_("Your first name"), max_length=150)
+    last_name = forms.CharField(label=_("Your last name"), max_length=150, required=False)
+    username = forms.CharField(
+        label=_("Username"), max_length=150, help_text=_("What you'll type to sign in, e.g. arta.")
+    )
+    password1 = forms.CharField(label=_("Password"), widget=forms.PasswordInput, strip=False)
+    password2 = forms.CharField(label=_("Repeat password"), widget=forms.PasswordInput, strip=False)
+
+    def clean_username(self):
+        username = self.cleaned_data["username"].strip()
+        User.username_validator(username)
+        return username
+
+    def clean(self):
+        cleaned = super().clean()
+        p1, p2 = cleaned.get("password1"), cleaned.get("password2")
+        if p1 and p2 and p1 != p2:
+            self.add_error("password2", _("The passwords do not match."))
+        elif p1:
+            try:
+                password_validation.validate_password(p1, User(username=cleaned.get("username", "")))
+            except forms.ValidationError as e:
+                self.add_error("password1", e)
+        return cleaned

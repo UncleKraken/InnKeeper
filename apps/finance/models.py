@@ -32,6 +32,7 @@ class Folio(models.Model):
         "frontdesk.Reservation", on_delete=models.PROTECT, related_name="folio", verbose_name=_("reservation")
     )
     status = models.CharField(_("status"), max_length=8, choices=Status.choices, default=Status.OPEN)
+    invoice_number = models.CharField(_("invoice number"), max_length=20, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     closed_at = models.DateTimeField(null=True, blank=True)
 
@@ -141,6 +142,7 @@ class Payment(LedgerEntry):
     method = models.CharField(_("method"), max_length=16, choices=Method.choices, default=Method.CASH)
     amount = models.DecimalField(_("amount"), **MONEY)
     reference = models.CharField(_("reference"), max_length=80, blank=True)
+    tendered = models.DecimalField(_("cash given"), null=True, blank=True, **MONEY)
 
     class Meta:
         verbose_name = _("payment")
@@ -149,3 +151,68 @@ class Payment(LedgerEntry):
 
     def __str__(self) -> str:
         return f"{self.get_method_display()} {self.amount}"
+
+    @property
+    def change(self) -> Decimal:
+        return max((self.tendered or ZERO) - self.amount, ZERO) if self.tendered else ZERO
+
+
+class Expense(LedgerEntry):
+    """Money going out: supplies, salaries, bills… so the owner can see real profit."""
+
+    class Category(models.TextChoices):
+        FOOD_DRINK = "food_drink", _("Food & drink stock")
+        SUPPLIES = "supplies", _("Supplies & cleaning")
+        SALARIES = "salaries", _("Salaries")
+        UTILITIES = "utilities", _("Electricity, water, internet")
+        RENT = "rent", _("Rent")
+        MAINTENANCE = "maintenance", _("Repairs & maintenance")
+        MARKETING = "marketing", _("Marketing & commissions")
+        TAXES = "taxes", _("Taxes & fees")
+        OTHER = "other", _("Other")
+
+    category = models.CharField(_("category"), max_length=16, choices=Category.choices, default=Category.SUPPLIES)
+    description = models.CharField(_("description"), max_length=200)
+    supplier = models.CharField(_("supplier"), max_length=120, blank=True)
+    amount = models.DecimalField(_("amount"), **MONEY)
+    method = models.CharField(
+        _("paid with"), max_length=16, choices=Payment.Method.choices, default=Payment.Method.CASH
+    )
+    reference = models.CharField(_("invoice / reference"), max_length=80, blank=True)
+
+    class Meta:
+        verbose_name = _("expense")
+        verbose_name_plural = _("expenses")
+        ordering = ["-business_date", "-id"]
+
+    def __str__(self) -> str:
+        return f"{self.description} {self.amount}"
+
+
+class DayClose(models.Model):
+    """End-of-day cash count (Z report). Records what the drawer should hold and what was counted."""
+
+    business_date = models.DateField(_("date"), unique=True)
+    opening_float = models.DecimalField(_("opening float"), default=ZERO, **MONEY)
+    cash_sales = models.DecimalField(_("cash received"), **MONEY)
+    cash_expenses = models.DecimalField(_("cash paid out"), **MONEY)
+    expected_cash = models.DecimalField(_("expected in drawer"), **MONEY)
+    counted_cash = models.DecimalField(_("counted"), **MONEY)
+    card_total = models.DecimalField(_("card"), default=ZERO, **MONEY)
+    other_total = models.DecimalField(_("bank & other"), default=ZERO, **MONEY)
+    revenue_total = models.DecimalField(_("revenue"), default=ZERO, **MONEY)
+    notes = models.CharField(_("notes"), max_length=255, blank=True)
+    closed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    closed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("day close")
+        verbose_name_plural = _("day closes")
+        ordering = ["-business_date"]
+
+    def __str__(self) -> str:
+        return f"Z {self.business_date}"
+
+    @property
+    def difference(self) -> Decimal:
+        return self.counted_cash - self.expected_cash

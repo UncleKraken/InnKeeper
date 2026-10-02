@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Receipts" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Services" %}</div><h1>{% translate "Receipts" %}</h1><p>{% translate "Find, reprint or void past bills." %}</p></div>
+  <form method="get" class="filters">
+    <div class="field"><label for="d">{% translate "Date" %}</label><input class="input" type="date" id="d" name="date" value="{{ day }}"></div>
+    {% if outlets|length > 1 %}
+    <div class="field"><label for="o">{% translate "Outlet" %}</label><select class="input" id="o" name="outlet"><option value="">{% translate "All" %}</option>{% for o in outlets %}<option value="{{ o.pk }}" {% if request.GET.outlet == o.pk|stringformat:"s" %}selected{% endif %}>{{ o.name }}</option>{% endfor %}</select></div>
+    {% endif %}
+    <div class="field"><label for="q">{% translate "Number or table" %}</label><input class="input" id="q" name="q" value="{{ q }}"></div>
+    <button class="btn btn-secondary">{% translate "Show" %}</button>
+  </form>
+</div>
+<div class="card card-flush">
+  {% if object_list %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Receipt" %}</th><th>{% translate "Time" %}</th><th>{% translate "Outlet" %}</th><th>{% translate "Table / customer" %}</th><th>{% translate "Staff" %}</th><th>{% translate "Settled" %}</th><th class="num">{% translate "Total" %}</th><th></th></tr></thead>
+    <tbody>
+    {% for o in object_list %}
+      <tr class="{% if o.status == 'cancelled' %}voided{% endif %}">
+        <td class="mono"><a href="{% url 'outlets:receipt' o.pk %}">{{ o.receipt_number|default:o.number }}</a></td>
+        <td class="nowrap">{{ o.closed_at|date:"d.m H:i" }}</td>
+        <td>{{ o.outlet }}</td>
+        <td>{{ o.display_name }}</td>
+        <td>{{ o.opened_by|default:"—" }}</td>
+        <td>{% if o.status == "cancelled" %}{% translate "Voided" as l %}{% status_badge "cancelled" l %}{% else %}{% status_badge o.settlement o.get_settlement_display %}{% endif %}</td>
+        <td class="num">{{ o.total|money }}</td>
+        <td class="num"><a class="btn btn-ghost btn-sm" href="{% url 'outlets:receipt' o.pk %}?print=1" target="_blank">{% icon "print" %}</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% include "includes/pagination.html" %}
+  {% else %}
+    <div class="empty"><strong>{% translate "No receipts found" %}</strong></div>
+  {% endif %}
+</div>
+{% endblock %}

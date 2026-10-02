@@ -1,0 +1,38 @@
+{% load static i18n %}<!doctype html>
+{% get_current_language as LANG %}
+<html lang="{{ LANG }}">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% translate "Welcome to InnKeeper" %}</title>
+  <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+</head>
+<body>
+<div class="auth">
+  <section class="auth-art">
+    <div class="brand" style="padding:0"><span class="brand-mark">I</span><span>InnKeeper</span></div>
+    <div>
+      <h2>{% translate "Welcome! Let's create your manager account." %}</h2>
+      <p>{% translate "This is the first account on this installation. It can do everything, including adding your staff. Choose a strong password and keep it safe." %}</p>
+    </div>
+    <small style="color:#7d8899">InnKeeper</small>
+  </section>
+  <section class="auth-form">
+    <div class="auth-card">
+      <div class="row" style="justify-content:flex-end; margin-bottom:1.5rem">{% include "includes/lang_switch.html" %}</div>
+      <h1>{% translate "Create your account" %}</h1>
+      <form method="post" novalidate style="margin-top:1.25rem">{% csrf_token %}
+        {% for field in form %}
+          <div class="field{% if field.errors %} has-error{% endif %}" style="margin-bottom:.9rem">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}
+            {% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}
+            {% for e in field.errors %}<div class="error">{{ e }}</div>{% endfor %}
+          </div>
+        {% endfor %}
+        <button class="btn btn-lg btn-block" type="submit">{% translate "Create account and continue" %}</button>
+      </form>
+    </div>
+  </section>
+</div>
+</body>
+</html>

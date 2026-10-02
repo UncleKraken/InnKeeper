@@ -26,10 +26,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - backups:/app/backups
     ports:
       - "8000:8000"
 
-  # Posts each in-house guest's room charge for the night just gone, daily at 03:00.
+  # Daily at 03:00: post last night's room charges and save a backup (kept in the backups volume).
   night-audit:
     build: .
     restart: unless-stopped
@@ -44,7 +46,11 @@ services:
         now=$$(date +%s); next=$$(date -d "tomorrow 03:00" +%s);
         sleep $$((next - now));
         python manage.py night_audit;
+        python manage.py backup --keep 30;
       done'
+    volumes:
+      - backups:/app/backups
 
 volumes:
   pgdata:
+  backups:

@@ -39,22 +39,25 @@
 
       {% if "outlets" in modules %}
         <div class="nav-section">{% translate "Services" %}</div>
-        <a href="{% url 'outlets:home' %}" class="{% if request.path|slice:':9' == '/outlets/' and '/outlets/setup' not in request.path %}active{% endif %}">{% icon "utensils" %} {% translate "Restaurant, bar & services" %}</a>
+        <a href="{% url 'outlets:home' %}" class="{% if request.path|slice:':9' == '/outlets/' and '/outlets/setup' not in request.path and '/outlets/receipts' not in request.path %}active{% endif %}">{% icon "utensils" %} {% translate "Restaurant, bar & services" %}</a>
+        <a href="{% url 'outlets:receipts' %}" class="{% active '/outlets/receipts' %}">{% icon "receipt" %} {% translate "Receipts" %}</a>
       {% endif %}
 
       {% if "finance" in modules %}
         <div class="nav-section">{% translate "Finance" %}</div>
-        <a href="{% url 'finance:dashboard' %}" class="{% active '/finance/' %}">{% icon "chart" %} {% translate "Reports" %}</a>
+        <a href="{% url 'finance:dashboard' %}" class="{% if request.path == '/finance/' or '/finance/ledger' in request.path or '/finance/sales' in request.path %}active{% endif %}">{% icon "chart" %} {% translate "Reports" %}</a>
+        <a href="{% url 'finance:day_close' %}" class="{% active '/finance/day-close' %}">{% icon "lock" %} {% translate "Day close" %}</a>
+        <a href="{% url 'finance:expenses' %}" class="{% active '/finance/expenses' %}">{% icon "wallet" %} {% translate "Expenses" %}</a>
       {% endif %}
 
       {% if "management" in modules %}
         <div class="nav-section">{% translate "Management" %}</div>
-        <a href="{% url 'frontdesk:room_list' %}" class="{% active '/front-desk/setup' %}">{% icon "bed" %} {% translate "Rooms & rates" %}</a>
-        <a href="{% url 'outlets:setup' %}" class="{% active '/outlets/setup' %}">{% icon "store" %} {% translate "Outlets & menus" %}</a>
+        {% if hotel.module_rooms %}<a href="{% url 'frontdesk:room_list' %}" class="{% active '/front-desk/setup' %}">{% icon "bed" %} {% translate "Rooms & rates" %}</a>{% endif %}
+        {% if hotel.module_outlets %}<a href="{% url 'outlets:setup' %}" class="{% active '/outlets/setup' %}">{% icon "store" %} {% translate "Outlets & menus" %}</a>{% endif %}
         <a href="{% url 'accounts:staff_list' %}" class="{% active '/accounts/staff' %}">{% icon "staff" %} {% translate "Staff" %}</a>
-        <a href="{% url 'core:settings' %}" class="{% active '/settings' %}">{% icon "settings" %} {% translate "Hotel settings" %}</a>
-        <a href="{% url 'core:audit_log' %}" class="{% active '/audit' %}">{% icon "history" %} {% translate "Activity log" %}</a>
+        <a href="{% url 'core:settings' %}" class="{% active '/settings' '/setup' '/audit' %}">{% icon "settings" %} {% translate "Settings" %}</a>
       {% endif %}
+      <a href="{% url 'core:help' %}" class="{% active '/help' %}" style="margin-top:.75rem">{% icon "help" %} {% translate "Help" %}</a>
     </nav>
     <div class="sidebar-foot">
       <div class="who">{{ request.user }}</div>
@@ -78,6 +81,7 @@
       <span style="width:28px"></span>
     </header>
     <main class="content">
+      {% if update_available %}<div class="alert alert-info no-print" style="margin-bottom:1rem">{% blocktranslate with v=update_available.version %}A new version of InnKeeper ({{ v }}) is available.{% endblocktranslate %} <a href="{{ update_available.url }}" target="_blank" rel="noopener">{% translate "See what's new and download" %}</a></div>{% endif %}
       {% include "includes/messages.html" %}
       {% block content %}{% endblock %}
     </main>

@@ -130,9 +130,7 @@ def check_out(reservation: Reservation, user, *, allow_balance: bool = False) ->
         reservation.save(update_fields=["status", "checked_out_at", "departure"])
 
         if balance <= 0:
-            folio.status = Folio.Status.CLOSED
-            folio.closed_at = timezone.now()
-            folio.save(update_fields=["status", "closed_at"])
+            _close_folio(folio)
 
         from apps.housekeeping.services import room_vacated
 
@@ -161,6 +159,17 @@ def cancel(reservation: Reservation, user, *, no_show: bool = False) -> Reservat
         reservation,
     )
     return reservation
+
+
+def _close_folio(folio: Folio) -> None:
+    """Close a settled bill and give it the next invoice number."""
+    from apps.core.models import Sequence
+
+    folio.status = Folio.Status.CLOSED
+    folio.closed_at = timezone.now()
+    if not folio.invoice_number:
+        folio.invoice_number = Sequence.next("invoice", timezone.localdate().year)
+    folio.save(update_fields=["status", "closed_at", "invoice_number"])
 
 
 def _require_open(folio: Folio) -> None:
@@ -202,9 +211,7 @@ def add_payment(folio: Folio, *, amount: Decimal, method: str, reference: str = 
         Reservation.Status.CHECKED_OUT,
         Reservation.Status.CANCELLED,
     ):
-        folio.status = Folio.Status.CLOSED
-        folio.closed_at = timezone.now()
-        folio.save(update_fields=["status", "closed_at"])
+        _close_folio(folio)
     return payment
 
 
@@ -227,3 +234,35 @@ def void_entry(entry, *, reason: str, user):
     entry.save(update_fields=["voided", "void_reason", "voided_by", "voided_at"])
     audit(user, f"{entry._meta.model_name}.void", f"{entry} – {reason}", entry)
     return entry
+
+
+@transaction.atomic
+def move_room(reservation: Reservation, new_room: Room, user, *, use_new_rate: bool = False) -> Reservation:
+    """Move a booked or in-house guest to another room, checking it is free for the stay."""
+    reservation = Reservation.objects.select_for_update().select_related("room").get(pk=reservation.pk)
+    if reservation.status not in Reservation.ACTIVE_STATUSES:
+        raise BusinessError(_("Closed or cancelled reservations cannot be changed."))
+    if new_room.pk == reservation.room_id:
+        return reservation
+    _lock_room(new_room.pk)
+    if new_room.out_of_order:
+        raise BusinessError(_("Room %(n)s is out of order.") % {"n": new_room.number})
+    old_room = reservation.room
+    reservation.room = new_room
+    if reservation.status == Reservation.Status.CHECKED_IN:
+        # From today on; past nights stay as they were.
+        occupant = new_room.reservations.filter(status=Reservation.Status.CHECKED_IN).exclude(pk=reservation.pk).first()
+        if occupant:
+            raise BusinessError(
+                _("Room %(n)s is still occupied by %(g)s.") % {"n": new_room.number, "g": occupant.guest}
+            )
+    if use_new_rate:
+        reservation.rate = new_room.room_type.base_rate
+    reservation.full_clean()
+    reservation.save(update_fields=["room", "rate"])
+    if reservation.status == Reservation.Status.CHECKED_IN:
+        from apps.housekeeping.services import room_vacated
+
+        room_vacated(old_room, user)
+    audit(user, "reservation.move_room", f"{reservation.code}: {old_room.number} → {new_room.number}", reservation)
+    return reservation

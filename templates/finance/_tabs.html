@@ -1,0 +1,8 @@
+{% load i18n %}
+<nav class="tabs">
+  <a href="{% url 'finance:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">{% translate "Overview" %}</a>
+  <a href="{% url 'finance:day_close' %}" class="{% if request.resolver_match.url_name == 'day_close' %}active{% endif %}">{% translate "Day close" %}</a>
+  <a href="{% url 'finance:expenses' %}" class="{% if 'expense' in request.resolver_match.url_name %}active{% endif %}">{% translate "Expenses" %}</a>
+  {% if hotel.module_outlets %}<a href="{% url 'finance:sales' %}" class="{% if request.resolver_match.url_name == 'sales' %}active{% endif %}">{% translate "Sales" %}</a>{% endif %}
+  <a href="{% url 'finance:ledger' %}" class="{% if request.resolver_match.url_name == 'ledger' %}active{% endif %}">{% translate "Ledger" %}</a>
+</nav>

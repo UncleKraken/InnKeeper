@@ -46,7 +46,8 @@ class ReservationForm(StyledFormMixin, forms.ModelForm):
         label=_("Existing guest"),
         queryset=Guest.objects.all(),
         required=False,
-        help_text=_("Choose a returning guest, or fill in the new guest's name below."),
+        widget=forms.HiddenInput,
+        help_text=_("Search for a returning guest, or fill in the new guest's name below."),
     )
     new_first_name = forms.CharField(label=_("First name"), required=False, max_length=80)
     new_last_name = forms.CharField(label=_("Last name"), required=False, max_length=80)

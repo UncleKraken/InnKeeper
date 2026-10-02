@@ -1,8 +1,12 @@
+from decimal import Decimal, InvalidOperation
+
 from django import forms
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 
@@ -10,10 +14,12 @@ from apps.accounts.permissions import module_required
 from apps.core.crud import CrudCreateView, CrudListView, CrudUpdateView
 from apps.core.exceptions import BusinessError
 from apps.core.forms import StyledFormMixin
+from apps.core.templatetags.innkeeper import money
 from apps.finance.models import Payment
 from apps.frontdesk.models import Reservation
 
 from . import services
+from .floorplan import floor_plan, floor_plan_save  # noqa: F401  (routed in urls.py)
 from .models import Category, Item, Order, OrderLine, Outlet, Table
 
 
@@ -52,9 +58,39 @@ def floor(request, pk):
         outlet.orders.filter(status=Order.Status.OPEN).select_related("table", "opened_by").prefetch_related("lines")
     )
     by_table = {o.table_id: o for o in open_orders if o.table_id}
-    tables = [{"table": t, "order": by_table.get(t.pk)} for t in outlet.tables.filter(is_active=True)]
+    all_tables = list(outlet.tables.filter(is_active=True))
+    zones = []
+    for t in all_tables:
+        if t.zone not in zones:
+            zones.append(t.zone)
+    zone = request.GET.get("zone", zones[0] if zones else "")
+    if zone not in zones and zones:
+        zone = zones[0]
+    tables = [
+        {
+            "table": t,
+            "order": by_table.get(t.pk),
+            "left": t.pos_x / 10,
+            "top": t.pos_y / 6.4,
+            "width": t.width / 10,
+            "height": t.height / 6.4,
+        }
+        for t in all_tables
+        if t.zone == zone
+    ]
     loose_orders = [o for o in open_orders if not o.table_id]
-    return render(request, "outlets/floor.html", {"outlet": outlet, "tables": tables, "loose_orders": loose_orders})
+    return render(
+        request,
+        "outlets/floor.html",
+        {
+            "outlet": outlet,
+            "tables": tables,
+            "loose_orders": loose_orders,
+            "zones": zones,
+            "zone": zone,
+            "busy_counts": {z: sum(1 for t in all_tables if t.zone == z and t.pk in by_table) for z in zones},
+        },
+    )
 
 
 @module_required("outlets")
@@ -103,6 +139,8 @@ def order_view(request, pk):
             "menu": [m for m in menu if m["items"]],
             "in_house": in_house,
             "methods": Payment.Method.choices,
+            "payments": order.payments.filter(voided=False).select_related("created_by"),
+            "move_tables": order.outlet.tables.filter(is_active=True).exclude(pk=order.table_id),
         },
     )
 
@@ -150,6 +188,13 @@ def update_order(request, pk):
     return _back_to_order(order)
 
 
+def _decimal(value) -> Decimal | None:
+    try:
+        return Decimal(str(value).replace(",", ".").strip()) if str(value).strip() else None
+    except (InvalidOperation, ValueError):
+        raise BusinessError(_("Enter a valid amount."))
+
+
 @require_POST
 @module_required("outlets")
 def settle(request, pk):
@@ -161,13 +206,90 @@ def settle(request, pk):
             services.charge_to_room(order, reservation, user=request.user)
             messages.success(request, _("Charged to room %(room)s.") % {"room": reservation.room.number})
         elif how in Payment.Method.values:
-            services.pay_order(order, method=how, user=request.user, reference=request.POST.get("reference", "")[:80])
-            messages.success(request, _("Paid. The table is free again."))
+            payment = services.pay_order(
+                order,
+                method=how,
+                user=request.user,
+                amount=_decimal(request.POST.get("amount", "")),
+                tendered=_decimal(request.POST.get("tendered", "")),
+                reference=request.POST.get("reference", "")[:80],
+            )
+            order.refresh_from_db()
+            if order.is_open:
+                messages.success(
+                    request,
+                    _("%(amount)s received. %(left)s left to pay.")
+                    % {"amount": money(payment.amount), "left": money(order.remaining)},
+                )
+                return _back_to_order(order)
+            if payment.change:
+                messages.success(request, _("Paid. Give back %(change)s change.") % {"change": money(payment.change)})
+            else:
+                messages.success(request, _("Paid. The table is free again."))
         else:
             raise BusinessError(_("Choose how the bill is settled."))
     except BusinessError as e:
         messages.error(request, str(e))
         return _back_to_order(order)
+    url = reverse("outlets:receipt", args=[order.pk])
+    return redirect(url + ("?print=1" if request.POST.get("print") == "1" else ""))
+
+
+@require_POST
+@module_required("outlets")
+def discount(request, pk):
+    order = _order_for(request, pk)
+    try:
+        value = _decimal(request.POST.get("value", "")) or Decimal("0")
+        kind = request.POST.get("kind", "percent")
+        services.set_discount(
+            order,
+            user=request.user,
+            percent=value if kind == "percent" else None,
+            amount=value if kind == "amount" else None,
+            reason=request.POST.get("reason", ""),
+        )
+    except BusinessError as e:
+        messages.error(request, str(e))
+    return _back_to_order(order)
+
+
+@require_POST
+@module_required("outlets")
+def move(request, pk):
+    order = _order_for(request, pk)
+    table = get_object_or_404(Table, pk=request.POST.get("table"), outlet=order.outlet, is_active=True)
+    try:
+        target = services.move_order(order, table, user=request.user)
+        messages.success(request, _("Moved to table %(name)s.") % {"name": table.name})
+    except BusinessError as e:
+        messages.error(request, str(e))
+        return _back_to_order(order)
+    return _back_to_order(target)
+
+
+@require_POST
+@module_required("outlets")
+def void_payment(request, pk, payment_id):
+    order = _order_for(request, pk)
+    payment = get_object_or_404(Payment, pk=payment_id, order=order)
+    try:
+        services.void_payment(payment, user=request.user, reason=request.POST.get("reason", ""))
+        messages.success(request, _("Entry voided."))
+    except BusinessError as e:
+        messages.error(request, str(e))
+    return _back_to_order(order)
+
+
+@require_POST
+@module_required("outlets")
+def void_receipt(request, pk):
+    order = _order_for(request, pk)
+    try:
+        services.void_receipt(order, user=request.user, reason=request.POST.get("reason", ""))
+        messages.success(request, _("Receipt voided."))
+    except BusinessError as e:
+        messages.error(request, str(e))
     return redirect("outlets:receipt", pk=order.pk)
 
 
@@ -186,16 +308,52 @@ def cancel(request, pk):
 
 @module_required("outlets")
 def receipt(request, pk):
+    from apps.core.models import HotelSettings
+
     order = _order_for(request, pk)
+    hs = HotelSettings.load()
+    total = order.total
+    vat = (total * hs.vat_fraction).quantize(Decimal("0.01"))
     room_charge = (
-        order.charges.filter(folio__isnull=False)
+        order.charges.filter(folio__isnull=False, voided=False)
         .select_related("folio__reservation__room", "folio__reservation__guest")
         .first()
     )
     return render(
         request,
         "outlets/receipt.html",
-        {"order": order, "lines": order.lines.all(), "payment": order.payments.first(), "room_charge": room_charge},
+        {
+            "order": order,
+            "lines": order.lines.all(),
+            "payments": order.payments.filter(voided=False),
+            "room_charge": room_charge,
+            "vat": vat,
+            "net": total - vat,
+            "auto_print": request.GET.get("print") == "1",
+        },
+    )
+
+
+@module_required("outlets")
+def receipts(request):
+    """Every closed or voided bill, newest first, for reprinting or voiding."""
+    qs = Order.objects.exclude(status=Order.Status.OPEN).select_related("outlet", "table", "closed_by", "opened_by")
+    qs = qs.exclude(status=Order.Status.CANCELLED, receipt_number="")
+    outlets = [o for o in Outlet.objects.all() if o.user_can_use(request.user)]
+    qs = qs.filter(outlet__in=outlets)
+    day = request.GET.get("date", "")
+    if day:
+        qs = qs.filter(closed_at__date=day)
+    if request.GET.get("outlet"):
+        qs = qs.filter(outlet_id=request.GET["outlet"])
+    q = request.GET.get("q", "").strip()
+    if q:
+        qs = qs.filter(Q(receipt_number__icontains=q) | Q(label__icontains=q) | Q(table__name=q))
+    page = Paginator(qs.order_by("-closed_at"), 50).get_page(request.GET.get("page"))
+    return render(
+        request,
+        "outlets/receipts.html",
+        {"page_obj": page, "object_list": page.object_list, "outlets": outlets, "q": q, "day": day},
     )
 
 
@@ -212,7 +370,7 @@ SETUP_TABS = [
 class OutletForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = Outlet
-        fields = ["name", "kind", "uses_tables", "sort_order", "is_active", "staff"]
+        fields = ["name", "kind", "uses_tables", "menu_public", "menu_intro", "sort_order", "is_active", "staff"]
         widgets = {"staff": forms.CheckboxSelectMultiple}
 
     def __init__(self, *args, **kwargs):
@@ -230,6 +388,10 @@ class OutletList(CrudListView):
     list_url_name = "outlets:setup"
     create_url_name = "outlets:outlet_create"
     update_url_name = "outlets:outlet_edit"
+    row_actions = [
+        (_("Floor plan"), "outlets:floor_plan", "move", "uses_tables"),
+        (_("Menu & QR"), "outlets:menu_admin", "qr", ""),
+    ]
     columns = [
         ("name", _("Name"), "text"),
         ("kind", _("Type"), "choice"),
@@ -269,7 +431,7 @@ class CategoryList(CrudListView):
 
 class CategoryFormConfig:
     model = Category
-    fields = ["outlet", "name", "sort_order"]
+    fields = ["outlet", "name", "name_en", "sort_order"]
     title = _("Outlets & menus")
     singular = _("category")
     list_url_name = "outlets:category_list"
@@ -292,7 +454,17 @@ class CategoryEdit(CategoryFormConfig, CrudUpdateView):
 class ItemForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = Item
-        fields = ["category", "name", "price", "description", "duration_minutes", "sort_order", "is_active"]
+        fields = [
+            "category",
+            "name",
+            "name_en",
+            "price",
+            "description",
+            "description_en",
+            "duration_minutes",
+            "sort_order",
+            "is_active",
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -353,7 +525,7 @@ class TableList(CrudListView):
 
 class TableFormConfig:
     model = Table
-    fields = ["outlet", "name", "seats", "sort_order", "is_active"]
+    fields = ["outlet", "name", "seats", "zone", "shape", "sort_order", "is_active"]
     title = _("Outlets & menus")
     singular = _("table")
     list_url_name = "outlets:table_list"

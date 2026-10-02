@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Sales" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Finance" %}</div><h1>{% translate "Sales" %}</h1><p>{{ start|date:"d.m.Y" }} – {{ end|date:"d.m.Y" }}</p></div>
+  <div class="actions">{% include "finance/_range.html" %}</div>
+</div>
+{% include "finance/_tabs.html" %}
+<div class="grid grid-4" style="margin-bottom:1.25rem">
+  <div class="card stat"><div class="stat-label">{% translate "Outlet sales" %}</div><div class="stat-value">{{ revenue|money }}</div></div>
+  <div class="card stat"><div class="stat-label">{% translate "Bills" %}</div><div class="stat-value">{{ order_count }}</div></div>
+  <div class="card stat"><div class="stat-label">{% translate "Average bill" %}</div><div class="stat-value">{{ avg_bill|money }}</div></div>
+  <div class="card stat"><div class="stat-label">{% translate "Discounts given" %}</div><div class="stat-value">{{ discounts|money }}</div></div>
+</div>
+<div class="grid grid-2">
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "Best sellers" %}</h2></div>
+    <div class="table-wrap"><table class="table table-sm">
+      <thead><tr><th>{% translate "Item" %}</th><th>{% translate "Outlet" %}</th><th class="num">{% translate "Qty" %}</th><th class="num">{% translate "Sales" %}</th></tr></thead>
+      <tbody>
+      {% for i in top_items %}<tr><td>{{ i.name }}</td><td class="muted">{{ i.order__outlet__name }}</td><td class="num">{{ i.qty }}</td><td class="num">{{ i.revenue|money }}</td></tr>
+      {% empty %}<tr><td colspan="4" class="empty">{% translate "No sales in this period." %}</td></tr>{% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+  <div class="stack">
+    <section class="card card-flush">
+      <div class="card-header"><h2>{% translate "By staff" %}</h2></div>
+      <div class="table-wrap"><table class="table table-sm">
+        <thead><tr><th>{% translate "Staff" %}</th><th class="num">{% translate "Bills" %}</th><th class="num">{% translate "Average" %}</th><th class="num">{% translate "Sales" %}</th></tr></thead>
+        <tbody>
+        {% for r in staff_rows %}<tr><td>{{ r.name }}</td><td class="num">{{ r.count }}</td><td class="num">{{ r.avg|money }}</td><td class="num">{{ r.total|money }}</td></tr>
+        {% empty %}<tr><td colspan="4" class="empty">{% translate "No sales in this period." %}</td></tr>{% endfor %}
+        </tbody>
+      </table></div>
+    </section>
+    <section class="card">
+      <div class="card-header"><h2>{% translate "Busiest hours" %}</h2></div>
+      <div class="card-body">
+        {% if busy_hours %}
+        <div class="bars" style="height:140px">
+          {% for h, v in busy_hours %}<div class="bar-col" title="{{ h }}:00 · {{ v|money }}"><div class="bar-fill" style="height:{{ v|percent_of:hour_max }}%; background:var(--accent)"></div><div class="bar-label">{{ h }}</div></div>{% endfor %}
+        </div>
+        {% else %}<div class="empty">{% translate "No sales in this period." %}</div>{% endif %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

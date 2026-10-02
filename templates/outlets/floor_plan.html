@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Floor plan" %} · {{ outlet.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="eyebrow"><a href="{% url 'outlets:setup' %}">{% icon "back" %} {% translate "Outlets & menus" %}</a></div>
+    <h1>{% translate "Floor plan" %} · {{ outlet.name }}</h1>
+    <p>{% translate "Drag tables to move them. Drag the corner to resize. Click a table to rename it." %}</p>
+  </div>
+  <div class="actions">
+    {% if outlets|length > 1 %}
+    <select class="input" style="width:auto" onchange="if(this.value) location.href=this.value">
+      {% for o in outlets %}<option value="{% url 'outlets:floor_plan' o.pk %}" {% if o.pk == outlet.pk %}selected{% endif %}>{{ o.name }}</option>{% endfor %}
+    </select>
+    {% endif %}
+    <span class="muted" id="dirty-flag" hidden>{% translate "Unsaved changes" %}</span>
+    <button class="btn" id="save" type="button">{% icon "check" %} {% translate "Save plan" %}</button>
+  </div>
+</div>
+
+<div class="fp">
+  <div class="fp-main card">
+    <div class="fp-toolbar">
+      <nav class="fp-zones" id="zones"></nav>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-secondary btn-sm" id="add-zone">{% icon "plus" %} {% translate "Area" %}</button>
+      <button type="button" class="btn btn-secondary btn-sm" id="arrange">{% icon "grid" %} {% translate "Tidy up" %}</button>
+      <button type="button" class="btn btn-sm" id="add-table">{% icon "plus" %} {% translate "Table" %}</button>
+    </div>
+    <div class="fp-canvas-wrap"><div class="fp-canvas" id="canvas" tabindex="0"></div></div>
+  </div>
+
+  <aside class="card fp-panel" id="panel">
+    <div class="card-header"><h3 id="panel-title">{% translate "Table" %}</h3></div>
+    <div class="card-body" id="panel-empty"><p class="muted" style="margin:0">{% translate "Select a table to edit it, or add a new one." %}</p></div>
+    <div class="card-body hidden" id="panel-form">
+      <div class="field" style="margin-bottom:.8rem"><label for="f-name">{% translate "Name or number" %}</label><input class="input" id="f-name" maxlength="30"></div>
+      <div class="form-grid" style="grid-template-columns:1fr 1fr; gap:.8rem">
+        <div class="field"><label for="f-seats">{% translate "Seats" %}</label><input class="input" id="f-seats" type="number" min="1" max="99"></div>
+        <div class="field"><label for="f-shape">{% translate "Shape" %}</label><select class="input" id="f-shape">{% for v, l in shapes %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select></div>
+        <div class="field"><label for="f-w">{% translate "Width" %}</label><input class="input" id="f-w" type="number" min="40" max="400" step="10"></div>
+        <div class="field"><label for="f-h">{% translate "Height" %}</label><input class="input" id="f-h" type="number" min="40" max="400" step="10"></div>
+      </div>
+      <div class="field" style="margin-top:.8rem"><label for="f-zone">{% translate "Area" %}</label><select class="input" id="f-zone"></select></div>
+      <label class="check" style="margin-top:.9rem"><input type="checkbox" id="f-active"> {% translate "In use" %}</label>
+      <div class="row" style="margin-top:1.1rem">
+        <button type="button" class="btn btn-secondary btn-sm" id="dup">{% translate "Duplicate" %}</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn btn-ghost btn-sm" id="del" style="color:var(--danger)">{% icon "trash" %} {% translate "Remove" %}</button>
+      </div>
+    </div>
+    <div class="card-footer muted" style="font-size:.8rem">{% translate "Tip: arrow keys nudge the selected table. Hold Shift for bigger steps." %}</div>
+  </aside>
+</div>
+{{ plan|json_script:"plan-data" }}
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var T = {
+    main: '{{ _("Main")|escapejs }}',
+    newArea: '{{ _("Name of the new area (e.g. Terrace):")|escapejs }}',
+    renameArea: '{{ _("Rename this area:")|escapejs }}',
+    busy: '{{ _("This table has an open order. Close it before removing the table.")|escapejs }}',
+    saved: '{{ _("Saved")|escapejs }}',
+    leave: '{{ _("You have unsaved changes.")|escapejs }}',
+    seats: '{{ _("seats")|escapejs }}'
+  };
+  var data = JSON.parse(document.getElementById('plan-data').textContent);
+  var W = data.w, H = data.h, GRID = 10;
+  var tables = data.tables.map(function (t, i) { t.key = 'k' + i; return t; });
+  var busy = new Set(data.busy);
+  var zone = tables.length ? tables[0].zone : '';
+  var selected = null, dirty = false, nextKey = tables.length;
+  var canvas = document.getElementById('canvas');
+  var extraZones = [];
+
+  function zones() {
+    var z = [];
+    tables.forEach(function (t) { if (z.indexOf(t.zone) === -1) z.push(t.zone); });
+    extraZones.forEach(function (e) { if (z.indexOf(e) === -1) z.push(e); });
+    if (z.indexOf(zone) === -1) z.push(zone);
+    return z;
+  }
+  function label(z) { return z || T.main; }
+  function setDirty(v) { dirty = v; document.getElementById('dirty-flag').hidden = !v; }
+  function snap(v) { return Math.round(v / GRID) * GRID; }
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function find(key) { return tables.find(function (t) { return t.key === key; }); }
+
+  function renderZones() {
+    var nav = document.getElementById('zones');
+    nav.innerHTML = '';
+    zones().forEach(function (z) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = label(z) + ' (' + tables.filter(function (t) { return t.zone === z; }).length + ')';
+      b.className = z === zone ? 'active' : '';
+      b.onclick = function () { zone = z; selected = null; render(); };
+      b.ondblclick = function () {
+        var n = prompt(T.renameArea, z); if (n === null) return; n = n.trim().slice(0, 40);
+        tables.forEach(function (t) { if (t.zone === z) t.zone = n; });
+        extraZones = extraZones.map(function (e) { return e === z ? n : e; });
+        zone = n; setDirty(true); render();
+      };
+      nav.appendChild(b);
+    });
+    var sel = document.getElementById('f-zone');
+    sel.innerHTML = '';
+    zones().forEach(function (z) { var o = document.createElement('option'); o.value = z; o.textContent = label(z); sel.appendChild(o); });
+  }
+
+  function render() {
+    renderZones();
+    canvas.innerHTML = '';
+    tables.filter(function (t) { return t.zone === zone; }).forEach(function (t) {
+      var el = document.createElement('div');
+      el.className = 'fp-table shape-' + t.shape + (t.key === selected ? ' selected' : '') + (t.active ? '' : ' inactive') + (busy.has(t.id) ? ' busy' : '');
+      el.style.left = (t.x / W * 100) + '%'; el.style.top = (t.y / H * 100) + '%';
+      el.style.width = (t.w / W * 100) + '%'; el.style.height = (t.h / H * 100) + '%';
+      el.dataset.key = t.key;
+      el.innerHTML = '<span class="fp-name"></span><span class="fp-seats"></span><span class="fp-resize" title=""></span>';
+      el.querySelector('.fp-name').textContent = t.name;
+      el.querySelector('.fp-seats').textContent = t.seats + ' ' + T.seats;
+      canvas.appendChild(el);
+    });
+    renderPanel();
+  }
+
+  function renderPanel() {
+    var t = selected && find(selected);
+    document.getElementById('panel-empty').classList.toggle('hidden', !!t);
+    document.getElementById('panel-form').classList.toggle('hidden', !t);
+    if (!t) return;
+    document.getElementById('f-name').value = t.name;
+    document.getElementById('f-seats').value = t.seats;
+    document.getElementById('f-shape').value = t.shape;
+    document.getElementById('f-w').value = t.w;
+    document.getElementById('f-h').value = t.h;
+    document.getElementById('f-zone').value = t.zone;
+    document.getElementById('f-active').checked = t.active;
+  }
+
+  function bind(id, prop, conv) {
+    document.getElementById(id).addEventListener('input', function (e) {
+      var t = selected && find(selected); if (!t) return;
+      var v = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+      t[prop] = conv ? conv(v, t) : v;
+      if (prop === 'w') t.x = clamp(t.x, 0, W - t.w);
+      if (prop === 'h') t.y = clamp(t.y, 0, H - t.h);
+      if (prop === 'zone') { zone = t.zone; }
+      setDirty(true); render();
+      if (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') { var el = document.getElementById(id); el.focus(); try { el.setSelectionRange(el.value.length, el.value.length); } catch (x) {} }
+    });
+  }
+  bind('f-name', 'name', function (v) { return v.slice(0, 30); });
+  bind('f-seats', 'seats', function (v) { return clamp(parseInt(v || '1', 10), 1, 99); });
+  bind('f-shape', 'shape');
+  bind('f-w', 'w', function (v) { return clamp(snap(parseInt(v || '40', 10)), 40, 400); });
+  bind('f-h', 'h', function (v) { return clamp(snap(parseInt(v || '40', 10)), 40, 400); });
+  bind('f-zone', 'zone');
+  bind('f-active', 'active');
+
+  // Dragging and resizing
+  var drag = null;
+  canvas.addEventListener('pointerdown', function (e) {
+    var el = e.target.closest('.fp-table');
+    if (!el) { selected = null; render(); return; }
+    var t = find(el.dataset.key);
+    selected = t.key;
+    var scale = canvas.clientWidth / W;
+    drag = { t: t, resize: e.target.classList.contains('fp-resize'), sx: e.clientX, sy: e.clientY, x: t.x, y: t.y, w: t.w, h: t.h, scale: scale, moved: false };
+    canvas.setPointerCapture(e.pointerId);
+    render();
+    e.preventDefault();
+  });
+  canvas.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var dx = (e.clientX - drag.sx) / drag.scale, dy = (e.clientY - drag.sy) / drag.scale;
+    if (Math.abs(dx) + Math.abs(dy) > 2) drag.moved = true;
+    var t = drag.t;
+    if (drag.resize) {
+      t.w = clamp(snap(drag.w + dx), 40, Math.min(400, W - t.x));
+      t.h = clamp(snap(drag.h + dy), 40, Math.min(400, H - t.y));
+      if (t.shape === 'round') t.h = t.w;
+    } else {
+      t.x = clamp(snap(drag.x + dx), 0, W - t.w);
+      t.y = clamp(snap(drag.y + dy), 0, H - t.h);
+    }
+    var el = canvas.querySelector('[data-key="' + t.key + '"]');
+    el.style.left = (t.x / W * 100) + '%'; el.style.top = (t.y / H * 100) + '%';
+    el.style.width = (t.w / W * 100) + '%'; el.style.height = (t.h / H * 100) + '%';
+  });
+  canvas.addEventListener('pointerup', function () {
+    if (drag && drag.moved) { setDirty(true); renderPanel(); }
+    drag = null;
+  });
+  canvas.addEventListener('keydown', function (e) {
+    var t = selected && find(selected); if (!t) return;
+    var step = e.shiftKey ? 50 : GRID, moved = true;
+    if (e.key === 'ArrowLeft') t.x = clamp(t.x - step, 0, W - t.w);
+    else if (e.key === 'ArrowRight') t.x = clamp(t.x + step, 0, W - t.w);
+    else if (e.key === 'ArrowUp') t.y = clamp(t.y - step, 0, H - t.h);
+    else if (e.key === 'ArrowDown') t.y = clamp(t.y + step, 0, H - t.h);
+    else if (e.key === 'Delete' || e.key === 'Backspace') { remove(); moved = false; }
+    else moved = false;
+    if (moved) { e.preventDefault(); setDirty(true); render(); }
+  });
+
+  function nextName() {
+    var n = 0;
+    tables.forEach(function (t) { var v = parseInt(t.name, 10); if (!isNaN(v) && String(v) === t.name.trim()) n = Math.max(n, v); });
+    var name = String(n + 1);
+    while (tables.some(function (t) { return t.name === name; })) name = name + "'";
+    return name;
+  }
+  function freeSpot(w, h) {
+    var here = tables.filter(function (t) { return t.zone === zone; });
+    for (var y = 20; y <= H - h; y += 20) for (var x = 20; x <= W - w; x += 20) {
+      var hit = here.some(function (t) { return x < t.x + t.w + 20 && x + w + 20 > t.x && y < t.y + t.h + 20 && y + h + 20 > t.y; });
+      if (!hit) return { x: x, y: y };
+    }
+    return { x: 20, y: 20 };
+  }
+  function add(base) {
+    var w = base ? base.w : 90, h = base ? base.h : 90, spot = freeSpot(w, h);
+    var t = { id: null, key: 'k' + (nextKey++), name: nextName(), seats: base ? base.seats : 4, shape: base ? base.shape : 'square', zone: zone, x: spot.x, y: spot.y, w: w, h: h, active: true };
+    tables.push(t); selected = t.key; setDirty(true); render();
+    document.getElementById('f-name').select();
+  }
+  function remove() {
+    var t = selected && find(selected); if (!t) return;
+    if (t.id && busy.has(t.id)) { alert(T.busy); return; }
+    tables = tables.filter(function (x) { return x !== t; }); selected = null; setDirty(true); render();
+  }
+  document.getElementById('add-table').onclick = function () { add(null); };
+  document.getElementById('dup').onclick = function () { var t = selected && find(selected); if (t) add(t); };
+  document.getElementById('del').onclick = remove;
+  document.getElementById('add-zone').onclick = function () {
+    var n = prompt(T.newArea, ''); if (!n) return; n = n.trim().slice(0, 40);
+    if (extraZones.indexOf(n) === -1) extraZones.push(n);
+    zone = n; selected = null; render();
+  };
+  document.getElementById('arrange').onclick = function () {
+    var here = tables.filter(function (t) { return t.zone === zone; });
+    var x = 40, y = 40, rowH = 0;
+    here.forEach(function (t) {
+      if (x + t.w > W - 20) { x = 40; y += rowH + 50; rowH = 0; }
+      t.x = x; t.y = clamp(y, 0, H - t.h); x += t.w + 50; rowH = Math.max(rowH, t.h);
+    });
+    setDirty(true); render();
+  };
+
+  document.getElementById('save').onclick = function () {
+    var btn = this; btn.disabled = true;
+    fetch('{% url "outlets:floor_plan_save" outlet.pk %}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+      body: JSON.stringify({ tables: tables.map(function (t) { return { id: t.id, name: t.name, seats: t.seats, shape: t.shape, zone: t.zone, x: t.x, y: t.y, w: t.w, h: t.h, active: t.active }; }) })
+    }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        btn.disabled = false;
+        if (!res.ok || !res.j.ok) { alert(res.j.error || 'Error'); return; }
+        tables = res.j.tables.map(function (t, i) { t.key = 'k' + i; return t; }); nextKey = tables.length;
+        selected = null; setDirty(false); render();
+        btn.innerHTML = '✓ ' + T.saved; setTimeout(function () { location.reload(); }, 600);
+      })
+      .catch(function () { btn.disabled = false; alert('Network error'); });
+  };
+  window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = T.leave; } });
+  render();
+})();
+</script>
+{% endblock %}

@@ -1,8 +1,9 @@
 """
 Role-based access control.
 
-Each area of the app is a "module". A user may open a module when their
-role is listed for it. Managers and superusers can open everything.
+Each area of the app is a "module". A user may open a module when the
+business has it switched on (Settings → Modules) and their role is listed
+for it. Managers and superusers can open every switched-on module.
 """
 
 from functools import wraps
@@ -23,8 +24,17 @@ MODULE_ROLES: dict[str, set[str]] = {
 }
 
 
+def module_enabled(module: str) -> bool:
+    from apps.core.models import HotelSettings
+
+    return module in HotelSettings.load().enabled_modules()
+
+
 def can_access(user, module: str) -> bool:
+    """True when the business uses this module and the user's role may open it."""
     if not user.is_authenticated or not user.is_active:
+        return False
+    if not module_enabled(module):
         return False
     if user.is_manager:
         return True

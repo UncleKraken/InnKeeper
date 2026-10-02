@@ -9,7 +9,8 @@
     <a class="btn" href="?type={{ kind }}&from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}&format=csv">{% translate "Export CSV" %}</a>
   </div>
 </div>
-<nav class="tabs">
+{% include "finance/_tabs.html" %}
+<nav class="tabs" style="border:0">
   <a href="?type=charges&from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}" class="{% if kind == 'charges' %}active{% endif %}">{% translate "Revenue" %}</a>
   <a href="?type=payments&from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}" class="{% if kind == 'payments' %}active{% endif %}">{% translate "Payments" %}</a>
 </nav>

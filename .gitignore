@@ -12,3 +12,5 @@ media/
 .vscode/
 .DS_Store
 backups/
+build/
+dist/

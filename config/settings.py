@@ -6,6 +6,7 @@ All environment-specific values are read from environment variables
 """
 
 import os
+import sys
 from pathlib import Path
 
 import dj_database_url
@@ -69,6 +70,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "apps.core.middleware.SettingsCacheMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -76,6 +78,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "apps.accounts.middleware.UserLanguageMiddleware",
+    "apps.core.middleware.SetupRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -146,6 +149,21 @@ STORAGES = {
     },
 }
 
+# Where automatic and safety backups are written (the Windows app sets this to the user's data folder).
+INNKEEPER_BACKUP_DIR = Path(os.environ.get("INNKEEPER_BACKUP_DIR", BASE_DIR / "backups"))
+# Optional: check GitHub for new releases and tell managers (set to "" to turn off).
+INNKEEPER_UPDATE_REPO = os.environ.get("INNKEEPER_UPDATE_REPO", "UncleKraken/InnKeeper")
+if len(sys.argv) > 1 and sys.argv[1] == "test":
+    INNKEEPER_UPDATE_REPO = ""
+
+# Shared across server processes (login lockout counters, etc.).
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "innkeeper_cache",
+    }
+}
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Sessions: staff devices are often shared, so sessions expire.
@@ -156,8 +174,8 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = env_bool("INNKEEPER_SESSION_EXPIRE_ON_CLOSE", 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", True)
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+    # Secure cookies need HTTPS. The Windows app on a local network runs plain HTTP, so it turns this off.
+    SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = env_bool("DJANGO_SECURE_COOKIES", SECURE_SSL_REDIRECT)
     SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_HSTS_SECONDS", "0"))
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = "DENY"

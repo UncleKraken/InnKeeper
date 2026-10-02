@@ -1,0 +1,3 @@
+# Extra packages for the Windows desktop build (see windows/ and .github/workflows/windows.yml)
+waitress>=3.0
+pyinstaller>=6.6

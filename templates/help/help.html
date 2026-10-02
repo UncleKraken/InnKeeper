@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Help" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">InnKeeper {{ innkeeper_version }}</div><h1>{% translate "Help & user guide" %}</h1><p>{% translate "Short, practical answers for every part of the app." %}</p></div>
+  <div class="actions">
+    <div class="search">{% icon "search" %}<input class="input" type="search" id="help-search" placeholder="{% translate 'Search the guide…' %}"></div>
+    <button class="btn btn-secondary" onclick="window.print()">{% icon "print" %} {% translate "Print" %}</button>
+  </div>
+</div>
+<div class="help-layout">
+  <nav class="settings-nav card no-print" id="help-toc"></nav>
+  <article class="card card-body help-body" id="help-body">{% include guide %}</article>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var body = document.getElementById('help-body'), toc = document.getElementById('help-toc');
+  body.querySelectorAll('section[id]').forEach(function (s) {
+    var a = document.createElement('a'); a.href = '#' + s.id; a.textContent = s.querySelector('h2').textContent; toc.appendChild(a);
+  });
+  document.getElementById('help-search').addEventListener('input', function () {
+    var q = this.value.trim().toLowerCase();
+    body.querySelectorAll('section[id]').forEach(function (s) {
+      var hit = !q || s.textContent.toLowerCase().indexOf(q) !== -1;
+      s.classList.toggle('hidden', !hit);
+      s.querySelectorAll('details').forEach(function (d) { if (q && d.textContent.toLowerCase().indexOf(q) !== -1) d.open = true; });
+    });
+  });
+})();
+</script>
+{% endblock %}

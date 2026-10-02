@@ -1,9 +1,15 @@
+import threading
 from decimal import Decimal
 
 from django.conf import settings
-from django.core.cache import cache
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+_request_local = threading.local()
+
+
+def clear_settings_cache() -> None:
+    _request_local.hotel_settings = None
 
 
 class HotelSettings(models.Model):
@@ -28,6 +34,50 @@ class HotelSettings(models.Model):
     )
     invoice_footer = models.TextField(_("invoice footer"), blank=True)
 
+    class BusinessType(models.TextChoices):
+        HOTEL = "hotel", _("Hotel with restaurant, bar and services")
+        GUESTHOUSE = "guesthouse", _("Guesthouse, B&B, hostel or apartments")
+        RESTAURANT = "restaurant", _("Restaurant, bar or café (no rooms)")
+
+    business_type = models.CharField(
+        _("type of business"), max_length=20, choices=BusinessType.choices, default=BusinessType.HOTEL
+    )
+    module_rooms = models.BooleanField(
+        _("rooms & front desk"), default=True, help_text=_("Reservations, room rack, guests and guest bills.")
+    )
+    module_housekeeping = models.BooleanField(_("housekeeping"), default=True)
+    module_maintenance = models.BooleanField(_("maintenance"), default=True)
+    module_outlets = models.BooleanField(
+        _("restaurant, bar & services"),
+        default=True,
+        help_text=_("Point of sale for restaurant, bar, spa and other services."),
+    )
+    setup_completed = models.BooleanField(default=False)
+    onboarding_dismissed = models.BooleanField(default=False)
+    default_language = models.CharField(
+        _("default language"), max_length=8, choices=[("sq", _("Albanian")), ("en", _("English"))], default="sq"
+    )
+
+    # Receipts and invoices
+    logo = models.TextField(_("logo"), blank=True, help_text=_("Stored inside the database so it moves with backups."))
+    receipt_header = models.TextField(
+        _("receipt header"),
+        blank=True,
+        help_text=_("Extra lines under the name, e.g. opening hours or Wi-Fi password."),
+    )
+    receipt_footer = models.TextField(_("receipt footer"), blank=True, default="Faleminderit! · Thank you!")
+    receipt_width = models.PositiveSmallIntegerField(
+        _("receipt paper width"), choices=[(58, "58 mm"), (80, "80 mm")], default=80
+    )
+    receipt_show_logo = models.BooleanField(_("show logo on receipts"), default=True)
+    receipt_show_vat = models.BooleanField(_("show VAT breakdown on receipts"), default=True)
+    max_staff_discount = models.PositiveSmallIntegerField(
+        _("maximum discount for service staff (%)"),
+        default=0,
+        help_text=_("0 means only managers can give discounts."),
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         verbose_name = _("hotel settings")
         verbose_name_plural = _("hotel settings")
@@ -35,23 +85,56 @@ class HotelSettings(models.Model):
     def __str__(self) -> str:
         return self.name
 
-    CACHE_KEY = "innkeeper:hotel-settings"
-
     def save(self, *args, **kwargs):
         self.pk = 1
         super().save(*args, **kwargs)
-        cache.delete(self.CACHE_KEY)
+        clear_settings_cache()
 
     def delete(self, *args, **kwargs):  # the settings row is never deleted
         return
 
     @classmethod
     def load(cls) -> "HotelSettings":
-        obj = cache.get(cls.CACHE_KEY)
+        """The settings row, loaded at most once per request (see SettingsCacheMiddleware)."""
+        obj = getattr(_request_local, "hotel_settings", None)
         if obj is None:
             obj, _created = cls.objects.get_or_create(pk=1)
-            cache.set(cls.CACHE_KEY, obj, 300)
+            _request_local.hotel_settings = obj
         return obj
+
+    @property
+    def vat_fraction(self) -> Decimal:
+        """Share of a VAT-inclusive price that is VAT, e.g. 20% → 1/6."""
+        return self.vat_rate / (Decimal("100") + self.vat_rate) if self.vat_rate else Decimal("0")
+
+    def enabled_modules(self) -> set[str]:
+        mods = {"finance", "management"}
+        if self.module_rooms:
+            mods |= {"frontdesk", "guests"}
+        if self.module_housekeeping and self.module_rooms:
+            mods.add("housekeeping")
+        if self.module_maintenance:
+            mods.add("maintenance")
+        if self.module_outlets:
+            mods.add("outlets")
+        return mods
+
+
+class Sequence(models.Model):
+    """Gap-free counters for receipt and invoice numbers (one row per series and year)."""
+
+    key = models.CharField(max_length=40, unique=True)
+    value = models.PositiveIntegerField(default=0)
+
+    @classmethod
+    def next(cls, series: str, year: int) -> str:
+        from django.db import transaction
+
+        with transaction.atomic():
+            row, _created = cls.objects.select_for_update().get_or_create(key=f"{series}-{year}")
+            row.value += 1
+            row.save(update_fields=["value"])
+        return f"{year}-{row.value:06d}"
 
 
 class AuditLog(models.Model):

@@ -5,6 +5,8 @@ Albanian and English. Runs on any device with a browser.
 
 InnKeeper covers the whole property: the front desk, housekeeping, maintenance, and every place that sells something — restaurant, bar, café, spa, room service, minibar, laundry, transfers, events. Each sale is either paid on the spot or charged to the guest's room, and lands on one bill at check-out.
 
+It adapts to the business: a setup wizard asks whether you run a **hotel**, a **guesthouse** or a **restaurant/bar/café**, and switches on only the parts you need.
+
 > Version 2 is a complete rewrite. The original university project (CustomTkinter desktop app) is preserved on the `master` branch.
 
 ---
@@ -15,11 +17,15 @@ InnKeeper covers the whole property: the front desk, housekeeping, maintenance, 
 |---|---|
 | **Front desk** | Room rack (calendar timeline), reservations with double-booking protection and room capacity checks, check-in / check-out, guest profiles with ID documents, booking sources (walk-in, phone, Booking.com, Airbnb…) |
 | **Guest bill (folio)** | Room nights, extras and outlet charges in one place; cash / card / bank transfer payments; refunds; printable invoice; check-out blocked until the bill is settled (manager override for company invoices) |
-| **Outlets** | Any number of outlets of any kind. Tables or no tables, categories, items and services (with duration for spa treatments), touch-friendly POS, pay or charge to room, printable receipts |
+| **Outlets (POS)** | Any number of outlets of any kind. Touch-friendly ordering, discounts with staff limits, split and mixed payments, cash change calculator, move/merge tables, charge to room, sold-out items |
+| **Floor plans** | Drag-and-drop editor: move, resize, rename and renumber tables, square/round/long shapes, areas such as Inside and Terrace. The POS shows the real layout |
+| **Receipts & menus** | Numbered receipts with logo, VAT breakdown and change, 58/80 mm thermal printing, receipt history with reprint and manager void. Guest menu on phones via QR code (Albanian/English), printable A4 menu and QR table cards |
 | **Housekeeping** | Room status board by floor, tasks created automatically at check-out, assign to staff, start → done |
 | **Maintenance** | Tickets with priority and assignee; a ticket can take a room out of order until resolved |
-| **Finance** | Revenue by day and by department, payments by method, occupancy, ADR, RevPAR, unpaid bills, full ledger with CSV export (opens correctly in Excel) |
-| **Management** | Rooms & rates, outlets & menus, staff accounts and roles, hotel details for invoices, activity log of every check-in, payment and void |
+| **Finance** | Revenue, expenses and profit; end-of-day cash count with printable Z report; best sellers, sales by staff and busiest hours; occupancy, ADR, RevPAR; unpaid bills; full ledger with CSV export (opens correctly in Excel) |
+| **Settings** | Setup wizard, business details, receipt design with preview, modules on/off, staff and roles, activity log |
+| **Backups** | Full backup (move to a new computer) and settings-only export (second location), restore with preview and automatic safety copy, daily automatic backups |
+| **Help** | Built-in user guide in Albanian and English, getting-started checklist for new businesses |
 
 ### Security and data integrity
 - Passwords hashed (Django PBKDF2); never shown, only replaced. Lockout after 5 failed sign-ins.
@@ -31,7 +37,17 @@ InnKeeper covers the whole property: the front desk, housekeeping, maintenance, 
 
 ---
 
-## Try it in 2 minutes
+## Windows app
+
+Download **InnKeeper-Setup-x.y.z.exe** from the [Releases page](https://github.com/UncleKraken/InnKeeper/releases) and run it. It adds an InnKeeper icon; opening it starts InnKeeper and opens it in your browser. On first start you create the manager account and the setup wizard does the rest.
+
+- Data is kept in `%LOCALAPPDATA%\InnKeeper` (database, daily backups, logs), so updating or reinstalling never touches it.
+- Other devices on the same Wi-Fi (tablets for waiters, a phone for housekeeping) open the address shown in the InnKeeper window.
+- When a new version is published, managers see a notice in the app. Run the new installer; a backup is made automatically before the update.
+
+The installer is built automatically by GitHub Actions (`.github/workflows/windows.yml`) on every push; pushing a tag such as `v2.1.0` publishes it as a release.
+
+## Try it in 2 minutes (developers)
 
 Requires Python 3.11+.
 
@@ -47,6 +63,8 @@ python manage.py seed_demo --password demo-pass-2026
 python manage.py runserver
 ```
 
+(Skip `seed_demo` to start empty: you'll be asked to create the first manager account and run the setup wizard.)
+
 Open http://127.0.0.1:8000 and sign in as `manager`, `reception`, `housekeeping`, `maintenance`, `waiter`, `bar`, `spa` or `finance` (password `demo-pass-2026`). Each role sees only its own tools.
 
 Run the tests with `python manage.py test`.
@@ -59,13 +77,12 @@ Run the tests with `python manage.py test`.
    ```bash
    cp .env.example .env        # set DJANGO_SECRET_KEY, DJANGO_ALLOWED_HOSTS, POSTGRES_PASSWORD
    docker compose up -d
-   docker compose exec web python manage.py createsuperuser
    ```
-   This runs InnKeeper, PostgreSQL, and the nightly room-charge job.
+   This runs InnKeeper, PostgreSQL, and the nightly room-charge job. Open the site and create the first manager account.
 2. **HTTPS.** Put it behind a reverse proxy (Caddy, Nginx, or Cloudflare Tunnel) with a certificate. On a closed office LAN without HTTPS, set `DJANGO_SECURE_SSL_REDIRECT=0`.
-3. **Set up the hotel.** Sign in as the superuser → *Hotel settings* (name, NIPT, address, currency, VAT) → *Rooms & rates* → *Outlets & menus* → *Staff*.
+3. **Set up the business.** The setup wizard runs on first sign-in. Then follow the getting-started checklist on the dashboard.
 4. **Nightly room charges.** `python manage.py night_audit` posts last night's room charge for every in-house guest, so revenue is reported on the right day. The Docker setup runs it at 03:00; otherwise schedule it with cron or Windows Task Scheduler. Check-out always posts any nights still missing, so a missed run never loses money.
-5. **Backups.** Back up the database daily and keep copies off the server, e.g. `docker compose exec db pg_dump -U innkeeper innkeeper > backup-$(date +%F).sql`.
+5. **Backups.** Schedule `python manage.py backup` daily (keeps the newest 30 in `INNKEEPER_BACKUP_DIR`) and copy them off the server. *Settings → Backup & restore* downloads or restores backups from the browser.
 
 `/admin/` (Django admin) is available to superusers for advanced fixes; the ledger is read-only there.
 
@@ -104,8 +121,8 @@ Each user can switch language (SQ / EN) from the sidebar; the choice is remember
 
 ## Roadmap
 - Fiscal receipt / e-invoice integration (Albania)
+- Kitchen display and direct printing to network thermal printers
 - Channel manager sync (Booking.com, Airbnb) and an online booking page
 - Rate plans and seasons, deposits, group bookings
-- Kitchen / bar order display
 - Inventory and purchasing
 - Guest registration export for the authorities

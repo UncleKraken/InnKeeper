@@ -24,6 +24,11 @@ class LoginView(auth_views.LoginView):
     authentication_form = LoginForm
     redirect_authenticated_user = True
 
+    def dispatch(self, request, *args, **kwargs):
+        if not User.objects.exists():
+            return redirect("accounts:first_run")
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         response = super().form_valid(form)
         audit(self.request.user, "auth.login", str(self.request.user))
@@ -128,3 +133,30 @@ def staff_set_password(request, pk):
             "list_url": reverse("accounts:staff_edit", args=[pk]),
         },
     )
+
+
+def first_run(request):
+    """Create the very first manager account on a brand-new installation."""
+    from django.contrib.auth import login
+
+    from .forms import FirstRunForm
+    from .models import Role
+
+    if User.objects.exists():
+        return redirect("accounts:login")
+    form = FirstRunForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        d = form.cleaned_data
+        user = User.objects.create_user(
+            d["username"],
+            password=d["password1"],
+            first_name=d["first_name"],
+            last_name=d["last_name"],
+            role=Role.MANAGER,
+            is_staff=True,
+            is_superuser=True,
+        )
+        login(request, user)
+        audit(user, "auth.first_run", str(user), user)
+        return redirect("core:setup")
+    return render(request, "accounts/first_run.html", {"form": form})

@@ -11,7 +11,7 @@ COPY . .
 RUN DJANGO_DEBUG=0 DJANGO_SECRET_KEY=build-only python manage.py compilemessages -v0 \
  && DJANGO_DEBUG=0 DJANGO_SECRET_KEY=build-only python manage.py collectstatic --noinput -v0
 
-RUN useradd --create-home innkeeper && chown -R innkeeper /app
+RUN mkdir -p /app/backups && useradd --create-home innkeeper && chown -R innkeeper /app
 USER innkeeper
 
 EXPOSE 8000

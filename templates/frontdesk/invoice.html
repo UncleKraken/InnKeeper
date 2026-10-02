@@ -11,12 +11,13 @@
 <div class="doc card">
   <div class="doc-head">
     <div>
+      {% if hotel.logo %}<img src="{{ hotel.logo }}" alt="" style="max-height:70px; max-width:220px; margin-bottom:.6rem">{% endif %}
       <div class="doc-title">{{ hotel.legal_name|default:hotel.name }}</div>
       <div class="muted">{{ hotel.address }}<br>{% if hotel.phone %}{{ hotel.phone }} · {% endif %}{{ hotel.email }}{% if hotel.tax_id %}<br>NIPT: {{ hotel.tax_id }}{% endif %}</div>
     </div>
     <div style="text-align:right">
       <div class="doc-title">{% if folio.status == "closed" %}{% translate "Invoice" %}{% else %}{% translate "Pro-forma bill" %}{% endif %}</div>
-      <div class="mono">{{ folio.number }}</div>
+      <div class="mono">{% if folio.invoice_number %}{% translate "No." %} {{ folio.invoice_number }}{% else %}{{ folio.number }}{% endif %}</div>
       <div class="muted">{{ printed_at|date:"d.m.Y H:i" }}</div>
     </div>
   </div>
@@ -30,6 +31,10 @@
       {% for c in charges %}<tr><td>{{ c.business_date|date:"d.m.Y" }}</td><td>{{ c.description }}</td><td class="num">{{ c.quantity }}</td><td class="num">{{ c.unit_price|money }}</td><td class="num">{{ c.amount|money }}</td></tr>{% endfor %}
     </tbody>
     <tfoot>
+      {% if hotel.vat_rate %}
+      <tr style="font-weight:400"><td colspan="4">{% translate "Without VAT" %}</td><td class="num">{{ net|money }}</td></tr>
+      <tr style="font-weight:400"><td colspan="4">{% blocktranslate with r=hotel.vat_rate|floatformat:"-2" %}VAT {{ r }}%{% endblocktranslate %}</td><td class="num">{{ vat|money }}</td></tr>
+      {% endif %}
       <tr><td colspan="4">{% translate "Total" %}</td><td class="num">{{ folio.total_charges|money }}</td></tr>
     </tfoot>
   </table>
@@ -41,7 +46,7 @@
     <tfoot><tr><td colspan="2">{% translate "Balance due" %}</td><td class="num">{{ folio.balance|money }}</td></tr></tfoot>
   </table>
   {% endif %}
-  <p class="muted" style="margin-top:1.5rem; font-size:.85rem">{% blocktranslate with rate=hotel.vat_rate %}Prices include VAT ({{ rate }}%).{% endblocktranslate %}</p>
+  <p class="muted" style="margin-top:1.5rem; font-size:.85rem">{% translate "This is not a fiscal invoice." %}</p>
   {% if hotel.invoice_footer %}<p class="muted" style="white-space:pre-line; font-size:.85rem">{{ hotel.invoice_footer }}</p>{% endif %}
 </div>
 </body>

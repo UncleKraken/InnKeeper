@@ -42,6 +42,8 @@ class CrudListView(CrudMixin, ListView):
     # (attribute, label, kind) where kind is text | money | bool | choice | badge
     columns: list[tuple[str, str, str]] = []
     search_fields: list[str] = []
+    # Extra buttons per row: (label, url name, icon, attribute that must be truthy or "")
+    row_actions: list[tuple[str, str, str, str]] = []
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -71,6 +73,11 @@ class CrudListView(CrudMixin, ListView):
                 obj,
                 reverse(self.update_url_name, args=[obj.pk]),
                 [(self.cell(obj, a, k), k) for a, _l, k in self.columns],
+                [
+                    (label, reverse(url_name, args=[obj.pk]), icon)
+                    for label, url_name, icon, cond in self.row_actions
+                    if not cond or getattr(obj, cond)
+                ],
             )
             for obj in ctx["object_list"]
         ]
