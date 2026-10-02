@@ -2,9 +2,34 @@
 #   pyinstaller windows/innkeeper.spec --noconfirm
 import os
 
+import django
 from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 ROOT = os.path.abspath(os.path.join(SPECPATH, ".."))
+
+
+def walk_modules(package_dir, prefix, skip=()):
+    """List every module in a package by walking its folder.
+
+    collect_submodules() imports each module to find it, which fails for Django
+    code before settings are loaded, so those modules would silently be left out.
+    """
+    found = []
+    for dirpath, dirnames, filenames in os.walk(package_dir):
+        rel = os.path.relpath(dirpath, package_dir)
+        parts = [] if rel == "." else rel.split(os.sep)
+        dotted = ".".join([prefix] + parts)
+        if any(dotted == s or dotted.startswith(s + ".") for s in skip) or "__pycache__" in parts:
+            dirnames[:] = []
+            continue
+        if "__init__.py" not in filenames:
+            dirnames[:] = []
+            continue
+        found.append(dotted)
+        for f in filenames:
+            if f.endswith(".py") and f != "__init__.py":
+                found.append(f"{dotted}.{f[:-3]}")
+    return found
 
 
 def here(*parts):
@@ -21,11 +46,13 @@ datas = [
 datas += collect_data_files("django")
 
 hiddenimports = (
-    collect_submodules("apps")
-    + collect_submodules("config")
-    + collect_submodules("django")
+    walk_modules(here("apps"), "apps", skip=("apps.accounts.tests", "apps.core.tests", "apps.frontdesk.tests",
+                                            "apps.housekeeping.tests", "apps.outlets.tests", "apps.finance.tests"))
+    + walk_modules(here("config"), "config")
+    + walk_modules(os.path.dirname(django.__file__), "django", skip=("django.contrib.gis", "django.test", "django.db.backends.oracle", "django.db.backends.mysql", "django.db.backends.postgresql"))
     + collect_submodules("whitenoise")
-    + ["waitress", "dj_database_url", "qrcode", "qrcode.image.svg"]
+    + collect_submodules("waitress")
+    + ["dj_database_url", "qrcode", "qrcode.image.svg", "qrcode.image.pure"]
 )
 
 a = Analysis(
