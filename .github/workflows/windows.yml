@@ -6,7 +6,7 @@ name: windows-installer
 #    which the app's update notice points to.
 on:
   push:
-    branches: [v2, master, main]
+    branches: [master, main, v2]
     tags: ["v*"]
   workflow_dispatch:
     inputs:

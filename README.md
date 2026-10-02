@@ -7,7 +7,7 @@ InnKeeper covers the whole property: the front desk, housekeeping, maintenance, 
 
 It adapts to the business: a setup wizard asks whether you run a **hotel**, a **guesthouse** or a **restaurant/bar/café**, and switches on only the parts you need.
 
-> Version 2 is a complete rewrite. The original university project (CustomTkinter desktop app) is preserved on the `master` branch.
+> Version 2 is a complete rewrite. The original university project (CustomTkinter desktop app) is preserved on the [`uni-project`](https://github.com/UncleKraken/InnKeeper/tree/uni-project) branch.
 
 ---
 
@@ -54,7 +54,6 @@ Requires Python 3.11+.
 ```bash
 git clone https://github.com/UncleKraken/InnKeeper.git
 cd InnKeeper
-git checkout v2
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 echo "DJANGO_DEBUG=1" > .env
