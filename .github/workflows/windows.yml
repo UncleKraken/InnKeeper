@@ -46,8 +46,9 @@ jobs:
         run: |
           $env:INNKEEPER_DATA_DIR = "$env:RUNNER_TEMP\innkeeper-selftest"
           $env:INNKEEPER_PORT = "8790"
-          $p = Start-Process -FilePath "dist\InnKeeper\InnKeeper.exe" -ArgumentList "--selftest" -Wait -PassThru
-          Get-Content "$env:INNKEEPER_DATA_DIR\logs\selftest.txt"
+          $p = Start-Process -FilePath "dist\InnKeeper\InnKeeper.exe" -ArgumentList "--selftest" -PassThru
+          if (-not $p.WaitForExit(180000)) { $p.Kill(); Write-Host "Self-test timed out" }
+          if (Test-Path "$env:INNKEEPER_DATA_DIR\logs\selftest.txt") { Get-Content "$env:INNKEEPER_DATA_DIR\logs\selftest.txt" }
           if ($p.ExitCode -ne 0) { throw "Self-test failed with exit code $($p.ExitCode)" }
 
       - name: Build installer with Inno Setup

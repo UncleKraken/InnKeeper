@@ -159,6 +159,11 @@ def main() -> int:
         sys.stdout = sys.stderr = out.open("w", encoding="utf-8")
         try:
             return run_selftest()
+        except BaseException:
+            import traceback
+
+            traceback.print_exc()
+            return 1
         finally:
             sys.stdout.flush()
 
