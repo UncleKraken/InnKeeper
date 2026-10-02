@@ -141,6 +141,7 @@ def order_view(request, pk):
             "methods": Payment.Method.choices,
             "payments": order.payments.filter(voided=False).select_related("created_by"),
             "move_tables": order.outlet.tables.filter(is_active=True).exclude(pk=order.table_id),
+            "item_count": sum(line.quantity for line in order.lines.all()),
         },
     )
 

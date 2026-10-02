@@ -598,3 +598,20 @@ textarea.input { min-height: 90px; resize: vertical; }
 @media (max-width: 1000px) { .checklist { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 860px) { .help-layout { grid-template-columns: 1fr; } .checklist { grid-template-columns: 1fr; } }
 @media print { .help-layout { grid-template-columns: 1fr; } .help-body details { border: 0; padding: 0; } }
+
+/* Phone: keep the bill total in view while choosing items */
+.mobile-total { display: none; }
+.seg button { white-space: nowrap; }
+@media (max-width: 1100px) {
+  .mobile-total {
+    display: flex; justify-content: space-between; align-items: center; gap: .75rem;
+    position: sticky; bottom: 0; z-index: 20; margin: 1rem -1rem -2.5rem; padding: .85rem 1.1rem;
+    background: var(--ink); color: #fff; font-size: .9rem; box-shadow: 0 -4px 16px rgba(22, 32, 47, .2);
+  }
+  .mobile-total:hover { text-decoration: none; }
+  .mobile-total strong { font-size: 1.2rem; color: #f0d29e; }
+}
+@media (max-width: 520px) {
+  .seg button .icon { display: none; }
+  .seg button { font-size: .82rem; padding: .55rem .25rem; }
+}

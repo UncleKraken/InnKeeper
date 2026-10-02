@@ -16,9 +16,9 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -63,14 +63,29 @@ jobs:
           if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress; }
           & $iscc "/DAppVersion=${{ steps.version.outputs.version }}" windows\installer.iss
 
-      - uses: actions/upload-artifact@v4
+      - name: Test the installer (silent install, then start the installed app)
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem dist\installer\*.exe | Select-Object -First 1
+          $p = Start-Process -FilePath $setup.FullName -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/CURRENTUSER", "/DIR=$env:RUNNER_TEMP\InnKeeperInstalled" -PassThru
+          if (-not $p.WaitForExit(300000)) { $p.Kill(); throw "Installer timed out" }
+          if ($p.ExitCode -ne 0) { throw "Installer failed with exit code $($p.ExitCode)" }
+          $env:INNKEEPER_DATA_DIR = "$env:RUNNER_TEMP\innkeeper-installed-test"
+          $env:INNKEEPER_PORT = "8791"
+          $app = Start-Process -FilePath "$env:RUNNER_TEMP\InnKeeperInstalled\InnKeeper.exe" -ArgumentList "--selftest" -PassThru
+          if (-not $app.WaitForExit(180000)) { $app.Kill(); throw "Installed app self-test timed out" }
+          Get-Content "$env:INNKEEPER_DATA_DIR\logs\selftest.txt"
+          if ($app.ExitCode -ne 0) { throw "Installed app self-test failed" }
+
+      - uses: actions/upload-artifact@v7
         with:
           name: InnKeeper-Setup-${{ steps.version.outputs.version }}
           path: dist/installer/*.exe
 
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: dist/installer/*.exe
-          generate_release_notes: true
+          name: InnKeeper ${{ steps.version.outputs.version }}
+          body_path: CHANGELOG.md
