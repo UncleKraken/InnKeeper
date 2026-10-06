@@ -38,11 +38,15 @@ FULL_MODELS = [
     "frontdesk.Room",
     "frontdesk.Guest",
     "frontdesk.Reservation",
+    "frontdesk.SeasonRate",
+    "outlets.Printer",
+    "outlets.Station",
     "outlets.Outlet",
     "outlets.Category",
     "outlets.Item",
     "outlets.Table",
     "outlets.Order",
+    "outlets.KitchenTicket",
     "outlets.OrderLine",
     "finance.Folio",
     "finance.Charge",
@@ -52,6 +56,9 @@ FULL_MODELS = [
     "housekeeping.HousekeepingTask",
     "housekeeping.MaintenanceTicket",
 ]
+
+# Not worth moving: print history (kept 3 days).
+NOT_BACKED_UP = {"outlets.PrintJob"}
 
 SETTINGS_FIELDS_SKIP = {"id", "setup_completed", "updated_at", "smtp_password", "onboarding_dismissed"}
 
@@ -151,8 +158,8 @@ def restore_full(doc: dict) -> None:
 
 def export_settings() -> bytes:
     from apps.core.models import HotelSettings
-    from apps.frontdesk.models import Room, RoomType
-    from apps.outlets.models import Outlet
+    from apps.frontdesk.models import Room, RoomType, SeasonRate
+    from apps.outlets.models import Outlet, Printer, Station
 
     hs = HotelSettings.load()
     hotel = {f.name: getattr(hs, f.name) for f in hs._meta.concrete_fields if f.name not in SETTINGS_FIELDS_SKIP}
@@ -170,8 +177,42 @@ def export_settings() -> bytes:
                 "max_adults": t.max_adults,
                 "max_children": t.max_children,
                 "is_active": t.is_active,
+                "name_en": t.name_en,
+                "description_en": t.description_en,
+                "bookable_online": t.bookable_online,
+                "photo": t.photo,
+                "sort_order": t.sort_order,
             }
             for t in RoomType.objects.all()
+        ],
+        "seasons": [
+            {
+                "name": x.name,
+                "room_type": x.room_type.code if x.room_type_id else None,
+                "start_date": x.start_date.isoformat(),
+                "end_date": x.end_date.isoformat(),
+                "rate": str(x.rate) if x.rate is not None else None,
+                "percent": str(x.percent) if x.percent is not None else None,
+                "min_nights": x.min_nights,
+                "is_active": x.is_active,
+            }
+            for x in SeasonRate.objects.select_related("room_type")
+        ],
+        "printers": [
+            {
+                f: getattr(p, f)
+                for f in ("name", "connection", "address", "port", "system_name", "paper_width", "open_drawer", "is_active")
+            }
+            for p in Printer.objects.all()
+        ],
+        "stations": [
+            {
+                "name": st.name,
+                "printer": st.printer.name if st.printer_id else None,
+                "sort_order": st.sort_order,
+                "is_active": st.is_active,
+            }
+            for st in Station.objects.select_related("printer")
         ],
         "rooms": [
             {
@@ -185,7 +226,7 @@ def export_settings() -> bytes:
         ],
         "outlets": [],
     }
-    for o in Outlet.objects.prefetch_related("categories__items", "tables"):
+    for o in Outlet.objects.select_related("receipt_printer").prefetch_related("categories__items", "tables"):
         payload["outlets"].append(
             {
                 "name": o.name,
@@ -195,11 +236,14 @@ def export_settings() -> bytes:
                 "is_active": o.is_active,
                 "menu_public": o.menu_public,
                 "menu_intro": o.menu_intro,
+                "receipt_printer": o.receipt_printer.name if o.receipt_printer_id else None,
+                "auto_print_receipt": o.auto_print_receipt,
                 "categories": [
                     {
                         "name": c.name,
                         "name_en": c.name_en,
                         "sort_order": c.sort_order,
+                        "station": c.station.name if c.station_id else None,
                         "items": [
                             {
                                 "name": i.name,
@@ -242,8 +286,8 @@ def import_settings(doc: dict) -> dict:
     from decimal import Decimal
 
     from apps.core.models import HotelSettings
-    from apps.frontdesk.models import Room, RoomType
-    from apps.outlets.models import Category, Item, Outlet, Table
+    from apps.frontdesk.models import Room, RoomType, SeasonRate
+    from apps.outlets.models import Category, Item, Outlet, Printer, Station, Table
 
     if doc["kind"] != "settings":
         raise BackupError("wrong-kind")
@@ -280,21 +324,54 @@ def import_settings(doc: dict) -> dict:
             },
         )
         stats["rooms"] += 1
-    for o in data.get("outlets", []):
-        outlet, _c = Outlet.objects.update_or_create(
-            name=o["name"],
+    for x in data.get("seasons", []):
+        rt = types.get(x["room_type"]) or RoomType.objects.filter(code=x["room_type"]).first() if x["room_type"] else None
+        SeasonRate.objects.update_or_create(
+            name=x["name"],
+            room_type=rt,
+            start_date=x["start_date"],
             defaults={
-                k: o[k]
-                for k in ("kind", "uses_tables", "sort_order", "is_active", "menu_public", "menu_intro")
-                if k in o
+                "end_date": x["end_date"],
+                "rate": Decimal(x["rate"]) if x.get("rate") else None,
+                "percent": Decimal(x["percent"]) if x.get("percent") else None,
+                "min_nights": x.get("min_nights", 1),
+                "is_active": x.get("is_active", True),
             },
         )
+    printers = {}
+    for p in data.get("printers", []):
+        printers[p["name"]], _c = Printer.objects.update_or_create(
+            name=p["name"], defaults={k: v for k, v in p.items() if k != "name"}
+        )
+    stations = {}
+    for st in data.get("stations", []):
+        stations[st["name"]], _c = Station.objects.update_or_create(
+            name=st["name"],
+            defaults={
+                "printer": printers.get(st.get("printer")),
+                "sort_order": st.get("sort_order", 0),
+                "is_active": st.get("is_active", True),
+            },
+        )
+    for o in data.get("outlets", []):
+        defaults = {
+            k: o[k]
+            for k in ("kind", "uses_tables", "sort_order", "is_active", "menu_public", "menu_intro", "auto_print_receipt")
+            if k in o
+        }
+        if "receipt_printer" in o:
+            defaults["receipt_printer"] = printers.get(o["receipt_printer"])
+        outlet, _c = Outlet.objects.update_or_create(name=o["name"], defaults=defaults)
         stats["outlets"] += 1
         for c in o.get("categories", []):
             cat, _c = Category.objects.update_or_create(
                 outlet=outlet,
                 name=c["name"],
-                defaults={"name_en": c.get("name_en", ""), "sort_order": c.get("sort_order", 0)},
+                defaults={
+                    "name_en": c.get("name_en", ""),
+                    "sort_order": c.get("sort_order", 0),
+                    "station": stations.get(c.get("station")) or Station.objects.filter(name=c.get("station") or "").first(),
+                },
             )
             for i in c.get("items", []):
                 Item.objects.update_or_create(

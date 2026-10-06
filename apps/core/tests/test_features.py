@@ -281,6 +281,44 @@ class BackupTests(HotelTestCase):
         self.assertEqual(counts_before, counts_after)
         self.assertTrue(User.objects.get(username="desk").check_password(PASSWORD))
 
+    def test_every_model_is_in_the_full_backup(self):
+        from django.apps import apps as django_apps
+
+        ours = {m._meta.label for m in django_apps.get_models() if m.__module__.startswith("apps.")}
+        self.assertEqual(ours - set(backup.FULL_MODELS) - backup.NOT_BACKED_UP, set())
+
+    def test_full_backup_keeps_stations_and_seasons(self):
+        from apps.frontdesk.models import SeasonRate
+        from apps.outlets.models import Category, Printer, Station
+
+        printer = Printer.objects.create(name="Kitchen printer", address="10.0.0.9")
+        station = Station.objects.create(name="Kitchen", printer=printer)
+        Category.objects.filter(outlet=self.restaurant).update(station=station)
+        SeasonRate.objects.create(name="Summer", start_date=self.today, end_date=self.today, percent=10)
+        doc = backup.read_file(backup.export_full())
+        backup.restore_full(doc)
+        self.assertEqual(Category.objects.get(outlet=self.restaurant).station.printer.address, "10.0.0.9")
+        self.assertTrue(SeasonRate.objects.filter(name="Summer").exists())
+
+    def test_settings_export_carries_stations_printers_and_seasons(self):
+        from apps.frontdesk.models import SeasonRate
+        from apps.outlets.models import Category, Printer, Station
+
+        printer = Printer.objects.create(name="Bar printer", address="10.0.0.8")
+        station = Station.objects.create(name="Bar", printer=printer)
+        Category.objects.filter(outlet=self.restaurant).update(station=station)
+        SeasonRate.objects.create(
+            name="Peak", room_type=self.double, start_date=self.today, end_date=self.today, rate=Decimal("99")
+        )
+        data = backup.export_settings()
+        Category.objects.update(station=None)
+        Station.objects.all().delete()
+        Printer.objects.all().delete()
+        SeasonRate.objects.all().delete()
+        backup.import_settings(backup.read_file(data))
+        self.assertEqual(Category.objects.get(outlet=self.restaurant).station.printer.address, "10.0.0.8")
+        self.assertEqual(SeasonRate.objects.get().rate, Decimal("99.00"))
+
     def test_settings_export_import(self):
         data = backup.export_settings()
         Item.objects.all().delete()
