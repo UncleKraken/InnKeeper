@@ -20,6 +20,15 @@
   </div>
 </div>
 
+{% if r.status == "booked" and not r.confirmed %}
+  <div class="alert alert-warning row" style="margin-bottom:1.25rem; justify-content:space-between">
+    <span>{% icon "alert" %} <strong>{% translate "Online booking request" %}</strong> — {% translate "confirm it so the guest knows the room is theirs." %}</span>
+    <span class="row" style="gap:.4rem">
+      <form method="post" action="{% url 'frontdesk:confirm_booking' r.pk %}" class="inline">{% csrf_token %}<button class="btn btn-sm">{% icon "check" %} {% translate "Confirm" %}</button></form>
+      <form method="post" action="{% url 'frontdesk:decline_booking' r.pk %}" class="inline decline-form">{% csrf_token %}<input type="hidden" name="reason"><button class="btn btn-secondary btn-sm">{% translate "Decline" %}</button></form>
+    </span>
+  </div>
+{% endif %}
 {% if r.status == "booked" and not r.room.is_ready %}
   <div class="alert alert-warning" style="margin-bottom:1.25rem">{% if r.room.out_of_order %}{% translate "This room is out of order. Move the guest to another room before check-in." %}{% else %}{% translate "This room is not clean yet." %}{% endif %}</div>
 {% endif %}
@@ -108,12 +117,19 @@
       <div class="card-header"><h3>{% translate "Stay details" %}</h3></div>
       <div class="card-body"><dl class="dl">
         <dt>{% translate "Guests" %}</dt><dd>{{ r.adults }} {% translate "adults" %}{% if r.children %}, {{ r.children }} {% translate "children" %}{% endif %}</dd>
-        <dt>{% translate "Rate" %}</dt><dd>{{ r.rate|money }} / {% translate "night" %}</dd>
+        <dt>{% translate "Rate" %}</dt><dd>{% if r.has_varying_rates %}{% translate "varies by night" %}{% else %}{{ r.rate|money }} / {% translate "night" %}{% endif %}</dd>
+        <dt>{% translate "Stay total" %}</dt><dd>{{ r.estimated_total|money }}</dd>
+        {% if r.deposit_due %}<dt>{% translate "Deposit requested" %}</dt><dd>{{ r.deposit_due|money }}</dd>{% endif %}
         <dt>{% translate "Source" %}</dt><dd>{{ r.get_source_display }}{% if r.external_ref %} · {{ r.external_ref }}{% endif %}</dd>
         <dt>{% translate "Booked" %}</dt><dd>{{ r.created_at|date:"d.m.Y H:i" }}{% if r.created_by %} · {{ r.created_by }}{% endif %}</dd>
         {% if r.checked_in_at %}<dt>{% translate "Checked in" %}</dt><dd>{{ r.checked_in_at|date:"d.m.Y H:i" }}</dd>{% endif %}
         {% if r.checked_out_at %}<dt>{% translate "Checked out" %}</dt><dd>{{ r.checked_out_at|date:"d.m.Y H:i" }}</dd>{% endif %}
       </dl>
+      {% if r.has_varying_rates %}
+        <details style="margin-top:.75rem"><summary class="muted" style="cursor:pointer">{% translate "Price per night" %}</summary>
+          <table class="table table-sm" style="margin-top:.4rem">{% for d, price in r.nightly_breakdown %}<tr><td>{{ d|date:"D d.m" }}</td><td class="num">{{ price|money }}</td></tr>{% endfor %}</table>
+        </details>
+      {% endif %}
       {% if r.notes %}<p style="margin:1rem 0 0; white-space:pre-line">{{ r.notes }}</p>{% endif %}
       </div>
     </section>
@@ -145,6 +161,13 @@
 {% endblock %}
 {% block scripts %}
 <script>
+  document.querySelectorAll('.decline-form').forEach(function (f) {
+    f.addEventListener('submit', function (e) {
+      var reason = window.prompt('{{ _("Message to the guest (optional), e.g. fully booked on these dates:")|escapejs }}', '');
+      if (reason === null) { e.preventDefault(); return; }
+      f.querySelector('[name=reason]').value = reason;
+    });
+  });
   document.querySelectorAll('.void-form').forEach(function (f) {
     f.addEventListener('submit', function (e) {
       var reason = window.prompt('{{ _("Why is this entry being voided?")|escapejs }}');

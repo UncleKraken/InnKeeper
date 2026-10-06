@@ -39,8 +39,12 @@
 
       {% if "outlets" in modules %}
         <div class="nav-section">{% translate "Services" %}</div>
-        <a href="{% url 'outlets:home' %}" class="{% if request.path|slice:':9' == '/outlets/' and '/outlets/setup' not in request.path and '/outlets/receipts' not in request.path %}active{% endif %}">{% icon "utensils" %} {% translate "Restaurant, bar & services" %}</a>
+        <a href="{% url 'outlets:home' %}" class="{% if request.path|slice:':9' == '/outlets/' and '/outlets/setup' not in request.path and '/outlets/receipts' not in request.path and '/outlets/kitchen' not in request.path %}active{% endif %}">{% icon "utensils" %} {% translate "Restaurant, bar & services" %}</a>
         <a href="{% url 'outlets:receipts' %}" class="{% active '/outlets/receipts' %}">{% icon "receipt" %} {% translate "Receipts" %}</a>
+      {% endif %}
+      {% if "kitchen" in modules %}
+        {% if "outlets" not in modules %}<div class="nav-section">{% translate "Services" %}</div>{% endif %}
+        <a href="{% url 'outlets:board_home' %}" class="{% active '/outlets/kitchen' %}">{% icon "grid" %} {% translate "Kitchen & bar screens" %}</a>
       {% endif %}
 
       {% if "finance" in modules %}

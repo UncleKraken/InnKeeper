@@ -76,6 +76,58 @@ class HotelSettings(models.Model):
         default=0,
         help_text=_("0 means only managers can give discounts."),
     )
+    # Online booking page
+    booking_enabled = models.BooleanField(
+        _("accept online bookings"), default=False, help_text=_("Opens the public booking page for your website.")
+    )
+    booking_requires_confirmation = models.BooleanField(
+        _("confirm each online booking by hand"),
+        default=True,
+        help_text=_("Bookings arrive as requests; reception confirms them. Turn off to confirm instantly."),
+    )
+    booking_deposit_percent = models.PositiveSmallIntegerField(
+        _("deposit (%)"),
+        default=0,
+        help_text=_("Share of the stay to pay in advance by bank transfer. 0 = pay at the hotel."),
+    )
+    booking_min_days_ahead = models.PositiveSmallIntegerField(
+        _("book at least (days ahead)"), default=0, help_text=_("0 allows same-day bookings.")
+    )
+    booking_max_days_ahead = models.PositiveSmallIntegerField(_("book at most (days ahead)"), default=365)
+    booking_intro = models.TextField(_("welcome text"), blank=True)
+    booking_terms = models.TextField(
+        _("booking conditions"), blank=True, help_text=_("Cancellation policy, check-in times, house rules…")
+    )
+    bank_details = models.TextField(
+        _("bank details for deposits"), blank=True, help_text=_("Bank name, IBAN and account holder.")
+    )
+    public_url = models.URLField(
+        _("public web address of InnKeeper"),
+        blank=True,
+        help_text=_("e.g. https://book.yourhotel.al — used for links in emails and the QR menu."),
+    )
+    notify_email = models.EmailField(
+        _("send new booking alerts to"), blank=True, help_text=_("Usually the reception email address.")
+    )
+
+    # Outgoing email (SMTP)
+    smtp_host = models.CharField(_("SMTP server"), max_length=120, blank=True, help_text=_("e.g. smtp.gmail.com"))
+    smtp_port = models.PositiveIntegerField(_("port"), default=587)
+    smtp_username = models.CharField(_("username"), max_length=120, blank=True)
+    smtp_password = models.CharField(
+        _("password"),
+        max_length=200,
+        blank=True,
+        help_text=_("For Gmail, use an app password, not your normal password."),
+    )
+    smtp_security = models.CharField(
+        _("security"),
+        max_length=8,
+        choices=[("tls", "STARTTLS (587)"), ("ssl", "SSL/TLS (465)"), ("none", _("None"))],
+        default="tls",
+    )
+    email_from = models.EmailField(_("send emails from"), blank=True)
+
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -107,6 +159,14 @@ class HotelSettings(models.Model):
         """Share of a VAT-inclusive price that is VAT, e.g. 20% → 1/6."""
         return self.vat_rate / (Decimal("100") + self.vat_rate) if self.vat_rate else Decimal("0")
 
+    @property
+    def email_configured(self) -> bool:
+        return bool(self.smtp_host and (self.email_from or self.smtp_username))
+
+    @property
+    def booking_open(self) -> bool:
+        return self.booking_enabled and self.module_rooms
+
     def enabled_modules(self) -> set[str]:
         mods = {"finance", "management"}
         if self.module_rooms:
@@ -116,7 +176,7 @@ class HotelSettings(models.Model):
         if self.module_maintenance:
             mods.add("maintenance")
         if self.module_outlets:
-            mods.add("outlets")
+            mods |= {"outlets", "kitchen"}
         return mods
 
 

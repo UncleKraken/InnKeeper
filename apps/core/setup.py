@@ -90,6 +90,21 @@ def grid_positions(count: int, per_row: int = 6) -> list[tuple[int, int]]:
     return [(60 + (i % per_row) * 150, 60 + (i // per_row) * 140) for i in range(count)]
 
 
+KITCHEN_CATEGORIES = {"Starters", "Mains", "Desserts", "Food", "Breakfast", "Snacks", "Pastries", "Night menu"}
+DRINK_CATEGORIES = {"Drinks", "Coffee", "Soft drinks", "Beer", "Wine & spirits", "Tea"}
+
+
+def starter_station(kind: str, category_en: str):
+    """Food goes to the kitchen screen, drinks to the bar screen (only where someone else prepares them)."""
+    from apps.outlets.models import Station
+
+    if kind in {"restaurant", "room_service"} and category_en in KITCHEN_CATEGORIES:
+        return Station.objects.get_or_create(name="Kuzhina", defaults={"sort_order": 0})[0]
+    if kind in {"restaurant", "room_service", "pool"} and category_en in DRINK_CATEGORIES:
+        return Station.objects.get_or_create(name="Bar", defaults={"sort_order": 1})[0]
+    return None
+
+
 @transaction.atomic
 def apply_setup(answers: SetupAnswers, user) -> HotelSettings:
     hs = HotelSettings.load()
@@ -128,7 +143,9 @@ def apply_setup(answers: SetupAnswers, user) -> HotelSettings:
             for i, (x, y) in enumerate(grid_positions(n_tables), start=1):
                 Table.objects.create(outlet=outlet, name=str(i), seats=4, pos_x=x, pos_y=y, sort_order=i)
             for c_order, (sq, en) in enumerate(categories):
-                Category.objects.create(outlet=outlet, name=sq, name_en=en, sort_order=c_order)
+                Category.objects.create(
+                    outlet=outlet, name=sq, name_en=en, sort_order=c_order, station=starter_station(kind, en)
+                )
 
     audit(user, "settings.setup", f"{hs.name} ({hs.get_business_type_display()})", hs)
     return hs

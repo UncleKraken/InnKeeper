@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.core.forms import DateInput, StyledFormMixin
 from apps.finance.models import Payment
 
-from .models import Guest, Reservation, Room, RoomType
+from .models import Guest, Reservation, Room, RoomType, SeasonRate
 
 
 class GuestForm(StyledFormMixin, forms.ModelForm):
@@ -59,7 +59,7 @@ class ReservationForm(StyledFormMixin, forms.ModelForm):
         required=False,
         min_value=Decimal("0"),
         decimal_places=2,
-        help_text=_("Leave empty to use the room type's standard rate."),
+        help_text=_("Leave empty to use the price list (room type rate and seasons)."),
     )
 
     class Meta:
@@ -73,6 +73,9 @@ class ReservationForm(StyledFormMixin, forms.ModelForm):
         if self.instance.pk:
             for name in ("guest", "new_first_name", "new_last_name", "new_phone", "new_email"):
                 del self.fields[name]
+            if self.instance.nightly_rates:
+                # Priced from the price list: keep it automatic unless someone types a rate.
+                self.initial["rate"] = None
         else:
             self.order_fields(["guest", "new_first_name", "new_last_name", "new_phone", "new_email"])
 
@@ -83,10 +86,22 @@ class ReservationForm(StyledFormMixin, forms.ModelForm):
             first, last = cleaned.get("new_first_name", "").strip(), cleaned.get("new_last_name", "").strip()
             if not guest and not (first and last):
                 raise forms.ValidationError(_("Choose an existing guest or enter the new guest's first and last name."))
-        if cleaned.get("rate") is None and cleaned.get("room"):
-            cleaned["rate"] = cleaned["room"].room_type.base_rate
-            self.instance.rate = cleaned["rate"]
+        room, arrival, departure = cleaned.get("room"), cleaned.get("arrival"), cleaned.get("departure")
+        self.quote = None
+        if cleaned.get("rate") is None and room and arrival and departure and departure > arrival:
+            from .pricing import apply_quote, quote
+
+            self.quote = quote(room.room_type, arrival, departure)
+            apply_quote(self.instance, self.quote)
+            cleaned["rate"] = self.instance.rate
+        elif cleaned.get("rate") is not None:
+            self.instance.nightly_rates = []
         return cleaned
+
+    def _post_clean(self):
+        nightly = self.instance.nightly_rates
+        super()._post_clean()
+        self.instance.nightly_rates = nightly
 
     def get_guest(self) -> Guest:
         if self.instance.pk:
@@ -132,6 +147,53 @@ class RoomForm(StyledFormMixin, forms.ModelForm):
 
 
 class RoomTypeForm(StyledFormMixin, forms.ModelForm):
+    photo_file = forms.FileField(
+        label=_("Photo"),
+        required=False,
+        help_text=_("Shown on the online booking page. JPG or PNG, up to 600 KB (a 1200 px wide photo is plenty)."),
+    )
+    remove_photo = forms.BooleanField(label=_("Remove the current photo"), required=False)
+
     class Meta:
         model = RoomType
-        fields = ["name", "code", "base_rate", "max_adults", "max_children", "description", "is_active"]
+        fields = [
+            "name",
+            "code",
+            "base_rate",
+            "max_adults",
+            "max_children",
+            "description",
+            "name_en",
+            "description_en",
+            "bookable_online",
+            "sort_order",
+            "is_active",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.photo:
+            del self.fields["remove_photo"]
+
+    def clean_photo_file(self):
+        from apps.core.forms import image_to_data_uri
+
+        f = self.cleaned_data.get("photo_file")
+        return image_to_data_uri(f, 600) if f else None
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        if self.cleaned_data.get("remove_photo"):
+            obj.photo = ""
+        elif self.cleaned_data.get("photo_file"):
+            obj.photo = self.cleaned_data["photo_file"]
+        if commit:
+            obj.save()
+        return obj
+
+
+class SeasonRateForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = SeasonRate
+        fields = ["name", "room_type", "start_date", "end_date", "percent", "rate", "min_nights", "is_active"]
+        widgets = {"start_date": DateInput(), "end_date": DateInput()}

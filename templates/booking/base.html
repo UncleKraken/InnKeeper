@@ -1,0 +1,29 @@
+{% load static i18n innkeeper %}<!doctype html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% translate "Book your stay" %}{% endblock %} · {{ hotel.name }}</title>
+  <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <meta name="robots" content="noindex">
+</head>
+<body class="menu-page booking-page">
+{% include "includes/icons.svg" %}
+<header class="menu-hero booking-hero">
+  <div class="menu-lang">
+    <a href="?{% block langq %}{% endblock %}lang=sq" class="{% if lang == 'sq' %}active{% endif %}">SQ</a>
+    <a href="?{% block langq2 %}{% endblock %}lang=en" class="{% if lang == 'en' %}active{% endif %}">EN</a>
+  </div>
+  {% if hotel.logo %}<img src="{{ hotel.logo }}" alt="{{ hotel.name }}" class="menu-logo">{% endif %}
+  <p class="menu-eyebrow">{% translate "Book your stay" %}</p>
+  <h1>{{ hotel.name }}</h1>
+  {% if hotel.address %}<p class="menu-intro">{{ hotel.address }}</p>{% endif %}
+</header>
+<main class="booking-body">
+  {% block content %}{% endblock %}
+</main>
+<footer class="booking-foot">
+  {{ hotel.name }}{% if hotel.phone %} · <a href="tel:{{ hotel.phone }}">{{ hotel.phone }}</a>{% endif %}{% if hotel.email %} · <a href="mailto:{{ hotel.email }}">{{ hotel.email }}</a>{% endif %}
+</footer>
+</body>
+</html>

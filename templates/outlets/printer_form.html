@@ -1,0 +1,15 @@
+{% extends "core/crud_form.html" %}
+{% load i18n innkeeper %}
+{% block scripts %}
+<script>
+(function () {
+  var conn = document.getElementById('id_connection'); if (!conn) return;
+  function sync() {
+    var net = conn.value === 'network';
+    ['id_address', 'id_port'].forEach(function (id) { document.getElementById(id).closest('.field').style.display = net ? '' : 'none'; });
+    document.getElementById('id_system_name').closest('.field').style.display = net ? 'none' : '';
+  }
+  conn.addEventListener('change', sync); sync();
+})();
+</script>
+{% endblock %}

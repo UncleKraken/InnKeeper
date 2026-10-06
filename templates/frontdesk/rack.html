@@ -39,7 +39,7 @@
             </th>
             {% for c in row.cells %}
               {% if c.kind == "stay" %}
-                <td class="stay" colspan="{{ c.span }}"><a class="bar {{ c.res.status }}" href="{% url 'frontdesk:reservation_detail' c.res.pk %}" title="{{ c.res.guest }} · {{ c.res.arrival|date:'d.m' }}–{{ c.res.departure|date:'d.m' }}">{{ c.res.guest }}</a></td>
+                <td class="stay" colspan="{{ c.span }}"><a class="bar {{ c.res.status }}{% if not c.res.confirmed %} unconfirmed{% endif %}" href="{% url 'frontdesk:reservation_detail' c.res.pk %}" title="{{ c.res.guest }} · {{ c.res.arrival|date:'d.m' }}–{{ c.res.departure|date:'d.m' }}">{{ c.res.guest }}</a></td>
               {% elif c.blocked %}
                 <td class="blocked" title="{% translate 'Out of order' %}"></td>
               {% else %}
@@ -55,6 +55,7 @@
   </div>
   <div class="card-footer legend">
     <span><i style="background:var(--info)"></i>{% translate "Booked" %}</span>
+    <span><i style="background:repeating-linear-gradient(45deg,#2f5fb0,#2f5fb0 3px,#4a77c4 3px,#4a77c4 6px)"></i>{% translate "Online request" %}</span>
     <span><i style="background:var(--success)"></i>{% translate "In house" %}</span>
     <span><i style="background:#9aa1ab"></i>{% translate "Checked out" %}</span>
     <span><i style="background:#f7dcd8"></i>{% translate "Out of order" %}</span>

@@ -18,8 +18,11 @@ It adapts to the business: a setup wizard asks whether you run a **hotel**, a **
 | **Front desk** | Room rack (calendar timeline), reservations with double-booking protection and room capacity checks, check-in / check-out, guest profiles with ID documents, booking sources (walk-in, phone, Booking.com, Airbnb…) |
 | **Guest bill (folio)** | Room nights, extras and outlet charges in one place; cash / card / bank transfer payments; refunds; printable invoice; check-out blocked until the bill is settled (manager override for company invoices) |
 | **Outlets (POS)** | Any number of outlets of any kind. Touch-friendly ordering, discounts with staff limits, split and mixed payments, cash change calculator, move/merge tables, charge to room, sold-out items |
+| **Kitchen & bar** | Send orders to stations (Kitchen, Bar…); live kitchen display with sound, waiting time and Start → Ready; ready tables flagged on the waiter's floor plan; items removed after sending shown crossed out |
+| **Printing** | ESC/POS thermal printers over the network (IP:9100) or installed in Windows; bills, receipts and kitchen tickets print directly; cash drawer kick; print log with retry |
 | **Floor plans** | Drag-and-drop editor: move, resize, rename and renumber tables, square/round/long shapes, areas such as Inside and Terrace. The POS shows the real layout |
 | **Receipts & menus** | Numbered receipts with logo, VAT breakdown and change, 58/80 mm thermal printing, receipt history with reprint and manager void. Guest menu on phones via QR code (Albanian/English), printable A4 menu and QR table cards |
+| **Prices & online booking** | Seasons (percentage or fixed price per room type, minimum stay) priced night by night; public booking page (Albanian/English) with room photos, deposit by bank transfer, request → confirm/decline by reception, guest and staff emails over your own SMTP |
 | **Housekeeping** | Room status board by floor, tasks created automatically at check-out, assign to staff, start → done |
 | **Maintenance** | Tickets with priority and assignee; a ticket can take a room out of order until resolved |
 | **Finance** | Revenue, expenses and profit; end-of-day cash count with printable Z report; best sellers, sales by staff and busiest hours; occupancy, ADR, RevPAR; unpaid bills; full ledger with CSV export (opens correctly in Excel) |
@@ -29,7 +32,7 @@ It adapts to the business: a setup wizard asks whether you run a **hotel**, a **
 
 ### Security and data integrity
 - Passwords hashed (Django PBKDF2); never shown, only replaced. Lockout after 5 failed sign-ins.
-- Role-based access: Manager, Reception, Housekeeping, Maintenance, Service staff (optionally limited to specific outlets), Finance.
+- Role-based access: Manager, Reception, Housekeeping, Maintenance, Service staff (optionally limited to specific outlets), Kitchen & bar (order screens only), Finance.
 - Money is stored as exact decimals, never floats.
 - Nothing financial is deleted. Mistakes are **voided** by a manager with a reason, and every action is written to the activity log.
 - Bookings for the same room are serialised with a database lock, so two receptionists can't double-book a room at the same moment.
@@ -120,8 +123,7 @@ Each user can switch language (SQ / EN) from the sidebar; the choice is remember
 
 ## Roadmap
 - Fiscal receipt / e-invoice integration (Albania)
-- Kitchen display and direct printing to network thermal printers
-- Channel manager sync (Booking.com, Airbnb) and an online booking page
-- Rate plans and seasons, deposits, group bookings
+- Channel manager sync (Booking.com, Airbnb)
+- Online card payments for deposits, group bookings
 - Inventory and purchasing
 - Guest registration export for the authorities

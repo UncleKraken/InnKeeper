@@ -10,6 +10,78 @@ from django.utils.translation import gettext_lazy as _
 MONEY = {"max_digits": 12, "decimal_places": 2}
 
 
+class Printer(models.Model):
+    """A receipt or kitchen printer (ESC/POS thermal printers, the usual kind in shops and kitchens)."""
+
+    class Connection(models.TextChoices):
+        NETWORK = "network", _("Network (IP address)")
+        SYSTEM = "system", _("Installed on this computer (USB)")
+
+    name = models.CharField(_("name"), max_length=60, help_text=_("e.g. Bar receipt printer, Kitchen printer"))
+    connection = models.CharField(
+        _("connection"), max_length=10, choices=Connection.choices, default=Connection.NETWORK
+    )
+    address = models.CharField(
+        _("IP address"),
+        max_length=100,
+        blank=True,
+        help_text=_("Printed on the printer's self-test page, e.g. 192.168.1.50"),
+    )
+    port = models.PositiveIntegerField(_("port"), default=9100)
+    system_name = models.CharField(
+        _("printer name in Windows"),
+        max_length=120,
+        blank=True,
+        help_text=_("Exactly as shown in Windows Settings → Printers. Works only on the computer running InnKeeper."),
+    )
+    paper_width = models.PositiveSmallIntegerField(_("paper width"), choices=[(58, "58 mm"), (80, "80 mm")], default=80)
+    open_drawer = models.BooleanField(
+        _("open cash drawer on cash payments"),
+        default=False,
+        help_text=_("For a cash drawer plugged into this printer."),
+    )
+    is_active = models.BooleanField(_("active"), default=True)
+
+    class Meta:
+        verbose_name = _("printer")
+        verbose_name_plural = _("printers")
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def where(self) -> str:
+        if self.connection == self.Connection.NETWORK:
+            return f"{self.address}:{self.port}"
+        return self.system_name
+
+
+class Station(models.Model):
+    """Where orders are prepared: Kitchen, Bar, Pizza oven… Each has a screen and/or a printer."""
+
+    name = models.CharField(_("name"), max_length=60)
+    printer = models.ForeignKey(
+        Printer,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="stations",
+        verbose_name=_("ticket printer"),
+        help_text=_("Optional. New orders are printed here as well as shown on the screen."),
+    )
+    sort_order = models.PositiveSmallIntegerField(_("order"), default=0)
+    is_active = models.BooleanField(_("active"), default=True)
+
+    class Meta:
+        verbose_name = _("station")
+        verbose_name_plural = _("stations")
+        ordering = ["sort_order", "name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class Outlet(models.Model):
     """Any point of sale or service in the hotel: restaurant, bar, spa, room service, laundry…"""
 
@@ -45,6 +117,18 @@ class Outlet(models.Model):
     )
     menu_intro = models.CharField(_("menu introduction"), max_length=255, blank=True)
     menu_token = models.CharField(max_length=24, unique=True, editable=False, default="")
+    receipt_printer = models.ForeignKey(
+        Printer,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="outlets",
+        verbose_name=_("receipt printer"),
+        help_text=_("Bills and receipts print here. Leave empty to print from the browser."),
+    )
+    auto_print_receipt = models.BooleanField(
+        _("print a receipt for every payment"), default=False, help_text=_("Needs a receipt printer.")
+    )
 
     class Meta:
         verbose_name = _("outlet")
@@ -69,6 +153,15 @@ class Category(models.Model):
     outlet = models.ForeignKey(Outlet, on_delete=models.CASCADE, related_name="categories", verbose_name=_("outlet"))
     name = models.CharField(_("name"), max_length=80)
     name_en = models.CharField(_("name in English"), max_length=80, blank=True)
+    station = models.ForeignKey(
+        Station,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="categories",
+        verbose_name=_("prepared at"),
+        help_text=_("Where items in this category are prepared. Leave empty for things served straight away."),
+    )
     sort_order = models.PositiveSmallIntegerField(_("order"), default=0)
 
     class Meta:
@@ -198,6 +291,15 @@ class Order(models.Model):
         return self.label or _("Order #%(n)s") % {"n": self.number}
 
     @property
+    def active_lines(self):
+        """Lines still on the bill (items cancelled after going to the kitchen have quantity 0)."""
+        return self.lines.filter(quantity__gt=0)
+
+    @property
+    def unsent_count(self) -> int:
+        return self.lines.filter(status=OrderLine.Status.NEW, quantity__gt=0).count()
+
+    @property
     def subtotal(self) -> Decimal:
         value = self.lines.aggregate(t=Sum(F("unit_price") * F("quantity")))["t"]
         return (value or Decimal("0")).quantize(Decimal("0.01"))
@@ -220,14 +322,51 @@ class Order(models.Model):
         return self.status == self.Status.OPEN
 
 
+class KitchenTicket(models.Model):
+    """One batch of items sent to one station. Shown on the station's screen until it is served."""
+
+    class Status(models.TextChoices):
+        NEW = "new", _("New")
+        PREPARING = "preparing", _("Preparing")
+        READY = "ready", _("Ready")
+        SERVED = "served", _("Served")
+        CANCELLED = "cancelled", _("Cancelled")
+
+    ON_BOARD = (Status.NEW, Status.PREPARING, Status.READY, Status.CANCELLED)
+
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="tickets")
+    station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name="tickets")
+    status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.NEW, db_index=True)
+    sent_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    sent_at = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    ready_at = models.DateTimeField(null=True, blank=True)
+    served_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["sent_at", "id"]
+
+    def __str__(self) -> str:
+        return f"{self.station} · {self.order.display_name}"
+
+
 class OrderLine(models.Model):
+    class Status(models.TextChoices):
+        NEW = "new", _("Not sent")
+        SENT = "sent", _("Sent")
+        DIRECT = "direct", _("Served directly")
+
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="lines")
     item = models.ForeignKey(Item, null=True, on_delete=models.SET_NULL, related_name="+")
     # Name and price are copied so old bills stay correct after the menu changes.
     name = models.CharField(_("name"), max_length=120)
     unit_price = models.DecimalField(_("unit price"), **MONEY)
-    quantity = models.PositiveSmallIntegerField(_("quantity"), default=1, validators=[MinValueValidator(1)])
+    quantity = models.PositiveSmallIntegerField(_("quantity"), default=1)
     note = models.CharField(_("note"), max_length=120, blank=True)
+    station = models.ForeignKey(Station, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    status = models.CharField(max_length=8, choices=Status.choices, default=Status.DIRECT)
+    ticket = models.ForeignKey(KitchenTicket, null=True, blank=True, on_delete=models.SET_NULL, related_name="lines")
+    sent_quantity = models.PositiveSmallIntegerField(default=0)
     added_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
     added_at = models.DateTimeField(auto_now_add=True)
 
@@ -240,3 +379,30 @@ class OrderLine(models.Model):
     @property
     def line_total(self) -> Decimal:
         return self.unit_price * self.quantity
+
+    @property
+    def is_new(self) -> bool:
+        return self.status == self.Status.NEW
+
+
+class PrintJob(models.Model):
+    """Everything sent to a printer is kept for a few days, so failed jobs can be retried."""
+
+    class Status(models.TextChoices):
+        DONE = "done", _("Printed")
+        FAILED = "failed", _("Failed")
+
+    printer = models.ForeignKey(Printer, on_delete=models.CASCADE, related_name="jobs")
+    title = models.CharField(max_length=120)
+    data = models.BinaryField()
+    status = models.CharField(max_length=8, choices=Status.choices, default=Status.FAILED)
+    error = models.CharField(max_length=255, blank=True)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return self.title

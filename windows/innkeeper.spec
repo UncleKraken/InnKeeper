@@ -52,7 +52,7 @@ hiddenimports = (
     + walk_modules(os.path.dirname(django.__file__), "django", skip=("django.contrib.gis", "django.test", "django.db.backends.oracle", "django.db.backends.mysql", "django.db.backends.postgresql"))
     + collect_submodules("whitenoise")
     + collect_submodules("waitress")
-    + ["dj_database_url", "qrcode", "qrcode.image.svg", "qrcode.image.pure"]
+    + ["dj_database_url", "qrcode", "qrcode.image.svg", "qrcode.image.pure", "win32print", "win32timezone"]
 )
 
 a = Analysis(

@@ -1,0 +1,52 @@
+{% extends "booking/base.html" %}
+{% load i18n innkeeper %}
+{% block langq %}{{ query }}&{% endblock %}
+{% block langq2 %}{{ query }}&{% endblock %}
+{% block content %}
+<a class="booking-back" href="{% url 'booking:search' %}?{{ query }}">{% icon "back" %} {% translate "Back to rooms" %}</a>
+<div class="booking-grid">
+  <form method="post" class="card" novalidate>{% csrf_token %}
+    <input type="hidden" name="lang" value="{{ lang }}">
+    <div class="card-header"><h2>{% translate "Your details" %}</h2></div>
+    <div class="card-body">
+      {% if error %}<div class="alert alert-error" style="margin-bottom:1rem">{{ error }}</div>{% endif %}
+      <div class="form-grid">
+        {% for f in form %}{% if f.name != "accept" and f.name != "website" %}
+          <div class="field{% if f.errors %} has-error{% endif %}{% if f.name == 'notes' %} full{% endif %}">
+            <label for="{{ f.id_for_label }}">{{ f.label }}{% if f.field.required %} <span style="color:var(--danger)">*</span>{% endif %}</label>
+            {{ f }}
+            {% if f.help_text %}<div class="help">{{ f.help_text }}</div>{% endif %}
+            {% for e in f.errors %}<div class="error">{{ e }}</div>{% endfor %}
+          </div>
+        {% endif %}{% endfor %}
+      </div>
+      <div class="hp" aria-hidden="true"><label>Website {{ form.website }}</label></div>
+      {% if hotel.booking_terms %}<div class="booking-terms"><strong>{% translate "Booking conditions" %}</strong><p>{{ hotel.booking_terms|linebreaksbr }}</p></div>{% endif %}
+      <label class="check{% if form.accept.errors %} has-error{% endif %}" style="margin-top:1rem">{{ form.accept }} {{ form.accept.label }}</label>
+      {% for e in form.accept.errors %}<div class="error">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="card-footer"><button class="btn btn-lg btn-block" {% if not offer or not offer.bookable %}disabled{% endif %}>{% if hotel.booking_requires_confirmation %}{% translate "Send booking request" %}{% else %}{% translate "Confirm booking" %}{% endif %}</button></div>
+  </form>
+
+  <aside class="card">
+    {% if room_type.photo %}<img class="offer-photo" src="{{ room_type.photo }}" alt="{{ name }}" style="border-radius:var(--radius) var(--radius) 0 0">{% endif %}
+    <div class="card-body">
+      <h3 style="margin-bottom:.6rem">{{ name }}</h3>
+      <dl class="dl">
+        <dt>{% translate "Arrival" %}</dt><dd>{{ arrival|date:"D, d.m.Y" }}{% if hotel.check_in_time %} · {% translate "from" %} {{ hotel.check_in_time|time:"H:i" }}{% endif %}</dd>
+        <dt>{% translate "Departure" %}</dt><dd>{{ departure|date:"D, d.m.Y" }}{% if hotel.check_out_time %} · {% translate "until" %} {{ hotel.check_out_time|time:"H:i" }}{% endif %}</dd>
+        <dt>{% translate "Guests" %}</dt><dd>{{ adults }} {% translate "adults" %}{% if children %}, {{ children }} {% translate "children" %}{% endif %}</dd>
+      </dl>
+      {% if offer %}
+        {% if offer.quote.varies %}
+          <table class="table table-sm" style="margin-top:.75rem">{% for price in offer.quote.nightly %}<tr><td class="muted">{% translate "Night" %} {{ forloop.counter }}</td><td class="num">{{ price|money }}</td></tr>{% endfor %}</table>
+        {% endif %}
+        <div class="t-row t-total" style="margin-top:1rem"><span>{% translate "Total" %}</span><span class="amount">{{ offer.quote.total|money }}</span></div>
+        <p class="muted" style="font-size:.85rem">{% blocktranslate with rate=hotel.vat_rate|floatformat:"-2" %}Prices include VAT ({{ rate }}%){% endblocktranslate %}</p>
+        {% if deposit %}<div class="alert alert-info">{% blocktranslate with d=deposit|money %}A deposit of {{ d }} is requested by bank transfer. You'll see the details after booking.{% endblocktranslate %}</div>
+        {% else %}<div class="alert alert-info">{% translate "Nothing to pay now. You pay at the hotel." %}</div>{% endif %}
+      {% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Printers" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Management" %}</div><h1>{% translate "Outlets & menus" %}</h1></div>
+  <div class="actions"><a class="btn" href="{% url 'outlets:printer_create' %}">{% icon "plus" %} {% translate "Add printer" %}</a></div>
+</div>
+<nav class="tabs">{% for url, label, is_active in tabs %}<a href="{{ url }}" class="{% if is_active %}active{% endif %}">{{ label }}</a>{% endfor %}</nav>
+
+<div class="grid grid-main" style="align-items:start">
+  <section class="card card-flush">
+    {% if printers %}
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Connection" %}</th><th>{% translate "Paper" %}</th><th>{% translate "Status" %}</th><th></th></tr></thead>
+      <tbody>
+      {% for p in printers %}
+        <tr>
+          <td><a href="{% url 'outlets:printer_edit' p.pk %}"><strong>{{ p.name }}</strong></a>{% if p.open_drawer %}<br><small class="muted">{% translate "Opens cash drawer" %}</small>{% endif %}</td>
+          <td>{{ p.get_connection_display }}<br><small class="mono">{{ p.where }}</small></td>
+          <td>{{ p.paper_width }} mm</td>
+          <td>{% if not p.is_active %}{% translate "Off" as l %}{% status_badge "closed" l %}{% elif p.failed %}{% blocktranslate count n=p.failed asvar l %}{{ n }} failed job{% plural %}{{ n }} failed jobs{% endblocktranslate %}{% status_badge "danger" l %}{% else %}{% translate "OK" as l %}{% status_badge "success" l %}{% endif %}</td>
+          <td class="num nowrap">
+            <form method="post" action="{% url 'outlets:printer_test' p.pk %}" class="inline">{% csrf_token %}<button class="btn btn-secondary btn-sm">{% icon "print" %} {% translate "Test print" %}</button></form>
+            <a class="btn btn-ghost btn-sm" href="{% url 'outlets:printer_edit' p.pk %}">{% icon "edit" %}</a>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {% else %}
+      <div class="empty"><strong>{% translate "No printers yet" %}</strong>{% translate "Without a printer, bills and receipts are printed from the browser." %}</div>
+    {% endif %}
+  </section>
+
+  <aside class="card">
+    <div class="card-header"><h3>{% translate "How to connect a printer" %}</h3></div>
+    <div class="card-body help-body" style="font-size:.9rem">
+      <p><strong>{% translate "Network printer (recommended)" %}</strong><br>{% translate "Connect it to the same router as InnKeeper with a cable or Wi-Fi. Hold the feed button while switching it on to print its settings page, and copy the IP address from there. Port is usually 9100." %}</p>
+      <p><strong>{% translate "USB printer" %}</strong><br>{% translate "Plug it into the computer running the InnKeeper Windows app and install its driver. Then choose 'Installed on this computer' and type the name exactly as Windows shows it." %}</p>
+      <p style="margin:0">{% translate "Then choose where things print: the receipt printer in each outlet's settings, and a ticket printer for each station (Kitchen, Bar…)." %}</p>
+    </div>
+  </aside>
+</div>
+
+<section class="card card-flush" style="margin-top:1.25rem">
+  <div class="card-header"><h2>{% translate "Recent print jobs" %}</h2><span class="muted" style="font-size:.85rem">{% translate "Kept for 3 days" %}</span></div>
+  <div class="table-wrap"><table class="table table-sm">
+    <tbody>
+    {% for j in jobs %}
+      <tr>
+        <td class="nowrap">{{ j.created_at|date:"d.m H:i" }}</td>
+        <td>{{ j.title }}</td>
+        <td>{{ j.printer }}</td>
+        <td>{% if j.status == "done" %}{% status_badge "success" j.get_status_display %}{% else %}{% status_badge "danger" j.get_status_display %}<br><small class="muted">{{ j.error }}</small>{% endif %}</td>
+        <td class="num">{% if j.status != "done" %}<form method="post" action="{% url 'outlets:job_retry' j.pk %}" class="inline">{% csrf_token %}<button class="btn btn-secondary btn-sm">{% translate "Retry" %}</button></form>{% endif %}</td>
+      </tr>
+    {% empty %}
+      <tr><td class="empty">{% translate "Nothing printed yet." %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</section>
+{% endblock %}

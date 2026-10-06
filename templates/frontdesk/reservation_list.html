@@ -9,7 +9,7 @@
     <a class="btn" href="{% url 'frontdesk:reservation_create' %}">{% icon "plus" %} {% translate "New reservation" %}</a>
   </div>
 </div>
-<nav class="tabs">{% for key, label in views.items %}<a href="?view={{ key }}" class="{% if key == view %}active{% endif %}">{{ label }}</a>{% endfor %}</nav>
+<nav class="tabs">{% for key, label in views.items %}<a href="?view={{ key }}" class="{% if key == view %}active{% endif %}">{{ label }}{% if key == "online" and pending_online %} <span class="count-pill">{{ pending_online }}</span>{% endif %}</a>{% endfor %}</nav>
 <div class="card card-flush">
   {% if object_list %}
   <div class="table-wrap"><table class="table">
@@ -22,10 +22,13 @@
         <td><strong>{{ r.room.number }}</strong> <small>{{ r.room.room_type.code }}</small></td>
         <td class="nowrap">{{ r.arrival|date:"d.m.Y" }} → {{ r.departure|date:"d.m.Y" }}<br><small>{{ r.nights }} {% translate "nights" %} · {{ r.adults }}+{{ r.children }}</small></td>
         <td>{{ r.get_source_display }}</td>
-        <td>{% status_badge r.status r.get_status_display %}</td>
+        <td>{% if not r.confirmed and r.status == "booked" %}{% translate "Request" as l %}{% status_badge "warning" l %}{% else %}{% status_badge r.status r.get_status_display %}{% endif %}</td>
         <td class="num">{{ r.rate|money }}</td>
         <td class="num">
-          {% if view == "arrivals" and r.status == "booked" %}
+          {% if not r.confirmed and r.status == "booked" %}
+            <form method="post" action="{% url 'frontdesk:confirm_booking' r.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-sm">{% icon "check" %} {% translate "Confirm" %}</button></form>
+            <a class="btn btn-ghost btn-sm" href="{% url 'frontdesk:reservation_detail' r.pk %}">{% translate "Open" %}</a>
+          {% elif view == "arrivals" and r.status == "booked" %}
             <form method="post" action="{% url 'frontdesk:check_in' r.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-sm">{% translate "Check in" %}</button></form>
           {% else %}
             <a class="btn btn-ghost btn-sm" href="{% url 'frontdesk:reservation_detail' r.pk %}">{% translate "Open" %}</a>

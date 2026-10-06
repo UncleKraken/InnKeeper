@@ -8,8 +8,9 @@
     <h1>{% if object %}{{ object }}{% else %}{% blocktranslate %}Add {{ singular }}{% endblocktranslate %}{% endif %}</h1>
   </div>
 </div>
-<form method="post" class="card" style="max-width:860px" novalidate>{% csrf_token %}
+<form method="post" class="card" style="max-width:860px" enctype="multipart/form-data" novalidate>{% csrf_token %}
   <div class="card-body">
+    {% if object.photo %}<div class="logo-preview"><img src="{{ object.photo }}" alt="" style="max-height:140px"></div>{% endif %}
     {% include "includes/form_fields.html" %}
   </div>
   <div class="card-footer form-actions" style="margin-top:0">

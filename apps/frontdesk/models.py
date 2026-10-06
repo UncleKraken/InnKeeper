@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
 from django.conf import settings
@@ -20,6 +20,14 @@ class RoomType(models.Model):
     max_adults = models.PositiveSmallIntegerField(_("max adults"), default=2)
     max_children = models.PositiveSmallIntegerField(_("max children"), default=1)
     is_active = models.BooleanField(_("active"), default=True)
+    # Online booking page
+    bookable_online = models.BooleanField(
+        _("bookable online"), default=True, help_text=_("Show this room type on the public booking page.")
+    )
+    name_en = models.CharField(_("name in English"), max_length=80, blank=True)
+    description_en = models.TextField(_("description in English"), blank=True)
+    photo = models.TextField(_("photo"), blank=True)
+    sort_order = models.PositiveSmallIntegerField(_("order"), default=0)
 
     class Meta:
         verbose_name = _("room type")
@@ -125,10 +133,17 @@ class Reservation(models.Model):
     adults = models.PositiveSmallIntegerField(_("adults"), default=1, validators=[MinValueValidator(1)])
     children = models.PositiveSmallIntegerField(_("children"), default=0)
     rate = models.DecimalField(_("nightly rate"), validators=[MinValueValidator(0)], **MONEY)
+    # One price per night when seasons apply (as strings, e.g. ["80.00", "80.00", "104.00"]); empty = `rate` every night.
+    nightly_rates = models.JSONField(default=list, blank=True)
     status = models.CharField(_("status"), max_length=12, choices=Status.choices, default=Status.BOOKED, db_index=True)
     source = models.CharField(_("source"), max_length=20, choices=Source.choices, default=Source.WALK_IN)
     external_ref = models.CharField(_("external reference"), max_length=60, blank=True)
     notes = models.TextField(_("notes"), blank=True)
+    # Online bookings
+    confirmed = models.BooleanField(_("confirmed"), default=True)
+    booking_token = models.CharField(max_length=32, blank=True, db_index=True)
+    guest_language = models.CharField(max_length=8, blank=True)
+    deposit_due = models.DecimalField(_("deposit due"), default=Decimal("0.00"), **MONEY)
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
@@ -160,9 +175,26 @@ class Reservation(models.Model):
     def nights(self) -> int:
         return (self.departure - self.arrival).days
 
+    def rate_for_night(self, index: int) -> Decimal:
+        """Price of the night starting `index` days after arrival."""
+        if self.nightly_rates and len(self.nightly_rates) == self.nights and 0 <= index < self.nights:
+            return Decimal(str(self.nightly_rates[index]))
+        return self.rate
+
+    def amount_for_nights(self, start: int, end: int) -> Decimal:
+        return sum((self.rate_for_night(i) for i in range(start, end)), Decimal("0.00"))
+
+    @property
+    def has_varying_rates(self) -> bool:
+        return bool(self.nightly_rates) and len(set(map(str, self.nightly_rates))) > 1
+
+    @property
+    def nightly_breakdown(self) -> list[tuple[date, Decimal]]:
+        return [(self.arrival + timedelta(days=i), self.rate_for_night(i)) for i in range(self.nights)]
+
     @property
     def estimated_total(self) -> Decimal:
-        return self.rate * self.nights
+        return self.amount_for_nights(0, self.nights)
 
     @property
     def is_active(self) -> bool:
@@ -207,3 +239,50 @@ class Reservation(models.Model):
         """Nights actually stayed if the guest leaves on `on_date` (at least one)."""
         on_date = on_date or timezone.localdate()
         return max(1, (on_date - self.arrival).days)
+
+
+class SeasonRate(models.Model):
+    """A price change for a period: a fixed nightly price for one room type, or a percentage for all."""
+
+    name = models.CharField(_("name"), max_length=80, help_text=_("e.g. Summer, New Year, Low season"))
+    room_type = models.ForeignKey(
+        RoomType,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="season_rates",
+        verbose_name=_("room type"),
+        help_text=_("Leave empty to apply to all room types (percentage only)."),
+    )
+    start_date = models.DateField(_("from"))
+    end_date = models.DateField(_("until (including)"))
+    rate = models.DecimalField(_("nightly price"), null=True, blank=True, validators=[MinValueValidator(0)], **MONEY)
+    percent = models.DecimalField(
+        _("change (%)"),
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text=_("e.g. 30 for +30%, -15 for a 15% discount."),
+    )
+    min_nights = models.PositiveSmallIntegerField(_("minimum nights"), default=1)
+    is_active = models.BooleanField(_("active"), default=True)
+
+    class Meta:
+        verbose_name = _("season")
+        verbose_name_plural = _("seasons")
+        ordering = ["start_date", "name"]
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.start_date:%d.%m}–{self.end_date:%d.%m.%Y})"
+
+    def clean(self):
+        errors = {}
+        if self.start_date and self.end_date and self.end_date < self.start_date:
+            errors["end_date"] = _("The end date must be on or after the start date.")
+        if (self.rate is None) == (self.percent is None):
+            errors["rate"] = _("Enter either a nightly price or a percentage change, not both.")
+        elif self.rate is not None and not self.room_type_id:
+            errors["room_type"] = _("A fixed price needs a room type.")
+        if errors:
+            raise ValidationError(errors)

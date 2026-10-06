@@ -11,6 +11,8 @@
     <a href="?tab=business" class="{% if tab == 'business' %}active{% endif %}">{% icon "building" %} {% translate "Business details" %}</a>
     <a href="?tab=receipts" class="{% if tab == 'receipts' %}active{% endif %}">{% icon "receipt" %} {% translate "Receipts & invoices" %}</a>
     <a href="?tab=modules" class="{% if tab == 'modules' %}active{% endif %}">{% icon "grid" %} {% translate "Modules" %}</a>
+    {% if hotel.module_rooms %}<a href="?tab=booking" class="{% if tab == 'booking' %}active{% endif %}">{% icon "calendar" %} {% translate "Online booking" %}</a>{% endif %}
+    <a href="?tab=email" class="{% if tab == 'email' %}active{% endif %}">{% icon "mail" %} {% translate "Email" %}</a>
     <a href="?tab=backup" class="{% if tab == 'backup' %}active{% endif %}">{% icon "download" %} {% translate "Backup & restore" %}</a>
     <div class="settings-nav-sep"></div>
     {% if hotel.module_rooms %}<a href="{% url 'frontdesk:room_list' %}">{% icon "bed" %} {% translate "Rooms & rates" %}</a>{% endif %}
@@ -75,6 +77,42 @@
         </div>
       </div>
       <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
+    </form>
+
+  {% elif tab == "booking" %}
+    <form method="post" class="card" novalidate>{% csrf_token %}
+      <div class="card-header"><h2>{% translate "Online booking" %}</h2>{% if hotel.booking_enabled %}{% translate "Open" as l %}{% status_badge "success" l %}{% else %}{% translate "Closed" as l %}{% status_badge "closed" l %}{% endif %}</div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0">{% translate "Guests book directly from your website. Room types appear with their photo and description; prices come from Rooms & rates and Seasons." %}</p>
+        {% include "includes/form_fields.html" %}
+      </div>
+      <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
+    </form>
+    <section class="card" style="margin-top:1.25rem">
+      <div class="card-header"><h3>{% translate "Add it to your website" %}</h3>{% if hotel.booking_enabled %}<a class="btn btn-secondary btn-sm" href="{{ booking_link }}" target="_blank">{% translate "Open booking page" %}</a>{% endif %}</div>
+      <div class="card-body">
+        <p>{% translate "Link to this address from your website, Instagram or Google Business profile:" %}</p>
+        <pre class="bank">{{ booking_link }}</pre>
+        <p style="margin-top:1rem">{% translate "Or paste this button into your website:" %}</p>
+        <pre class="bank">&lt;a href="{{ booking_link }}" style="display:inline-block;background:#0e6e64;color:#fff;padding:12px 22px;border-radius:8px;font-weight:600;text-decoration:none"&gt;{% translate "Book now" %}&lt;/a&gt;</pre>
+        {% if not hotel.public_url %}<div class="alert alert-warning" style="margin-top:1rem">{% translate "Guests can only reach this page if InnKeeper is online. Set the public web address above once it is." %}</div>{% endif %}
+        {% if not hotel.email_configured %}<div class="alert alert-info" style="margin-top:1rem">{% translate "Set up Email so guests receive confirmations automatically." %} <a href="?tab=email">{% translate "Email settings" %}</a></div>{% endif %}
+      </div>
+    </section>
+
+  {% elif tab == "email" %}
+    <form method="post" class="card" novalidate>{% csrf_token %}
+      <div class="card-header"><h2>{% translate "Email" %}</h2>{% if hotel.email_configured %}{% translate "Set up" as l %}{% status_badge "success" l %}{% endif %}</div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0">{% translate "Used for booking confirmations to guests and alerts to reception. Use the details from your email provider." %}</p>
+        {% include "includes/form_fields.html" %}
+        <details class="help-body" style="margin-top:1rem"><summary>{% translate "Gmail settings" %}</summary><p>{% translate "Server smtp.gmail.com, port 587, STARTTLS, your Gmail address as username, and an app password (Google Account → Security → App passwords)." %}</p></details>
+      </div>
+      <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
+    </form>
+    <form method="post" action="{% url 'core:email_test' %}" class="card card-body row" style="margin-top:1.25rem">{% csrf_token %}
+      <span class="spacer">{% translate "Send a test email to yourself to check the settings." %}</span>
+      <button class="btn btn-secondary">{% translate "Send test email" %}</button>
     </form>
 
   {% elif tab == "backup" %}

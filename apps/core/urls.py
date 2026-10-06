@@ -11,6 +11,7 @@ urlpatterns = [
     path("settings/backup/save/", settings_views.backup_now, name="backup_now"),
     path("settings/backup/file/<str:name>", settings_views.backup_file, name="backup_file"),
     path("settings/restore/", settings_views.restore, name="restore"),
+    path("settings/email/test/", settings_views.email_test, name="email_test"),
     path("settings/restore/confirm/", settings_views.restore_confirm, name="restore_confirm"),
     path("setup/", views.setup_wizard, name="setup"),
     path("setup/done/", views.setup_done, name="setup_done"),

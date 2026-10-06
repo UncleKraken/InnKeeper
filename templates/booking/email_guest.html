@@ -1,0 +1,25 @@
+{% load i18n innkeeper %}<!doctype html>
+<html><body style="font-family:Arial,Helvetica,sans-serif;color:#1d2430;background:#f4f2ee;padding:20px">
+<div style="max-width:560px;margin:0 auto;background:#fff;border-radius:10px;padding:24px">
+  <p style="color:#6b7381;text-transform:uppercase;letter-spacing:.1em;font-size:12px;margin:0">{{ hotel.name }}</p>
+  <h2 style="margin:6px 0 16px">{% if kind == "confirmed" %}{% translate "Your booking is confirmed" %}{% elif kind == "declined" %}{% translate "We can't confirm your booking" %}{% else %}{% translate "We received your booking request" %}{% endif %}</h2>
+  <p>{% blocktranslate with name=r.guest.first_name %}Dear {{ name }},{% endblocktranslate %}</p>
+  {% if kind == "confirmed" %}<p>{% translate "Thank you for booking with us. Here are the details of your stay." %}</p>
+  {% elif kind == "declined" %}<p>{% translate "Unfortunately we can't accept this booking request." %}{% if reason %} {{ reason }}{% endif %} {% translate "Please contact us if you'd like other dates." %}</p>
+  {% else %}<p>{% translate "Thank you for your request. We'll check it and send a confirmation shortly." %}</p>{% endif %}
+  <table style="width:100%;border-collapse:collapse;margin:16px 0">
+    <tr><td style="color:#6b7381;padding:4px 0">{% translate "Booking" %}</td><td style="text-align:right;font-weight:bold">{{ r.code }}</td></tr>
+    <tr><td style="color:#6b7381;padding:4px 0">{% translate "Arrival" %}</td><td style="text-align:right">{{ r.arrival|date:"D, d.m.Y" }}</td></tr>
+    <tr><td style="color:#6b7381;padding:4px 0">{% translate "Departure" %}</td><td style="text-align:right">{{ r.departure|date:"D, d.m.Y" }}</td></tr>
+    <tr><td style="color:#6b7381;padding:4px 0">{% translate "Guests" %}</td><td style="text-align:right">{{ r.adults }}{% if r.children %} + {{ r.children }}{% endif %}</td></tr>
+    <tr><td style="color:#6b7381;padding:4px 0">{% translate "Total" %}</td><td style="text-align:right;font-weight:bold">{{ r.estimated_total|money }}</td></tr>
+    {% if r.deposit_due and kind != "declined" %}<tr><td style="color:#6b7381;padding:4px 0">{% translate "Deposit" %}</td><td style="text-align:right">{{ r.deposit_due|money }}</td></tr>{% endif %}
+  </table>
+  {% if r.deposit_due and kind != "declined" and hotel.bank_details %}
+    <p>{% blocktranslate with code=r.code %}Please transfer the deposit and write {{ code }} as the payment reference.{% endblocktranslate %}</p>
+    <pre style="background:#f4f2ee;padding:12px;border-radius:6px;white-space:pre-wrap;font-family:inherit">{{ hotel.bank_details }}</pre>
+  {% endif %}
+  {% if kind != "declined" %}<p><a href="{{ url }}" style="display:inline-block;background:#0e6e64;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">{% translate "View your booking" %}</a></p>{% endif %}
+  <p style="color:#6b7381;font-size:13px;margin-top:24px">{{ hotel.name }}{% if hotel.address %} · {{ hotel.address }}{% endif %}{% if hotel.phone %} · {{ hotel.phone }}{% endif %}</p>
+</div>
+</body></html>

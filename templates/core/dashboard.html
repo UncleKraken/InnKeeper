@@ -29,6 +29,12 @@
 </section>
 {% endif %}
 
+{% if online_requests %}
+<a class="alert alert-warning row" style="margin-bottom:1.25rem; justify-content:space-between; color:inherit" href="{% url 'frontdesk:reservation_list' %}?view=online">
+  <span>{% icon "alert" %} <strong>{% blocktranslate count n=online_requests %}{{ n }} online booking request waiting for confirmation{% plural %}{{ n }} online booking requests waiting for confirmation{% endblocktranslate %}</strong></span>
+  <span class="btn btn-sm">{% translate "Review" %}</span>
+</a>
+{% endif %}
 <div class="grid grid-4" style="margin-bottom:1.25rem">
   {% if "frontdesk" in modules %}
     <a class="card stat" href="{% url 'frontdesk:reservation_list' %}?view=arrivals"><div class="stat-label">{% translate "Arrivals today" %}</div><div class="stat-value">{{ arrivals|length }}</div><div class="stat-note">{% blocktranslate count n=upcoming %}{{ n }} more this week{% plural %}{{ n }} more this week{% endblocktranslate %}</div></a>

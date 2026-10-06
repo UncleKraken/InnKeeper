@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Kitchen & bar screens" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="eyebrow">{% translate "Services" %}</div><h1>{% translate "Kitchen & bar screens" %}</h1><p>{% translate "Open a station on the tablet or TV where orders are prepared." %}</p></div>
+{% if request.user.is_manager %}<a class="btn btn-secondary" href="{% url 'outlets:station_list' %}">{% icon "settings" %} {% translate "Stations & printers" %}</a>{% endif %}</div>
+<div class="grid grid-3">
+  {% for s, n in stations %}
+    <a class="card stat" href="{% url 'outlets:board' s.pk %}"><div class="stat-label">{% translate "Station" %}</div><div class="stat-value" style="font-size:1.35rem">{{ s.name }}</div>
+    <div class="stat-note">{% blocktranslate count n=n %}{{ n }} order waiting{% plural %}{{ n }} orders waiting{% endblocktranslate %}</div></a>
+  {% empty %}
+    <div class="card empty" style="grid-column:1/-1"><strong>{% translate "No stations yet" %}</strong>{% translate "A manager can add Kitchen, Bar and other stations under Outlets & menus → Stations, then choose for each menu category where it is prepared." %}</div>
+  {% endfor %}
+</div>
+{% endblock %}

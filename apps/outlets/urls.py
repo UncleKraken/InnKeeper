@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import menu, views
+from . import kitchen, menu, views
 
 app_name = "outlets"
 
@@ -21,6 +21,15 @@ urlpatterns = [
     path("orders/<int:pk>/payments/<int:payment_id>/void/", views.void_payment, name="void_payment"),
     path("orders/<int:pk>/void/", views.void_receipt, name="void_receipt"),
     path("receipts/", views.receipts, name="receipts"),
+    path("orders/<int:pk>/send/", views.send_order, name="send"),
+    path("orders/<int:pk>/print/", views.print_bill, name="print_bill"),
+    path("orders/<int:order_id>/served/", kitchen.serve_ready, name="serve_ready"),
+    path("<int:pk>/signature/", kitchen.floor_signature, name="floor_signature"),
+    path("kitchen/", kitchen.board_home, name="board_home"),
+    path("kitchen/<int:pk>/", kitchen.board, name="board"),
+    path("kitchen/<int:pk>/tickets/", kitchen.board_tickets, name="board_tickets"),
+    path("kitchen/<int:pk>/recall/", kitchen.recall, name="board_recall"),
+    path("kitchen/ticket/<int:ticket_id>/", kitchen.ticket_status, name="ticket_status"),
     path("setup/<int:pk>/menu/", menu.menu_admin, name="menu_admin"),
     path("setup/<int:pk>/menu/qr-cards/", menu.menu_qr_cards, name="menu_qr_cards"),
     path("setup/<int:pk>/menu/new-link/", menu.new_menu_link, name="new_menu_link"),
@@ -36,6 +45,14 @@ urlpatterns = [
     path("setup/items/", views.ItemList.as_view(), name="item_list"),
     path("setup/items/new/", views.ItemCreate.as_view(), name="item_create"),
     path("setup/items/<int:pk>/", views.ItemEdit.as_view(), name="item_edit"),
+    path("setup/stations/", views.StationList.as_view(), name="station_list"),
+    path("setup/stations/new/", views.StationCreate.as_view(), name="station_create"),
+    path("setup/stations/<int:pk>/", views.StationEdit.as_view(), name="station_edit"),
+    path("setup/printers/", views.printer_list, name="printer_list"),
+    path("setup/printers/new/", views.PrinterCreate.as_view(), name="printer_create"),
+    path("setup/printers/<int:pk>/", views.PrinterEdit.as_view(), name="printer_edit"),
+    path("setup/printers/<int:pk>/test/", views.printer_test, name="printer_test"),
+    path("print-jobs/<int:pk>/retry/", views.job_retry, name="job_retry"),
     path("setup/tables/", views.TableList.as_view(), name="table_list"),
     path("setup/tables/new/", views.TableCreate.as_view(), name="table_create"),
     path("setup/tables/<int:pk>/", views.TableEdit.as_view(), name="table_edit"),

@@ -27,6 +27,8 @@ def health(request):
 @login_required
 def dashboard(request):
     user = request.user
+    if user.role == "kitchen" and not user.is_manager:
+        return redirect("outlets:board_home")
     today = timezone.localdate()
     ctx = {"today": today}
 
@@ -43,6 +45,7 @@ def dashboard(request):
             in_house_count=in_house.count(),
             rooms_total=rooms_total,
             occupancy=round(in_house.count() * 100 / rooms_total) if rooms_total else 0,
+            online_requests=Reservation.objects.filter(status=Reservation.Status.BOOKED, confirmed=False).count(),
             upcoming=Reservation.objects.filter(
                 status=Reservation.Status.BOOKED, arrival__gt=today, arrival__lte=today + timedelta(days=7)
             ).count(),

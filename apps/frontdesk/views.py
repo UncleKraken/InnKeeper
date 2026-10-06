@@ -15,6 +15,7 @@ from django.views.decorators.http import require_POST
 from apps.accounts.permissions import module_required
 from apps.core.crud import CrudCreateView, CrudListView, CrudUpdateView
 from apps.core.exceptions import BusinessError
+from apps.core.models import HotelSettings
 from apps.finance.models import Charge, Folio, Payment
 
 from . import services
@@ -25,9 +26,10 @@ from .forms import (
     ReservationForm,
     RoomForm,
     RoomTypeForm,
+    SeasonRateForm,
     VoidForm,
 )
-from .models import Guest, Reservation, Room, RoomType
+from .models import Guest, Reservation, Room, RoomType, SeasonRate
 
 
 def _parse_date(value, default: date) -> date:
@@ -107,6 +109,7 @@ def rack(request):
 # ---------- Reservations ----------
 
 LIST_VIEWS = {
+    "online": _("Online requests"),
     "upcoming": _("Upcoming"),
     "arrivals": _("Arrivals today"),
     "in_house": _("In house"),
@@ -118,9 +121,12 @@ LIST_VIEWS = {
 @module_required("frontdesk")
 def reservation_list(request):
     today = timezone.localdate()
-    view = request.GET.get("view", "upcoming")
+    pending_online = Reservation.objects.filter(status=Reservation.Status.BOOKED, confirmed=False).count()
+    view = request.GET.get("view", "online" if pending_online else "upcoming")
     qs = Reservation.objects.select_related("guest", "room", "room__room_type")
-    if view == "arrivals":
+    if view == "online":
+        qs = qs.filter(status=Reservation.Status.BOOKED, confirmed=False).order_by("created_at")
+    elif view == "arrivals":
         qs = qs.filter(status=Reservation.Status.BOOKED, arrival__lte=today, departure__gt=today).order_by(
             "room__number"
         )
@@ -144,7 +150,19 @@ def reservation_list(request):
     return render(
         request,
         "frontdesk/reservation_list.html",
-        {"page_obj": page, "object_list": page.object_list, "view": view, "views": LIST_VIEWS, "q": q, "today": today},
+        {
+            "page_obj": page,
+            "object_list": page.object_list,
+            "view": view,
+            "views": {
+                k: v
+                for k, v in LIST_VIEWS.items()
+                if k != "online" or HotelSettings.load().booking_open or pending_online
+            },
+            "pending_online": pending_online,
+            "q": q,
+            "today": today,
+        },
     )
 
 
@@ -196,11 +214,12 @@ def reservation_detail(request, pk):
     charges = folio.charges.select_related("outlet", "created_by").order_by("business_date", "id")
     payments = folio.payments.select_related("created_by").order_by("business_date", "id")
     pending_nights = 0
+    posted = folio.accommodation_nights_posted()
     if res.status == Reservation.Status.CHECKED_IN:
-        pending_nights = max(0, max(res.nights, res.nights_to_charge()) - folio.accommodation_nights_posted())
+        pending_nights = max(0, max(res.nights, res.nights_to_charge()) - posted)
     elif res.status == Reservation.Status.BOOKED:
-        pending_nights = res.nights
-    pending_amount = res.rate * pending_nights
+        pending_nights = max(0, res.nights - posted)
+    pending_amount = res.amount_for_nights(posted, posted + pending_nights)
     return render(
         request,
         "frontdesk/reservation_detail.html",
@@ -366,6 +385,39 @@ def guest_search(request):
     return JsonResponse({"results": results})
 
 
+@require_POST
+@module_required("frontdesk")
+def confirm_booking(request, pk):
+    from . import booking
+
+    res = get_object_or_404(Reservation, pk=pk)
+    try:
+        booking.confirm(res, request.user, request.build_absolute_uri("/"))
+        msg = _("Booking confirmed.")
+        if res.guest.email and HotelSettings.load().email_configured:
+            msg = _("Booking confirmed. The guest was sent a confirmation email.")
+        messages.success(request, msg)
+    except BusinessError as e:
+        messages.error(request, str(e))
+    return redirect(request.POST.get("next") or reverse("frontdesk:reservation_detail", args=[pk]))
+
+
+@require_POST
+@module_required("frontdesk")
+def decline_booking(request, pk):
+    from . import booking
+
+    res = get_object_or_404(Reservation, pk=pk)
+    try:
+        booking.decline(
+            res, request.user, request.POST.get("reason", "").strip()[:255], request.build_absolute_uri("/")
+        )
+        messages.success(request, _("Booking request declined."))
+    except BusinessError as e:
+        messages.error(request, str(e))
+    return redirect("frontdesk:reservation_list")
+
+
 @module_required("frontdesk")
 def invoice(request, pk):
     res = get_object_or_404(Reservation.objects.select_related("guest", "room"), pk=pk)
@@ -429,7 +481,11 @@ def guest_form(request, pk=None):
 
 # ---------- Setup: rooms & room types (managers) ----------
 
-SETUP_TABS = [("frontdesk:room_list", _("Rooms")), ("frontdesk:roomtype_list", _("Room types & rates"))]
+SETUP_TABS = [
+    ("frontdesk:room_list", _("Rooms")),
+    ("frontdesk:roomtype_list", _("Room types & rates")),
+    ("frontdesk:season_list", _("Seasons")),
+]
 
 
 class RoomList(CrudListView):
@@ -499,4 +555,41 @@ class RoomTypeCreate(RoomTypeFormConfig, CrudCreateView):
 
 
 class RoomTypeEdit(RoomTypeFormConfig, CrudUpdateView):
+    pass
+
+
+class SeasonList(CrudListView):
+    model = SeasonRate
+    queryset = SeasonRate.objects.select_related("room_type")
+    title = _("Rooms & rates")
+    singular = _("season")
+    tabs = SETUP_TABS
+    list_url_name = "frontdesk:season_list"
+    create_url_name = "frontdesk:season_create"
+    update_url_name = "frontdesk:season_edit"
+    columns = [
+        ("name", _("Name"), "text"),
+        ("room_type.name", _("Room type"), "text"),
+        ("start_date", _("From"), "text"),
+        ("end_date", _("Until"), "text"),
+        ("percent", _("Change (%)"), "text"),
+        ("rate", _("Nightly price"), "money"),
+        ("min_nights", _("Min. nights"), "text"),
+        ("is_active", _("Active"), "bool"),
+    ]
+
+
+class SeasonFormConfig:
+    model = SeasonRate
+    form_class = SeasonRateForm
+    title = _("Rooms & rates")
+    singular = _("season")
+    list_url_name = "frontdesk:season_list"
+
+
+class SeasonCreate(SeasonFormConfig, CrudCreateView):
+    pass
+
+
+class SeasonEdit(SeasonFormConfig, CrudUpdateView):
     pass

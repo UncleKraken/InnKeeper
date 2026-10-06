@@ -1,0 +1,9 @@
+{% load i18n innkeeper %}<!doctype html>
+<html><body style="font-family:Arial,Helvetica,sans-serif;color:#1d2430">
+<h3>{% translate "New online booking" %} {{ r.code }}{% if not r.confirmed %} · {% translate "waiting for confirmation" %}{% endif %}</h3>
+<p>{{ r.guest }} · {{ r.guest.email }} · {{ r.guest.phone }}</p>
+<p>{{ r.room.room_type.name }} ({% translate "room" %} {{ r.room.number }}) · {{ r.arrival|date:"d.m.Y" }} → {{ r.departure|date:"d.m.Y" }} · {{ r.adults }}+{{ r.children }}</p>
+<p>{% translate "Total" %}: {{ r.estimated_total|money }}{% if r.deposit_due %} · {% translate "Deposit" %}: {{ r.deposit_due|money }}{% endif %}</p>
+{% if r.notes %}<p>{{ r.notes|linebreaksbr }}</p>{% endif %}
+{% if url %}<p><a href="{{ url }}">{% translate "Open in InnKeeper" %}</a></p>{% endif %}
+</body></html>

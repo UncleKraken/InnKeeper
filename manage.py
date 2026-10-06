@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """InnKeeper command-line utility."""
+
 import os
 import sys
 

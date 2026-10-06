@@ -14,7 +14,11 @@
       <button class="btn btn-secondary" title="{% translate 'Move or merge' %}">{% icon "swap" %}</button>
     </form>
     {% endif %}
-    <a class="btn btn-secondary" href="{% url 'outlets:receipt' order.pk %}?print=1" target="_blank">{% icon "print" %} {% translate "Print bill" %}</a>
+    {% if outlet.receipt_printer_id %}
+      <form method="post" action="{% url 'outlets:print_bill' order.pk %}" class="inline">{% csrf_token %}<button class="btn btn-secondary">{% icon "print" %} {% translate "Print bill" %}</button></form>
+    {% else %}
+      <a class="btn btn-secondary" href="{% url 'outlets:receipt' order.pk %}?print=1" target="_blank">{% icon "print" %} {% translate "Print bill" %}</a>
+    {% endif %}
   </div>
 </div>
 
@@ -50,10 +54,23 @@
       </label>
       <input type="hidden" name="note" value="{{ order.note }}">
     </form>
+    {% if unsent %}
+      <form method="post" action="{% url 'outlets:send' order.pk %}" class="send-bar">{% csrf_token %}
+        <strong>{% blocktranslate count n=unsent %}{{ n }} item not sent to the kitchen yet{% plural %}{{ n }} items not sent to the kitchen yet{% endblocktranslate %}</strong>
+        <button class="btn btn-sm btn-secondary" name="then" value="floor" title="{% translate 'Send and go back to the tables' %}">{% icon "back" %}</button>
+        <button class="btn btn-sm btn-accent">{% translate "Send" %} {% icon "next" %}</button>
+      </form>
+    {% endif %}
+    {% if ready_count %}
+      <form method="post" action="{% url 'outlets:serve_ready' order.pk %}" class="ready-bar">{% csrf_token %}
+        <span>{% icon "check" %} {% translate "Ready to serve" %}</span>
+        <button class="btn btn-sm">{% translate "Served" %}</button>
+      </form>
+    {% endif %}
     <div class="ticket-lines">
       {% for line in lines %}
         <div class="line">
-          <div class="line-name">{{ line.name }}<small class="muted">{{ line.unit_price|money }}{% if line.note %} · {{ line.note }}{% endif %}</small></div>
+          <div class="line-name">{{ line.name }}{% if line.status == "new" %}<span class="line-flag flag-new">{% translate "new" %}</span>{% elif line.status == "sent" and line.ticket %}<span class="line-flag flag-{% if line.ticket.status == 'new' %}sent{% else %}{{ line.ticket.status }}{% endif %}">{{ line.ticket.get_status_display }}</span>{% endif %}<small class="muted">{{ line.unit_price|money }}{% if line.note %} · {{ line.note }}{% endif %}</small></div>
           <div class="qty">
             <form method="post" action="{% url 'outlets:change_line' order.pk line.pk %}" class="inline">{% csrf_token %}<button name="delta" value="-1" aria-label="{% translate 'Less' %}">−</button></form>
             <span>{{ line.quantity }}</span>
@@ -154,7 +171,11 @@
     {% endif %}
 
     <div class="card-footer row" style="justify-content:space-between">
-      <a href="{% url 'outlets:floor' outlet.pk %}">{% icon "back" %} {% translate "Keep open" %}</a>
+      {% if unsent %}
+        <form method="post" action="{% url 'outlets:send' order.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="then" value="floor"><button class="btn btn-ghost btn-sm">{% icon "back" %} {% translate "Send & keep open" %}</button></form>
+      {% else %}
+        <a href="{% url 'outlets:floor' outlet.pk %}">{% icon "back" %} {% translate "Keep open" %}</a>
+      {% endif %}
       {% if not lines or request.user.is_manager %}
       <form method="post" action="{% url 'outlets:cancel' order.pk %}" class="inline" data-confirm="{% translate 'Cancel this order?' %}">{% csrf_token %}<button class="btn btn-ghost btn-sm" style="color:var(--danger)">{% translate "Cancel order" %}</button></form>
       {% endif %}

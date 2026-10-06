@@ -1,0 +1,71 @@
+{% load static i18n innkeeper %}<!doctype html>
+{% get_current_language as LANG %}
+<html lang="{{ LANG }}">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ station.name }} · InnKeeper</title>
+  <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+</head>
+<body class="kds">
+{% include "includes/icons.svg" %}
+<header class="kds-bar">
+  <a href="{% url 'core:dashboard' %}" class="kds-brand" title="{% translate 'Back to InnKeeper' %}">{% icon "back" %} InnKeeper</a>
+  <nav class="kds-stations">
+    {% for s in stations %}<a href="{% url 'outlets:board' s.pk %}" class="{% if s.pk == station.pk %}active{% endif %}">{{ s.name }}</a>{% endfor %}
+  </nav>
+  <span class="spacer"></span>
+  <span class="kds-clock" id="clock"></span>
+  <form method="post" action="{% url 'outlets:board_recall' station.pk %}" class="inline">{% csrf_token %}<button class="kds-btn" title="{% translate 'Bring back the last cleared ticket' %}">{% icon "history" %} {% translate "Recall" %}</button></form>
+  <button class="kds-btn" id="sound" type="button" aria-pressed="false">{% translate "Sound off" %}</button>
+  <button class="kds-btn" id="fullscreen" type="button">{% translate "Full screen" %}</button>
+</header>
+<main id="tickets" data-url="{% url 'outlets:board_tickets' station.pk %}">{% include "outlets/_board_tickets.html" %}</main>
+<div class="kds-offline hidden" id="offline">{% translate "Connection lost — retrying…" %}</div>
+<script>
+(function () {
+  var box = document.getElementById('tickets'), url = box.dataset.url, csrf = '{{ csrf_token }}';
+  var known = null, soundOn = false, ctx = null;
+  try { soundOn = localStorage.getItem('kds-sound') === '1'; } catch (e) {}
+  var soundBtn = document.getElementById('sound');
+  function paintSound() { soundBtn.textContent = soundOn ? '{{ _("Sound on")|escapejs }}' : '{{ _("Sound off")|escapejs }}'; soundBtn.setAttribute('aria-pressed', soundOn); }
+  soundBtn.onclick = function () { soundOn = !soundOn; try { localStorage.setItem('kds-sound', soundOn ? '1' : '0'); } catch (e) {} if (soundOn) beep(); paintSound(); };
+  paintSound();
+  function beep() {
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.18].forEach(function (t) {
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.frequency.value = 880; o.connect(g); g.connect(ctx.destination);
+        g.gain.setValueAtTime(0.25, ctx.currentTime + t); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.15);
+        o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.16);
+      });
+    } catch (e) {}
+  }
+  function refresh() {
+    fetch(url, { headers: { 'X-Requested-With': 'fetch' } }).then(function (r) {
+      if (r.status === 302 || r.redirected) { location.reload(); return; }
+      var ids = (r.headers.get('X-New-Tickets') || '').split(',').filter(Boolean);
+      return r.text().then(function (html) {
+        document.getElementById('offline').classList.add('hidden');
+        box.innerHTML = html;
+        if (known !== null && ids.some(function (id) { return known.indexOf(id) === -1; }) && soundOn) beep();
+        known = ids;
+      });
+    }).catch(function () { document.getElementById('offline').classList.remove('hidden'); });
+  }
+  box.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-status]'); if (!b) return;
+    var card = b.closest('.kds-ticket'); card.classList.add('busy');
+    var body = new FormData(); body.append('status', b.dataset.status);
+    fetch(b.dataset.url, { method: 'POST', body: body, headers: { 'X-CSRFToken': csrf, 'X-Requested-With': 'fetch' } }).then(refresh);
+  });
+  setInterval(refresh, 5000);
+  refresh();
+  function tick() { var d = new Date(); document.getElementById('clock').textContent = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }); }
+  setInterval(tick, 15000); tick();
+  document.getElementById('fullscreen').onclick = function () { (document.documentElement.requestFullscreen || function () {}).call(document.documentElement); };
+})();
+</script>
+</body>
+</html>

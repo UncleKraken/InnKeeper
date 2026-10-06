@@ -14,5 +14,6 @@ urlpatterns = [
     path("outlets/", include("apps.outlets.urls")),
     path("finance/", include("apps.finance.urls")),
     path("menu/", include("apps.outlets.menu_urls")),
+    path("book/", include("apps.frontdesk.booking_urls")),
     path("", include("apps.core.urls")),
 ]

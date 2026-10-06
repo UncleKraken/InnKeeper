@@ -11,7 +11,7 @@ from apps.core.models import audit
 from apps.finance.models import Charge, Folio, Payment
 from apps.frontdesk.models import Reservation
 
-from .models import Item, Order, OrderLine, Outlet, Table
+from .models import Item, KitchenTicket, Order, OrderLine, Outlet, Table
 
 
 def _require_open(order: Order) -> None:
@@ -42,12 +42,16 @@ def open_order(outlet: Outlet, *, user, table: Table | None = None, guests: int 
 def add_item(order: Order, item: Item, *, user, quantity: int = 1, note: str = "") -> OrderLine:
     order = Order.objects.select_for_update().get(pk=order.pk)
     _require_open(order)
+    item = Item.objects.select_related("category__station").get(pk=item.pk)
     if item.category.outlet_id != order.outlet_id:
         raise BusinessError(_("That item is not sold here."))
     if not item.is_active:
         raise BusinessError(_("%(item)s is not available.") % {"item": item.name})
+    station = item.category.station if item.category.station_id and item.category.station.is_active else None
+    status = OrderLine.Status.NEW if station else OrderLine.Status.DIRECT
     if not note:
-        line = order.lines.filter(item=item, note="", unit_price=item.price).first()
+        # Only merge into lines the kitchen hasn't seen yet.
+        line = order.lines.filter(item=item, note="", unit_price=item.price, status=status, quantity__gt=0).first()
         if line:
             line.quantity += max(1, quantity)
             line.save(update_fields=["quantity"])
@@ -59,18 +63,36 @@ def add_item(order: Order, item: Item, *, user, quantity: int = 1, note: str = "
         unit_price=item.price,
         quantity=max(1, quantity),
         note=note,
+        station=station,
+        status=status,
         added_by=user,
     )
 
 
 @transaction.atomic
 def change_quantity(line: OrderLine, delta: int, *, user) -> OrderLine | None:
-    line = OrderLine.objects.select_for_update().select_related("order").get(pk=line.pk)
+    line = OrderLine.objects.select_for_update().select_related("order", "item").get(pk=line.pk)
     order = line.order
     _require_open(order)
+    if delta > 0 and line.status == OrderLine.Status.SENT:
+        # The kitchen already has this one: more of it is a new item to send.
+        if line.item_id is None:
+            raise BusinessError(_("This item is no longer on the menu."))
+        return add_item(order, line.item, user=user, quantity=delta, note=line.note)
     new_qty = line.quantity + delta
     if delta < 0 and order.total - line.unit_price * min(-delta, line.quantity) < order.paid:
         raise BusinessError(_("Part of this bill is already paid. Void the payment before removing items."))
+    if line.status == OrderLine.Status.SENT:
+        # Keep the line so the kitchen screen can show what was taken off.
+        line.quantity = max(new_qty, 0)
+        line.save(update_fields=["quantity"])
+        audit(user, "order.line_reduced", f"#{order.number}: {line.name} {line.sent_quantity}→{line.quantity}", order)
+        if line.ticket_id:
+            ticket = line.ticket
+            if not ticket.lines.filter(quantity__gt=0).exists() and ticket.status in KitchenTicket.ON_BOARD:
+                ticket.status = KitchenTicket.Status.CANCELLED
+                ticket.save(update_fields=["status"])
+        return line if line.quantity else None
     if new_qty <= 0:
         audit(user, "order.line_removed", f"#{order.number}: {line}", order)
         line.delete()
@@ -78,6 +100,61 @@ def change_quantity(line: OrderLine, delta: int, *, user) -> OrderLine | None:
     line.quantity = new_qty
     line.save(update_fields=["quantity"])
     return line
+
+
+def send_to_kitchen(order: Order, *, user) -> list[KitchenTicket]:
+    """Send every new item to its station: one ticket per station, printed if the station has a printer."""
+    with transaction.atomic():
+        order = Order.objects.select_for_update().get(pk=order.pk)
+        new_lines = list(order.lines.filter(status=OrderLine.Status.NEW, quantity__gt=0).select_related("station"))
+        by_station: dict[int, list[OrderLine]] = {}
+        for line in new_lines:
+            by_station.setdefault(line.station_id, []).append(line)
+        tickets = []
+        for station_id, lines in by_station.items():
+            ticket = KitchenTicket.objects.create(order=order, station_id=station_id, sent_by=user)
+            for line in lines:
+                line.status, line.ticket, line.sent_quantity = OrderLine.Status.SENT, ticket, line.quantity
+                line.save(update_fields=["status", "ticket", "sent_quantity"])
+            tickets.append(ticket)
+        if tickets:
+            audit(user, "order.sent", f"#{order.number}: {sum(len(v) for v in by_station.values())} items", order)
+    for ticket in tickets:
+        # Print only once the order is safely saved (and never while holding database locks).
+        transaction.on_commit(lambda t=ticket: _print_ticket(t, user))
+    return tickets
+
+
+def _print_ticket(ticket: KitchenTicket, user) -> None:
+    from . import printing
+
+    station = ticket.station
+    if station.printer_id and station.printer.is_active:
+        printing.submit(
+            station.printer,
+            f"{station.name}: {ticket.order.display_name}",
+            printing.kitchen_document(ticket, station.printer),
+            user,
+        )
+
+
+def set_ticket_status(ticket: KitchenTicket, status: str, *, user) -> KitchenTicket:
+    now = timezone.now()
+    if status not in KitchenTicket.Status.values:
+        raise BusinessError(_("Unknown status."))
+    ticket.status = status
+    fields = ["status"]
+    if status == KitchenTicket.Status.PREPARING and not ticket.started_at:
+        ticket.started_at = now
+        fields.append("started_at")
+    if status == KitchenTicket.Status.READY:
+        ticket.ready_at = now
+        fields.append("ready_at")
+    if status == KitchenTicket.Status.SERVED:
+        ticket.served_at = now
+        fields.append("served_at")
+    ticket.save(update_fields=fields)
+    return ticket
 
 
 @transaction.atomic
@@ -216,6 +293,7 @@ def move_order(order: Order, table: Table, *, user) -> Order:
     if order.payments.filter(voided=False).exists():
         raise BusinessError(_("This bill has payments, so it can't be merged. Move it to a free table instead."))
     order.lines.update(order=target)
+    order.tickets.update(order=target)
     target.guests += order.guests
     target.note = " · ".join(n for n in (target.note, order.note) if n)[:255]
     target.save(update_fields=["guests", "note"])
@@ -232,7 +310,7 @@ def move_order(order: Order, table: Table, *, user) -> Order:
 def cancel_order(order: Order, *, user) -> Order:
     order = Order.objects.select_for_update().get(pk=order.pk)
     _require_open(order)
-    if order.lines.exists() and not user.is_manager:
+    if order.lines.filter(quantity__gt=0).exists() and not user.is_manager:
         raise BusinessError(_("Only a manager can cancel an order that has items."))
     if order.payments.filter(voided=False).exists():
         raise BusinessError(_("This bill has payments. Void them first."))
@@ -240,6 +318,9 @@ def cancel_order(order: Order, *, user) -> Order:
     order.closed_at = timezone.now()
     order.closed_by = user
     order.save(update_fields=["status", "closed_at", "closed_by"])
+    order.tickets.filter(status__in=[KitchenTicket.Status.NEW, KitchenTicket.Status.PREPARING]).update(
+        status=KitchenTicket.Status.CANCELLED
+    )
     audit(user, "order.cancel", f"{order.outlet} #{order.number} {order.total}", order)
     return order
 
@@ -284,6 +365,8 @@ def void_receipt(order: Order, *, user, reason: str) -> Order:
 
 def _close(order: Order, settlement: str, user) -> None:
     from apps.core.models import Sequence
+
+    send_to_kitchen(order, user=user)  # anything not sent yet still has to be prepared
 
     order.status = Order.Status.CLOSED
     order.settlement = settlement

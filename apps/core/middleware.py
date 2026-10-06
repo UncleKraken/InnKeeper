@@ -3,7 +3,17 @@ from django.urls import reverse
 
 from .models import HotelSettings, clear_settings_cache
 
-SETUP_EXEMPT_PREFIXES = ("/setup/", "/static/", "/accounts/", "/i18n/", "/health/", "/admin/", "/menu/", "/help/")
+SETUP_EXEMPT_PREFIXES = (
+    "/setup/",
+    "/static/",
+    "/accounts/",
+    "/i18n/",
+    "/health/",
+    "/admin/",
+    "/menu/",
+    "/help/",
+    "/book/",
+)
 
 
 class SettingsCacheMiddleware:

@@ -53,7 +53,7 @@ FULL_MODELS = [
     "housekeeping.MaintenanceTicket",
 ]
 
-SETTINGS_FIELDS_SKIP = {"id", "setup_completed", "updated_at"}
+SETTINGS_FIELDS_SKIP = {"id", "setup_completed", "updated_at", "smtp_password", "onboarding_dismissed"}
 
 
 class BackupError(Exception):

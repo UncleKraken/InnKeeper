@@ -9,6 +9,7 @@ class Role(models.TextChoices):
     HOUSEKEEPING = "housekeeping", _("Housekeeping")
     MAINTENANCE = "maintenance", _("Maintenance")
     OUTLET = "outlet", _("Service staff (restaurant, bar, spa…)")
+    KITCHEN = "kitchen", _("Kitchen & bar (order screens)")
     FINANCE = "finance", _("Finance")
 
 

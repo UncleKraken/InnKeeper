@@ -105,7 +105,45 @@ class ModulesForm(StyledFormMixin, forms.ModelForm):
         return cleaned
 
 
-TABS = {"business": BusinessForm, "receipts": ReceiptForm, "modules": ModulesForm}
+class BookingSettingsForm(StyledFormMixin, forms.ModelForm):
+    full_width_fields = ("public_url",)
+
+    class Meta:
+        model = HotelSettings
+        fields = [
+            "booking_enabled",
+            "booking_requires_confirmation",
+            "public_url",
+            "notify_email",
+            "booking_deposit_percent",
+            "booking_min_days_ahead",
+            "booking_max_days_ahead",
+            "booking_intro",
+            "booking_terms",
+            "bank_details",
+        ]
+
+    def clean_booking_deposit_percent(self):
+        value = self.cleaned_data["booking_deposit_percent"]
+        if value > 100:
+            raise forms.ValidationError(gettext_lazy("Enter a value from 0 to 100."))
+        return value
+
+
+class EmailSettingsForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = HotelSettings
+        fields = ["smtp_host", "smtp_port", "smtp_security", "smtp_username", "smtp_password", "email_from"]
+        widgets = {"smtp_password": forms.PasswordInput(render_value=True)}
+
+
+TABS = {
+    "business": BusinessForm,
+    "receipts": ReceiptForm,
+    "modules": ModulesForm,
+    "booking": BookingSettingsForm,
+    "email": EmailSettingsForm,
+}
 
 
 @module_required("management")
@@ -121,6 +159,12 @@ def settings_hub(request):
             messages.success(request, _("Settings saved."))
             return redirect(f"{request.path}?tab={tab}")
         ctx["form"] = form
+        if tab == "booking":
+            from django.urls import reverse
+
+            from apps.outlets.menu import public_link
+
+            ctx["booking_link"] = public_link(request, reverse("booking:search"))
     elif tab == "backup":
         ctx["disk_backups"] = backup.disk_backups()
         ctx["backup_dir"] = backup.backup_dir()
@@ -221,3 +265,23 @@ def restore_confirm(request):
         % {"name": safety.name},
     )
     return redirect("accounts:login")
+
+
+@require_POST
+@module_required("management")
+def email_test(request):
+    from . import email
+
+    hs = HotelSettings.load()
+    to = request.user.email or hs.email or hs.email_from
+    if not hs.email_configured:
+        messages.error(request, _("Fill in and save the email settings first."))
+    elif not to:
+        messages.error(request, _("Add an email address to your staff account or the business details first."))
+    elif email.send(to, _("InnKeeper test email"), "booking/email_test.html", {}):
+        messages.success(request, _("Test email sent to %(to)s.") % {"to": to})
+    else:
+        messages.error(
+            request, _("The email could not be sent. Check the server, port, security, username and password.")
+        )
+    return redirect("/settings/?tab=email")

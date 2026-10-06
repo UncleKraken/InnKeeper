@@ -82,20 +82,30 @@ def post_accommodation(
         nights_due = min((on_date - reservation.arrival).days, reservation.nights)
     else:
         nights_due = reservation.nights_to_charge(on_date)
-    missing = nights_due - folio.accommodation_nights_posted()
-    if missing <= 0:
+    posted = folio.accommodation_nights_posted()
+    if nights_due <= posted:
         return None
-    charge = Charge.objects.create(
-        folio=folio,
-        kind=Charge.Kind.ACCOMMODATION,
-        description=_("Accommodation – room %(room)s") % {"room": reservation.room.number},
-        quantity=missing,
-        unit_price=reservation.rate,
-        business_date=on_date - timedelta(days=1) if night_audit else on_date,
-        created_by=user,
-    )
-    audit(user, "folio.accommodation", f"{folio.number}: {missing} × {reservation.rate}", folio)
-    return charge
+    # One charge per run of nights with the same price (seasons can change the price mid-stay).
+    first = None
+    start = posted
+    while start < nights_due:
+        price = reservation.rate_for_night(start)
+        end = start + 1
+        while end < nights_due and reservation.rate_for_night(end) == price:
+            end += 1
+        charge = Charge.objects.create(
+            folio=folio,
+            kind=Charge.Kind.ACCOMMODATION,
+            description=_("Accommodation – room %(room)s") % {"room": reservation.room.number},
+            quantity=end - start,
+            unit_price=price,
+            business_date=on_date - timedelta(days=1) if night_audit else on_date,
+            created_by=user,
+        )
+        audit(user, "folio.accommodation", f"{folio.number}: {end - start} × {price}", folio)
+        first = first or charge
+        start = end
+    return first
 
 
 def night_audit(on_date: date | None = None) -> int:

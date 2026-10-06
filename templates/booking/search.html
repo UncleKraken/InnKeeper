@@ -1,0 +1,54 @@
+{% extends "booking/base.html" %}
+{% load i18n innkeeper %}
+{% block langq %}{% if query %}{{ query }}&{% endif %}{% endblock %}
+{% block langq2 %}{% if query %}{{ query }}&{% endif %}{% endblock %}
+{% block content %}
+{% if hotel.booking_intro and offers is None %}<p class="booking-intro">{{ hotel.booking_intro|linebreaksbr }}</p>{% endif %}
+<form method="get" class="card booking-search" novalidate>
+  <input type="hidden" name="lang" value="{{ lang }}">
+  <div class="field"><label for="a">{% translate "Arrival" %}</label><input class="input" type="date" id="a" name="arrival" min="{{ min_date }}" value="{{ form.arrival.value|date:'Y-m-d'|default:form.arrival.value }}" required></div>
+  <div class="field"><label for="d">{% translate "Departure" %}</label><input class="input" type="date" id="d" name="departure" min="{{ min_date }}" value="{{ form.departure.value|date:'Y-m-d'|default:form.departure.value }}" required></div>
+  <div class="field"><label for="ad">{% translate "Adults" %}</label><input class="input" type="number" id="ad" name="adults" min="1" max="12" value="{{ form.adults.value|default:2 }}"></div>
+  <div class="field"><label for="ch">{% translate "Children" %}</label><input class="input" type="number" id="ch" name="children" min="0" max="12" value="{{ form.children.value|default:0 }}"></div>
+  <button class="btn btn-lg">{% icon "search" %} {% translate "Check availability" %}</button>
+</form>
+{% if form.errors %}<div class="alert alert-error" style="margin-top:1rem">{% for e in form.non_field_errors %}{{ e }}{% endfor %}{% for f in form %}{% for e in f.errors %}{{ f.label }}: {{ e }} {% endfor %}{% endfor %}</div>{% endif %}
+
+{% if offers is not None %}
+  <h2 class="booking-h2">{% blocktranslate count n=offers|length %}{{ n }} room type available{% plural %}{{ n }} room types available{% endblocktranslate %}</h2>
+  {% for x in offers %}{% with o=x.o %}
+    <article class="card offer">
+      {% if o.room_type.photo %}<img class="offer-photo" src="{{ o.room_type.photo }}" alt="{{ x.name }}">{% else %}<div class="offer-photo offer-nophoto">{% icon "bed" %}</div>{% endif %}
+      <div class="offer-body">
+        <h3>{{ x.name }}</h3>
+        <p class="muted">{% blocktranslate count n=o.room_type.max_adults %}Up to {{ n }} adult{% plural %}Up to {{ n }} adults{% endblocktranslate %}{% if o.room_type.max_children %} · {% blocktranslate count n=o.room_type.max_children %}{{ n }} child{% plural %}{{ n }} children{% endblocktranslate %}{% endif %}</p>
+        {% if x.description %}<p>{{ x.description|linebreaksbr }}</p>{% endif %}
+        {% if o.available <= 2 %}<p class="offer-few">{% blocktranslate count n=o.available %}Only {{ n }} left{% plural %}Only {{ n }} left{% endblocktranslate %}</p>{% endif %}
+      </div>
+      <div class="offer-price">
+        <div class="muted">{% blocktranslate count n=o.quote.nights %}{{ n }} night{% plural %}{{ n }} nights{% endblocktranslate %}</div>
+        <div class="offer-total">{{ o.quote.total|money }}</div>
+        <div class="muted" style="font-size:.85rem">{% if o.quote.varies %}{% translate "avg." %} {% endif %}{{ o.quote.average|money }} / {% translate "night" %}</div>
+        {% if o.quote.meets_min_nights %}
+          <a class="btn btn-block" href="{% url 'booking:details' o.room_type.pk %}?{{ query }}">{% translate "Book" %}</a>
+        {% else %}
+          <p class="offer-few">{% blocktranslate count n=o.quote.min_nights %}Minimum stay {{ n }} night{% plural %}Minimum stay {{ n }} nights{% endblocktranslate %}</p>
+        {% endif %}
+      </div>
+    </article>
+  {% endwith %}{% empty %}
+    <div class="card empty"><strong>{% translate "No rooms available for these dates" %}</strong>{% translate "Try other dates, or contact us directly." %}</div>
+  {% endfor %}
+{% endif %}
+<script>
+(function () {
+  var a = document.getElementById('a'), d = document.getElementById('d');
+  a.addEventListener('change', function () {
+    if (!a.value) return;
+    var next = new Date(a.value); next.setDate(next.getDate() + 1);
+    var n = next.toISOString().slice(0, 10);
+    d.min = n; if (!d.value || d.value <= a.value) d.value = n;
+  });
+})();
+</script>
+{% endblock %}

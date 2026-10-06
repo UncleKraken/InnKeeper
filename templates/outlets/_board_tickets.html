@@ -1,0 +1,40 @@
+{% load i18n %}
+{% if tickets %}
+<div class="kds-grid">
+  {% for x in tickets %}{% with t=x.t %}
+  <article class="kds-ticket s-{{ t.status }}{% if x.late %} late{% elif x.slow %} slow{% endif %}">
+    <header>
+      <div><strong class="kds-table">{{ t.order.display_name }}</strong><small>{{ t.order.outlet }} · #{{ t.order.number }}{% if t.sent_by %} · {{ t.sent_by.first_name|default:t.sent_by.username }}{% endif %}</small></div>
+      <span class="kds-time">{{ x.minutes }}′</span>
+    </header>
+    <ul>
+      {% for l in t.lines.all %}
+        <li class="{% if l.quantity == 0 %}gone{% elif l.quantity < l.sent_quantity %}less{% endif %}">
+          <b>{% if l.quantity < l.sent_quantity %}<s>{{ l.sent_quantity }}</s> {{ l.quantity }}{% else %}{{ l.quantity }}{% endif %}×</b> {{ l.name }}
+          {% if l.note %}<em>{{ l.note }}</em>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    {% if t.order.note %}<p class="kds-note">{{ t.order.note }}</p>{% endif %}
+    <footer>
+      {% url 'outlets:ticket_status' t.pk as surl %}
+      {% if t.status == "new" %}
+        <button type="button" data-url="{{ surl }}" data-status="preparing" class="kds-go">{% translate "Start" %}</button>
+        <button type="button" data-url="{{ surl }}" data-status="ready" class="kds-ready">{% translate "Ready" %}</button>
+      {% elif t.status == "preparing" %}
+        <span class="kds-state">{% translate "Preparing" %}</span>
+        <button type="button" data-url="{{ surl }}" data-status="ready" class="kds-ready">{% translate "Ready" %}</button>
+      {% elif t.status == "ready" %}
+        <span class="kds-state">{% translate "Waiting for waiter" %}</span>
+        <button type="button" data-url="{{ surl }}" data-status="served" class="kds-done">{% translate "Served" %}</button>
+      {% else %}
+        <span class="kds-state">{% translate "Cancelled by the waiter" %}</span>
+        <button type="button" data-url="{{ surl }}" data-status="served" class="kds-done">{% translate "Clear" %}</button>
+      {% endif %}
+    </footer>
+  </article>
+  {% endwith %}{% endfor %}
+</div>
+{% else %}
+<div class="kds-empty"><strong>{% translate "No orders right now" %}</strong>{% blocktranslate with name=station.name %}New orders for {{ name }} appear here automatically.{% endblocktranslate %}</div>
+{% endif %}

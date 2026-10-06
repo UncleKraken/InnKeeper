@@ -26,6 +26,14 @@ def qr_svg(url: str) -> str:
     return mark_safe(svg[svg.index("<svg") :])
 
 
+def public_link(request, path: str) -> str:
+    """Full link for guests: the public address from Settings if set, else the address in use now."""
+    from apps.core.models import HotelSettings
+
+    base = HotelSettings.load().public_url
+    return (base.rstrip("/") + path) if base else request.build_absolute_uri(path)
+
+
 def _menu_sections(outlet: Outlet, lang: str):
     english = lang == "en"
     sections = []
@@ -66,8 +74,8 @@ def public_menu_print(request, token):
 @module_required("management")
 def menu_admin(request, pk):
     outlet = get_object_or_404(Outlet, pk=pk)
-    url = request.build_absolute_uri(reverse("menu:public", args=[outlet.menu_token]))
-    host = request.get_host().split(":")[0]
+    url = public_link(request, reverse("menu:public", args=[outlet.menu_token]))
+    host = url.split("//", 1)[-1].split("/")[0].split(":")[0]
     return render(
         request,
         "outlets/menu_admin.html",
@@ -84,7 +92,7 @@ def menu_admin(request, pk):
 @module_required("management")
 def menu_qr_cards(request, pk):
     outlet = get_object_or_404(Outlet, pk=pk)
-    url = request.build_absolute_uri(reverse("menu:public", args=[outlet.menu_token]))
+    url = public_link(request, reverse("menu:public", args=[outlet.menu_token]))
     return render(request, "outlets/menu_qr_cards.html", {"outlet": outlet, "qr": qr_svg(url), "cards": range(8)})
 
 

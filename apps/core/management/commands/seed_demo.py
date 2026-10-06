@@ -7,7 +7,7 @@ Never run this on a live hotel's database.
 """
 
 import random
-from datetime import timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 
 from django.conf import settings
@@ -17,9 +17,10 @@ from django.utils import timezone
 
 from apps.accounts.models import Role, User
 from apps.core.models import HotelSettings
+from apps.core.setup import starter_station
 from apps.finance.models import Expense
 from apps.frontdesk import services as fd
-from apps.frontdesk.models import Guest, Reservation, Room, RoomType
+from apps.frontdesk.models import Guest, Reservation, Room, RoomType, SeasonRate
 from apps.housekeeping.models import HousekeepingTask, MaintenanceTicket
 from apps.outlets import services as pos
 from apps.outlets.models import Category, Item, Outlet, Table
@@ -33,6 +34,7 @@ STAFF = [
     ("bar", "Klea", "Basha", Role.OUTLET),
     ("spa", "Ina", "Gjoka", Role.OUTLET),
     ("finance", "Besnik", "Malaj", Role.FINANCE),
+    ("kitchen", "Ilir", "Kuka", Role.KITCHEN),
 ]
 
 MENUS = {
@@ -45,6 +47,7 @@ MENUS = {
             ("Pasta with seafood", "13.00"),
         ],
         "Desserts": [("Trilece", "4.00"), ("Bakllava", "4.50"), ("Ice cream (2 scoops)", "3.50")],
+        "Drinks": [("Water 0.75L", "2.00"), ("Red wine Kallmet (glass)", "4.50"), ("Homemade lemonade", "3.00")],
     },
     ("Lobby Bar", Outlet.Kind.BAR, True, 8): {
         "Coffee": [("Espresso", "1.50"), ("Macchiato", "1.80"), ("Cappuccino", "2.20")],
@@ -81,6 +84,7 @@ CATEGORY_SQ = {
     "Wellness": "Mirëqenie",
     "Breakfast": "Mëngjes",
     "Night menu": "Menu nate",
+    "Drinks": "Pije",
     "Wash & iron": "Larje & hekurosje",
 }
 
@@ -149,6 +153,66 @@ class Command(BaseCommand):
                 name="Suite", code="STE", base_rate=Decimal("140"), max_adults=3, max_children=2
             ),
         }
+        details = {
+            "SGL": (
+                "Dhomë teke",
+                "Single room",
+                "Dhomë e qetë me shtrat teke, banjë private dhe tavolinë pune.",
+                "Quiet room with a single bed, private bathroom and a desk.",
+            ),
+            "DBL": (
+                "Dhomë dyshe",
+                "Double room",
+                "Shtrat dopio, ballkon me pamje nga qyteti, kondicioner dhe Wi-Fi.",
+                "Double bed, balcony with city view, air conditioning and Wi-Fi.",
+            ),
+            "TWN": (
+                "Dhomë me dy shtretër",
+                "Twin room",
+                "Dy shtretër teke, ideale për miq ose kolegë.",
+                "Two single beds, ideal for friends or colleagues.",
+            ),
+            "STE": (
+                "Suitë",
+                "Suite",
+                "Dhomë gjumi dhe sallon i veçantë, vaskë dhe pamje panoramike.",
+                "Separate bedroom and living room, bathtub and panoramic view.",
+            ),
+        }
+        for order, (code, rt) in enumerate(types.items()):
+            sq, en, dsq, den = details[code]
+            rt.name, rt.name_en, rt.description, rt.description_en, rt.sort_order = sq, en, dsq, den, order
+            rt.save()
+        today_year = today.year
+        SeasonRate.objects.create(
+            name="Vera / Summer",
+            start_date=date(today_year, 6, 15),
+            end_date=date(today_year, 9, 15),
+            percent=Decimal("30"),
+            min_nights=2,
+        )
+        SeasonRate.objects.create(
+            name="Fundviti / New Year",
+            start_date=date(today_year, 12, 28),
+            end_date=date(today_year + 1, 1, 2),
+            percent=Decimal("50"),
+            min_nights=3,
+        )
+        SeasonRate.objects.create(
+            name="Suita – fundjavë e gjatë",
+            room_type=types["STE"],
+            start_date=today + timedelta(days=10),
+            end_date=today + timedelta(days=13),
+            rate=Decimal("180"),
+        )
+        hotel.booking_enabled = True
+        hotel.booking_deposit_percent = 30
+        hotel.booking_terms = (
+            "Anulim falas deri 7 ditë para mbërritjes. · Free cancellation up to 7 days before arrival."
+        )
+        hotel.bank_details = "Banka Demo sh.a.\nIBAN: AL00 0000 0000 0000 0000 0000 0000\nHotel Demo Tirana sh.p.k."
+        hotel.save()
+
         layout = ["SGL", "DBL", "DBL", "TWN", "TWN", "STE"]
         rooms = []
         for floor in range(1, 5):
@@ -176,7 +240,11 @@ class Command(BaseCommand):
                 )
             for c_order, (cat_name, items) in enumerate(cats.items()):
                 cat = Category.objects.create(
-                    outlet=outlet, name=CATEGORY_SQ.get(cat_name, cat_name), name_en=cat_name, sort_order=c_order
+                    outlet=outlet,
+                    name=CATEGORY_SQ.get(cat_name, cat_name),
+                    name_en=cat_name,
+                    sort_order=c_order,
+                    station=starter_station(kind, cat_name),
                 )
                 for i_order, item in enumerate(items):
                     Item.objects.create(
@@ -230,6 +298,10 @@ class Command(BaseCommand):
         book(guests[7], rooms[20], 1, 3)
         book(guests[8], rooms[9], 2, 5, Reservation.Source.EXPEDIA)
         book(guests[9], rooms[17], 4, 7)
+        request = book(guests[11], rooms[16], 9, 3, Reservation.Source.WEBSITE)
+        Reservation.objects.filter(pk=request.pk).update(
+            confirmed=False, booking_token="demo-online-request-token", deposit_due=Decimal("67.50")
+        )
         # Some history, checked out last week
         for g, room in [(guests[10], rooms[6]), (guests[11], rooms[7])]:
             past = book(g, room, -9, 3, Reservation.Source.WALK_IN)
@@ -267,8 +339,22 @@ class Command(BaseCommand):
         order = pos.open_order(rest, table=rest.tables.get(name="7"), user=users["waiter"], guests=3)
         for name in ["Fërgesë Tirane", "Fërgesë Tirane", "Byrek me spinaq"]:
             pos.add_item(order, Item.objects.get(name=name), user=users["waiter"])
+        pos.add_item(order, Item.objects.get(name="Tavë kosi"), user=users["waiter"], note="pa qepë / no onion")
+        pos.send_to_kitchen(order, user=users["waiter"])
+        order = pos.open_order(rest, table=rest.tables.get(name="2"), user=users["waiter"], guests=2)
+        for name in ["Grilled sea bass", "Sallatë fshati"]:
+            pos.add_item(order, Item.objects.get(name=name), user=users["waiter"])
+        tickets = pos.send_to_kitchen(order, user=users["waiter"])
+        pos.set_ticket_status(tickets[0], "ready", user=users["kitchen"])
+        order = pos.open_order(rest, table=rest.tables.get(name="5"), user=users["waiter"], guests=4)
+        pos.add_item(order, Item.objects.get(name="Pasta with seafood"), user=users["waiter"], quantity=2)
         order = pos.open_order(bar, table=bar.tables.get(name="5"), user=users["bar"])
         pos.add_item(order, Item.objects.get(name="Birra Korça 0.5L"), user=users["bar"], quantity=2)
+
+        # Bills that were already paid were served long ago.
+        from apps.outlets.models import KitchenTicket
+
+        KitchenTicket.objects.exclude(order__status="open").update(status="served")
 
         # Housekeeping work for today
         for room in Room.objects.filter(hk_status=Room.HKStatus.DIRTY):

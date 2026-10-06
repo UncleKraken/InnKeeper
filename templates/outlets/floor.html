@@ -26,6 +26,8 @@
         <a class="plan-table shape-{{ t.table.shape }}{% if t.order %} busy{% endif %}" href="{% url 'outlets:open_table' outlet.pk t.table.pk %}"
            style="left:{{ t.left|stringformat:'.2f' }}%; top:{{ t.top|stringformat:'.2f' }}%; width:{{ t.width|stringformat:'.2f' }}%; height:{{ t.height|stringformat:'.2f' }}%"
            title="{{ t.table.name }} · {{ t.table.seats }}">
+          {% if t.order.has_ready %}<span class="p-ready" title="{% translate 'Ready to serve' %}"></span>{% endif %}
+          {% if t.order.has_unsent %}<span class="p-new" title="{% translate 'Not sent to the kitchen' %}"></span>{% endif %}
           <span class="p-name">{{ t.table.name }}</span>
           {% if t.order %}<span class="p-total">{{ t.order.total|money }}</span><span class="p-meta">{{ t.order.opened_at|time:"H:i" }}</span>
           {% else %}<span class="p-meta">{{ t.table.seats }} {% translate "seats" %}</span>{% endif %}
@@ -36,6 +38,7 @@
   <div class="floor list-only">
     {% for t in tables %}
       <a class="table-tile {% if t.order %}busy{% endif %}" href="{% url 'outlets:open_table' outlet.pk t.table.pk %}">
+        {% if t.order.has_ready %}<span class="p-ready"></span>{% endif %}
         <div><div class="t-name">{{ t.table.name }}</div><div class="t-meta">{% blocktranslate count n=t.table.seats %}{{ n }} seat{% plural %}{{ n }} seats{% endblocktranslate %}</div></div>
         {% if t.order %}<div><div class="t-total">{{ t.order.total|money }}</div><div class="t-meta">{{ t.order.opened_by|default:"" }} · {{ t.order.opened_at|time:"H:i" }}</div></div>
         {% else %}<div class="t-meta">{% translate "Free" %}</div>{% endif %}
@@ -53,7 +56,7 @@
   <div class="table-wrap"><table class="table">
     <tbody>
     {% for o in loose_orders %}
-      <tr><td><a href="{% url 'outlets:order' o.pk %}"><strong>{{ o.display_name }}</strong></a><br><small>#{{ o.number }} · {{ o.opened_at|time:"H:i" }} · {{ o.opened_by|default:"" }}</small></td><td class="num"><strong>{{ o.total|money }}</strong></td><td class="num"><a class="btn btn-secondary btn-sm" href="{% url 'outlets:order' o.pk %}">{% translate "Open" %}</a></td></tr>
+      <tr><td><a href="{% url 'outlets:order' o.pk %}"><strong>{{ o.display_name }}</strong></a>{% if o.has_ready %} <span class="line-flag flag-ready">{% translate "Ready" %}</span>{% endif %}<br><small>#{{ o.number }} · {{ o.opened_at|time:"H:i" }} · {{ o.opened_by|default:"" }}</small></td><td class="num"><strong>{{ o.total|money }}</strong></td><td class="num"><a class="btn btn-secondary btn-sm" href="{% url 'outlets:order' o.pk %}">{% translate "Open" %}</a></td></tr>
     {% empty %}
       <tr><td class="empty">{% translate "No open orders." %}</td></tr>
     {% endfor %}
@@ -61,4 +64,20 @@
   </table></div>
 </section>
 {% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+// Refresh the table plan when another waiter or the kitchen changes something.
+(function () {
+  var url = '{% url "outlets:floor_signature" outlet.pk %}', sig = null;
+  function check() {
+    if (document.hidden) return;
+    fetch(url).then(function (r) { return r.json(); }).then(function (d) {
+      if (sig !== null && d.sig !== sig) location.reload();
+      sig = d.sig;
+    }).catch(function () {});
+  }
+  check(); setInterval(check, 8000);
+})();
+</script>
 {% endblock %}

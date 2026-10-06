@@ -95,3 +95,17 @@ class SetupForm(StyledFormMixin, forms.Form):
         if not cleaned.get("modules"):
             raise forms.ValidationError(gettext_lazy("Choose at least one area of the app to use."))
         return cleaned
+
+
+IMAGE_TYPES = {"image/png", "image/jpeg", "image/webp", "image/svg+xml", "image/gif"}
+
+
+def image_to_data_uri(upload, max_kb: int = 400) -> str:
+    """Store small images inside the database (so they travel with backups)."""
+    import base64
+
+    if upload.size > max_kb * 1024:
+        raise forms.ValidationError(gettext_lazy("The image is too large. Use one under %(kb)s KB.") % {"kb": max_kb})
+    if upload.content_type not in IMAGE_TYPES:
+        raise forms.ValidationError(gettext_lazy("Use a PNG, JPG, WEBP or SVG image."))
+    return f"data:{upload.content_type};base64,{base64.b64encode(upload.read()).decode('ascii')}"

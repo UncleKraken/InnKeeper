@@ -1,0 +1,43 @@
+{% extends "booking/base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ r.code }}{% endblock %}
+{% block content %}
+<section class="card booking-status booking-narrow">
+  <div class="card-body" style="text-align:center; padding:2rem 1.25rem">
+    {% if r.status == "cancelled" %}
+      <h2>{% translate "This booking was cancelled" %}</h2>
+      <p class="muted">{% translate "If this is a mistake, please contact us." %}</p>
+    {% elif r.confirmed %}
+      <div class="success-mark">{% icon "check" %}</div>
+      <h2 style="margin-top:1rem">{% translate "Your booking is confirmed" %}</h2>
+      <p class="muted">{% blocktranslate with name=r.guest.first_name %}Thank you, {{ name }}. We look forward to welcoming you.{% endblocktranslate %}</p>
+    {% else %}
+      <div class="success-mark" style="background:var(--info-soft); color:var(--info)">{% icon "history" %}</div>
+      <h2 style="margin-top:1rem">{% translate "We received your booking request" %}</h2>
+      <p class="muted">{% translate "We'll confirm it shortly by email." %}</p>
+    {% endif %}
+    <p class="mono" style="font-size:1.2rem; margin-top:.5rem">{{ r.code }}</p>
+  </div>
+  <div class="card-footer">
+    <dl class="dl">
+      <dt>{% translate "Guest" %}</dt><dd>{{ r.guest }}</dd>
+      <dt>{% translate "Room" %}</dt><dd>{{ name }}</dd>
+      <dt>{% translate "Arrival" %}</dt><dd>{{ r.arrival|date:"D, d.m.Y" }}{% if hotel.check_in_time %} · {% translate "from" %} {{ hotel.check_in_time|time:"H:i" }}{% endif %}</dd>
+      <dt>{% translate "Departure" %}</dt><dd>{{ r.departure|date:"D, d.m.Y" }}{% if hotel.check_out_time %} · {% translate "until" %} {{ hotel.check_out_time|time:"H:i" }}{% endif %}</dd>
+      <dt>{% translate "Guests" %}</dt><dd>{{ r.adults }} {% translate "adults" %}{% if r.children %}, {{ r.children }} {% translate "children" %}{% endif %}</dd>
+      <dt>{% translate "Total" %}</dt><dd>{{ r.estimated_total|money }}</dd>
+    </dl>
+  </div>
+</section>
+{% if r.status != "cancelled" and r.deposit_due %}
+<section class="card booking-narrow" style="margin-top:1rem">
+  <div class="card-header"><h3>{% translate "Deposit" %}</h3><strong>{{ r.deposit_due|money }}</strong></div>
+  <div class="card-body">
+    <p>{% blocktranslate with code=r.code %}Please transfer the deposit and write {{ code }} as the payment reference.{% endblocktranslate %}</p>
+    {% if hotel.bank_details %}<pre class="bank">{{ hotel.bank_details }}</pre>{% endif %}
+  </div>
+</section>
+{% endif %}
+{% if hotel.booking_terms %}<section class="card card-body booking-narrow" style="margin-top:1rem"><strong>{% translate "Booking conditions" %}</strong><p style="margin:.4rem 0 0">{{ hotel.booking_terms|linebreaksbr }}</p></section>{% endif %}
+<p class="muted" style="text-align:center; margin-top:1rem; font-size:.85rem">{% translate "Keep this page's address to see your booking again." %}</p>
+{% endblock %}
