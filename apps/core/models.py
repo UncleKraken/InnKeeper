@@ -52,6 +52,11 @@ class HotelSettings(models.Model):
         default=True,
         help_text=_("Point of sale for restaurant, bar, spa and other services."),
     )
+    module_inventory = models.BooleanField(
+        _("stock & inventory"),
+        default=True,
+        help_text=_("Ingredients and products, recipes, deliveries and stock counts."),
+    )
     setup_completed = models.BooleanField(default=False)
     onboarding_dismissed = models.BooleanField(default=False)
     default_language = models.CharField(
@@ -177,6 +182,8 @@ class HotelSettings(models.Model):
             mods.add("maintenance")
         if self.module_outlets:
             mods |= {"outlets", "kitchen"}
+        if self.module_inventory:
+            mods.add("inventory")
         return mods
 
 

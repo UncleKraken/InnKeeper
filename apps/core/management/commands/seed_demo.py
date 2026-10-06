@@ -318,6 +318,85 @@ class Command(BaseCommand):
         # Rooms needing work
         Room.objects.filter(pk__in=[rooms[4].pk, rooms[10].pk, rooms[19].pk]).update(hk_status=Room.HKStatus.DIRTY)
 
+        # Stock: suppliers, stock items, recipes and an opening delivery
+        from apps.inventory import services as inv
+        from apps.inventory.models import RecipeLine, StockItem, Supplier
+
+        market = Supplier.objects.create(name="Tregu Elbasanit", phone="+355 69 000 1111")
+        drinks = Supplier.objects.create(name="Birra Korça Distribution", phone="+355 68 000 2222")
+        coffee = Supplier.objects.create(name="Lavazza AL", email="orders@example.com")
+        S = StockItem
+        stock = {
+            name: S.objects.create(name=name, group=group, unit=unit, min_level=Decimal(minimum), supplier=sup)
+            for name, group, unit, minimum, sup in [
+                ("Mish qengji", S.Group.FOOD, S.Unit.KG, "3", market),
+                ("Kos", S.Group.FOOD, S.Unit.KG, "2", market),
+                ("Levrek (fileto)", S.Group.FOOD, S.Unit.KG, "4", market),
+                ("Domate", S.Group.FOOD, S.Unit.KG, "3", market),
+                ("Djathë i bardhë", S.Group.FOOD, S.Unit.KG, "1", market),
+                ("Kafe në kokrra", S.Group.DRINKS, S.Unit.KG, "2", coffee),
+                ("Qumësht", S.Group.DRINKS, S.Unit.LITRE, "4", market),
+                ("Birra Korça 0.5L", S.Group.DRINKS, S.Unit.BOTTLE, "24", drinks),
+                ("Coca-Cola 0.33L", S.Group.DRINKS, S.Unit.BOTTLE, "24", drinks),
+                ("Raki rrushi", S.Group.BAR, S.Unit.LITRE, "1", drinks),
+                ("Detergjent", S.Group.CLEANING, S.Unit.LITRE, "5", None),
+                ("Shampo hoteli", S.Group.AMENITIES, S.Unit.PIECE, "50", None),
+            ]
+        }
+        inv.receive_delivery(
+            [
+                inv.DeliveryLine(stock[n], Decimal(q), Decimal(c))
+                for n, q, c in [
+                    ("Mish qengji", "8", "9.50"),
+                    ("Kos", "6", "1.80"),
+                    ("Levrek (fileto)", "4", "14.00"),
+                    ("Domate", "10", "0.90"),
+                    ("Djathë i bardhë", "3", "6.50"),
+                    ("Qumësht", "12", "1.10"),
+                    ("Detergjent", "10", "2.40"),
+                    ("Shampo hoteli", "200", "0.35"),
+                ]
+            ],
+            user=manager,
+            supplier=market,
+            business_date=today - timedelta(days=6),
+            reference="FT-2026-0412",
+        )
+        inv.receive_delivery(
+            [
+                inv.DeliveryLine(stock["Birra Korça 0.5L"], Decimal("48"), Decimal("0.85")),
+                inv.DeliveryLine(stock["Coca-Cola 0.33L"], Decimal("48"), Decimal("0.55")),
+                inv.DeliveryLine(stock["Raki rrushi"], Decimal("5"), Decimal("7.00")),
+            ],
+            user=manager,
+            supplier=drinks,
+            business_date=today - timedelta(days=4),
+            reference="BK-88213",
+            record_expense=True,
+            paid_with="bank_transfer",
+        )
+        inv.receive_delivery(
+            [inv.DeliveryLine(stock["Kafe në kokrra"], Decimal("3"), Decimal("18.00"))],
+            user=manager,
+            supplier=coffee,
+            business_date=today - timedelta(days=5),
+        )
+        for item_name, uses in {
+            "Tavë kosi": [("Mish qengji", "0.25"), ("Kos", "0.30")],
+            "Fërgesë Tirane": [("Djathë i bardhë", "0.12"), ("Domate", "0.20")],
+            "Grilled sea bass": [("Levrek (fileto)", "0.30")],
+            "Sallatë fshati": [("Domate", "0.25"), ("Djathë i bardhë", "0.05")],
+            "Espresso": [("Kafe në kokrra", "0.008")],
+            "Macchiato": [("Kafe në kokrra", "0.008"), ("Qumësht", "0.03")],
+            "Cappuccino": [("Kafe në kokrra", "0.008"), ("Qumësht", "0.12")],
+            "Birra Korça 0.5L": [("Birra Korça 0.5L", "1")],
+            "Coca-Cola 0.33L": [("Coca-Cola 0.33L", "1")],
+            "Raki rrushi": [("Raki rrushi", "0.05")],
+        }.items():
+            for menu_item in Item.objects.filter(name=item_name):
+                for stock_name, qty in uses:
+                    RecipeLine.objects.create(item=menu_item, stock_item=stock[stock_name], quantity=Decimal(qty))
+
         # Outlet activity: a few paid orders, a room charge and open tables
         rest, bar, spa = outlets["Restaurant"], outlets["Lobby Bar"], outlets["Spa"]
         for table_no, picks in [(1, ["Tavë kosi", "Sallatë fshati", "Trilece"]), (4, ["Grilled sea bass", "Bakllava"])]:
@@ -350,6 +429,13 @@ class Command(BaseCommand):
         pos.add_item(order, Item.objects.get(name="Pasta with seafood"), user=users["waiter"], quantity=2)
         order = pos.open_order(bar, table=bar.tables.get(name="5"), user=users["bar"])
         pos.add_item(order, Item.objects.get(name="Birra Korça 0.5L"), user=users["bar"], quantity=2)
+
+        inv.record_waste(stock["Birra Korça 0.5L"], Decimal("1"), user=users["bar"], reason="Shishe e thyer")
+        inv.apply_count(
+            {stock["Raki rrushi"].pk: Decimal("4.6"), stock["Coca-Cola 0.33L"].pk: Decimal("47")},
+            user=manager,
+            note="Numërim i barit",
+        )
 
         # Bills that were already paid were served long ago.
         from apps.outlets.models import KitchenTicket

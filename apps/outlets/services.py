@@ -359,6 +359,9 @@ def void_receipt(order: Order, *, user, reason: str) -> Order:
     order.status = Order.Status.CANCELLED
     order.note = (_("Voided: %(r)s") % {"r": reason})[:255]
     order.save(update_fields=["status", "note"])
+    from apps.inventory.services import return_for_order
+
+    return_for_order(order, user)
     audit(user, "order.void", f"{order.outlet} #{order.number} {order.total} – {reason}", order)
     return order
 
@@ -374,3 +377,6 @@ def _close(order: Order, settlement: str, user) -> None:
     order.closed_by = user
     order.receipt_number = Sequence.next("receipt", timezone.localdate().year)
     order.save(update_fields=["status", "settlement", "closed_at", "closed_by", "receipt_number"])
+    from apps.inventory.services import consume_for_order
+
+    consume_for_order(order, user)

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Deliveries" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Stock" %}</div><h1>{% translate "Deliveries" %}</h1><p>{{ start|date:"d.m.Y" }} – {{ end|date:"d.m.Y" }} · <strong>{{ total|money }}</strong></p></div>
+  <div class="actions">
+    <form method="get" class="filters">
+      <div class="field"><label for="from">{% translate "From" %}</label><input class="input" type="date" id="from" name="from" value="{{ start|date:'Y-m-d' }}"></div>
+      <div class="field"><label for="to">{% translate "To" %}</label><input class="input" type="date" id="to" name="to" value="{{ end|date:'Y-m-d' }}"></div>
+      <button class="btn btn-secondary">{% translate "Show" %}</button>
+    </form>
+    <a class="btn" href="{% url 'inventory:delivery_create' %}">{% icon "truck" %} {% translate "Record delivery" %}</a>
+  </div>
+</div>
+{% include "inventory/_tabs.html" %}
+<div class="card card-flush">
+  {% if page_obj %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Date" %}</th><th>{% translate "Supplier" %}</th><th>{% translate "Invoice / reference" %}</th><th class="num">{% translate "Items" %}</th><th>{% translate "By" %}</th><th class="num">{% translate "Total" %}</th></tr></thead>
+    <tbody>
+    {% for d in page_obj %}
+      <tr>
+        <td class="nowrap"><a href="{% url 'inventory:delivery_detail' d.pk %}"><strong>{{ d.business_date|date:"d.m.Y" }}</strong></a></td>
+        <td>{{ d.supplier|default:"—" }}</td>
+        <td>{{ d.reference|default:"—" }}</td>
+        <td class="num">{{ d.lines }}</td>
+        <td>{{ d.created_by|default:"—" }}</td>
+        <td class="num">{{ d.total|money }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% include "includes/pagination.html" %}
+  {% else %}
+    <div class="empty"><strong>{% translate "No deliveries in this period." %}</strong><a href="{% url 'inventory:delivery_create' %}">{% translate "Record delivery" %}</a></div>
+  {% endif %}
+</div>
+{% endblock %}

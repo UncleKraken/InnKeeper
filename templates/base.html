@@ -53,6 +53,10 @@
         <a href="{% url 'finance:day_close' %}" class="{% active '/finance/day-close' %}">{% icon "lock" %} {% translate "Day close" %}</a>
         <a href="{% url 'finance:expenses' %}" class="{% active '/finance/expenses' %}">{% icon "wallet" %} {% translate "Expenses" %}</a>
       {% endif %}
+      {% if "inventory" in modules %}
+        {% if "finance" not in modules %}<div class="nav-section">{% translate "Finance" %}</div>{% endif %}
+        <a href="{% url 'inventory:stock' %}" class="{% active '/stock' %}">{% icon "box" %} {% translate "Stock" %}</a>
+      {% endif %}
 
       {% if "management" in modules %}
         <div class="nav-section">{% translate "Management" %}</div>

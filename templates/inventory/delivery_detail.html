@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Delivery" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'inventory:delivery_list' %}">{% icon "back" %} {% translate "Deliveries" %}</a></div><h1>{% translate "Delivery" %} {{ d.business_date|date:"d.m.Y" }}</h1>
+  <p>{{ d.supplier|default:_("No supplier") }}{% if d.reference %} · {{ d.reference }}{% endif %} · {% translate "by" %} {{ d.created_by|default:"—" }}</p></div>
+  <div class="actions"><button class="btn btn-secondary" onclick="window.print()">{% icon "print" %} {% translate "Print" %}</button></div>
+</div>
+<section class="card card-flush">
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Item" %}</th><th class="num">{% translate "Quantity" %}</th><th class="num">{% translate "Price per unit" %}</th><th class="num">{% translate "Line total" %}</th></tr></thead>
+    <tbody>
+    {% for m in moves %}
+      <tr><td><a href="{% url 'inventory:item_detail' m.stock_item_id %}">{{ m.stock_item.name }}</a></td><td class="num">{{ m.quantity|qty }} {{ m.stock_item.get_unit_display }}</td><td class="num">{{ m.unit_cost|money }}</td><td class="num">{{ m.value|money }}</td></tr>
+    {% endfor %}
+    </tbody>
+    <tfoot><tr><td colspan="3" class="num"><strong>{% translate "Total" %}</strong></td><td class="num"><strong>{{ d.total|money }}</strong></td></tr></tfoot>
+  </table></div>
+  <div class="card-footer muted">
+    {% if d.expense %}{% icon "check" %} {% translate "Recorded as an expense" %} ({{ d.expense.get_method_display }}){% if d.expense.voided %} — {% translate "voided" %}{% endif %}{% else %}{% translate "Not recorded as an expense." %}{% endif %}
+    {% if d.note %}<br>{{ d.note }}{% endif %}
+  </div>
+</section>
+{% endblock %}

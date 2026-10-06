@@ -72,6 +72,11 @@ def dashboard(request):
     if can_access(user, "finance"):
         ctx["revenue_today"] = Charge.objects.active().filter(business_date=today).aggregate(t=Sum("amount"))["t"] or 0
 
+    if can_access(user, "inventory"):
+        from apps.inventory.views import low_stock_count
+
+        ctx["low_stock"] = low_stock_count()
+
     if user.is_manager and not HotelSettings.load().onboarding_dismissed:
         steps = onboarding_steps(user)
         if not all(s["done"] for s in steps):

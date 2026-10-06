@@ -72,3 +72,19 @@ def absval(value):
         return abs(value)
     except TypeError:
         return value
+
+
+@register.filter
+def qty(value):
+    """A stock quantity without needless zeros: 4.600 → 4.6, 12.000 → 12 (in the user's number format)."""
+    from django.utils.formats import number_format
+
+    if value in (None, ""):
+        return "—"
+    try:
+        d = Decimal(value).normalize()
+    except (InvalidOperation, TypeError, ValueError):
+        return value
+    if d == d.to_integral():
+        d = d.quantize(Decimal("1"))
+    return number_format(d, use_l10n=True)

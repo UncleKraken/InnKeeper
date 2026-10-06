@@ -55,6 +55,12 @@ FULL_MODELS = [
     "finance.DayClose",
     "housekeeping.HousekeepingTask",
     "housekeeping.MaintenanceTicket",
+    "inventory.Supplier",
+    "inventory.StockItem",
+    "inventory.RecipeLine",
+    "inventory.Delivery",
+    "inventory.StockCount",
+    "inventory.StockMove",
 ]
 
 # Not worth moving: print history (kept 3 days).
@@ -201,7 +207,16 @@ def export_settings() -> bytes:
         "printers": [
             {
                 f: getattr(p, f)
-                for f in ("name", "connection", "address", "port", "system_name", "paper_width", "open_drawer", "is_active")
+                for f in (
+                    "name",
+                    "connection",
+                    "address",
+                    "port",
+                    "system_name",
+                    "paper_width",
+                    "open_drawer",
+                    "is_active",
+                )
             }
             for p in Printer.objects.all()
         ],
@@ -277,6 +292,34 @@ def export_settings() -> bytes:
                 ],
             }
         )
+    from apps.inventory.models import RecipeLine, StockItem, Supplier
+
+    payload["suppliers"] = [
+        {f: getattr(x, f) for f in ("name", "contact", "phone", "email", "tax_id", "notes", "is_active")}
+        for x in Supplier.objects.all()
+    ]
+    payload["stock_items"] = [
+        {
+            "name": x.name,
+            "group": x.group,
+            "unit": x.unit,
+            "min_level": str(x.min_level),
+            "cost": str(x.cost),
+            "supplier": x.supplier.name if x.supplier_id else None,
+            "is_active": x.is_active,
+        }
+        for x in StockItem.objects.select_related("supplier")
+    ]
+    payload["recipes"] = [
+        {
+            "outlet": r.item.category.outlet.name,
+            "category": r.item.category.name,
+            "item": r.item.name,
+            "stock_item": r.stock_item.name,
+            "quantity": str(r.quantity),
+        }
+        for r in RecipeLine.objects.select_related("item__category__outlet", "stock_item")
+    ]
     return _wrap("settings", payload)
 
 
@@ -325,7 +368,11 @@ def import_settings(doc: dict) -> dict:
         )
         stats["rooms"] += 1
     for x in data.get("seasons", []):
-        rt = types.get(x["room_type"]) or RoomType.objects.filter(code=x["room_type"]).first() if x["room_type"] else None
+        rt = (
+            types.get(x["room_type"]) or RoomType.objects.filter(code=x["room_type"]).first()
+            if x["room_type"]
+            else None
+        )
         SeasonRate.objects.update_or_create(
             name=x["name"],
             room_type=rt,
@@ -356,7 +403,15 @@ def import_settings(doc: dict) -> dict:
     for o in data.get("outlets", []):
         defaults = {
             k: o[k]
-            for k in ("kind", "uses_tables", "sort_order", "is_active", "menu_public", "menu_intro", "auto_print_receipt")
+            for k in (
+                "kind",
+                "uses_tables",
+                "sort_order",
+                "is_active",
+                "menu_public",
+                "menu_intro",
+                "auto_print_receipt",
+            )
             if k in o
         }
         if "receipt_printer" in o:
@@ -370,7 +425,8 @@ def import_settings(doc: dict) -> dict:
                 defaults={
                     "name_en": c.get("name_en", ""),
                     "sort_order": c.get("sort_order", 0),
-                    "station": stations.get(c.get("station")) or Station.objects.filter(name=c.get("station") or "").first(),
+                    "station": stations.get(c.get("station"))
+                    or Station.objects.filter(name=c.get("station") or "").first(),
                 },
             )
             for i in c.get("items", []):
@@ -385,7 +441,43 @@ def import_settings(doc: dict) -> dict:
                 outlet=outlet, name=t["name"], defaults={k: v for k, v in t.items() if k != "name"}
             )
             stats["tables"] += 1
+    _import_stock_settings(data)
     return stats
+
+
+def _import_stock_settings(data: dict) -> None:
+    from decimal import Decimal
+
+    from apps.inventory.models import RecipeLine, StockItem, Supplier
+    from apps.outlets.models import Item
+
+    suppliers = {}
+    for x in data.get("suppliers", []):
+        suppliers[x["name"]], _c = Supplier.objects.update_or_create(
+            name=x["name"], defaults={k: v for k, v in x.items() if k != "name"}
+        )
+    stock = {}
+    for x in data.get("stock_items", []):
+        stock[x["name"]], _c = StockItem.objects.update_or_create(
+            name=x["name"],
+            defaults={
+                "group": x.get("group", "food"),
+                "unit": x.get("unit", "pcs"),
+                "min_level": Decimal(x.get("min_level") or "0"),
+                "cost": Decimal(x.get("cost") or "0"),
+                "supplier": suppliers.get(x.get("supplier")),
+                "is_active": x.get("is_active", True),
+            },
+        )
+    for r in data.get("recipes", []):
+        item = Item.objects.filter(
+            name=r["item"], category__name=r["category"], category__outlet__name=r["outlet"]
+        ).first()
+        stock_item = stock.get(r["stock_item"]) or StockItem.objects.filter(name=r["stock_item"]).first()
+        if item and stock_item:
+            RecipeLine.objects.update_or_create(
+                item=item, stock_item=stock_item, defaults={"quantity": Decimal(r["quantity"])}
+            )
 
 
 # ---------- Automatic backups on disk ----------

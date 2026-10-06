@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Counts" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Stock" %}</div><h1>{% translate "Stock counts" %}</h1><p>{% translate "Count regularly (e.g. every week for the bar) to find losses early." %}</p></div>
+  <div class="actions"><a class="btn" href="{% url 'inventory:count_create' %}">{% icon "list" %} {% translate "Count stock" %}</a></div>
+</div>
+{% include "inventory/_tabs.html" %}
+<div class="card card-flush">
+  {% if page_obj %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Date" %}</th><th>{% translate "Note" %}</th><th class="num">{% translate "Items changed" %}</th><th>{% translate "By" %}</th><th class="num">{% translate "Difference" %}</th></tr></thead>
+    <tbody>
+    {% for c in page_obj %}
+      <tr>
+        <td class="nowrap"><a href="{% url 'inventory:count_detail' c.pk %}"><strong>{{ c.business_date|date:"d.m.Y" }}</strong></a></td>
+        <td>{{ c.note|default:"—" }}</td>
+        <td class="num">{{ c.lines }}</td>
+        <td>{{ c.created_by|default:"—" }}</td>
+        <td class="num" style="{% if c.difference_value < 0 %}color:var(--danger){% endif %}">{{ c.difference_value|money }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% include "includes/pagination.html" %}
+  {% else %}
+    <div class="empty"><strong>{% translate "No counts yet." %}</strong><a href="{% url 'inventory:count_create' %}">{% translate "Count stock" %}</a></div>
+  {% endif %}
+</div>
+{% endblock %}

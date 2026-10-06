@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Stock" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Stock" %}</div><h1>{% translate "Stock" %}</h1></div>
+  <div class="actions">
+    <a class="btn btn-secondary" href="{% url 'inventory:count_create' %}">{% icon "list" %} {% translate "Count stock" %}</a>
+    <a class="btn btn-secondary" href="{% url 'inventory:item_create' %}">{% icon "plus" %} {% translate "Add stock item" %}</a>
+    <a class="btn" href="{% url 'inventory:delivery_create' %}">{% icon "truck" %} {% translate "Record delivery" %}</a>
+  </div>
+</div>
+{% include "inventory/_tabs.html" %}
+
+<div class="grid grid-3" style="margin-bottom:1.25rem">
+  <div class="card stat"><div class="stat-label">{% translate "Stock value" %}</div><div class="stat-value">{{ total_value|money }}</div><div class="stat-note">{% blocktranslate count n=item_count %}{{ n }} item at average purchase price{% plural %}{{ n }} items at average purchase price{% endblocktranslate %}</div></div>
+  <a class="card stat" href="?low=1"><div class="stat-label">{% translate "Running low" %}</div><div class="stat-value" {% if low_count %}style="color:var(--danger)"{% endif %}>{{ low_count }}</div><div class="stat-note">{% translate "At or below the reorder level" %}</div></a>
+  <a class="card stat" href="{% url 'inventory:recipes' %}"><div class="stat-label">{% translate "Sales take stock automatically" %}</div><div class="stat-value" style="font-size:1rem; font-weight:600; margin-top:.4rem">{% translate "Set up recipes" %} →</div><div class="stat-note">{% translate "What each menu item uses" %}</div></a>
+</div>
+
+<div class="card card-flush">
+  <div class="card-header">
+    <form method="get" class="filters" style="flex-wrap:wrap">
+      <div class="search">{% icon "search" %}<input class="input" type="search" name="q" value="{{ q }}" placeholder="{% translate 'Search…' %}"></div>
+      <select class="input" name="group" onchange="this.form.submit()" aria-label="{% translate 'Group' %}"><option value="">{% translate "All groups" %}</option>{% for v, l in groups %}<option value="{{ v }}" {% if v == group %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+      <label class="check" style="margin:0"><input type="checkbox" name="low" value="1" {% if low_only %}checked{% endif %} onchange="this.form.submit()"> {% translate "Only running low" %}</label>
+    </form>
+  </div>
+  {% if items %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Item" %}</th><th>{% translate "Group" %}</th><th class="num">{% translate "In stock" %}</th><th class="num">{% translate "Reorder at" %}</th><th class="num">{% translate "Cost per unit" %}</th><th class="num">{% translate "Value" %}</th><th>{% translate "Supplier" %}</th></tr></thead>
+    <tbody>
+    {% for i in items %}
+      <tr>
+        <td><a href="{% url 'inventory:item_detail' i.pk %}"><strong>{{ i.name }}</strong></a></td>
+        <td>{{ i.get_group_display }}</td>
+        <td class="num nowrap">{% if i.is_low %}{% translate "Low" as low %}{% status_badge "danger" low %} {% endif %}<strong>{{ i.on_hand|qty }}</strong> {{ i.get_unit_display }}</td>
+        <td class="num">{% if i.min_level %}{{ i.min_level|qty }}{% else %}—{% endif %}</td>
+        <td class="num">{{ i.cost|money }}</td>
+        <td class="num">{{ i.value|money }}</td>
+        <td>{{ i.supplier|default:"—" }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+    <div class="empty">
+      <strong>{% if q or group or low_only %}{% translate "Nothing matches." %}{% else %}{% translate "No stock items yet" %}{% endif %}</strong>
+      {% if not q and not group and not low_only %}
+        <p class="muted" style="max-width:520px; margin:.4rem auto">{% translate "Add the things you buy — ingredients, bottles, cleaning supplies, room amenities. For drinks sold by the bottle or can, use “Track as stock” on the Recipes tab." %}</p>
+        <a href="{% url 'inventory:item_create' %}">{% translate "Add stock item" %}</a>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

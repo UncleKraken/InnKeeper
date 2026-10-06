@@ -1,0 +1,1 @@
+{% load i18n %}<nav class="tabs">{% for name, label in tabs %}<a href="{% url name %}" class="{% if name == tab %}active{% endif %}">{{ label }}</a>{% endfor %}</nav>

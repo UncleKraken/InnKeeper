@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Recipes" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Stock" %}</div><h1>{% translate "Recipes" %}</h1>
+  <p>{% translate "What one sale of each menu item takes out of stock. Items without a recipe don't change stock." %}</p></div>
+</div>
+{% include "inventory/_tabs.html" %}
+<div class="card card-flush">
+  <div class="card-header">
+    <form method="get" class="filters" style="flex-wrap:wrap">
+      <div class="search">{% icon "search" %}<input class="input" type="search" name="q" value="{{ q }}" placeholder="{% translate 'Search…' %}"></div>
+      <select class="input" name="outlet" onchange="this.form.submit()" aria-label="{% translate 'Outlet' %}"><option value="">{% translate "All outlets" %}</option>{% for o in outlets %}<option value="{{ o.pk }}" {% if o.pk|stringformat:"s" == outlet_id %}selected{% endif %}>{{ o.name }}</option>{% endfor %}</select>
+    </form>
+    {% if without %}<span class="muted" style="font-size:.85rem">{% blocktranslate count n=without %}{{ n }} item without a recipe{% plural %}{{ n }} items without a recipe{% endblocktranslate %}</span>{% endif %}
+  </div>
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Menu item" %}</th><th>{% translate "Uses" %}</th><th class="num">{% translate "Price" %}</th><th class="num">{% translate "Cost" %}</th><th class="num">{% translate "Margin" %}</th><th></th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td><a href="{% url 'inventory:recipe_edit' r.item.pk %}"><strong>{{ r.item.name }}</strong></a><br><small class="muted">{{ r.item.category.outlet.name }} · {{ r.item.category.name }}</small></td>
+        <td>{% for l in r.lines %}{{ l.quantity|qty }} {{ l.stock_item.get_unit_display }} {{ l.stock_item.name }}{% if not forloop.last %}, {% endif %}{% empty %}<span class="muted">—</span>{% endfor %}</td>
+        <td class="num">{{ r.item.price|money }}</td>
+        <td class="num">{% if r.lines %}{{ r.cost|money }}{% else %}—{% endif %}</td>
+        <td class="num">{% if r.margin is not None %}<span style="{% if r.margin < 60 %}color:var(--warning){% endif %}">{{ r.margin }}%</span>{% else %}—{% endif %}</td>
+        <td class="num nowrap">
+          {% if r.can_track %}<form method="post" action="{% url 'inventory:recipe_track' r.item.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-secondary btn-sm" title="{% translate 'Creates a stock item with the same name; each sale takes 1 out of stock.' %}">{% icon "box" %} {% translate "Track as stock" %}</button></form>{% endif %}
+          <a class="btn btn-ghost btn-sm" href="{% url 'inventory:recipe_edit' r.item.pk %}">{% icon "edit" %} {% translate "Edit" %}</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+    <div class="empty"><strong>{% translate "No menu items" %}</strong></div>
+  {% endif %}
+</div>
+{% endblock %}

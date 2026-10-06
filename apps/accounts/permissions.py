@@ -21,6 +21,7 @@ MODULE_ROLES: dict[str, set[str]] = {
     "outlets": {Role.OUTLET, Role.RECEPTION},
     "finance": {Role.FINANCE},
     "kitchen": {Role.KITCHEN, Role.OUTLET},
+    "inventory": {Role.FINANCE},
     "management": set(),  # managers only
 }
 

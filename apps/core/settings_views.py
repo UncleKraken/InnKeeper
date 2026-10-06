@@ -95,7 +95,14 @@ class ReceiptForm(StyledFormMixin, forms.ModelForm):
 class ModulesForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = HotelSettings
-        fields = ["business_type", "module_rooms", "module_housekeeping", "module_maintenance", "module_outlets"]
+        fields = [
+            "business_type",
+            "module_rooms",
+            "module_housekeeping",
+            "module_maintenance",
+            "module_outlets",
+            "module_inventory",
+        ]
         widgets = {"business_type": forms.RadioSelect}
 
     def clean(self):

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ item.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'inventory:stock' %}">{% icon "back" %} {% translate "Stock" %}</a></div><h1>{{ item.name }}</h1><p>{{ item.get_group_display }}{% if item.supplier %} · {{ item.supplier }}{% endif %}{% if not item.is_active %} · {% translate "Not active" %}{% endif %}</p></div>
+  <div class="actions">
+    <a class="btn btn-secondary" href="{% url 'inventory:item_edit' item.pk %}">{% icon "edit" %} {% translate "Edit" %}</a>
+    <a class="btn" href="{% url 'inventory:delivery_create' %}?item={{ item.pk }}">{% icon "truck" %} {% translate "Record delivery" %}</a>
+  </div>
+</div>
+
+<div class="grid grid-main" style="align-items:start">
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "History" %}</h2></div>
+    {% if moves %}
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>{% translate "Date" %}</th><th>{% translate "What" %}</th><th class="num">{% translate "Quantity" %}</th><th class="num">{% translate "In stock after" %}</th><th>{% translate "By" %}</th></tr></thead>
+      <tbody>
+      {% for m in moves %}
+        <tr>
+          <td class="nowrap">{{ m.created_at|date:"d.m.Y H:i" }}</td>
+          <td>{{ m.get_kind_display }}{% if m.delivery %} · <a href="{% url 'inventory:delivery_detail' m.delivery_id %}">{{ m.delivery.supplier|default:_("delivery") }}</a>{% endif %}{% if m.count_id %} · <a href="{% url 'inventory:count_detail' m.count_id %}">{% translate "count" %}</a>{% endif %}{% if m.note %}<br><small class="muted">{{ m.note }}</small>{% endif %}</td>
+          <td class="num nowrap" style="color:{% if m.quantity < 0 %}var(--danger){% else %}var(--success){% endif %}">{% if m.quantity > 0 %}+{% endif %}{{ m.quantity|qty }}</td>
+          <td class="num">{{ m.balance|qty }}</td>
+          <td>{{ m.created_by|default:"—" }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {% include "includes/pagination.html" %}
+    {% else %}
+      <div class="empty"><strong>{% translate "No movements yet" %}</strong></div>
+    {% endif %}
+  </section>
+
+  <aside class="stack">
+    <section class="card">
+      <div class="card-body">
+        <div class="stat-label">{% translate "In stock" %}</div>
+        <div class="stat-value" {% if item.is_low %}style="color:var(--danger)"{% endif %}>{{ item.on_hand|qty }} <small style="font-size:1rem">{{ item.get_unit_display }}</small></div>
+        <dl class="dl" style="margin-top:.75rem">
+          <dt>{% translate "Reorder at" %}</dt><dd>{% if item.min_level %}{{ item.min_level|qty }}{% else %}—{% endif %}</dd>
+          <dt>{% translate "Cost per unit" %}</dt><dd>{{ item.cost|money }}</dd>
+          <dt>{% translate "Value" %}</dt><dd>{{ item.value|money }}</dd>
+        </dl>
+      </div>
+    </section>
+    <section class="card">
+      <div class="card-header"><h3>{% translate "Waste or breakage" %}</h3></div>
+      <form method="post" class="card-body form-grid" style="grid-template-columns:1fr">{% csrf_token %}
+        {% for f in waste_form %}<div class="field">{{ f.label_tag }}{{ f }}{% for e in f.errors %}<div class="error">{{ e }}</div>{% endfor %}</div>{% endfor %}
+        <div><button class="btn btn-secondary">{% icon "trash" %} {% translate "Take out of stock" %}</button></div>
+      </form>
+    </section>
+    <section class="card">
+      <div class="card-header"><h3>{% translate "Used in" %}</h3></div>
+      <div class="card-body">
+        {% for r in used_in %}<div class="row" style="justify-content:space-between"><a href="{% url 'inventory:recipe_edit' r.item_id %}">{{ r.item.name }}</a><span class="muted">{{ r.quantity|qty }} {{ item.get_unit_display }} · {{ r.item.category.outlet.name }}</span></div>{% empty %}<p class="muted">{% translate "Not used in any recipe. Sales won't take it out of stock." %}</p>{% endfor %}
+      </div>
+    </section>
+  </aside>
+</div>
+{% endblock %}

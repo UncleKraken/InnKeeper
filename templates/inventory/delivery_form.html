@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Record delivery" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'inventory:delivery_list' %}">{% icon "back" %} {% translate "Deliveries" %}</a></div><h1>{% translate "Record delivery" %}</h1><p>{% translate "What arrived, how much, and the price per unit from the supplier's invoice." %}</p></div>
+</div>
+{% if not items %}
+  <div class="alert alert-warning">{% translate "Add stock items first." %} <a href="{% url 'inventory:item_create' %}">{% translate "Add stock item" %}</a></div>
+{% else %}
+<form method="post" class="stack" id="delivery">{% csrf_token %}
+  <section class="card card-flush">
+    <div class="table-wrap"><table class="table" id="lines">
+      <thead><tr><th style="width:45%">{% translate "Item" %}</th><th class="num">{% translate "Quantity" %}</th><th class="num">{% translate "Price per unit" %}</th><th class="num">{% translate "Line total" %}</th><th></th></tr></thead>
+      <tbody>
+      {% for r in rows %}
+        <tr class="dl-row">
+          <td><select class="input" name="item"><option value="">—</option>{% for i in items %}<option value="{{ i.pk }}" data-cost="{{ i.cost|floatformat:'-4u' }}" data-unit="{{ i.get_unit_display }}" {% if r.item == i.pk|stringformat:"s" %}selected{% endif %}>{{ i.name }} ({{ i.get_unit_display }})</option>{% endfor %}</select></td>
+          <td class="num"><input class="input num" name="qty" inputmode="decimal" value="{{ r.qty }}" style="max-width:8rem"></td>
+          <td class="num"><input class="input num" name="cost" inputmode="decimal" value="{{ r.cost }}" style="max-width:8rem"></td>
+          <td class="num line-total">—</td>
+          <td class="num"><button type="button" class="btn btn-ghost btn-sm rm" title="{% translate 'Remove' %}">{% icon "x" %}</button></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+      <tfoot><tr><td><button type="button" class="btn btn-secondary btn-sm" id="add">{% icon "plus" %} {% translate "Add line" %}</button></td><td></td><td class="num"><strong>{% translate "Total" %}</strong></td><td class="num"><strong id="total">—</strong></td><td></td></tr></tfoot>
+    </table></div>
+  </section>
+  <section class="card">
+    <div class="card-body form-grid">
+      {% for f in form %}
+        <div class="field{% if f.field.widget.input_type == 'checkbox' %} full{% endif %}">
+          {% if f.field.widget.input_type == 'checkbox' %}<label>{{ f }} {{ f.label }}</label>{% else %}{{ f.label_tag }}{{ f }}{% endif %}
+          {% if f.help_text %}<small class="muted">{{ f.help_text }}</small>{% endif %}
+          {% for e in f.errors %}<div class="error">{{ e }}</div>{% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+    <div class="card-footer form-actions"><a class="btn btn-secondary" href="{% url 'inventory:delivery_list' %}">{% translate "Cancel" %}</a><button class="btn">{% icon "check" %} {% translate "Save delivery" %}</button></div>
+  </section>
+</form>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var body = document.querySelector('#lines tbody'); if (!body) return;
+  function num(v) { v = (v || '').replace(',', '.'); var n = parseFloat(v); return isNaN(n) ? null : n; }
+  function fmt(n) { return n.toFixed(2); }
+  function recalc() {
+    var total = 0;
+    body.querySelectorAll('tr').forEach(function (tr) {
+      var q = num(tr.querySelector('[name=qty]').value), c = num(tr.querySelector('[name=cost]').value);
+      var cell = tr.querySelector('.line-total');
+      if (q !== null && c !== null) { cell.textContent = fmt(q * c); total += q * c; } else { cell.textContent = '—'; }
+    });
+    document.getElementById('total').textContent = fmt(total) + ' {{ hotel.currency_symbol }}';
+  }
+  body.addEventListener('input', recalc);
+  body.addEventListener('change', function (e) {
+    if (e.target.name === 'item') {
+      var opt = e.target.selectedOptions[0], cost = e.target.closest('tr').querySelector('[name=cost]');
+      if (opt && opt.dataset.cost && !cost.value && parseFloat(opt.dataset.cost) > 0) cost.value = opt.dataset.cost;
+      recalc();
+    }
+  });
+  body.addEventListener('click', function (e) {
+    var b = e.target.closest('.rm'); if (!b) return;
+    var tr = b.closest('tr');
+    if (body.rows.length > 1) tr.remove(); else tr.querySelectorAll('input,select').forEach(function (i) { i.value = ''; });
+    recalc();
+  });
+  document.getElementById('add').addEventListener('click', function () {
+    var tr = body.rows[0].cloneNode(true);
+    tr.querySelectorAll('input,select').forEach(function (i) { i.value = ''; });
+    body.appendChild(tr); tr.querySelector('select').focus(); recalc();
+  });
+  recalc();
+})();
+</script>
+{% endblock %}

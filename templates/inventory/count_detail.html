@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Stock count" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'inventory:count_list' %}">{% icon "back" %} {% translate "Counts" %}</a></div><h1>{% translate "Stock count" %} {{ c.business_date|date:"d.m.Y" }}</h1>
+  <p>{% translate "by" %} {{ c.created_by|default:"—" }}{% if c.note %} · {{ c.note }}{% endif %}</p></div>
+  <div class="actions"><button class="btn btn-secondary" onclick="window.print()">{% icon "print" %} {% translate "Print" %}</button></div>
+</div>
+<section class="card card-flush">
+  {% if moves %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Item" %}</th><th class="num">{% translate "Expected" %}</th><th class="num">{% translate "Counted" %}</th><th class="num">{% translate "Difference" %}</th><th class="num">{% translate "Value" %}</th></tr></thead>
+    <tbody>
+    {% for m in moves %}
+      <tr><td><a href="{% url 'inventory:item_detail' m.stock_item_id %}">{{ m.stock_item.name }}</a></td><td class="num">{{ m.before|qty }}</td><td class="num">{{ m.balance|qty }}</td><td class="num" style="color:{% if m.quantity < 0 %}var(--danger){% else %}var(--success){% endif %}">{% if m.quantity > 0 %}+{% endif %}{{ m.quantity|qty }} {{ m.stock_item.get_unit_display }}</td><td class="num">{{ m.value|money }}</td></tr>
+    {% endfor %}
+    </tbody>
+    <tfoot><tr><td colspan="4" class="num"><strong>{% translate "Total difference" %}</strong></td><td class="num"><strong>{{ c.difference_value|money }}</strong></td></tr></tfoot>
+  </table></div>
+  {% else %}
+    <div class="empty"><strong>{% translate "Everything matched — no differences." %}</strong></div>
+  {% endif %}
+</section>
+{% endblock %}

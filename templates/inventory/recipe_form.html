@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Recipe" %} · {{ item.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'inventory:recipes' %}?outlet={{ item.category.outlet_id }}">{% icon "back" %} {% translate "Recipes" %}</a></div><h1>{{ item.name }}</h1>
+  <p>{{ item.category.outlet.name }} · {% translate "Price" %} {{ item.price|money }} · {% translate "Cost now" %} {{ cost|money }}</p></div>
+</div>
+{% if not stock_items %}
+  <div class="alert alert-warning">{% translate "Add stock items first." %} <a href="{% url 'inventory:item_create' %}">{% translate "Add stock item" %}</a></div>
+{% else %}
+<form method="post">{% csrf_token %}
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "One sale uses" %}</h2></div>
+    <div class="table-wrap"><table class="table" id="lines">
+      <thead><tr><th>{% translate "Stock item" %}</th><th class="num">{% translate "Quantity" %}</th><th></th></tr></thead>
+      <tbody>
+      {% for l in lines %}
+        <tr>
+          <td><select class="input" name="stock"><option value="">—</option>{% for s in stock_items %}<option value="{{ s.pk }}" {% if s.pk == l.stock %}selected{% endif %}>{{ s.name }} ({{ s.get_unit_display }})</option>{% endfor %}</select></td>
+          <td class="num"><input class="input num" name="qty" inputmode="decimal" value="{{ l.qty }}" style="max-width:8rem"></td>
+          <td class="num"><button type="button" class="btn btn-ghost btn-sm rm" title="{% translate 'Remove' %}">{% icon "x" %}</button></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    <div class="card-body muted" style="font-size:.88rem">{% translate "Use the stock item's unit: e.g. 0.04 l of raki for a 4 cl shot, 0.2 kg of meat, 1 bottle of beer." %}</div>
+    <div class="card-footer form-actions">
+      <button type="button" class="btn btn-secondary" id="add">{% icon "plus" %} {% translate "Add line" %}</button>
+      <span class="spacer"></span>
+      <a class="btn btn-secondary" href="{% url 'inventory:recipes' %}">{% translate "Cancel" %}</a>
+      <button class="btn">{% icon "check" %} {% translate "Save" %}</button>
+    </div>
+  </section>
+</form>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var body = document.querySelector('#lines tbody'); if (!body) return;
+  body.addEventListener('click', function (e) {
+    var b = e.target.closest('.rm'); if (!b) return;
+    var tr = b.closest('tr');
+    if (body.rows.length > 1) tr.remove(); else tr.querySelectorAll('input,select').forEach(function (i) { i.value = ''; });
+  });
+  document.getElementById('add').addEventListener('click', function () {
+    var tr = body.rows[0].cloneNode(true);
+    tr.querySelectorAll('input,select').forEach(function (i) { i.value = ''; });
+    body.appendChild(tr); tr.querySelector('select').focus();
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Usage report" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Stock" %}</div><h1>{% translate "Usage report" %}</h1><p>{{ start|date:"d.m.Y" }} – {{ end|date:"d.m.Y" }}</p></div>
+  <div class="actions">
+    <form method="get" class="filters">
+      <div class="field"><label for="from">{% translate "From" %}</label><input class="input" type="date" id="from" name="from" value="{{ start|date:'Y-m-d' }}"></div>
+      <div class="field"><label for="to">{% translate "To" %}</label><input class="input" type="date" id="to" name="to" value="{{ end|date:'Y-m-d' }}"></div>
+      <button class="btn btn-secondary">{% translate "Show" %}</button>
+    </form>
+  </div>
+</div>
+{% include "inventory/_tabs.html" %}
+<div class="grid grid-4" style="margin-bottom:1.25rem">
+  <div class="card stat"><div class="stat-label">{% translate "Cost of goods sold" %}</div><div class="stat-value">{{ used_value|money }}</div><div class="stat-note">{% translate "From recipes, at purchase price" %}</div></div>
+  <div class="card stat"><div class="stat-label">{% translate "Restaurant, bar & services sales" %}</div><div class="stat-value">{{ sales|money }}</div><div class="stat-note">{% translate "Including VAT" %}</div></div>
+  <div class="card stat"><div class="stat-label">{% translate "Cost of sales" %}</div><div class="stat-value">{% if cost_pct is not None %}{{ cost_pct }}%{% else %}—{% endif %}</div><div class="stat-note">{% translate "Restaurants usually aim for 25–35%" %}</div></div>
+  <div class="card stat"><div class="stat-label">{% translate "Waste & count losses" %}</div><div class="stat-value" {% if wasted_value or counted_value < 0 %}style="color:var(--danger)"{% endif %}>{{ wasted_value|money }}</div><div class="stat-note">{% blocktranslate with v=counted_value|money %}Count corrections: {{ v }}{% endblocktranslate %}</div></div>
+</div>
+<div class="card card-flush">
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Item" %}</th><th class="num">{% translate "Received" %}</th><th class="num">{% translate "Used by sales" %}</th><th class="num">{% translate "Value used" %}</th><th class="num">{% translate "Wasted" %}</th><th class="num">{% translate "Count correction" %}</th><th class="num">{% translate "In stock now" %}</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td><a href="{% url 'inventory:item_detail' r.item.pk %}">{{ r.item.name }}</a> <span class="muted">{{ r.item.get_unit_display }}</span></td>
+        <td class="num">{{ r.received|qty|default:"—" }}</td>
+        <td class="num">{{ r.used|qty }}</td>
+        <td class="num">{{ r.used_value|money }}</td>
+        <td class="num">{% if r.wasted %}{{ r.wasted|qty }}{% else %}—{% endif %}</td>
+        <td class="num" style="{% if r.counted < 0 %}color:var(--danger){% endif %}">{% if r.counted %}{% if r.counted > 0 %}+{% endif %}{{ r.counted|qty }}{% else %}—{% endif %}</td>
+        <td class="num">{{ r.item.on_hand|qty }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+    <div class="empty"><strong>{% translate "No stock movements in this period." %}</strong></div>
+  {% endif %}
+</div>
+{% endblock %}
