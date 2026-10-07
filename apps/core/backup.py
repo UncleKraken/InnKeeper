@@ -36,6 +36,7 @@ FULL_MODELS = [
     "core.AuditLog",
     "frontdesk.RoomType",
     "frontdesk.Room",
+    "frontdesk.CalendarFeed",
     "frontdesk.Guest",
     "frontdesk.Reservation",
     "frontdesk.SeasonRate",
@@ -164,7 +165,7 @@ def restore_full(doc: dict) -> None:
 
 def export_settings() -> bytes:
     from apps.core.models import HotelSettings
-    from apps.frontdesk.models import Room, RoomType, SeasonRate
+    from apps.frontdesk.models import CalendarFeed, Room, RoomType, SeasonRate
     from apps.outlets.models import Outlet, Printer, Station
 
     hs = HotelSettings.load()
@@ -203,6 +204,10 @@ def export_settings() -> bytes:
                 "is_active": x.is_active,
             }
             for x in SeasonRate.objects.select_related("room_type")
+        ],
+        "calendars": [
+            {"room": f.room.number, "source": f.source, "url": f.url, "is_active": f.is_active}
+            for f in CalendarFeed.objects.select_related("room")
         ],
         "printers": [
             {
@@ -329,7 +334,7 @@ def import_settings(doc: dict) -> dict:
     from decimal import Decimal
 
     from apps.core.models import HotelSettings
-    from apps.frontdesk.models import Room, RoomType, SeasonRate
+    from apps.frontdesk.models import CalendarFeed, Room, RoomType, SeasonRate
     from apps.outlets.models import Category, Item, Outlet, Printer, Station, Table
 
     if doc["kind"] != "settings":
@@ -385,6 +390,12 @@ def import_settings(doc: dict) -> dict:
                 "is_active": x.get("is_active", True),
             },
         )
+    for f in data.get("calendars", []):
+        room = Room.objects.filter(number=f["room"]).first()
+        if room:
+            CalendarFeed.objects.update_or_create(
+                room=room, url=f["url"], defaults={"source": f["source"], "is_active": f.get("is_active", True)}
+            )
     printers = {}
     for p in data.get("printers", []):
         printers[p["name"]], _c = Printer.objects.update_or_create(

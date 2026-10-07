@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Channels" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Management" %}</div><h1>{% translate "Rooms & rates" %}</h1></div>
+  <div class="actions">
+    <form method="post" action="{% url 'frontdesk:channel_sync_all' %}" class="inline">{% csrf_token %}<button class="btn btn-secondary">{% icon "sync" %} {% translate "Sync all now" %}</button></form>
+  </div>
+</div>
+<nav class="tabs">{% for url, label, is_active in tabs %}<a href="{{ url }}" class="{% if is_active %}active{% endif %}">{{ label }}</a>{% endfor %}</nav>
+
+<section class="card" style="margin-bottom:1.25rem">
+  <div class="card-header"><h2>{% translate "Sell on Booking.com, Airbnb and others without double bookings" %}</h2></div>
+  <div class="card-body grid grid-2 help-body" style="font-size:.92rem">
+    <div><strong>1. {% translate "Channel → InnKeeper" %}</strong><p>{% translate "In the channel's extranet, open the room's calendar settings and copy its export link (iCal, .ics). Add it below. Its bookings appear on the room rack and are updated every 30 minutes." %}</p></div>
+    <div><strong>2. {% translate "InnKeeper → Channel" %}</strong><p>{% translate "Copy the room's InnKeeper link from the table and paste it into the channel's calendar import. Rooms booked here (reception, website, other channels) are closed there." %}</p></div>
+  </div>
+  {% if needs_public %}<div class="card-footer"><div class="alert alert-warning" style="margin:0">{% translate "Channels can only read your links when InnKeeper is reachable from the internet. Set the public web address in Settings → Online booking once it is. Importing works anyway." %}</div></div>{% endif %}
+</section>
+
+{% for feed in feeds_with_conflicts %}
+<div class="alert alert-error" style="margin-bottom:1rem">
+  <strong>{% icon "alert" %} {{ feed }}: {% translate "possible double booking" %}</strong>
+  <ul style="margin:.4rem 0 0">{% for c in feed.conflicts %}<li>{{ c.start }} → {{ c.end }}{% if c.summary %} ({{ c.summary }}){% endif %}: {{ c.reason }}</li>{% endfor %}</ul>
+  <div style="margin-top:.4rem; font-size:.88rem">{% translate "Move one of the guests to another room, then sync again." %}</div>
+</div>
+{% endfor %}
+
+<section class="card card-flush" style="margin-bottom:1.25rem">
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Room" %}</th><th style="width:38%">{% translate "InnKeeper link for the channel" %}</th><th>{% translate "Channel calendars" %}</th><th></th></tr></thead>
+    <tbody>
+    {% for room, link, feeds in rows %}
+      <tr>
+        <td class="nowrap"><strong>{{ room.number }}</strong> <span class="muted">{{ room.room_type.code }}</span></td>
+        <td><div class="row" style="gap:.4rem; flex-wrap:nowrap"><input class="input mono" readonly value="{{ link }}" style="font-size:.78rem" onclick="this.select()" aria-label="{% translate 'Link' %} {{ room.number }}"><button type="button" class="btn btn-secondary btn-sm copy" data-copy="{{ link }}">{% translate "Copy" %}</button></div></td>
+        <td>
+          {% for f in feeds %}
+            <div class="row" style="gap:.4rem; margin:.15rem 0; flex-wrap:wrap">
+              {% if f.last_error %}{% status_badge "danger" f.get_source_display %}{% elif f.conflicts %}{% status_badge "warning" f.get_source_display %}{% else %}{% status_badge "success" f.get_source_display %}{% endif %}
+              <small class="muted" title="{{ f.last_error }}">{% if f.last_sync %}{{ f.last_sync|timesince }}{% else %}{% translate "not synced yet" %}{% endif %}{% if f.last_error %} · {{ f.last_error|truncatechars:50 }}{% endif %}</small>
+              <form method="post" action="{% url 'frontdesk:channel_sync' f.pk %}" class="inline">{% csrf_token %}<button class="btn btn-ghost btn-sm" title="{% translate 'Sync now' %}">{% icon "sync" %}</button></form>
+              <form method="post" action="{% url 'frontdesk:channel_delete' f.pk %}" class="inline" data-confirm="{% translate 'Remove this calendar? Bookings already copied stay.' %}">{% csrf_token %}<button class="btn btn-ghost btn-sm" title="{% translate 'Remove' %}">{% icon "x" %}</button></form>
+            </div>
+          {% empty %}<span class="muted">—</span>{% endfor %}
+        </td>
+        <td class="num"><a class="btn btn-ghost btn-sm" href="?room={{ room.pk }}#add">{% icon "plus" %} {% translate "Add" %}</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</section>
+
+<section class="card" id="add">
+  <div class="card-header"><h2>{% translate "Add a channel calendar" %}</h2></div>
+  <form method="post">{% csrf_token %}
+    <div class="card-body form-grid">
+      {% for f in form %}
+        <div class="field{% if f.name == 'url' %} full{% endif %}">{{ f.label_tag }}{{ f }}{% if f.help_text %}<small class="muted">{{ f.help_text }}</small>{% endif %}{% for e in f.errors %}<div class="error">{{ e }}</div>{% endfor %}</div>
+      {% endfor %}
+    </div>
+    <div class="card-footer form-actions"><button class="btn">{% icon "plus" %} {% translate "Add and sync" %}</button></div>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+document.querySelectorAll('.copy').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var t = b.dataset.copy, done = function () { var o = b.textContent; b.textContent = '✓'; setTimeout(function () { b.textContent = o; }, 1200); };
+    if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, function () {}); else { b.previousElementSibling.select(); document.execCommand('copy'); done(); }
+  });
+});
+</script>
+{% endblock %}

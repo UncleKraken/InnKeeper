@@ -144,6 +144,11 @@ class Reservation(models.Model):
     booking_token = models.CharField(max_length=32, blank=True, db_index=True)
     guest_language = models.CharField(max_length=8, blank=True)
     deposit_due = models.DecimalField(_("deposit due"), default=Decimal("0.00"), **MONEY)
+    # Bookings imported from a channel's calendar (Booking.com, Airbnb…)
+    feed = models.ForeignKey(
+        "CalendarFeed", null=True, blank=True, on_delete=models.SET_NULL, related_name="reservations"
+    )
+    external_uid = models.CharField(max_length=255, blank=True, db_index=True)
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
@@ -286,3 +291,29 @@ class SeasonRate(models.Model):
             errors["room_type"] = _("A fixed price needs a room type.")
         if errors:
             raise ValidationError(errors)
+
+
+class CalendarFeed(models.Model):
+    """A channel's calendar for one room (iCal link). Its bookings are copied in so the room can't be sold twice."""
+
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="feeds", verbose_name=_("room"))
+    source = models.CharField(
+        _("channel"), max_length=20, choices=Reservation.Source.choices, default=Reservation.Source.BOOKING_COM
+    )
+    url = models.URLField(
+        _("calendar link (iCal)"),
+        max_length=500,
+        help_text=_("The export link from the channel's calendar settings, usually ending in .ics."),
+    )
+    is_active = models.BooleanField(_("active"), default=True)
+    last_sync = models.DateTimeField(_("last synced"), null=True, blank=True)
+    last_error = models.CharField(_("last problem"), max_length=255, blank=True)
+    conflicts = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        verbose_name = _("channel calendar")
+        verbose_name_plural = _("channel calendars")
+        ordering = ["room__number", "source"]
+
+    def __str__(self) -> str:
+        return f"{self.get_source_display()} → {self.room}"

@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import channels, views
 
 app_name = "frontdesk"
 
@@ -28,6 +28,10 @@ urlpatterns = [
     path("setup/rooms/", views.RoomList.as_view(), name="room_list"),
     path("setup/rooms/new/", views.RoomCreate.as_view(), name="room_create"),
     path("setup/rooms/<int:pk>/", views.RoomEdit.as_view(), name="room_edit"),
+    path("setup/channels/", channels.channels, name="channels"),
+    path("setup/channels/sync/", channels.channel_sync, name="channel_sync_all"),
+    path("setup/channels/<int:pk>/sync/", channels.channel_sync, name="channel_sync"),
+    path("setup/channels/<int:pk>/delete/", channels.channel_delete, name="channel_delete"),
     path("setup/seasons/", views.SeasonList.as_view(), name="season_list"),
     path("setup/seasons/new/", views.SeasonCreate.as_view(), name="season_create"),
     path("setup/seasons/<int:pk>/", views.SeasonEdit.as_view(), name="season_edit"),

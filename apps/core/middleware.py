@@ -13,6 +13,7 @@ SETUP_EXEMPT_PREFIXES = (
     "/menu/",
     "/help/",
     "/book/",
+    "/ical/",
 )
 
 

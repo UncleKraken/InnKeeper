@@ -485,6 +485,7 @@ SETUP_TABS = [
     ("frontdesk:room_list", _("Rooms")),
     ("frontdesk:roomtype_list", _("Room types & rates")),
     ("frontdesk:season_list", _("Seasons")),
+    ("frontdesk:channels", _("Channels")),
 ]
 
 

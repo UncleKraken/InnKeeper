@@ -100,7 +100,7 @@ def prepare_database(log) -> None:
 
 
 def daily_jobs(log, stop: threading.Event) -> None:
-    """Daily automatic backup and the nightly room-charge posting, while the app is open."""
+    """Daily automatic backup, the nightly room-charge posting and channel calendar sync (every 15 minutes)."""
     from django.utils import timezone
 
     from apps.core.backup import backup_dir, save_backup_to_disk
@@ -120,7 +120,15 @@ def daily_jobs(log, stop: threading.Event) -> None:
                 log(f"Room charges posted for {n} stay(s).")
         except Exception as e:
             log(f"Daily job error: {e}")
-        stop.wait(600)
+        try:
+            from apps.frontdesk.ical import sync_all
+
+            for feed, r in sync_all().items():
+                if r.error or r.created or r.updated or r.cancelled or r.conflicts:
+                    log(f"Calendar {feed}: +{r.created} ~{r.updated} -{r.cancelled} {r.error}")
+        except Exception as e:
+            log(f"Calendar sync error: {e}")
+        stop.wait(900)
 
 
 def serve(log, ready: threading.Event) -> None:
