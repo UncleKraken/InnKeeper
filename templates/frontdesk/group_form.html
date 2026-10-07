@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "New group booking" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'frontdesk:group_list' %}">{% icon "back" %} {% translate "Groups" %}</a></div><h1>{% translate "New group booking" %}</h1></div>
+</div>
+<form method="post" class="stack">{% csrf_token %}
+  <section class="card">
+    <div class="card-body form-grid">
+      {% for f in form %}
+        <div class="field{% if f.name == 'notes' or f.name == 'one_bill' %} full{% endif %}">
+          {% if f.field.widget.input_type == 'checkbox' %}<label class="check">{{ f }} {{ f.label }}</label>{% else %}{{ f.label_tag }}{{ f }}{% endif %}
+          {% if f.help_text %}<small class="muted">{{ f.help_text }}</small>{% endif %}
+          {% for e in f.errors %}<div class="error">{{ e }}</div>{% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+    <div class="card-footer form-actions"><button class="btn btn-secondary" name="action" value="search">{% icon "search" %} {% translate "Show free rooms" %}</button></div>
+  </section>
+
+  {% if searched %}
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "Choose the rooms" %}</h2><span class="muted" id="count"></span></div>
+    {% if available %}
+      {% for a in available %}
+        <div class="card-body" style="border-top:1px solid var(--line)">
+          <div class="row" style="justify-content:space-between; margin-bottom:.5rem"><strong>{{ a.type.name }}</strong><span class="muted">{% blocktranslate with avg=a.average|money total=a.total|money %}{{ avg }} / night · {{ total }} per room{% endblocktranslate %}</span></div>
+          <div class="chip-checks">
+            {% for room in a.rooms %}<label class="chip-check"><input type="checkbox" name="rooms" value="{{ room.pk }}" {% if room.pk|stringformat:"s" in chosen %}checked{% endif %}><span>{{ room.number }}</span></label>{% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+      <div class="card-footer form-actions"><button class="btn" name="action" value="save">{% icon "check" %} {% translate "Book the group" %}</button></div>
+    {% else %}
+      <div class="empty"><strong>{% translate "No rooms free for these dates." %}</strong></div>
+    {% endif %}
+  </section>
+  {% endif %}
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var out = document.getElementById('count'); if (!out) return;
+  function upd() { var n = document.querySelectorAll('input[name=rooms]:checked').length; out.textContent = n ? n + ' ✓' : ''; }
+  document.addEventListener('change', upd); upd();
+})();
+</script>
+{% endblock %}

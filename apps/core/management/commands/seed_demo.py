@@ -315,6 +315,24 @@ class Command(BaseCommand):
             past.folio.status = "closed"
             past.folio.save()
 
+        # A group: a wedding party in three double rooms, on one bill
+        from apps.frontdesk.groups import create_group
+
+        g_start = today + timedelta(days=18)
+        doubles = [r for r in rooms if r.room_type.code == "DBL"][-3:]
+        create_group(
+            name="Dasma Hoxha / Hoxha wedding",
+            contact=Guest.objects.create(first_name="Arben", last_name="Hoxha", phone="+355 69 123 4567"),
+            rooms=doubles,
+            arrival=g_start,
+            departure=g_start + timedelta(days=2),
+            adults=2,
+            rate=Decimal("70"),
+            company="",
+            notes="Dasma të shtunën. Mëngjes i përfshirë.",
+            user=users["reception"],
+        )
+
         # Rooms needing work
         Room.objects.filter(pk__in=[rooms[4].pk, rooms[10].pk, rooms[19].pk]).update(hk_status=Room.HKStatus.DIRTY)
 

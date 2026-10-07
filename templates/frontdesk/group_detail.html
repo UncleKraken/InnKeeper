@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ group.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'frontdesk:group_list' %}">{% icon "back" %} {% translate "Groups" %}</a></div>
+    <h1>{{ group.name }} <span class="mono muted" style="font-size:1rem">{{ group.code }}</span></h1>
+    <p>{{ group.contact }}{% if group.contact.phone %} · {{ group.contact.phone }}{% endif %}{% if group.contact.email %} · {{ group.contact.email }}{% endif %}{% if group.company %} · {{ group.company }}{% endif %}</p></div>
+  <div class="actions">
+    {% if can_check_in %}<form method="post" action="{% url 'frontdesk:group_action' group.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="action" value="check_in"><button class="btn">{% icon "login" %} {% blocktranslate count n=can_check_in|length %}Check in {{ n }} room{% plural %}Check in {{ n }} rooms{% endblocktranslate %}</button></form>{% endif %}
+    {% if in_house %}<form method="post" action="{% url 'frontdesk:group_action' group.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="action" value="check_out"><button class="btn btn-secondary">{% icon "logout" %} {% blocktranslate count n=in_house|length %}Check out {{ n }} room{% plural %}Check out {{ n }} rooms{% endblocktranslate %}</button></form>{% endif %}
+    {% if booked %}<form method="post" action="{% url 'frontdesk:group_action' group.pk %}" class="inline" data-confirm="{% translate 'Cancel every room of this group that has not arrived yet?' %}">{% csrf_token %}<input type="hidden" name="action" value="cancel"><button class="btn btn-ghost">{% icon "x" %} {% translate "Cancel group" %}</button></form>{% endif %}
+  </div>
+</div>
+
+<div class="grid grid-3" style="margin-bottom:1.25rem">
+  <div class="card stat"><div class="stat-label">{% translate "Rooms" %}</div><div class="stat-value">{{ members|length }}</div><div class="stat-note">{% blocktranslate count n=in_house|length %}{{ n }} in house{% plural %}{{ n }} in house{% endblocktranslate %}</div></div>
+  <div class="card stat"><div class="stat-label">{% translate "Stay total" %}</div><div class="stat-value">{{ total|money }}</div><div class="stat-note">{% translate "Rooms only, before extras" %}</div></div>
+  <div class="card stat"><div class="stat-label">{% translate "Still to pay" %}</div><div class="stat-value">{{ balance|money }}</div><div class="stat-note">{% translate "On all the group's bills now" %}</div></div>
+</div>
+
+<section class="card card-flush" style="margin-bottom:1.25rem">
+  <div class="card-header">
+    <h2>{% translate "Rooms" %}</h2>
+    <form method="post" action="{% url 'frontdesk:group_action' group.pk %}" class="inline row" style="gap:.5rem">{% csrf_token %}<input type="hidden" name="action" value="one_bill"><input type="hidden" name="value" value="{% if group.one_bill %}0{% else %}1{% endif %}">
+      <span class="muted" style="font-size:.88rem">{% if group.one_bill %}{% blocktranslate with room=group.master.room.number %}One bill: room {{ room }} pays for everyone.{% endblocktranslate %}{% else %}{% translate "Each room pays its own bill." %}{% endif %}</span>
+      <button class="btn btn-ghost btn-sm">{% if group.one_bill %}{% translate "Let each room pay" %}{% else %}{% translate "Use one bill" %}{% endif %}</button>
+    </form>
+  </div>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Room" %}</th><th>{% translate "Guest" %}</th><th>{% translate "Stay" %}</th><th>{% translate "Status" %}</th><th class="num">{% translate "Rate" %}</th><th class="num">{% translate "Balance" %}</th><th></th></tr></thead>
+    <tbody>
+    {% for r in members %}
+      <tr class="{% if r.status == 'cancelled' %}voided{% endif %}">
+        <td class="nowrap"><strong>{{ r.room.number }}</strong> <small>{{ r.room.room_type.code }}</small>{% if group.one_bill and r.pk == group.master_id %} {% translate "pays" as pays %}{% status_badge "vip" pays %}{% endif %}</td>
+        <td><a href="{% url 'frontdesk:reservation_detail' r.pk %}">{{ r.guest }}</a> <span class="mono muted">{{ r.code }}</span></td>
+        <td class="nowrap">{{ r.arrival|date:"d.m" }} → {{ r.departure|date:"d.m.Y" }}</td>
+        <td>{% status_badge r.status r.get_status_display %}</td>
+        <td class="num">{{ r.rate|money }}</td>
+        <td class="num">{{ r.folio.balance|money }}</td>
+        <td class="num nowrap">
+          {% if r.is_active %}<a class="btn btn-ghost btn-sm" href="{% url 'frontdesk:reservation_edit' r.pk %}" title="{% translate 'Change the guest or details' %}">{% icon "edit" %}</a>{% endif %}
+          {% if group.one_bill and r.pk != group.master_id and r.status != 'cancelled' and r.status != 'checked_out' %}<form method="post" action="{% url 'frontdesk:group_action' group.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="action" value="master"><input type="hidden" name="reservation" value="{{ r.pk }}"><button class="btn btn-ghost btn-sm">{% translate "Make main room" %}</button></form>{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% if group.one_bill and in_house %}
+  <div class="card-footer row" style="justify-content:space-between">
+    <span class="muted" style="font-size:.88rem">{% translate "Charges move to the main room automatically at check-out. You can also move them now, e.g. to show the company the full bill." %}</span>
+    <form method="post" action="{% url 'frontdesk:group_action' group.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="action" value="move_bills"><button class="btn btn-secondary btn-sm">{% icon "swap" %} {% translate "Move bills to the main room now" %}</button></form>
+  </div>
+  {% endif %}
+</section>
+{% if group.notes %}<section class="card"><div class="card-body">{{ group.notes|linebreaksbr }}</div></section>{% endif %}
+{% endblock %}

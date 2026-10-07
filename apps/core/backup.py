@@ -39,6 +39,7 @@ FULL_MODELS = [
     "frontdesk.CalendarFeed",
     "frontdesk.Guest",
     "frontdesk.Reservation",
+    "frontdesk.Group",
     "frontdesk.SeasonRate",
     "outlets.Printer",
     "outlets.Station",

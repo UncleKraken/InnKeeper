@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Groups" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'frontdesk:reservation_list' %}">{% icon "back" %} {% translate "Reservations" %}</a></div><h1>{% translate "Groups" %}</h1><p>{% translate "Tours, weddings, teams: several rooms booked together, on one bill if you like." %}</p></div>
+  <div class="actions"><a class="btn" href="{% url 'frontdesk:group_create' %}">{% icon "plus" %} {% translate "New group booking" %}</a></div>
+</div>
+<nav class="tabs"><a href="?show=current" class="{% if show == 'current' %}active{% endif %}">{% translate "Current & upcoming" %}</a><a href="?show=all" class="{% if show == 'all' %}active{% endif %}">{% translate "All" %}</a></nav>
+<div class="card card-flush">
+  {% if groups %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Group" %}</th><th>{% translate "Contact person" %}</th><th>{% translate "Arrival" %}</th><th class="num">{% translate "Rooms" %}</th><th>{% translate "Bill" %}</th></tr></thead>
+    <tbody>
+    {% for g in groups %}
+      <tr>
+        <td><a href="{% url 'frontdesk:group_detail' g.pk %}"><strong>{{ g.name }}</strong></a> <span class="mono muted">{{ g.code }}</span>{% if g.company %}<br><small class="muted">{{ g.company }}</small>{% endif %}</td>
+        <td>{{ g.contact }}<br><small class="muted">{{ g.contact.phone }}</small></td>
+        <td class="nowrap">{{ g.first_arrival|date:"d.m.Y"|default:"—" }}</td>
+        <td class="num">{{ g.rooms }}</td>
+        <td>{% if g.one_bill %}{% translate "One bill" %}{% else %}{% translate "Each room pays" %}{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+    <div class="empty"><strong>{% translate "No groups" %}</strong><a href="{% url 'frontdesk:group_create' %}">{% translate "New group booking" %}</a></div>
+  {% endif %}
+</div>
+{% endblock %}

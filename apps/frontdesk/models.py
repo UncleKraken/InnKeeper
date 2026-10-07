@@ -149,6 +149,9 @@ class Reservation(models.Model):
         "CalendarFeed", null=True, blank=True, on_delete=models.SET_NULL, related_name="reservations"
     )
     external_uid = models.CharField(max_length=255, blank=True, db_index=True)
+    group = models.ForeignKey(
+        "Group", null=True, blank=True, on_delete=models.SET_NULL, related_name="reservations", verbose_name=_("group")
+    )
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
@@ -317,3 +320,43 @@ class CalendarFeed(models.Model):
 
     def __str__(self) -> str:
         return f"{self.get_source_display()} → {self.room}"
+
+
+class Group(models.Model):
+    """Several rooms booked together (a tour, a wedding, a company), optionally on one shared bill."""
+
+    name = models.CharField(_("group name"), max_length=120)
+    contact = models.ForeignKey(
+        Guest, on_delete=models.PROTECT, related_name="groups", verbose_name=_("contact person")
+    )
+    company = models.CharField(_("company / agency"), max_length=120, blank=True)
+    one_bill = models.BooleanField(
+        _("one bill for the whole group"),
+        default=True,
+        help_text=_("Room charges and extras of every room move to the main room's bill at check-out."),
+    )
+    master = models.ForeignKey(
+        "Reservation",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name=_("main room (pays the bill)"),
+    )
+    notes = models.TextField(_("notes"), blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("group")
+        verbose_name_plural = _("groups")
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def code(self) -> str:
+        return f"G{self.pk:05d}" if self.pk else "—"

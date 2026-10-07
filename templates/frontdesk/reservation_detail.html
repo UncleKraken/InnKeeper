@@ -6,7 +6,7 @@
   <div>
     <div class="eyebrow"><a href="{% url 'frontdesk:reservation_list' %}">{% icon "back" %} {% translate "Reservations" %}</a> · <span class="mono">{{ r.code }}</span></div>
     <h1>{{ r.guest }} {% if r.guest.is_vip %}<span class="badge b-vip badge-plain">VIP</span>{% endif %}</h1>
-    <p>{% translate "Room" %} <strong>{{ r.room.number }}</strong> · {{ r.room.room_type.name }} · {{ r.arrival|date:"d.m.Y" }} → {{ r.departure|date:"d.m.Y" }} ({{ r.nights }} {% translate "nights" %})</p>
+    <p>{% translate "Room" %} <strong>{{ r.room.number }}</strong> · {{ r.room.room_type.name }} · {{ r.arrival|date:"d.m.Y" }} → {{ r.departure|date:"d.m.Y" }} ({{ r.nights }} {% translate "nights" %}){% if r.group %} · {% icon "users" %} <a href="{% url 'frontdesk:group_detail' r.group_id %}">{{ r.group }}</a>{% endif %}</p>
   </div>
   <div class="actions">
     {% status_badge r.status r.get_status_display %}

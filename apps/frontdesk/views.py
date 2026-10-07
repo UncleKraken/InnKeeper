@@ -30,6 +30,7 @@ from .forms import (
     VoidForm,
 )
 from .models import Guest, Reservation, Room, RoomType, SeasonRate
+from .groups import group_check_out
 
 
 def _parse_date(value, default: date) -> date:
@@ -123,7 +124,7 @@ def reservation_list(request):
     today = timezone.localdate()
     pending_online = Reservation.objects.filter(status=Reservation.Status.BOOKED, confirmed=False).count()
     view = request.GET.get("view", "online" if pending_online else "upcoming")
-    qs = Reservation.objects.select_related("guest", "room", "room__room_type")
+    qs = Reservation.objects.select_related("guest", "room", "room__room_type", "group")
     if view == "online":
         qs = qs.filter(status=Reservation.Status.BOOKED, confirmed=False).order_by("created_at")
     elif view == "arrivals":
@@ -285,7 +286,7 @@ def check_out(request, pk):
     return _action(
         request,
         pk,
-        services.check_out,
+        group_check_out,
         _("%(guest)s checked out. Room %(room)s sent to housekeeping."),
         allow_balance=allow_balance,
     )

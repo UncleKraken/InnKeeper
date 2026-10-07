@@ -6,6 +6,7 @@
   <div><div class="eyebrow">{% translate "Front desk" %}</div><h1>{% translate "Reservations" %}</h1></div>
   <div class="actions">
     <form method="get" class="search"><input type="hidden" name="view" value="{{ view }}">{% icon "search" %}<input class="input" type="search" name="q" value="{{ q }}" placeholder="{% translate 'Guest, phone, room or code…' %}"></form>
+    <a class="btn btn-secondary" href="{% url 'frontdesk:group_list' %}">{% icon "users" %} {% translate "Groups" %}</a>
     <a class="btn" href="{% url 'frontdesk:reservation_create' %}">{% icon "plus" %} {% translate "New reservation" %}</a>
   </div>
 </div>
@@ -18,7 +19,7 @@
     {% for r in object_list %}
       <tr>
         <td class="mono"><a href="{% url 'frontdesk:reservation_detail' r.pk %}">{{ r.code }}</a></td>
-        <td><strong>{{ r.guest }}</strong>{% if r.guest.is_vip %} <span class="badge b-vip badge-plain">VIP</span>{% endif %}<br><small>{{ r.guest.phone }}</small></td>
+        <td><strong>{{ r.guest }}</strong>{% if r.group_id %} <a class="badge b-info badge-plain" href="{% url 'frontdesk:group_detail' r.group_id %}">{{ r.group.name|truncatechars:18 }}</a>{% endif %}{% if r.guest.is_vip %} <span class="badge b-vip badge-plain">VIP</span>{% endif %}<br><small>{{ r.guest.phone }}</small></td>
         <td><strong>{{ r.room.number }}</strong> <small>{{ r.room.room_type.code }}</small></td>
         <td class="nowrap">{{ r.arrival|date:"d.m.Y" }} → {{ r.departure|date:"d.m.Y" }}<br><small>{{ r.nights }} {% translate "nights" %} · {{ r.adults }}+{{ r.children }}</small></td>
         <td>{{ r.get_source_display }}</td>
