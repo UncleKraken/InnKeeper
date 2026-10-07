@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import channels, groups, views
+from . import channels, groups, register, views
 
 app_name = "frontdesk"
 
@@ -22,6 +22,7 @@ urlpatterns = [
     path("reservations/<int:pk>/decline/", views.decline_booking, name="decline_booking"),
     path("guests/search/", views.guest_search, name="guest_search"),
     path("guests/", views.guest_list, name="guest_list"),
+    path("guests/register/", register.guest_register, name="guest_register"),
     path("guests/new/", views.guest_form, name="guest_create"),
     path("guests/<int:pk>/", views.guest_detail, name="guest_detail"),
     path("guests/<int:pk>/edit/", views.guest_form, name="guest_edit"),

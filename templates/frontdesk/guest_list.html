@@ -6,6 +6,7 @@
   <div><div class="eyebrow">{% translate "Front desk" %}</div><h1>{% translate "Guests" %}</h1></div>
   <div class="actions">
     <form method="get" class="search">{% icon "search" %}<input class="input" type="search" name="q" value="{{ q }}" placeholder="{% translate 'Name, phone, email, document…' %}"></form>
+    {% if "frontdesk" in modules %}<a class="btn btn-secondary" href="{% url 'frontdesk:guest_register' %}">{% icon "id" %} {% translate "Guest register" %}</a>{% endif %}
     <a class="btn" href="{% url 'frontdesk:guest_create' %}">{% icon "plus" %} {% translate "New guest" %}</a>
   </div>
 </div>

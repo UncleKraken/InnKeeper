@@ -276,7 +276,14 @@ def _action(request, pk, func, success_message, **kwargs):
 @require_POST
 @module_required("frontdesk")
 def check_in(request, pk):
-    return _action(request, pk, services.check_in, _("%(guest)s checked in to room %(room)s."))
+    response = _action(request, pk, services.check_in, _("%(guest)s checked in to room %(room)s."))
+    res = Reservation.objects.select_related("guest").get(pk=pk)
+    if res.status == Reservation.Status.CHECKED_IN and not res.guest.document_number:
+        messages.warning(
+            request,
+            _("Add %(guest)s's ID or passport number for the guest register.") % {"guest": res.guest},
+        )
+    return response
 
 
 @require_POST
@@ -476,6 +483,11 @@ def guest_form(request, pk=None):
     if request.method == "POST" and form.is_valid():
         guest = form.save()
         messages.success(request, _("Guest saved."))
+        from django.utils.http import url_has_allowed_host_and_scheme
+
+        nxt = request.GET.get("next", "")
+        if nxt and url_has_allowed_host_and_scheme(nxt, allowed_hosts={request.get_host()}):
+            return redirect(nxt)
         return redirect("frontdesk:guest_detail", pk=guest.pk)
     return render(request, "frontdesk/guest_form.html", {"form": form, "object": guest})
 
