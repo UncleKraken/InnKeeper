@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Fiscal" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Finance" %}</div><h1>{% translate "Fiscal receipts & invoices" %}</h1>
+    <p>{% if hotel.fiscal_test %}{% translate "Test system — not valid for tax" as l %}{% status_badge "warning" l %}{% else %}{% translate "Live" as l %}{% status_badge "success" l %}{% endif %}</p></div>
+  <div class="actions">
+    {% if waiting %}<form method="post" action="{% url 'fiscal:resend_all' %}" class="inline">{% csrf_token %}<button class="btn">{% icon "sync" %} {% blocktranslate count n=waiting %}Send {{ n }} waiting{% plural %}Send {{ n }} waiting{% endblocktranslate %}</button></form>{% endif %}
+  </div>
+</div>
+
+{% if failed %}<div class="alert alert-error" style="margin-bottom:1rem">{% icon "alert" %} {% blocktranslate count n=failed %}{{ n }} document was rejected by the tax authority. Check the problem, fix the settings and send it again.{% plural %}{{ n }} documents were rejected by the tax authority. Check the problem, fix the settings and send them again.{% endblocktranslate %}</div>{% endif %}
+
+<div class="grid grid-main" style="align-items:start">
+  <section class="card card-flush">
+    <div class="card-header">
+      <nav class="seg"><a href="?" class="{% if not status %}active{% endif %}">{% translate "All" %}</a>{% for v, l in statuses %}<a href="?status={{ v }}" class="{% if v == status %}active{% endif %}">{{ l }}</a>{% endfor %}</nav>
+    </div>
+    {% if page_obj %}
+    <div class="table-wrap"><table class="table table-sm">
+      <thead><tr><th>{% translate "Time" %}</th><th>{% translate "Invoice no." %}</th><th>{% translate "For" %}</th><th class="num">{% translate "Total" %}</th><th>NSLF / NIVF</th><th>{% translate "Status" %}</th><th></th></tr></thead>
+      <tbody>
+      {% for d in page_obj %}
+        <tr>
+          <td class="nowrap">{{ d.created_at|date:"d.m.Y H:i" }}</td>
+          <td class="mono nowrap">{{ d.inv_num }}</td>
+          <td>{% if d.order %}<a href="{% url 'outlets:receipt' d.order_id %}">{{ d.order.outlet.name }} #{{ d.order.number }}</a>{% elif d.folio %}<a href="{% url 'frontdesk:invoice' d.folio.reservation_id %}">{{ d.folio.reservation.guest }}</a>{% endif %}{% if d.kind == "correction" %} · {% translate "correction" %}{% endif %}</td>
+          <td class="num">{{ d.total|money }}</td>
+          <td class="mono" style="font-size:.75rem">{{ d.iic }}<br>{{ d.fic|default:"—" }}</td>
+          <td>{% if d.status == "registered" %}{% status_badge "success" d.get_status_display %}{% elif d.status == "pending" %}{% status_badge "warning" d.get_status_display %}{% else %}{% status_badge "danger" d.get_status_display %}{% endif %}{% if d.was_offline %}<br><small class="muted">{% translate "sent later" %}</small>{% endif %}{% if d.last_error %}<br><small style="color:var(--danger)">{{ d.last_error|truncatechars:120 }}</small>{% endif %}</td>
+          <td class="num">{% if d.status != "registered" %}<form method="post" action="{% url 'fiscal:resend' d.pk %}" class="inline">{% csrf_token %}<button class="btn btn-ghost btn-sm" title="{% translate 'Send again' %}">{% icon "sync" %}</button></form>{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {% include "includes/pagination.html" %}
+    {% else %}
+      <div class="empty"><strong>{% translate "No fiscal documents yet." %}</strong></div>
+    {% endif %}
+  </section>
+
+  <aside class="stack">
+    <section class="card">
+      <div class="card-header"><h3>{% translate "Cash in the drawer" %}</h3></div>
+      <form method="post" action="{% url 'fiscal:cash' %}" class="card-body form-grid" style="grid-template-columns:1fr">{% csrf_token %}
+        <p class="muted" style="margin:0; font-size:.88rem">{% translate "The opening cash is reported automatically before the first cash sale of the day. Report here when cash is taken out, or to correct the opening amount." %}</p>
+        <div class="field"><label for="op">{% translate "Operation" %}</label><select class="input" id="op" name="operation"><option value="WITHDRAW">{% translate "Cash taken out" %}</option><option value="INITIAL">{% translate "Opening cash" %}</option></select></div>
+        {% if tcrs|length > 1 %}<div class="field"><label for="tcr">{% translate "Cash register" %}</label><select class="input" id="tcr" name="tcr">{% for t in tcrs %}<option>{{ t }}</option>{% endfor %}</select></div>{% endif %}
+        <div class="field"><label for="amt">{% translate "Amount" %}</label><input class="input" id="amt" name="amount" inputmode="decimal" required></div>
+        <div><button class="btn btn-secondary">{% icon "check" %} {% translate "Report" %}</button></div>
+      </form>
+      {% if deposits %}<div class="card-body" style="border-top:1px solid var(--line); font-size:.85rem">
+        {% for d in deposits %}<div class="row" style="justify-content:space-between"><span>{{ d.created_at|date:"d.m H:i" }} · {{ d.get_operation_display }} · {{ d.tcr_code }}</span><span>{{ d.amount|money }} {% if d.status == "registered" %}✓{% else %}<span style="color:var(--danger)" title="{{ d.last_error }}">✕</span>{% endif %}</span></div>{% endfor %}
+      </div>{% endif %}
+    </section>
+  </aside>
+</div>
+{% endblock %}

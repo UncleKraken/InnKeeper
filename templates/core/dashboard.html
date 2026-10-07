@@ -35,6 +35,12 @@
   <span class="btn btn-sm">{% translate "Review" %}</span>
 </a>
 {% endif %}
+{% if fiscal_failed or fiscal_overdue %}
+<a class="alert alert-error row" style="margin-bottom:1.25rem; justify-content:space-between; color:inherit" href="{% url 'fiscal:documents' %}">
+  <span>{% icon "alert" %} <strong>{% if fiscal_failed %}{% blocktranslate count n=fiscal_failed %}{{ n }} fiscal document was rejected by the tax authority{% plural %}{{ n }} fiscal documents were rejected by the tax authority{% endblocktranslate %}{% else %}{% blocktranslate count n=fiscal_overdue %}{{ n }} fiscal document is close to the 48-hour limit{% plural %}{{ n }} fiscal documents are close to the 48-hour limit{% endblocktranslate %}{% endif %}</strong></span>
+  <span class="btn btn-sm">{% translate "Review" %}</span>
+</a>
+{% endif %}
 {% if channel_problems %}
 <div class="alert alert-error row" style="margin-bottom:1.25rem; justify-content:space-between">
   <span>{% icon "alert" %} <strong>{% blocktranslate count n=channel_problems %}{{ n }} channel booking needs attention (no free room or room type not linked){% plural %}{{ n }} channel bookings need attention (no free room or room type not linked){% endblocktranslate %}</strong></span>

@@ -74,7 +74,7 @@
     {% if room_charge %}<p style="margin-top:.75rem">{{ room_charge.folio.reservation.guest }}<br><br>{% translate "Signature" %}: ____________________</p>{% endif %}
   {% endif %}
   {% if hotel.receipt_footer %}<hr><div class="r-center r-pre">{{ hotel.receipt_footer }}</div>{% endif %}
-  <div class="r-center r-small" style="margin-top:.6rem">{% translate "This is not a fiscal receipt." %}</div>
+  {% translate "This is not a fiscal receipt." as not_fiscal_text %}{% include "fiscal/_block.html" %}
 </div>
 <script>
   {% if auto_print %}window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 250); });{% endif %}

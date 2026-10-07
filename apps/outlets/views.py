@@ -18,6 +18,8 @@ from apps.core.templatetags.innkeeper import money
 from apps.finance.models import Payment
 from apps.frontdesk.models import Reservation
 
+from apps.fiscal.views import fiscal_block
+
 from . import services
 from .floorplan import floor_plan, floor_plan_save  # noqa: F401  (routed in urls.py)
 from .models import Category, Item, KitchenTicket, Order, OrderLine, Outlet, Printer, PrintJob, Station, Table
@@ -424,6 +426,7 @@ def receipt(request, pk):
             "vat": vat,
             "net": total - vat,
             "auto_print": request.GET.get("print") == "1",
+            **fiscal_block(order.fiscal_documents.order_by("created_at").first()),
         },
     )
 
@@ -472,6 +475,7 @@ class OutletForm(StyledFormMixin, forms.ModelForm):
             "uses_tables",
             "receipt_printer",
             "auto_print_receipt",
+            "fiscal_tcr_code",
             "menu_public",
             "menu_intro",
             "sort_order",

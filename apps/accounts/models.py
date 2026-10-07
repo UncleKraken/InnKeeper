@@ -18,6 +18,12 @@ class User(AbstractUser):
 
     role = models.CharField(_("role"), max_length=20, choices=Role.choices, default=Role.RECEPTION)
     phone = models.CharField(_("phone"), max_length=40, blank=True)
+    fiscal_operator_code = models.CharField(
+        _("fiscal operator code"),
+        max_length=20,
+        blank=True,
+        help_text=_("Operator code from the tax authority's self-care portal (for fiscal receipts)."),
+    )
     language = models.CharField(
         _("language"),
         max_length=8,

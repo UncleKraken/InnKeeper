@@ -52,6 +52,7 @@
         <a href="{% url 'finance:dashboard' %}" class="{% if request.path == '/finance/' or '/finance/ledger' in request.path or '/finance/sales' in request.path %}active{% endif %}">{% icon "chart" %} {% translate "Reports" %}</a>
         <a href="{% url 'finance:day_close' %}" class="{% active '/finance/day-close' %}">{% icon "lock" %} {% translate "Day close" %}</a>
         <a href="{% url 'finance:expenses' %}" class="{% active '/finance/expenses' %}">{% icon "wallet" %} {% translate "Expenses" %}</a>
+        {% if hotel.fiscal_enabled %}<a href="{% url 'fiscal:documents' %}" class="{% active '/fiscal' %}">{% icon "qr" %} {% translate "Fiscal" %}</a>{% endif %}
       {% endif %}
       {% if "inventory" in modules %}
         {% if "finance" not in modules %}<div class="nav-section">{% translate "Finance" %}</div>{% endif %}

@@ -1,0 +1,14 @@
+{% load i18n %}{% if fdoc %}
+<div class="fiscal-block r-center r-small" style="margin-top:.6rem">
+  {% if qr %}<div class="fiscal-qr">{{ qr }}</div>{% endif %}
+  <div>{% translate "Invoice no." %} {{ fdoc.inv_num }}</div>
+  <div>NSLF: <span class="mono">{{ fdoc.iic }}</span></div>
+  <div>NIVF: <span class="mono">{% if fdoc.fic %}{{ fdoc.fic }}{% else %}{% translate "will be added when the connection returns" %}{% endif %}</span></div>
+  <div>{% translate "Operator" %}: {{ fdoc.operator_code }} · TCR {{ fdoc.tcr_code }}</div>
+  {% if fdoc.test %}<div><strong>{% translate "TEST – not valid for tax" %}</strong></div>{% endif %}
+</div>
+{% elif hotel.fiscal_enabled %}
+<div class="r-center r-small" style="margin-top:.6rem">{% translate "Fiscal codes are being issued…" %}</div>
+{% else %}
+<div class="r-center r-small" style="margin-top:.6rem">{{ not_fiscal_text }}</div>
+{% endif %}

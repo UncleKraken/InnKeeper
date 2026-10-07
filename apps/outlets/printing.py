@@ -79,6 +79,19 @@ class Receipt:
         self.buf += b"\n" * lines
         return self
 
+    def qr(self, data: str, size: int = 5) -> "Receipt":
+        """Print a QR code (ESC/POS GS ( k: model 2, error correction M), centered."""
+        raw = data.encode("ascii", errors="replace")
+        n = len(raw) + 3
+        self.buf += ESC + b"a\x01"
+        self.buf += GS + b"(k\x04\x001A2\x00"  # model 2
+        self.buf += GS + b"(k\x03\x001C" + bytes([size])  # module size
+        self.buf += GS + b"(k\x03\x001E1"  # error correction M
+        self.buf += GS + b"(k" + bytes([n % 256, n // 256]) + b"1P0" + raw  # store
+        self.buf += GS + b"(k\x03\x001Q0\n"  # print
+        self.buf += ESC + b"a\x00"
+        return self
+
     # --- hardware ---------------------------------------------------------
     def open_drawer(self) -> "Receipt":
         self.buf += ESC + b"p\x00\x19\xfa"
@@ -228,7 +241,18 @@ def receipt_document(order, printer: Printer, *, open_drawer: bool = False) -> b
             r.feed().text(_("Signature") + ": ____________________")
     if hs.receipt_footer:
         r.rule().wrap(hs.receipt_footer, align="center")
-    r.text(_("This is not a fiscal receipt."), align="center")
+    fdoc = order.fiscal_documents.order_by("created_at").first()
+    if fdoc:
+        r.rule()
+        r.qr(fdoc.verify_url, size=4 if printer.paper_width < 80 else 5)
+        r.text(_("Invoice no.") + f" {fdoc.inv_num}", align="center")
+        r.text(f"NSLF: {fdoc.iic}", align="center")
+        r.text("NIVF: " + (fdoc.fic or _("will be added when the connection returns")), align="center")
+        r.text(_("Operator") + f": {fdoc.operator_code}  TCR: {fdoc.tcr_code}", align="center")
+        if fdoc.test:
+            r.text(_("TEST – not valid for tax"), bold=True, align="center")
+    else:
+        r.text(_("This is not a fiscal receipt."), align="center")
     if open_drawer and printer.open_drawer:
         r.open_drawer()
     return r.cut().to_bytes()

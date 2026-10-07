@@ -17,6 +17,7 @@ urlpatterns = [
     path("outlets/", include("apps.outlets.urls")),
     path("finance/", include("apps.finance.urls")),
     path("stock/", include("apps.inventory.urls")),
+    path("fiscal/", include("apps.fiscal.urls")),
     path("menu/", include("apps.outlets.menu_urls")),
     path("book/", include("apps.frontdesk.booking_urls")),
     path("pay/", include("apps.payments.urls")),

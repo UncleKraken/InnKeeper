@@ -180,6 +180,9 @@ def _close_folio(folio: Folio) -> None:
     if not folio.invoice_number:
         folio.invoice_number = Sequence.next("invoice", timezone.localdate().year)
     folio.save(update_fields=["status", "closed_at", "invoice_number"])
+    from apps.fiscal import services as fiscal
+
+    transaction.on_commit(lambda: fiscal.safely(fiscal.fiscalize_folio, folio, None))
 
 
 def _require_open(folio: Folio) -> None:

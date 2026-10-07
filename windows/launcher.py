@@ -140,6 +140,14 @@ def channel_jobs(log, stop: threading.Event) -> None:
     last_full = None
     while not stop.is_set():
         try:
+            from apps.fiscal.services import resend_pending
+
+            n = resend_pending()
+            if n:
+                log(f"Fiscal: {n} document(s) sent after a connection problem")
+        except Exception as e:
+            log(f"Fiscal resend error: {e}")
+        try:
             if HotelSettings.objects.filter(pk=1, channex_enabled=True).exists():
                 today = datetime.now().date()
                 r = sync(force_push=last_full != today)
@@ -160,10 +168,44 @@ def serve(log, ready: threading.Event) -> None:
     waitress_serve(application, host="0.0.0.0", port=PORT, threads=8, ident=APP_NAME, _quiet=True)
 
 
+def selftest_fiscal() -> None:
+    """Sign and verify a fiscal XML with a throw-away key: proves lxml and cryptography work in the .exe."""
+    from datetime import UTC
+    from datetime import datetime as dt
+
+    from cryptography import x509
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.asymmetric import rsa
+    from cryptography.x509.oid import NameOID
+    from lxml import etree
+
+    from apps.fiscal import cis, signing
+
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "selftest")])
+    now = dt.now(UTC)
+    cert = (
+        x509.CertificateBuilder().subject_name(name).issuer_name(name).public_key(key.public_key()).serial_number(1)
+        .not_valid_before(now).not_valid_after(now + timedelta(days=1)).sign(key, hashes.SHA256())
+    )
+    c = signing.Certificate(key, cert)
+    root = etree.Element(f"{{{cis.NS}}}RegisterCashDepositRequest", nsmap={None: cis.NS}, Id="Request", Version="3")
+    signing.sign_xml(root, c)
+    if not signing.verify_xml(root, key.public_key()):
+        raise RuntimeError("signature does not verify")
+    signing.iic(c, ["L00000000A", "2026-01-01T00:00:00+01:00", "1", "bu", "tcr", "sw", "1.00"])
+
+
 def run_selftest() -> int:
     data = data_dir()
     configure_environment(data)
     prepare_database(print)
+    try:
+        selftest_fiscal()
+        print("Fiscal signing OK")
+    except Exception as e:  # the frozen build must be able to sign fiscal receipts
+        print(f"SELFTEST FAILED: fiscal signing: {e!r}")
+        return 1
     ready = threading.Event()
     threading.Thread(target=serve, args=(print, ready), daemon=True).start()
     ready.wait(30)

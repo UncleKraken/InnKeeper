@@ -362,6 +362,9 @@ def void_receipt(order: Order, *, user, reason: str) -> Order:
     from apps.inventory.services import return_for_order
 
     return_for_order(order, user)
+    from apps.fiscal import services as fiscal
+
+    transaction.on_commit(lambda: fiscal.safely(fiscal.correct_order, order, user))
     audit(user, "order.void", f"{order.outlet} #{order.number} {order.total} – {reason}", order)
     return order
 
@@ -380,3 +383,7 @@ def _close(order: Order, settlement: str, user) -> None:
     from apps.inventory.services import consume_for_order
 
     consume_for_order(order, user)
+    if settlement == Order.Settlement.PAID:
+        from apps.fiscal import services as fiscal
+
+        transaction.on_commit(lambda: fiscal.safely(fiscal.fiscalize_order, order, user))

@@ -65,6 +65,9 @@ FULL_MODELS = [
     "inventory.StockCount",
     "inventory.StockMove",
     "payments.PaymentLink",
+    "fiscal.FiscalCounter",
+    "fiscal.FiscalDocument",
+    "fiscal.CashDeposit",
 ]
 
 # Not worth moving: print history (kept 3 days).
@@ -80,6 +83,8 @@ SETTINGS_FIELDS_SKIP = {
     "pok_key_secret",
     "paysera_password",
     "channex_api_key",
+    "fiscal_certificate",
+    "fiscal_certificate_password",
 }
 
 

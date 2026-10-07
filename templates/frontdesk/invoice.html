@@ -33,7 +33,7 @@
     <tfoot>
       {% if hotel.vat_rate %}
       <tr style="font-weight:400"><td colspan="4">{% translate "Without VAT" %}</td><td class="num">{{ net|money }}</td></tr>
-      <tr style="font-weight:400"><td colspan="4">{% blocktranslate with r=hotel.vat_rate|floatformat:"-2" %}VAT {{ r }}%{% endblocktranslate %}</td><td class="num">{{ vat|money }}</td></tr>
+      <tr style="font-weight:400"><td colspan="4">{% translate "VAT included" %}</td><td class="num">{{ vat|money }}</td></tr>
       {% endif %}
       <tr><td colspan="4">{% translate "Total" %}</td><td class="num">{{ folio.total_charges|money }}</td></tr>
     </tfoot>
@@ -46,7 +46,7 @@
     <tfoot><tr><td colspan="2">{% translate "Balance due" %}</td><td class="num">{{ folio.balance|money }}</td></tr></tfoot>
   </table>
   {% endif %}
-  <p class="muted" style="margin-top:1.5rem; font-size:.85rem">{% translate "This is not a fiscal invoice." %}</p>
+  <div style="margin-top:1.5rem; font-size:.85rem">{% translate "This is not a fiscal invoice." as not_fiscal_text %}{% include "fiscal/_block.html" %}</div>
   {% if hotel.invoice_footer %}<p class="muted" style="white-space:pre-line; font-size:.85rem">{{ hotel.invoice_footer }}</p>{% endif %}
 </div>
 </body>

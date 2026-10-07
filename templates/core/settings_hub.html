@@ -13,6 +13,7 @@
     <a href="?tab=modules" class="{% if tab == 'modules' %}active{% endif %}">{% icon "grid" %} {% translate "Modules" %}</a>
     {% if hotel.module_rooms %}<a href="?tab=booking" class="{% if tab == 'booking' %}active{% endif %}">{% icon "calendar" %} {% translate "Online booking" %}</a>{% endif %}
     <a href="?tab=email" class="{% if tab == 'email' %}active{% endif %}">{% icon "mail" %} {% translate "Email" %}</a>
+    <a href="?tab=fiscal" class="{% if tab == 'fiscal' %}active{% endif %}">{% icon "qr" %} {% translate "Fiscalization" %}</a>
     <a href="?tab=payments" class="{% if tab == 'payments' %}active{% endif %}">{% icon "wallet" %} {% translate "Card payments" %}</a>
     <a href="?tab=backup" class="{% if tab == 'backup' %}active{% endif %}">{% icon "download" %} {% translate "Backup & restore" %}</a>
     <div class="settings-nav-sep"></div>
@@ -114,6 +115,25 @@
     <form method="post" action="{% url 'core:email_test' %}" class="card card-body row" style="margin-top:1.25rem">{% csrf_token %}
       <span class="spacer">{% translate "Send a test email to yourself to check the settings." %}</span>
       <button class="btn btn-secondary">{% translate "Send test email" %}</button>
+    </form>
+
+  {% elif tab == "fiscal" %}
+    <form method="post" enctype="multipart/form-data" class="card" novalidate>{% csrf_token %}
+      <div class="card-header"><h2>{% translate "Fiscalization" %}</h2>{% if hotel.fiscal_configured %}{% if hotel.fiscal_test %}{% translate "Test system" as l %}{% status_badge "warning" l %}{% else %}{% translate "Live" as l %}{% status_badge "success" l %}{% endif %}{% endif %}</div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0">{% translate "InnKeeper sends every paid bill and every guest bill directly to the tax authority (DPT), signed with your certificate, and prints the NSLF, NIVF and QR code on it. Without internet the receipt is printed with its NSLF and sent automatically later (within 48 hours)." %}</p>
+        {% if certificate %}<div class="alert alert-info" style="margin-bottom:1rem">{% icon "check" %} {% translate "Certificate" %}: {{ certificate.subject }} · {% translate "valid until" %} {{ certificate.not_after|date:"d.m.Y" }}</div>{% elif certificate_error %}<div class="alert alert-error" style="margin-bottom:1rem">{{ certificate_error }}</div>{% endif %}
+        {% include "includes/form_fields.html" %}
+        <details class="help-body" style="margin-top:1rem"><summary>{% translate "Where do I get these codes?" %}</summary>
+          <ol>
+            <li>{% translate "Apply for the electronic seal certificate for fiscalization (via e-Albania) and download the .p12 file." %}</li>
+            <li>{% translate "In the tax authority's self-care portal, register the business unit (premises), the software (InnKeeper, as in-house/own software) to get the software and maintainer codes, each cash register (TCR) and each operator. Copy the codes here." %}</li>
+            <li>{% translate "Keep “Use the tax authority's test system” on and make a few sales: they must appear as Registered under Finance → Fiscal. Then turn it off to go live." %}</li>
+            <li>{% translate "Give every staff member who takes payments their own operator code (Staff → edit). Outlets with their own cash register get their own TCR code (Outlets & menus → edit)." %}</li>
+          </ol>
+        </details>
+      </div>
+      <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
     </form>
 
   {% elif tab == "payments" %}

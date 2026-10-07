@@ -154,6 +154,43 @@ class HotelSettings(models.Model):
         help_text=_("Shows a “Pay now” button on the online booking page when a payment provider is set up."),
     )
 
+    # Fiscalization (direct to the tax authority, DPT)
+    fiscal_enabled = models.BooleanField(
+        _("fiscalize receipts and invoices"),
+        default=False,
+        help_text=_("Every sale is sent to the tax authority and gets an NSLF and NIVF code with a QR code."),
+    )
+    fiscal_test = models.BooleanField(
+        _("use the tax authority's test system"), default=True, help_text=_("Turn off only when going live.")
+    )
+    fiscal_business_unit = models.CharField(
+        _("business unit code"), max_length=20, blank=True, help_text=_("From the self-care portal, e.g. ab123cd456.")
+    )
+    fiscal_tcr_code = models.CharField(
+        _("cash register (TCR) code"),
+        max_length=20,
+        blank=True,
+        help_text=_("Used by reception and by outlets without their own cash register code."),
+    )
+    fiscal_software_code = models.CharField(_("software code"), max_length=20, blank=True)
+    fiscal_maintainer_code = models.CharField(_("maintainer code"), max_length=20, blank=True)
+    fiscal_operator_code = models.CharField(
+        _("default operator code"),
+        max_length=20,
+        blank=True,
+        help_text=_("Used for staff members who don't have their own operator code."),
+    )
+    fiscal_town = models.CharField(_("town"), max_length=60, blank=True, default="Tiranë")
+    fiscal_certificate = models.TextField(_("digital certificate"), blank=True)
+    fiscal_certificate_password = models.CharField(_("certificate password"), max_length=120, blank=True)
+    vat_rate_accommodation = models.DecimalField(
+        _("VAT rate for accommodation (%)"),
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal("6.00"),
+        help_text=_("Room nights. Food, drinks and other services use the main VAT rate."),
+    )
+
     # Channel manager (Channex)
     channex_enabled = models.BooleanField(_("connect to the channel manager"), default=False)
     channex_api_key = models.CharField(_("Channex API key"), max_length=255, blank=True)
@@ -205,6 +242,17 @@ class HotelSettings(models.Model):
         if self.payment_provider == "paysera":
             return bool(self.paysera_project_id and self.paysera_password)
         return False
+
+    @property
+    def fiscal_configured(self) -> bool:
+        return bool(
+            self.fiscal_enabled
+            and self.tax_id
+            and self.fiscal_business_unit
+            and self.fiscal_tcr_code
+            and self.fiscal_software_code
+            and self.fiscal_certificate
+        )
 
     @property
     def channex_configured(self) -> bool:

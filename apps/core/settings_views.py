@@ -177,7 +177,63 @@ class PaymentSettingsForm(StyledFormMixin, forms.ModelForm):
         return cleaned
 
 
+class FiscalSettingsForm(StyledFormMixin, forms.ModelForm):
+    certificate_file = forms.FileField(
+        label=gettext_lazy("Digital certificate (.p12 / .pfx)"),
+        required=False,
+        help_text=gettext_lazy("The electronic seal certificate issued for fiscalization (from e-Albania / NAIS)."),
+    )
+
+    class Meta:
+        model = HotelSettings
+        fields = [
+            "fiscal_enabled",
+            "fiscal_test",
+            "fiscal_business_unit",
+            "fiscal_tcr_code",
+            "fiscal_software_code",
+            "fiscal_maintainer_code",
+            "fiscal_operator_code",
+            "fiscal_town",
+            "vat_rate_accommodation",
+            "certificate_file",
+            "fiscal_certificate_password",
+        ]
+        widgets = {"fiscal_certificate_password": forms.PasswordInput(render_value=True)}
+
+    def clean(self):
+        import base64
+
+        from apps.fiscal.signing import Certificate, CertificateError
+
+        cleaned = super().clean()
+        upload = cleaned.get("certificate_file")
+        password = cleaned.get("fiscal_certificate_password") or ""
+        data = (
+            upload.read()
+            if upload
+            else (base64.b64decode(self.instance.fiscal_certificate) if self.instance.fiscal_certificate else None)
+        )
+        if data:
+            try:
+                Certificate.from_p12(data, password)
+            except CertificateError:
+                self.add_error("fiscal_certificate_password", _("The certificate can't be opened with this password."))
+            else:
+                self.instance.fiscal_certificate = base64.b64encode(data).decode()
+        if cleaned.get("fiscal_enabled"):
+            if not self.instance.tax_id:
+                raise forms.ValidationError(_("Enter the NIPT in Business details first."))
+            for f in ("fiscal_business_unit", "fiscal_tcr_code", "fiscal_software_code", "fiscal_operator_code"):
+                if not cleaned.get(f):
+                    self.add_error(f, _("Needed to fiscalize."))
+            if not data:
+                self.add_error("certificate_file", _("Upload the certificate."))
+        return cleaned
+
+
 TABS = {
+    "fiscal": FiscalSettingsForm,
     "payments": PaymentSettingsForm,
     "business": BusinessForm,
     "receipts": ReceiptForm,
@@ -200,6 +256,13 @@ def settings_hub(request):
             messages.success(request, _("Settings saved."))
             return redirect(f"{request.path}?tab={tab}")
         ctx["form"] = form
+        if tab == "fiscal" and hs.fiscal_certificate:
+            from apps.fiscal.signing import Certificate, CertificateError
+
+            try:
+                ctx["certificate"] = Certificate.from_settings(hs)
+            except CertificateError as e:
+                ctx["certificate_error"] = str(e)
         if tab == "booking":
             from django.urls import reverse
 

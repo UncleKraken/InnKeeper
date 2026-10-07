@@ -81,6 +81,13 @@ def dashboard(request):
             ChannelBooking.objects.exclude(problem="").filter(updated_at__gte=timezone.now() - _td(days=14)).count()
         )
 
+    if can_access(user, "finance") and HotelSettings.load().fiscal_enabled:
+        from apps.fiscal.models import FiscalDocument
+        from apps.fiscal.services import overdue
+
+        ctx["fiscal_failed"] = FiscalDocument.objects.filter(status=FiscalDocument.Status.FAILED).count()
+        ctx["fiscal_overdue"] = overdue()
+
     if can_access(user, "inventory"):
         from apps.inventory.views import low_stock_count
 

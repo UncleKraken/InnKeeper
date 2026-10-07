@@ -442,8 +442,15 @@ def invoice(request, pk):
     folio, _created = Folio.objects.get_or_create(reservation=res)
     from apps.core.models import HotelSettings
 
+    from apps.fiscal.views import fiscal_block
+
+    hs = HotelSettings.load()
     total = folio.total_charges
-    vat = (total * HotelSettings.load().vat_fraction).quantize(Decimal("0.01"))
+    vat = Decimal("0")
+    for c in folio.charges.active():
+        rate = hs.vat_rate_accommodation if c.kind == "accommodation" else hs.vat_rate
+        vat += c.amount * rate / (Decimal("100") + rate) if hs.vat_rate else Decimal("0")
+    vat = vat.quantize(Decimal("0.01"))
     return render(
         request,
         "frontdesk/invoice.html",
@@ -455,6 +462,7 @@ def invoice(request, pk):
             "printed_at": timezone.localtime(),
             "vat": vat,
             "net": total - vat,
+            **fiscal_block(folio.fiscal_documents.order_by("created_at").first()),
         },
     )
 

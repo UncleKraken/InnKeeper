@@ -50,7 +50,17 @@ class LoginForm(StyledFormMixin, AuthenticationForm):
 class StaffForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = User
-        fields = ["username", "first_name", "last_name", "role", "email", "phone", "language", "is_active"]
+        fields = [
+            "username",
+            "first_name",
+            "last_name",
+            "role",
+            "email",
+            "phone",
+            "language",
+            "fiscal_operator_code",
+            "is_active",
+        ]
         help_texts = {"is_active": _("Inactive staff cannot sign in. Use this instead of deleting accounts.")}
 
 

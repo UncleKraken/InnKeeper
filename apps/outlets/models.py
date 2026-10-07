@@ -126,6 +126,12 @@ class Outlet(models.Model):
         verbose_name=_("receipt printer"),
         help_text=_("Bills and receipts print here. Leave empty to print from the browser."),
     )
+    fiscal_tcr_code = models.CharField(
+        _("cash register (TCR) code"),
+        max_length=20,
+        blank=True,
+        help_text=_("For fiscal receipts. Leave empty to use the main cash register code from Settings."),
+    )
     auto_print_receipt = models.BooleanField(
         _("print a receipt for every payment"), default=False, help_text=_("Needs a receipt printer.")
     )
