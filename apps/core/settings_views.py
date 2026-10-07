@@ -269,6 +269,10 @@ def settings_hub(request):
             from apps.outlets.menu import public_link
 
             ctx["booking_link"] = public_link(request, reverse("booking:search"))
+    elif tab == "import":
+        from . import importer
+
+        ctx["import_kinds"] = [(k, v["label"], v["columns"], v["required"]) for k, v in importer.KINDS.items()]
     elif tab == "backup":
         ctx["disk_backups"] = backup.disk_backups()
         ctx["backup_dir"] = backup.backup_dir()
@@ -389,3 +393,71 @@ def email_test(request):
             request, _("The email could not be sent. Check the server, port, security, username and password.")
         )
     return redirect("/settings/?tab=email")
+
+
+# ---------- Import from Excel (CSV) ----------
+
+
+@module_required("management")
+def import_template(request, kind):
+    from . import importer
+
+    if kind not in importer.KINDS:
+        raise Http404
+    response = HttpResponse("\ufeff" + importer.template_csv(kind), content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="innkeeper-{kind}.csv"'
+    return response
+
+
+@module_required("management")
+def import_file(request):
+    """Step 1: upload and preview. Step 2 (confirm): import the same file."""
+    from . import importer
+
+    kind = request.POST.get("kind", "")
+    if request.method != "POST" or kind not in importer.KINDS:
+        return redirect("/settings/?tab=import")
+    if request.POST.get("confirm") == "1":
+        name = request.POST.get("file", "")
+        path = backup.backup_dir() / name
+        if not name.startswith("import-") or "/" in name or "\\" in name or not path.is_file():
+            return redirect("/settings/?tab=import")
+        parsed = importer.parse(kind, path.read_bytes())
+        path.unlink(missing_ok=True)
+        if not parsed.rows:
+            messages.error(request, _("Nothing to import."))
+            return redirect("/settings/?tab=import")
+        stats = importer.apply(parsed, request.user)
+        messages.success(
+            request, _("Imported: %(c)s new, %(u)s updated.") % {"c": stats["created"], "u": stats["updated"]}
+        )
+        return redirect("/settings/?tab=import")
+    upload = request.FILES.get("file")
+    if not upload:
+        messages.error(request, _("Choose a file."))
+        return redirect("/settings/?tab=import")
+    raw = upload.read(5 * 1024 * 1024 + 1)
+    if len(raw) > 5 * 1024 * 1024:
+        messages.error(request, _("The file is too large (5 MB at most)."))
+        return redirect("/settings/?tab=import")
+    if raw[:2] == b"PK":
+        messages.error(
+            request, _("This is an Excel file. In Excel choose File → Save as → “CSV UTF-8”, then upload that.")
+        )
+        return redirect("/settings/?tab=import")
+    parsed = importer.parse(kind, raw)
+    name = f"import-{secrets.token_hex(6)}.csv"
+    (backup.backup_dir() / name).write_bytes(raw)
+    cols = importer.KINDS[kind]["columns"]
+    return render(
+        request,
+        "core/import_preview.html",
+        {
+            "kind": kind,
+            "label": importer.KINDS[kind]["label"],
+            "parsed": parsed,
+            "file": name,
+            "columns": [c for c in cols if c in parsed.columns],
+            "preview": parsed.rows[:20],
+        },
+    )

@@ -15,6 +15,7 @@
     <a href="?tab=email" class="{% if tab == 'email' %}active{% endif %}">{% icon "mail" %} {% translate "Email" %}</a>
     <a href="?tab=fiscal" class="{% if tab == 'fiscal' %}active{% endif %}">{% icon "qr" %} {% translate "Fiscalization" %}</a>
     <a href="?tab=payments" class="{% if tab == 'payments' %}active{% endif %}">{% icon "wallet" %} {% translate "Card payments" %}</a>
+    <a href="?tab=import" class="{% if tab == 'import' %}active{% endif %}">{% icon "upload" %} {% translate "Import from Excel" %}</a>
     <a href="?tab=backup" class="{% if tab == 'backup' %}active{% endif %}">{% icon "download" %} {% translate "Backup & restore" %}</a>
     <div class="settings-nav-sep"></div>
     {% if hotel.module_rooms %}<a href="{% url 'frontdesk:room_list' %}">{% icon "bed" %} {% translate "Rooms & rates" %}</a>{% endif %}
@@ -163,6 +164,26 @@
       sel.addEventListener('change', upd); upd();
     })();
     </script>
+
+  {% elif tab == "import" %}
+    <section class="card">
+      <div class="card-header"><h2>{% translate "Import from Excel" %}</h2></div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0">{% translate "Bring in your menu, stock list or guest list from a spreadsheet instead of typing it. Download the template, fill it in Excel (one row per item), save it as “CSV UTF-8” and upload it. You will see a preview before anything is saved. Existing entries with the same name are updated, nothing is deleted." %}</p>
+        <form method="post" action="{% url 'core:import_file' %}" enctype="multipart/form-data" class="form-grid">{% csrf_token %}
+          <div class="field"><label for="kind">{% translate "What" %}</label><select class="input" id="kind" name="kind">{% for k, label, cols, req in import_kinds %}<option value="{{ k }}">{{ label }}</option>{% endfor %}</select></div>
+          <div class="field"><label for="file">{% translate "File (.csv)" %}</label><input class="input" id="file" type="file" name="file" accept=".csv,text/csv" required></div>
+          <div class="full"><button class="btn">{% icon "upload" %} {% translate "Show preview" %}</button></div>
+        </form>
+      </div>
+      <div class="table-wrap"><table class="table table-sm">
+        <thead><tr><th>{% translate "What" %}</th><th>{% translate "Columns" %}</th><th></th></tr></thead>
+        <tbody>{% for k, label, cols, req in import_kinds %}
+          <tr><td><strong>{{ label }}</strong></td><td class="mono" style="font-size:.8rem">{% for c in cols %}{% if c in req %}<strong>{{ c }}</strong>{% else %}{{ c }}{% endif %}{% if not forloop.last %}; {% endif %}{% endfor %}</td><td class="num"><a class="btn btn-ghost btn-sm" href="{% url 'core:import_template' k %}">{% icon "download" %} {% translate "Template" %}</a></td></tr>
+        {% endfor %}</tbody>
+      </table></div>
+      <div class="card-footer muted" style="font-size:.85rem">{% translate "Bold columns are required. Albanian column names (emri, çmimi, kategoria…) work too." %}</div>
+    </section>
 
   {% elif tab == "backup" %}
     <div class="grid grid-2">

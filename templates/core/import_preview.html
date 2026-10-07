@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Import" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="/settings/?tab=import">{% icon "back" %} {% translate "Import from Excel" %}</a></div><h1>{{ label }}: {% translate "preview" %}</h1>
+  <p>{% blocktranslate count n=parsed.rows|length %}{{ n }} row ready to import{% plural %}{{ n }} rows ready to import{% endblocktranslate %}</p></div>
+</div>
+{% if parsed.errors %}<div class="alert alert-error" style="margin-bottom:1rem"><strong>{% translate "Problems" %}</strong><ul style="margin:.4rem 0 0">{% for e in parsed.errors|slice:":20" %}<li>{{ e }}</li>{% endfor %}</ul>{% if parsed.errors|length > 20 %}…{% endif %}<div style="margin-top:.4rem">{% translate "Rows with problems are skipped. Fix them in Excel and upload again, or import the rest." %}</div></div>{% endif %}
+{% if parsed.unknown %}<div class="alert alert-info" style="margin-bottom:1rem">{% translate "Columns that will be ignored" %}: {{ parsed.unknown|join:", " }}</div>{% endif %}
+{% if preview %}
+<section class="card card-flush" style="margin-bottom:1rem">
+  <div class="table-wrap"><table class="table table-sm">
+    <thead><tr>{% for c in columns %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+    <tbody>{% for row in preview %}<tr>{% for c in columns %}<td>{{ row|get_item:c|default_if_none:"" }}</td>{% endfor %}</tr>{% endfor %}</tbody>
+  </table></div>
+  {% if parsed.rows|length > 20 %}<div class="card-footer muted">{% blocktranslate with n=parsed.rows|length %}Showing the first 20 of {{ n }} rows.{% endblocktranslate %}</div>{% endif %}
+</section>
+<form method="post" action="{% url 'core:import_file' %}" class="row" style="gap:.5rem">{% csrf_token %}
+  <input type="hidden" name="kind" value="{{ kind }}"><input type="hidden" name="file" value="{{ file }}"><input type="hidden" name="confirm" value="1">
+  <a class="btn btn-secondary" href="/settings/?tab=import">{% translate "Cancel" %}</a>
+  <button class="btn">{% icon "check" %} {% blocktranslate count n=parsed.rows|length %}Import {{ n }} row{% plural %}Import {{ n }} rows{% endblocktranslate %}</button>
+</form>
+{% endif %}
+{% endblock %}
