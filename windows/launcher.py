@@ -131,6 +131,26 @@ def daily_jobs(log, stop: threading.Event) -> None:
         stop.wait(900)
 
 
+def channel_jobs(log, stop: threading.Event) -> None:
+    """Channel manager (Channex): new bookings every minute, availability and prices when they change,
+    and a full refresh every night."""
+    from apps.core.models import HotelSettings
+    from apps.frontdesk.channex import sync
+
+    last_full = None
+    while not stop.is_set():
+        try:
+            if HotelSettings.objects.filter(pk=1, channex_enabled=True).exists():
+                today = datetime.now().date()
+                r = sync(force_push=last_full != today)
+                last_full = today if not r["error"] else last_full
+                if r["error"] or r["bookings"]:
+                    log(f"Channel manager: {r['bookings']} booking update(s) {r['error']}")
+        except Exception as e:
+            log(f"Channel manager error: {e}")
+        stop.wait(60)
+
+
 def serve(log, ready: threading.Event) -> None:
     from waitress import serve as waitress_serve
 
@@ -201,6 +221,7 @@ def main() -> int:
     ready = threading.Event()
     threading.Thread(target=serve, args=(log, ready), daemon=True).start()
     threading.Thread(target=daily_jobs, args=(log, stop), daemon=True).start()
+    threading.Thread(target=channel_jobs, args=(log, stop), daemon=True).start()
     ready.wait(30)
     for _ in range(40):
         if already_running():

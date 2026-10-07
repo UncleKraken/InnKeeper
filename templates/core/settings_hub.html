@@ -13,6 +13,7 @@
     <a href="?tab=modules" class="{% if tab == 'modules' %}active{% endif %}">{% icon "grid" %} {% translate "Modules" %}</a>
     {% if hotel.module_rooms %}<a href="?tab=booking" class="{% if tab == 'booking' %}active{% endif %}">{% icon "calendar" %} {% translate "Online booking" %}</a>{% endif %}
     <a href="?tab=email" class="{% if tab == 'email' %}active{% endif %}">{% icon "mail" %} {% translate "Email" %}</a>
+    <a href="?tab=payments" class="{% if tab == 'payments' %}active{% endif %}">{% icon "wallet" %} {% translate "Card payments" %}</a>
     <a href="?tab=backup" class="{% if tab == 'backup' %}active{% endif %}">{% icon "download" %} {% translate "Backup & restore" %}</a>
     <div class="settings-nav-sep"></div>
     {% if hotel.module_rooms %}<a href="{% url 'frontdesk:room_list' %}">{% icon "bed" %} {% translate "Rooms & rates" %}</a>{% endif %}
@@ -113,6 +114,21 @@
     <form method="post" action="{% url 'core:email_test' %}" class="card card-body row" style="margin-top:1.25rem">{% csrf_token %}
       <span class="spacer">{% translate "Send a test email to yourself to check the settings." %}</span>
       <button class="btn btn-secondary">{% translate "Send test email" %}</button>
+    </form>
+
+  {% elif tab == "payments" %}
+    <form method="post" class="card" novalidate>{% csrf_token %}
+      <div class="card-header"><h2>{% translate "Card payments" %}</h2>{% if hotel.payments_configured %}{% if hotel.payment_test_mode %}{% translate "Test mode" as l %}{% status_badge "warning" l %}{% else %}{% translate "Live" as l %}{% status_badge "success" l %}{% endif %}{% endif %}</div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0">{% translate "Guests pay deposits and bills by card on the secure page of your payment provider. InnKeeper never sees card numbers. The money goes to your provider account and appears on the guest's bill as “Online card payment”." %}</p>
+        {% include "includes/form_fields.html" %}
+        <details class="help-body" style="margin-top:1rem"><summary>{% translate "Which provider?" %}</summary>
+          <p><strong>POK</strong> — {% translate "Albanian provider, accepts Albanian businesses (NUIS). Open a POK Business account, then ask POK for SDK API keys (key ID and secret) and your merchant ID. Supports ALL and EUR." %}</p>
+          <p><strong>Paysera</strong> — {% translate "European provider with an office in Albania. Open a business account, create a project for your website, and copy the project ID and project password." %}</p>
+          <p>{% translate "Payment confirmations reach InnKeeper over the internet, so the public web address (Settings → Online booking) must be set and reachable. Try everything in test mode first." %}</p>
+        </details>
+      </div>
+      <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
     </form>
 
   {% elif tab == "backup" %}

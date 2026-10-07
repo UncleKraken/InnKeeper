@@ -33,8 +33,20 @@
 <section class="card booking-narrow" style="margin-top:1rem">
   <div class="card-header"><h3>{% translate "Deposit" %}</h3><strong>{{ r.deposit_due|money }}</strong></div>
   <div class="card-body">
-    <p>{% blocktranslate with code=r.code %}Please transfer the deposit and write {{ code }} as the payment reference.{% endblocktranslate %}</p>
-    {% if hotel.bank_details %}<pre class="bank">{{ hotel.bank_details }}</pre>{% endif %}
+    {% if deposit_paid %}
+      <p style="color:var(--success); font-weight:600; margin:0">{% icon "check" %} {% translate "Deposit paid by card. Thank you!" %}</p>
+    {% else %}
+      {% if card_deposit %}
+        <form method="post" action="{% url 'booking:pay_deposit' r.booking_token %}?lang={{ lang }}" style="margin-bottom:1rem">{% csrf_token %}
+          <button class="btn btn-lg btn-block">{% icon "lock" %} {% blocktranslate with a=r.deposit_due|money %}Pay {{ a }} by card now{% endblocktranslate %}</button>
+        </form>
+        {% if hotel.bank_details %}<p class="muted" style="font-size:.9rem">{% translate "Or by bank transfer:" %}</p>{% endif %}
+      {% endif %}
+      {% if hotel.bank_details or not card_deposit %}
+      <p>{% blocktranslate with code=r.code %}Please transfer the deposit and write {{ code }} as the payment reference.{% endblocktranslate %}</p>
+      {% if hotel.bank_details %}<pre class="bank">{{ hotel.bank_details }}</pre>{% endif %}
+      {% endif %}
+    {% endif %}
   </div>
 </section>
 {% endif %}

@@ -35,6 +35,12 @@
   <span class="btn btn-sm">{% translate "Review" %}</span>
 </a>
 {% endif %}
+{% if channel_problems %}
+<div class="alert alert-error row" style="margin-bottom:1.25rem; justify-content:space-between">
+  <span>{% icon "alert" %} <strong>{% blocktranslate count n=channel_problems %}{{ n }} channel booking needs attention (no free room or room type not linked){% plural %}{{ n }} channel bookings need attention (no free room or room type not linked){% endblocktranslate %}</strong></span>
+  {% if request.user.is_manager %}<a class="btn btn-sm" href="{% url 'frontdesk:channel_manager' %}">{% translate "Review" %}</a>{% endif %}
+</div>
+{% endif %}
 {% if low_stock %}
 <a class="alert alert-warning row" style="margin-bottom:1.25rem; justify-content:space-between; color:inherit" href="{% url 'inventory:stock' %}?low=1">
   <span>{% icon "box" %} <strong>{% blocktranslate count n=low_stock %}{{ n }} stock item is running low{% plural %}{{ n }} stock items are running low{% endblocktranslate %}</strong></span>

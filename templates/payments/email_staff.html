@@ -1,0 +1,6 @@
+{% load i18n innkeeper %}<!doctype html>
+<html><body style="font-family:Arial,Helvetica,sans-serif;color:#1d2430">
+<h3>{% translate "Card payment received" %}</h3>
+<p>{{ link.description }} · <strong>{{ link.amount|money }}</strong> · {{ link.provider|upper }}{% if link.test_mode %} (test){% endif %}</p>
+{% if link.reservation %}<p>{{ link.reservation.code }} · {{ link.reservation.guest }} · {{ link.reservation.arrival|date:"d.m.Y" }} → {{ link.reservation.departure|date:"d.m.Y" }}</p>{% endif %}
+</body></html>

@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     "apps.outlets",
     "apps.finance",
     "apps.inventory",
+    "apps.payments",
 ]
 
 MIDDLEWARE = [
@@ -154,8 +155,11 @@ STORAGES = {
 INNKEEPER_BACKUP_DIR = Path(os.environ.get("INNKEEPER_BACKUP_DIR", BASE_DIR / "backups"))
 # Optional: check GitHub for new releases and tell managers (set to "" to turn off).
 INNKEEPER_UPDATE_REPO = os.environ.get("INNKEEPER_UPDATE_REPO", "UncleKraken/InnKeeper")
+# Send availability changes to the channel manager in a background thread right away.
+CHANNEX_BACKGROUND = True
 if len(sys.argv) > 1 and sys.argv[1] == "test":
     INNKEEPER_UPDATE_REPO = ""
+    CHANNEX_BACKGROUND = False
 
 # Shared across server processes (login lockout counters, etc.).
 CACHES = {

@@ -221,6 +221,12 @@ def reservation_detail(request, pk):
     elif res.status == Reservation.Status.BOOKED:
         pending_nights = max(0, res.nights - posted)
     pending_amount = res.amount_for_nights(posted, posted + pending_nights)
+    from apps.payments.services import link_url
+
+    base = request.build_absolute_uri("/")
+    links = [(link, link_url(link, base)) for link in res.payment_links.all()]
+    deposit_open = res.deposit_due and not any(lk.purpose == "deposit" and lk.status == "paid" for lk, _u in links)
+    link_amount = res.deposit_due if deposit_open and res.status == Reservation.Status.BOOKED else None
     return render(
         request,
         "frontdesk/reservation_detail.html",
@@ -238,6 +244,10 @@ def reservation_detail(request, pk):
                 initial={"amount": max(folio.balance + pending_amount, Decimal("0")).quantize(Decimal("0.01")) or None}
             ),
             "today": timezone.localdate(),
+            "payment_links": links,
+            "payments_on": HotelSettings.load().payments_configured,
+            "link_amount": link_amount or max(folio.balance + pending_amount, Decimal("0")).quantize(Decimal("0.01")),
+            "link_purpose": "deposit" if link_amount else "balance",
         },
     )
 
@@ -498,7 +508,8 @@ SETUP_TABS = [
     ("frontdesk:room_list", _("Rooms")),
     ("frontdesk:roomtype_list", _("Room types & rates")),
     ("frontdesk:season_list", _("Seasons")),
-    ("frontdesk:channels", _("Channels")),
+    ("frontdesk:channel_manager", _("Channel manager")),
+    ("frontdesk:channels", _("Calendar links")),
 ]
 
 

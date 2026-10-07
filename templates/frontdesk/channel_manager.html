@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Channel manager" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Management" %}</div><h1>{% translate "Rooms & rates" %}</h1></div>
+  {% if hotel.channex_configured %}
+  <div class="actions">
+    <form method="post" action="{% url 'frontdesk:channel_manager_sync' %}" class="inline">{% csrf_token %}<input type="hidden" name="what" value="pull"><button class="btn btn-secondary">{% icon "download" %} {% translate "Fetch bookings now" %}</button></form>
+    <form method="post" action="{% url 'frontdesk:channel_manager_sync' %}" class="inline">{% csrf_token %}<input type="hidden" name="what" value="push"><button class="btn">{% icon "sync" %} {% translate "Send availability & prices now" %}</button></form>
+  </div>
+  {% endif %}
+</div>
+<nav class="tabs">{% for url, label, is_active in tabs %}<a href="{{ url }}" class="{% if is_active %}active{% endif %}">{{ label }}</a>{% endfor %}</nav>
+
+<section class="card" style="margin-bottom:1.25rem">
+  <div class="card-header"><h2>{% translate "Booking.com, Airbnb, Expedia and 50+ channels in one place" %}</h2>
+    {% if hotel.channex_configured %}{% if state.last_error %}{% translate "Problem" as l %}{% status_badge "danger" l %}{% else %}{% translate "Connected" as l %}{% status_badge "success" l %}{% endif %}{% endif %}
+  </div>
+  <div class="card-body help-body" style="font-size:.92rem">
+    <p style="margin-top:0">{% translate "The channels give their connection only to certified partners. InnKeeper connects to Channex, a certified channel manager: you connect your channels in Channex once, and InnKeeper then sends free rooms and prices automatically and receives every booking, change and cancellation within a minute." %}</p>
+    <ol style="margin:.5rem 0 0; padding-left:1.2rem">
+      <li>{% translate "Open an account at channex.io (or with a Channex reseller), create your property with the same room types, and connect Booking.com, Airbnb and the others there." %}</li>
+      <li>{% translate "In Channex, create an API key (user profile → API keys) and copy your property ID. Enter both below." %}</li>
+      <li>{% translate "Link each InnKeeper room type to its Channex room type and rate plan." %}</li>
+      <li>{% translate "Optional: in Channex, add a webhook to the address below so bookings arrive instantly." %}</li>
+    </ol>
+    {% if hotel.channex_configured %}
+    <p class="muted" style="margin-bottom:0">{% translate "Last sent" %}: {{ state.last_push|date:"d.m.Y H:i"|default:"—" }} · {% translate "Last checked for bookings" %}: {{ state.last_pull|date:"d.m.Y H:i"|default:"—" }}{% if state.dirty %} · {% translate "changes waiting to be sent" %}{% endif %}{% if state.last_error %}<br><span style="color:var(--danger)">{{ state.last_error }}</span>{% endif %}</p>
+    {% endif %}
+  </div>
+</section>
+
+<div class="grid grid-2" style="align-items:start; margin-bottom:1.25rem">
+  <form method="post" class="card" novalidate>{% csrf_token %}<input type="hidden" name="form" value="settings">
+    <div class="card-header"><h3>{% translate "Connection" %}</h3></div>
+    <div class="card-body">{% include "includes/form_fields.html" %}
+      <div class="field" style="margin-top:1rem"><label>{% translate "Webhook address (optional)" %}</label><input class="input mono" readonly value="{{ webhook_url }}" onclick="this.select()" style="font-size:.78rem"></div>
+    </div>
+    <div class="card-footer form-actions"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
+  </form>
+
+  <form method="post" class="card card-flush">{% csrf_token %}<input type="hidden" name="form" value="mapping">
+    <div class="card-header"><h3>{% translate "Link room types" %}</h3></div>
+    {% if remote_error %}<div class="card-body"><div class="alert alert-error" style="margin:0">{{ remote_error }}</div></div>{% endif %}
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>InnKeeper</th><th>{% translate "Channex room type" %}</th><th>{% translate "Channex rate plan" %}</th></tr></thead>
+      <tbody>
+      {% for rt in room_types %}
+        <tr>
+          <td><strong>{{ rt.name }}</strong> <span class="muted">{{ rt.code }}</span></td>
+          <td>{% if remote_types %}<select class="input" name="rt{{ rt.pk }}"><option value="">—</option>{% for x in remote_types %}<option value="{{ x.id }}" {% if x.id == rt.channex_room_type_id %}selected{% endif %}>{{ x.title }}</option>{% endfor %}</select>{% else %}<input class="input mono" name="rt{{ rt.pk }}" value="{{ rt.channex_room_type_id }}" placeholder="ID" style="font-size:.78rem">{% endif %}</td>
+          <td>{% if remote_plans %}<select class="input" name="rp{{ rt.pk }}"><option value="">—</option>{% for x in remote_plans %}<option value="{{ x.id }}" {% if x.id == rt.channex_rate_plan_id %}selected{% endif %}>{{ x.title }}{% if x.currency %} ({{ x.currency }}){% endif %}</option>{% endfor %}</select>{% else %}<input class="input mono" name="rp{{ rt.pk }}" value="{{ rt.channex_rate_plan_id }}" placeholder="ID" style="font-size:.78rem">{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    <div class="card-body muted" style="font-size:.85rem">{% translate "InnKeeper sends the number of free rooms of each type, the price per night from your room rates and seasons, and the seasons' minimum stay. Rate plans must be in your hotel's currency." %}</div>
+    <div class="card-footer form-actions"><button class="btn">{% icon "check" %} {% translate "Save links" %}</button></div>
+  </form>
+</div>
+
+<section class="card card-flush">
+  <div class="card-header"><h3>{% translate "Bookings from the channel manager" %}</h3></div>
+  {% if bookings %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Received" %}</th><th>{% translate "Channel" %}</th><th>{% translate "Guest" %}</th><th>{% translate "Stay" %}</th><th>{% translate "Status" %}</th><th class="num">{% translate "Amount" %}</th><th>{% translate "In InnKeeper" %}</th></tr></thead>
+    <tbody>
+    {% for b in bookings %}
+      <tr>
+        <td class="nowrap">{{ b.updated_at|date:"d.m H:i" }}</td>
+        <td>{{ b.channel }}<br><small class="muted mono">{{ b.channel_code }}</small></td>
+        <td>{{ b.guest_name|default:"—" }}</td>
+        <td class="nowrap">{{ b.arrival|date:"d.m" }} → {{ b.departure|date:"d.m.Y" }}</td>
+        <td>{% if b.status == "cancelled" %}{% translate "Cancelled" as l %}{% status_badge "cancelled" l %}{% elif b.status == "modified" %}{% translate "Changed" as l %}{% status_badge "info" l %}{% else %}{% translate "New" as l %}{% status_badge "success" l %}{% endif %}</td>
+        <td class="num">{% if b.amount %}{{ b.amount }} {{ b.currency }}{% else %}—{% endif %}</td>
+        <td>{% for r in b.reservations %}<a href="{% url 'frontdesk:reservation_detail' r.pk %}" class="mono">{{ r.code }}</a> <small>({{ r.room.number }})</small> {% endfor %}{% if b.problem %}<div style="color:var(--danger); font-size:.85rem">{% icon "alert" %} {{ b.problem }}</div>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+    <div class="empty"><strong>{% translate "No bookings received yet." %}</strong></div>
+  {% endif %}
+</section>
+{% endblock %}

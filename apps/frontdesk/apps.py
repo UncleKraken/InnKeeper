@@ -6,3 +6,6 @@ class FrontDeskConfig(AppConfig):
     name = "apps.frontdesk"
     label = "frontdesk"
     verbose_name = _("Front desk")
+
+    def ready(self):
+        from . import signals  # noqa: F401

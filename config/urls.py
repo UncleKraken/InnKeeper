@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import include, path
 
+from apps.frontdesk.channel_manager import channex_webhook
 from apps.frontdesk.channels import room_calendar
 
 admin.site.site_header = "InnKeeper"
@@ -18,6 +19,8 @@ urlpatterns = [
     path("stock/", include("apps.inventory.urls")),
     path("menu/", include("apps.outlets.menu_urls")),
     path("book/", include("apps.frontdesk.booking_urls")),
+    path("pay/", include("apps.payments.urls")),
     path("ical/<str:token>.ics", room_calendar, name="ical_room"),
+    path("channex/webhook/<str:token>/", channex_webhook, name="channex_webhook"),
     path("", include("apps.core.urls")),
 ]

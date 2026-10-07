@@ -40,6 +40,7 @@ FULL_MODELS = [
     "frontdesk.Guest",
     "frontdesk.Reservation",
     "frontdesk.Group",
+    "frontdesk.ChannelBooking",
     "frontdesk.SeasonRate",
     "outlets.Printer",
     "outlets.Station",
@@ -63,12 +64,23 @@ FULL_MODELS = [
     "inventory.Delivery",
     "inventory.StockCount",
     "inventory.StockMove",
+    "payments.PaymentLink",
 ]
 
 # Not worth moving: print history (kept 3 days).
-NOT_BACKED_UP = {"outlets.PrintJob"}
+NOT_BACKED_UP = {"outlets.PrintJob", "frontdesk.ChannelSyncState"}
 
-SETTINGS_FIELDS_SKIP = {"id", "setup_completed", "updated_at", "smtp_password", "onboarding_dismissed"}
+SETTINGS_FIELDS_SKIP = {
+    "id",
+    "setup_completed",
+    "updated_at",
+    "smtp_password",
+    "onboarding_dismissed",
+    # Secrets stay on the machine they were entered on; they are re-entered after moving.
+    "pok_key_secret",
+    "paysera_password",
+    "channex_api_key",
+}
 
 
 class BackupError(Exception):

@@ -26,6 +26,8 @@ class Quote:
     departure: date
     nightly: list[Decimal] = field(default_factory=list)
     min_nights: int = 1
+    # Minimum stay required for an arrival on each night (for channel restrictions).
+    night_min_stay: list[int] = field(default_factory=list)
 
     @property
     def nights(self) -> int:
@@ -75,6 +77,7 @@ def quote(room_type: RoomType, arrival: date, departure: date) -> Quote:
             price = room_type.base_rate
         q.nightly.append(max(Decimal("0"), price).quantize(CENT, ROUND_HALF_UP))
         q.min_nights = max([q.min_nights] + [s.min_nights for s in covering])
+        q.night_min_stay.append(max([1] + [s.min_nights for s in covering]))
         day += timedelta(days=1)
     return q
 

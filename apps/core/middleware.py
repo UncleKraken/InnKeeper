@@ -14,6 +14,8 @@ SETUP_EXEMPT_PREFIXES = (
     "/help/",
     "/book/",
     "/ical/",
+    "/pay/",
+    "/channex/",
 )
 
 

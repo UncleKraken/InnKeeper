@@ -1,0 +1,28 @@
+{% extends "booking/base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Secure payment" %}{% endblock %}
+{% block eyebrow %}{% translate "Secure payment" %}{% endblock %}
+{% block content %}
+<section class="card booking-narrow">
+  <div class="card-body" style="text-align:center">
+    {% if link.status == "paid" %}
+      <div class="success-mark">{% icon "check" %}</div>
+      <h2 class="booking-h2">{% translate "Already paid. Thank you!" %}</h2>
+    {% elif link.status != "pending" %}
+      <h2 class="booking-h2">{% translate "This payment link is no longer valid." %}</h2>
+      <p class="muted">{% translate "Please contact us for a new link." %}</p>
+    {% else %}
+      <p class="muted" style="margin:0">{{ link.description }}</p>
+      <div style="font-size:2.4rem; font-weight:800; margin:.4rem 0 1rem">{{ link.amount|money }}</div>
+      {% if link.reservation %}<p class="muted">{{ link.reservation.guest }} · {{ link.reservation.arrival|date:"d.m.Y" }} → {{ link.reservation.departure|date:"d.m.Y" }}</p>{% endif %}
+      {% if cancelled %}<div class="alert alert-warning">{% translate "The payment was cancelled. You can try again." %}</div>{% endif %}
+      {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+      {% if link.test_mode %}<div class="alert alert-info">{% translate "Test mode: no real money will be charged." %}</div>{% endif %}
+      <form method="post">{% csrf_token %}
+        <button class="btn btn-lg btn-block">{% icon "lock" %} {% translate "Pay by card" %}</button>
+      </form>
+      <p class="muted" style="font-size:.85rem; margin-top:1rem">{% blocktranslate with p=link.provider|upper %}You will pay on the secure page of {{ p }}. We never see your card details.{% endblocktranslate %}</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

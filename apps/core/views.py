@@ -72,6 +72,15 @@ def dashboard(request):
     if can_access(user, "finance"):
         ctx["revenue_today"] = Charge.objects.active().filter(business_date=today).aggregate(t=Sum("amount"))["t"] or 0
 
+    if can_access(user, "frontdesk") and HotelSettings.load().channex_enabled:
+        from datetime import timedelta as _td
+
+        from apps.frontdesk.models import ChannelBooking
+
+        ctx["channel_problems"] = (
+            ChannelBooking.objects.exclude(problem="").filter(updated_at__gte=timezone.now() - _td(days=14)).count()
+        )
+
     if can_access(user, "inventory"):
         from apps.inventory.views import low_stock_count
 

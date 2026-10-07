@@ -1,0 +1,23 @@
+{% extends "booking/base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Secure payment" %}{% endblock %}
+{% block eyebrow %}{% translate "Secure payment" %}{% endblock %}
+{% block head %}{% if link.status == "pending" %}<meta http-equiv="refresh" content="6">{% endif %}{% endblock %}
+{% block content %}
+<section class="card booking-narrow">
+  <div class="card-body" style="text-align:center">
+    {% if link.status == "paid" %}
+      <div class="success-mark">{% icon "check" %}</div>
+      <h2 class="booking-h2">{% translate "Payment received. Thank you!" %}</h2>
+      <p>{{ link.amount|money }} · {{ link.description }}</p>
+      {% if link.reservation and link.reservation.booking_token %}<p><a class="btn btn-secondary" href="{% url 'booking:status' link.reservation.booking_token %}">{% translate "View your booking" %}</a></p>{% endif %}
+    {% elif link.status == "pending" %}
+      <h2 class="booking-h2">{% translate "Checking your payment…" %}</h2>
+      <p class="muted">{% translate "This page refreshes by itself. If you closed the payment page, you can try again." %}</p>
+      <p><a href="{% url 'payments:pay' link.token %}">{% translate "Back to payment" %}</a></p>
+    {% else %}
+      <h2 class="booking-h2">{% translate "This payment link is no longer valid." %}</h2>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

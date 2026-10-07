@@ -63,6 +63,18 @@ services:
         condition: service_healthy
     command: sh -c 'while true; do python manage.py sync_calendars; sleep 900; done'
 
+  # Every minute: bookings from the channel manager (Channex) in, availability and prices out.
+  channel-manager:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://innkeeper:${POSTGRES_PASSWORD:-change-me}@db:5432/innkeeper
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c 'python manage.py sync_channel_manager --full; while true; do sleep 60; python manage.py sync_channel_manager; done'
+
 volumes:
   pgdata:
   backups:

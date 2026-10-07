@@ -15,6 +15,13 @@ PASSWORD = "a-strong-test-pass-91"
 
 class HotelTestCase(TestCase):
     @classmethod
+    def _pre_setup(cls):
+        from apps.core.models import clear_settings_cache
+
+        super()._pre_setup()
+        clear_settings_cache()  # settings are cached per thread; each test starts from the database
+
+    @classmethod
     def setUpTestData(cls):
         from apps.core.models import HotelSettings
 

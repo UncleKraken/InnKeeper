@@ -104,6 +104,37 @@
   </div>
 
   <aside class="stack">
+    {% if payments_on or payment_links %}
+    <section class="card" id="pay-links">
+      <div class="card-header"><h3>{% translate "Card payment by link" %}</h3></div>
+      <div class="card-body">
+        {% for link, url in payment_links %}
+          <div style="padding:.5rem 0; border-bottom:1px solid var(--line)">
+            <div class="row" style="justify-content:space-between"><strong>{{ link.amount|money }}</strong>{% if link.status == "paid" %}{% status_badge "success" link.get_status_display %}{% elif link.status == "pending" %}{% status_badge "warning" link.get_status_display %}{% else %}{% status_badge "closed" link.get_status_display %}{% endif %}</div>
+            <small class="muted">{{ link.get_purpose_display }} · {{ link.created_at|date:"d.m.Y H:i" }}{% if link.test_mode %} · test{% endif %}</small>
+            {% if link.error %}<div style="color:var(--warning); font-size:.82rem">{{ link.error }}</div>{% endif %}
+            {% if link.status == "pending" %}
+              <div class="row" style="gap:.3rem; margin-top:.35rem; flex-wrap:nowrap"><input class="input mono" readonly value="{{ url }}" style="font-size:.75rem" onclick="this.select()"><button type="button" class="btn btn-secondary btn-sm" onclick="navigator.clipboard && navigator.clipboard.writeText('{{ url|escapejs }}'); this.textContent='✓'">{% translate "Copy" %}</button></div>
+              <form method="post" action="{% url 'payments:link_action' link.pk %}" class="row" style="gap:.3rem; margin-top:.35rem; flex-wrap:wrap">{% csrf_token %}
+                {% if link.email %}<button class="btn btn-ghost btn-sm" name="action" value="send">{% icon "mail" %} {% translate "Email" %}</button>{% endif %}
+                {% if link.provider == "pok" and link.external_id %}<button class="btn btn-ghost btn-sm" name="action" value="check">{% icon "sync" %} {% translate "Check" %}</button>{% endif %}
+                {% if request.user.is_manager %}<button class="btn btn-ghost btn-sm" name="action" value="paid" data-confirm="{% translate 'Only do this if the provider shows the money as received. Record it as paid?' %}">{% icon "check" %} {% translate "Mark paid" %}</button>{% endif %}
+                <button class="btn btn-ghost btn-sm" name="action" value="cancel">{% icon "x" %}</button>
+              </form>
+            {% endif %}
+          </div>
+        {% endfor %}
+        {% if payments_on and r.status != "cancelled" %}
+        <form method="post" action="{% url 'payments:create_for_reservation' r.pk %}" class="form-grid" style="grid-template-columns:1fr 1fr; margin-top:.75rem">{% csrf_token %}
+          <div class="field"><label for="pl-amount">{% translate "Amount" %}</label><input class="input" id="pl-amount" name="amount" inputmode="decimal" value="{{ link_amount|stringformat:'s' }}"></div>
+          <div class="field"><label for="pl-purpose">{% translate "For" %}</label><select class="input" id="pl-purpose" name="purpose"><option value="deposit" {% if link_purpose == "deposit" %}selected{% endif %}>{% translate "Deposit" %}</option><option value="balance" {% if link_purpose == "balance" %}selected{% endif %}>{% translate "Payment of the bill" %}</option></select></div>
+          <div class="field full"><label for="pl-email">{% translate "Guest email" %}</label><input class="input" id="pl-email" name="email" type="email" value="{{ r.guest.email }}"></div>
+          <div class="full row" style="gap:.5rem"><button class="btn btn-sm" name="send" value="1">{% icon "mail" %} {% translate "Create and email" %}</button><button class="btn btn-secondary btn-sm" name="send" value="0">{% translate "Create link" %}</button></div>
+        </form>
+        {% elif not payments_on %}<p class="muted" style="font-size:.85rem">{% translate "Card payments are switched off in Settings → Payments." %}</p>{% endif %}
+      </div>
+    </section>
+    {% endif %}
     <section class="card">
       <div class="card-header"><h3>{% translate "Guest" %}</h3><a href="{% url 'frontdesk:guest_detail' r.guest.pk %}">{% translate "Profile" %}</a></div>
       <div class="card-body"><dl class="dl">

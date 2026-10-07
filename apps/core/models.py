@@ -133,6 +133,36 @@ class HotelSettings(models.Model):
     )
     email_from = models.EmailField(_("send emails from"), blank=True)
 
+    # Online card payments
+    payment_provider = models.CharField(
+        _("payment provider"),
+        max_length=12,
+        choices=[("", _("None")), ("pok", "POK"), ("paysera", "Paysera")],
+        blank=True,
+    )
+    payment_test_mode = models.BooleanField(
+        _("test mode"), default=True, help_text=_("Use the provider's test system. No real money is charged.")
+    )
+    pok_key_id = models.CharField(_("POK key ID"), max_length=120, blank=True)
+    pok_key_secret = models.CharField(_("POK key secret"), max_length=255, blank=True)
+    pok_merchant_id = models.CharField(_("POK merchant ID"), max_length=120, blank=True)
+    paysera_project_id = models.CharField(_("Paysera project ID"), max_length=20, blank=True)
+    paysera_password = models.CharField(_("Paysera project password"), max_length=120, blank=True)
+    booking_card_deposit = models.BooleanField(
+        _("let guests pay the deposit by card"),
+        default=True,
+        help_text=_("Shows a “Pay now” button on the online booking page when a payment provider is set up."),
+    )
+
+    # Channel manager (Channex)
+    channex_enabled = models.BooleanField(_("connect to the channel manager"), default=False)
+    channex_api_key = models.CharField(_("Channex API key"), max_length=255, blank=True)
+    channex_property_id = models.CharField(_("Channex property ID"), max_length=64, blank=True)
+    channex_staging = models.BooleanField(
+        _("use the Channex test system (staging)"), default=False, help_text=_("For trying it out before going live.")
+    )
+    channex_days_ahead = models.PositiveSmallIntegerField(_("send availability for (days)"), default=365)
+
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -167,6 +197,18 @@ class HotelSettings(models.Model):
     @property
     def email_configured(self) -> bool:
         return bool(self.smtp_host and (self.email_from or self.smtp_username))
+
+    @property
+    def payments_configured(self) -> bool:
+        if self.payment_provider == "pok":
+            return bool(self.pok_key_id and self.pok_key_secret and self.pok_merchant_id)
+        if self.payment_provider == "paysera":
+            return bool(self.paysera_project_id and self.paysera_password)
+        return False
+
+    @property
+    def channex_configured(self) -> bool:
+        return bool(self.channex_enabled and self.channex_api_key and self.channex_property_id and self.module_rooms)
 
     @property
     def booking_open(self) -> bool:

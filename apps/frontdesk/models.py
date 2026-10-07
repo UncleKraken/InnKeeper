@@ -27,6 +27,8 @@ class RoomType(models.Model):
     name_en = models.CharField(_("name in English"), max_length=80, blank=True)
     description_en = models.TextField(_("description in English"), blank=True)
     photo = models.TextField(_("photo"), blank=True)
+    channex_room_type_id = models.CharField(_("Channex room type"), max_length=64, blank=True)
+    channex_rate_plan_id = models.CharField(_("Channex rate plan"), max_length=64, blank=True)
     sort_order = models.PositiveSmallIntegerField(_("order"), default=0)
 
     class Meta:
@@ -360,3 +362,48 @@ class Group(models.Model):
     @property
     def code(self) -> str:
         return f"G{self.pk:05d}" if self.pk else "—"
+
+
+class ChannelBooking(models.Model):
+    """A booking received from the channel manager (Channex), as the channel last described it."""
+
+    booking_id = models.CharField(max_length=64, unique=True)
+    revision_id = models.CharField(max_length=64, blank=True)
+    status = models.CharField(_("status"), max_length=12)  # new / modified / cancelled
+    channel = models.CharField(_("channel"), max_length=60, blank=True)
+    channel_code = models.CharField(_("channel booking number"), max_length=80, blank=True)
+    guest_name = models.CharField(_("guest"), max_length=160, blank=True)
+    arrival = models.DateField(_("arrival"), null=True, blank=True)
+    departure = models.DateField(_("departure"), null=True, blank=True)
+    amount = models.DecimalField(_("amount"), max_digits=12, decimal_places=2, null=True, blank=True)
+    currency = models.CharField(max_length=3, blank=True)
+    problem = models.CharField(_("problem"), max_length=255, blank=True)
+    payload = models.JSONField(default=dict, blank=True)
+    received_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("channel booking")
+        verbose_name_plural = _("channel bookings")
+        ordering = ["-updated_at"]
+
+    def __str__(self) -> str:
+        return f"{self.channel} {self.channel_code}"
+
+    @property
+    def reservations(self):
+        return Reservation.objects.filter(external_uid__startswith=f"cx:{self.booking_id}:")
+
+
+class ChannelSyncState(models.Model):
+    """One row: is there anything to send to the channel manager, and how did the last sync go."""
+
+    dirty = models.BooleanField(default=True)
+    last_push = models.DateTimeField(null=True, blank=True)
+    last_pull = models.DateTimeField(null=True, blank=True)
+    last_error = models.CharField(max_length=255, blank=True)
+
+    @classmethod
+    def get(cls) -> "ChannelSyncState":
+        obj, _created = cls.objects.get_or_create(pk=1)
+        return obj

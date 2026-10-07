@@ -10,6 +10,7 @@ from django.utils import timezone, translation
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from django.views.decorators.clickjacking import xframe_options_sameorigin
+from django.views.decorators.http import require_POST
 
 from apps.core.exceptions import BusinessError
 from apps.core.forms import StyledFormMixin
@@ -185,8 +186,37 @@ def status(request, token):
         raise Http404
     res = get_object_or_404(Reservation.objects.select_related("guest", "room__room_type"), booking_token=token)
     lang = _lang(request)
+    hs = HotelSettings.load()
+    links = res.payment_links.filter(purpose="deposit")
     return render(
         request,
         "booking/status.html",
-        {"r": res, "lang": lang, "name": _type_name(res.room.room_type, lang)},
+        {
+            "r": res,
+            "lang": lang,
+            "name": _type_name(res.room.room_type, lang),
+            "deposit_paid": links.filter(status="paid").exists(),
+            "card_deposit": hs.payments_configured and hs.booking_card_deposit and res.status == res.Status.BOOKED,
+        },
     )
+
+
+@require_POST
+def pay_deposit(request, token):
+    """Guest pressed "Pay by card": reuse the open deposit link or make one, then go to the payment page."""
+    from apps.payments import services as pay
+    from apps.payments.models import PaymentLink
+
+    res = get_object_or_404(Reservation, booking_token=token, status=Reservation.Status.BOOKED)
+    lang = _lang(request)
+    if not res.deposit_due or res.payment_links.filter(purpose="deposit", status="paid").exists():
+        return redirect(f"{booking.booking_url(res)}?lang={lang}")
+    link = res.payment_links.filter(purpose="deposit", status="pending", amount=res.deposit_due).first()
+    try:
+        link = link or pay.create_link(reservation=res, amount=res.deposit_due, purpose=PaymentLink.Purpose.DEPOSIT)
+        return redirect(pay.start_checkout(link, request.build_absolute_uri("/"), lang))
+    except BusinessError as e:
+        from django.contrib import messages
+
+        messages.error(request, str(e))
+        return redirect(f"{booking.booking_url(res)}?lang={lang}")

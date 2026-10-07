@@ -135,6 +135,7 @@ class Payment(LedgerEntry):
         CASH = "cash", _("Cash")
         CARD = "card", _("Card")
         BANK_TRANSFER = "bank_transfer", _("Bank transfer")
+        ONLINE = "online", _("Online card payment")
         OTHER = "other", _("Other")
 
     folio = models.ForeignKey(Folio, null=True, blank=True, on_delete=models.PROTECT, related_name="payments")

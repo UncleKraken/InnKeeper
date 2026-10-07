@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
   <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
   <meta name="robots" content="noindex">
+  {% block head %}{% endblock %}
 </head>
 <body class="menu-page booking-page">
 {% include "includes/icons.svg" %}
@@ -15,11 +16,12 @@
     <a href="?{% block langq2 %}{% endblock %}lang=en" class="{% if lang == 'en' %}active{% endif %}">EN</a>
   </div>
   {% if hotel.logo %}<img src="{{ hotel.logo }}" alt="{{ hotel.name }}" class="menu-logo">{% endif %}
-  <p class="menu-eyebrow">{% translate "Book your stay" %}</p>
+  <p class="menu-eyebrow">{% block eyebrow %}{% translate "Book your stay" %}{% endblock %}</p>
   <h1>{{ hotel.name }}</h1>
   {% if hotel.address %}<p class="menu-intro">{{ hotel.address }}</p>{% endif %}
 </header>
 <main class="booking-body">
+  {% include "includes/messages.html" %}
   {% block content %}{% endblock %}
 </main>
 <footer class="booking-foot">

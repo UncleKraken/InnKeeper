@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import channels, groups, register, views
+from . import channel_manager, channels, groups, register, views
 
 app_name = "frontdesk"
 
@@ -33,6 +33,8 @@ urlpatterns = [
     path("groups/new/", groups.group_create, name="group_create"),
     path("groups/<int:pk>/", groups.group_detail, name="group_detail"),
     path("groups/<int:pk>/action/", groups.group_action, name="group_action"),
+    path("setup/channel-manager/", channel_manager.channel_manager, name="channel_manager"),
+    path("setup/channel-manager/sync/", channel_manager.channel_manager_sync, name="channel_manager_sync"),
     path("setup/channels/", channels.channels, name="channels"),
     path("setup/channels/sync/", channels.channel_sync, name="channel_sync_all"),
     path("setup/channels/<int:pk>/sync/", channels.channel_sync, name="channel_sync"),

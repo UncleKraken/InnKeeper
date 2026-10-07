@@ -144,7 +144,41 @@ class EmailSettingsForm(StyledFormMixin, forms.ModelForm):
         widgets = {"smtp_password": forms.PasswordInput(render_value=True)}
 
 
+class PaymentSettingsForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = HotelSettings
+        fields = [
+            "payment_provider",
+            "payment_test_mode",
+            "booking_card_deposit",
+            "pok_merchant_id",
+            "pok_key_id",
+            "pok_key_secret",
+            "paysera_project_id",
+            "paysera_password",
+        ]
+        widgets = {
+            "pok_key_secret": forms.PasswordInput(render_value=True),
+            "paysera_password": forms.PasswordInput(render_value=True),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        p = cleaned.get("payment_provider")
+        need = {
+            "pok": ("pok_merchant_id", "pok_key_id", "pok_key_secret"),
+            "paysera": ("paysera_project_id", "paysera_password"),
+        }
+        for f in need.get(p, ()):
+            if not cleaned.get(f):
+                self.add_error(f, _("Needed for %(p)s.") % {"p": dict(self.fields["payment_provider"].choices)[p]})
+        if p == "pok" and self.instance.currency not in ("ALL", "EUR"):
+            raise forms.ValidationError(_("POK accepts only ALL and EUR. Change the currency in Business details."))
+        return cleaned
+
+
 TABS = {
+    "payments": PaymentSettingsForm,
     "business": BusinessForm,
     "receipts": ReceiptForm,
     "modules": ModulesForm,
