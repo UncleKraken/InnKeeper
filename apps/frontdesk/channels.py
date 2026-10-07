@@ -1,4 +1,4 @@
-"""Rooms & rates → Channels: connect each room's calendar with Booking.com, Airbnb and others."""
+"""Rooms & rates → Calendar links: connect each room's calendar with Booking.com, Airbnb and others."""
 
 from django import forms
 from django.contrib import messages

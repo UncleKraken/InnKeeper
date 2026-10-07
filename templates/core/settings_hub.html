@@ -130,6 +130,19 @@
       </div>
       <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
     </form>
+    <script>
+    (function () {
+      var sel = document.getElementById('id_payment_provider'); if (!sel) return;
+      function upd() {
+        ['pok', 'paysera'].forEach(function (p) {
+          document.querySelectorAll('[name^="' + p + '_"]').forEach(function (el) {
+            var f = el.closest('.field'); if (f) f.style.display = sel.value === p ? '' : 'none';
+          });
+        });
+      }
+      sel.addEventListener('change', upd); upd();
+    })();
+    </script>
 
   {% elif tab == "backup" %}
     <div class="grid grid-2">

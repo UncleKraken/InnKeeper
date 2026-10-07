@@ -4,7 +4,7 @@ from apps.frontdesk.ical import sync_all
 
 
 class Command(BaseCommand):
-    help = "Read the Booking.com / Airbnb / … calendars added under Rooms & rates → Channels. Run every 15–30 minutes."
+    help = "Read the Booking.com / Airbnb / … calendars added under Rooms & rates → Calendar links. Run every 15–30 minutes."
 
     def handle(self, *args, **opts):
         for feed, r in sync_all().items():

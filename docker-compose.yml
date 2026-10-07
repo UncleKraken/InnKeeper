@@ -51,7 +51,7 @@ services:
     volumes:
       - backups:/app/backups
 
-  # Every 15 minutes: read Booking.com / Airbnb / … calendars (Rooms & rates → Channels).
+  # Every 15 minutes: read Booking.com / Airbnb / … calendars (Rooms & rates → Calendar links).
   calendar-sync:
     build: .
     restart: unless-stopped

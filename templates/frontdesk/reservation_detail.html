@@ -131,7 +131,7 @@
           <div class="field full"><label for="pl-email">{% translate "Guest email" %}</label><input class="input" id="pl-email" name="email" type="email" value="{{ r.guest.email }}"></div>
           <div class="full row" style="gap:.5rem"><button class="btn btn-sm" name="send" value="1">{% icon "mail" %} {% translate "Create and email" %}</button><button class="btn btn-secondary btn-sm" name="send" value="0">{% translate "Create link" %}</button></div>
         </form>
-        {% elif not payments_on %}<p class="muted" style="font-size:.85rem">{% translate "Card payments are switched off in Settings → Payments." %}</p>{% endif %}
+        {% elif not payments_on %}<p class="muted" style="font-size:.85rem">{% translate "Card payments are switched off in Settings → Card payments." %}</p>{% endif %}
       </div>
     </section>
     {% endif %}

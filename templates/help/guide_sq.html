@@ -67,14 +67,26 @@
     <p>Te <em>Rezervimet → Grupet → Rezervim i ri grupi</em>, shkruani emrin e grupit, personin e kontaktit dhe datat, shtypni <em>Shfaq dhomat e lira</em>, zgjidhni dhomat dhe shtypni <em>Rezervo grupin</em>. Lëreni çmimin e grupit bosh për të përdorur listën e çmimeve.</p>
     <p>Me <em>Një faturë për të gjithë grupin</em> dhoma kryesore paguan për të gjithë: kur një dhomë tjetër largohet, netët dhe shpenzimet e saj kalojnë në faturën e dhomës kryesore. Faqja e grupit regjistron ose liron të gjitha dhomat me një buton dhe mund ta anulojë grupin. Ndryshoni mysafirin e çdo dhome me butonin e ndryshimit.</p>
   </details>
-  <details><summary>Booking.com, Airbnb dhe kanale të tjera</summary>
-    <p>Te <em>Dhoma &amp; çmime → Kanalet</em> çdo dhomë ka një lidhje kalendari InnKeeper. Ngjiteni te importi i kalendarit të kanalit (Booking.com: Rates &amp; availability → Sync calendars; Airbnb: Availability → Connect calendars) që dhomat e rezervuara këtu të mbyllen atje.</p>
+  <details><summary>Menaxheri i kanaleve (i rekomanduar për disa kanale)</summary>
+    <p>Booking.com, Airbnb dhe Expedia ua japin lidhjen vetëm partnerëve të certifikuar, ndaj InnKeeper lidhet nëpërmjet Channex, një menaxher kanalesh i certifikuar. Hapni një llogari në channex.io, krijoni pronën me të njëjtat lloje dhomash dhe lidhni atje kanalet tuaja. Pastaj te <em>Dhoma &amp; çmime → Menaxheri i kanaleve</em> shkruani çelësin API dhe ID-në e pronës në Channex, zgjidhni <em>Lidhu me menaxherin e kanaleve</em> dhe lidhni çdo lloj dhome me llojin e dhomës dhe planin e çmimeve në Channex.</p>
+    <p>Që atëherë InnKeeper dërgon numrin e dhomave të lira, çmimin e çdo nate (çmimet e dhomave dhe sezonet) dhe qëndrimin minimal sa herë ndryshon diçka, dhe merr çdo minutë rezervimet e reja, të ndryshuara dhe të anuluara. Ato shfaqen në tabelën e dhomave me emrin e mysafirit dhe çmimin e kanalit. Nëse një rezervim nuk mund të vendoset (pa dhomë të lirë, ose lloj dhome i palidhur), shfaqet me të kuqe në atë faqe dhe në panel, në vend që të mbirezervohet. Provojeni fillimisht me <em>Përdor sistemin provë të Channex</em>. Kur përdorni menaxherin e kanaleve, nuk ju duhen lidhjet e kalendarit për të njëjtat dhoma.</p>
+  </details>
+  <details><summary>Lidhjet e kalendarit (e thjeshtë, dhomë për dhomë)</summary>
+    <p>Te <em>Dhoma &amp; çmime → Lidhjet e kalendarit</em> çdo dhomë ka një lidhje kalendari InnKeeper. Ngjiteni te importi i kalendarit të kanalit (Booking.com: Rates &amp; availability → Sync calendars; Airbnb: Availability → Connect calendars) që dhomat e rezervuara këtu të mbyllen atje.</p>
     <p>Pastaj kopjoni lidhjen e eksportit të kanalit dhe shtojeni te dhoma në InnKeeper. Rezervimet e tij shfaqen në tabelën e dhomave, datat e ndryshuara përditësohen dhe anulimet anulohen. Aplikacioni për Windows kontrollon çdo 15 minuta; <em>Sinkronizo të gjitha tani</em> kontrollon menjëherë. Nëse një rezervim kanali bie në një dhomë të zënë, InnKeeper nuk e mbirezervon: shfaq një paralajmërim të kuq që të kaloni një mysafir.</p>
     <p>Lidhjet e kalendarit kanë vetëm datat. Shtoni emrin e mysafirit dhe kontrolloni çmimin kur vjen rezervimi.</p>
   </details>
   <details><summary>Regjistri i mysafirëve për autoritetet</summary>
     <p><em>Mysafirët → Regjistri i mysafirëve</em> liston të gjithë ata që qëndruan në ditët e zgjedhura me shtetësinë, datëlindjen dhe dokumentin. Zgjidhni <em>Vetëm mysafirët e huaj</em> nëse kjo duhet raportuar, pastaj printojeni ose shkarkojeni për Excel. Mysafirët pa të dhëna ID theksohen; InnKeeper ju kujton edhe në regjistrim.</p>
   </details>
+</section>
+
+<section id="payments">
+  <h2>Pagesat me kartë</h2>
+  <p>InnKeeper mund të marrë parapagime dhe fatura me kartë nëpërmjet <strong>POK</strong> (shqiptar, pranon biznese me NUIS, ALL dhe EUR) ose <strong>Paysera</strong>. Hapni një llogari biznesi te njëri prej tyre, pastaj vendosni çelësat te <em>Cilësimet → Pagesat me kartë</em> dhe mbajeni <em>Mënyrën provë</em> të aktivizuar derisa ta keni provuar. InnKeeper nuk i sheh kurrë numrat e kartave: mysafiri paguan në faqen e sigurt të ofruesit.</p>
+  <details open><summary>Parapagimet nga faqja e internetit</summary><p>Me <em>Lejo mysafirët të paguajnë parapagimin me kartë</em>, faqja e konfirmimit të rezervimit shfaq butonin <em>Paguaj tani</em> pranë të dhënave bankare. Kur pagesa konfirmohet, shfaqet në faturën e mysafirit si <em>Pagesë online me kartë</em> dhe recepsioni merr një email.</p></details>
+  <details><summary>Lidhjet e pagesave nga recepsioni</summary><p>Në çdo rezervim, <em>Pagesë me kartë me lidhje</em> krijon një lidhje për parapagimin ose faturën. Dërgojeni me email mysafirit ose kopjojeni në WhatsApp. Nëse konfirmimi nuk vjen, <em>Kontrollo</em> e pyet sërish ofruesin; menaxheri mund ta <em>Shënojë të paguar</em> pasi të kontrollojë aplikacionin e ofruesit.</p></details>
+  <p>Konfirmimet e pagesave vijnë nëpërmjet internetit, ndaj adresa publike (Cilësimet → Rezervimi online) duhet të jetë e vendosur dhe e arritshme.</p>
 </section>
 
 <section id="pos">

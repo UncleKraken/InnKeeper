@@ -33,7 +33,7 @@ def create_link(
 ) -> PaymentLink:
     hs = HotelSettings.load()
     if not hs.payments_configured:
-        raise BusinessError(_("Set up a payment provider in Settings → Payments first."))
+        raise BusinessError(_("Set up a payment provider in Settings → Card payments first."))
     amount = Decimal(amount).quantize(Decimal("0.01"))
     if amount <= 0:
         raise BusinessError(_("Enter an amount above zero."))

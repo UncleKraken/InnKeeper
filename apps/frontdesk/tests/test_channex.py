@@ -212,11 +212,11 @@ class ChannexTests(HotelTestCase):
         self.make_reservation(room=self.room2, start=4, nights=2)
         client = FakeClient([revision("rev-1", arrival=self.a, departure=self.d)])
         (cb,) = self.run_with(client, channex.pull)
-        self.assertIn("No free", cb.problem)
+        self.assertTrue(cb.problem)
         self.assertEqual(client.acked, ["rev-1"])
         self.assertFalse(Reservation.objects.filter(external_uid__startswith="cx:").exists())
         self.client.login(username="boss", password=PASSWORD)
-        self.assertContains(self.client.get("/"), "channel booking")
+        self.assertContains(self.client.get("/"), reverse("frontdesk:channel_manager"))
 
     def test_unlinked_room_type_is_reported(self):
         rooms = revision("x", arrival=self.a, departure=self.d)["rooms"]

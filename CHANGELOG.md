@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.4.0 — channel manager and card payments
+
+**Shqip**
+
+- **Menaxheri i kanaleve (Channex):** lidhje e plotë me Booking.com, Airbnb, Expedia dhe mbi 50 kanale nëpërmjet Channex, një partner i certifikuar. InnKeeper dërgon dhomat e lira, çmimin e çdo nate dhe qëndrimin minimal sa herë ndryshon diçka, dhe merr çdo minutë rezervimet e reja, të ndryshuara dhe të anuluara me emrin e mysafirit dhe çmimin. Pa mbirezervime: problemet shfaqen me të kuqe.
+- **Pagesat me kartë (POK ose Paysera):** mysafirët paguajnë parapagimin me kartë direkt nga faqja e rezervimit; recepsioni krijon dhe dërgon lidhje pagese për çdo shumë. Pagesat konfirmohen te ofruesi dhe shfaqen vetë në faturën e mysafirit.
+- Përmirësime: të dhënat sekrete (çelësat API, fjalëkalimet) nuk përfshihen në eksportin e cilësimeve.
+
+**English**
+
+- **Channel manager (Channex):** a full connection to Booking.com, Airbnb, Expedia and 50+ channels through Channex, a certified partner. InnKeeper sends free rooms, the price of every night and minimum stays whenever something changes, and fetches new, changed and cancelled bookings every minute with the guest's name and price. No overbooking: problems are shown in red.
+- **Card payments (POK or Paysera):** guests pay the deposit by card straight from the booking page; reception creates and sends payment links for any amount. Payments are confirmed with the provider and appear on the guest's bill by themselves.
+- Improvements: secrets (API keys, passwords) are left out of the settings export.
+
+### Install or update on Windows
+1. Download **InnKeeper-Setup-2.4.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not yet code-signed. Click **More info → Run anyway**.
+
+> Receipts and invoices are internal documents, not fiscal receipts. Fiscalisation is planned for a later version.
+
 ## 2.3.0 — stock, groups, channel calendars and guest register
 
 **Shqip**

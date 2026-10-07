@@ -67,14 +67,26 @@
     <p>Under <em>Reservations → Groups → New group booking</em>, enter the group name, the contact person and the dates, press <em>Show free rooms</em>, tick the rooms and press <em>Book the group</em>. Leave the group rate empty to use the price list.</p>
     <p>With <em>One bill for the whole group</em> the main room pays for everyone: when another room checks out, its nights and extras move to the main room's bill. The group page checks in or checks out all rooms with one button and can cancel the whole group. Change each room's guest with the edit button.</p>
   </details>
-  <details><summary>Booking.com, Airbnb and other channels</summary>
-    <p>In <em>Rooms &amp; rates → Channels</em> each room has an InnKeeper calendar link. Paste it into the channel's calendar import (Booking.com: Rates &amp; availability → Sync calendars; Airbnb: Availability → Connect calendars) so rooms booked here close there.</p>
+  <details><summary>Channel manager (recommended for several channels)</summary>
+    <p>Booking.com, Airbnb and Expedia give their connection only to certified partners, so InnKeeper connects through Channex, a certified channel manager. Open an account at channex.io, create your property with the same room types and connect your channels there. Then in <em>Rooms &amp; rates → Channel manager</em> enter the Channex API key and property ID, tick <em>Connect to the channel manager</em> and link each room type to its Channex room type and rate plan.</p>
+    <p>From then on InnKeeper sends the number of free rooms, the price of every night (room rates and seasons) and minimum stays whenever something changes, and fetches new, changed and cancelled bookings every minute. They appear on the room rack with the guest's name and the channel's price. If a booking can't be placed (no free room, or a room type that isn't linked), it is listed in red on that page and on the dashboard instead of being overbooked. Try it first with <em>Use the Channex test system</em>. When you use the channel manager, you don't need calendar links for the same rooms.</p>
+  </details>
+  <details><summary>Calendar links (simple, one room at a time)</summary>
+    <p>In <em>Rooms &amp; rates → Calendar links</em> each room has an InnKeeper calendar link. Paste it into the channel's calendar import (Booking.com: Rates &amp; availability → Sync calendars; Airbnb: Availability → Connect calendars) so rooms booked here close there.</p>
     <p>Then copy the channel's export link and add it to the room in InnKeeper. Its bookings appear on the room rack, changed dates are updated and cancellations are cancelled. The Windows app checks every 15 minutes; <em>Sync all now</em> checks immediately. If a channel booking falls on a room that is already taken, InnKeeper does not overbook: it shows a red warning so you can move one guest.</p>
     <p>Calendar links carry only dates. Add the guest's name and check the price when the booking arrives.</p>
   </details>
   <details><summary>Guest register for the authorities</summary>
     <p><em>Guests → Guest register</em> lists everyone who stayed on the chosen days with nationality, date of birth and document. Tick <em>Foreign guests only</em> if that is what you must report, then print it or download it for Excel. Guests with missing ID details are highlighted; InnKeeper also reminds you at check-in.</p>
   </details>
+</section>
+
+<section id="payments">
+  <h2>Card payments</h2>
+  <p>InnKeeper can take deposits and bills by card through <strong>POK</strong> (Albanian, accepts businesses with a NUIS, ALL and EUR) or <strong>Paysera</strong>. Open a business account with one of them, then enter its keys in <em>Settings → Card payments</em> and keep <em>Test mode</em> on until you have tried it. InnKeeper never sees card numbers: the guest pays on the provider's secure page.</p>
+  <details open><summary>Deposits from the website</summary><p>With <em>Let guests pay the deposit by card</em>, the booking confirmation page shows a <em>Pay now</em> button next to your bank details. When the payment is confirmed it appears on the guest's bill as <em>Online card payment</em> and reception gets an email.</p></details>
+  <details><summary>Payment links from reception</summary><p>On any reservation, <em>Card payment by link</em> creates a link for a deposit or the bill. Email it to the guest or copy it into WhatsApp. If a confirmation doesn't arrive, <em>Check</em> asks the provider again; a manager can <em>Mark paid</em> after checking the provider's app.</p></details>
+  <p>Payment confirmations come over the internet, so the public web address (Settings → Online booking) must be set and reachable.</p>
 </section>
 
 <section id="pos">
