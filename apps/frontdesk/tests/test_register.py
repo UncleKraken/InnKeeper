@@ -14,7 +14,7 @@ class RegisterTests(HotelTestCase):
         rows = register.stays(self.today, self.today)
         self.assertEqual(rows, [res])
         self.assertNotIn(future, rows)
-        self.assertIn("document", register.missing(self.guest))
+        self.assertEqual(len(register.missing(self.guest)), 3)  # document, nationality, date of birth
 
     def test_foreign_filter(self):
         self.guest.nationality = "Shqipëri"

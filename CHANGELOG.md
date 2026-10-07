@@ -1,5 +1,29 @@
 # Changelog
 
+## 2.3.0 — stock, groups, channel calendars and guest register
+
+**Shqip**
+
+- **Stoku & inventari:** artikuj stoku dhe furnitorë, receta për çdo artikull të menusë (shitjet dhe kalimet në dhomë e heqin stokun automatikisht, anulimet e kthejnë), furnizime me çmim mesatar dhe shpenzim automatik, humbje/thyerje, numërime stoku me diferencat, paralajmërim për stok të ulët, raport i kostos së shitjeve.
+- **Rezervime në grup:** disa dhoma njëherësh, një faturë e përbashkët (dhoma kryesore paguan për të gjithë), regjistrim/largim i të gjithë grupit me një buton.
+- **Booking.com, Airbnb e kanale të tjera:** sinkronizim i kalendarëve me lidhje iCal në të dy drejtimet, çdo 15 minuta, me paralajmërim për rezervime të dyfishta.
+- **Regjistri i mysafirëve:** lista e mysafirëve sipas datës me shtetësinë dhe dokumentin, vetëm të huajt nëse duhet, për printim ose Excel; kujtesë për ID-në në regjistrim.
+- Rregullime: kopjet rezervë tani përfshijnë stacionet, printerët, sezonet dhe porositë e kuzhinës; eksporti i cilësimeve përfshin edhe stokun, recetat dhe kalendarët e kanaleve.
+
+**English**
+
+- **Stock & inventory:** stock items and suppliers, recipes per menu item (sales and room charges take stock automatically, voided receipts put it back), deliveries with average cost and an optional expense, waste/breakage, stock counts with variance, low-stock alerts, cost of sales report.
+- **Group bookings:** several rooms at once, one shared bill (the main room pays for everyone), check the whole group in or out with one button.
+- **Booking.com, Airbnb and other channels:** two-way calendar sync with iCal links, every 15 minutes, with warnings instead of overbooking.
+- **Guest register:** guests by date with nationality and document, foreigners only if required, to print or open in Excel; ID reminder at check-in.
+- Fixes: full backups now include stations, printers, seasons and kitchen tickets; the settings export also carries stock items, recipes and channel calendars.
+
+### Install or update on Windows
+1. Download **InnKeeper-Setup-2.3.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not yet code-signed. Click **More info → Run anyway**.
+
+> Receipts and invoices are internal documents, not fiscal receipts. Fiscalisation is planned for a later version.
+
 ## 2.2.0 — kitchen screens, printers and online booking
 
 **Shqip**

@@ -23,6 +23,8 @@ It adapts to the business: a setup wizard asks whether you run a **hotel**, a **
 | **Floor plans** | Drag-and-drop editor: move, resize, rename and renumber tables, square/round/long shapes, areas such as Inside and Terrace. The POS shows the real layout |
 | **Receipts & menus** | Numbered receipts with logo, VAT breakdown and change, 58/80 mm thermal printing, receipt history with reprint and manager void. Guest menu on phones via QR code (Albanian/English), printable A4 menu and QR table cards |
 | **Prices & online booking** | Seasons (percentage or fixed price per room type, minimum stay) priced night by night; public booking page (Albanian/English) with room photos, deposit by bank transfer, request → confirm/decline by reception, guest and staff emails over your own SMTP |
+| **Groups & channels** | Group bookings (many rooms at once, one shared bill, bulk check-in/out); two-way calendar sync with Booking.com, Airbnb, Expedia via iCal links, with overbooking warnings; guest register for the authorities (print / Excel) |
+| **Stock** | Stock items and suppliers, recipes per menu item (sales and room charges take stock automatically, voids put it back), deliveries with average cost and optional expense, waste, stock counts with variance, low-stock alerts, cost of sales report |
 | **Housekeeping** | Room status board by floor, tasks created automatically at check-out, assign to staff, start → done |
 | **Maintenance** | Tickets with priority and assignee; a ticket can take a room out of order until resolved |
 | **Finance** | Revenue, expenses and profit; end-of-day cash count with printable Z report; best sellers, sales by staff and busiest hours; occupancy, ADR, RevPAR; unpaid bills; full ledger with CSV export (opens correctly in Excel) |
@@ -32,7 +34,7 @@ It adapts to the business: a setup wizard asks whether you run a **hotel**, a **
 
 ### Security and data integrity
 - Passwords hashed (Django PBKDF2); never shown, only replaced. Lockout after 5 failed sign-ins.
-- Role-based access: Manager, Reception, Housekeeping, Maintenance, Service staff (optionally limited to specific outlets), Kitchen & bar (order screens only), Finance.
+- Role-based access: Manager, Reception, Housekeeping, Maintenance, Service staff (optionally limited to specific outlets), Kitchen & bar (order screens only), Finance (also stock).
 - Money is stored as exact decimals, never floats.
 - Nothing financial is deleted. Mistakes are **voided** by a manager with a reason, and every action is written to the activity log.
 - Bookings for the same room are serialised with a database lock, so two receptionists can't double-book a room at the same moment.
@@ -84,7 +86,8 @@ Run the tests with `python manage.py test`.
 2. **HTTPS.** Put it behind a reverse proxy (Caddy, Nginx, or Cloudflare Tunnel) with a certificate. On a closed office LAN without HTTPS, set `DJANGO_SECURE_SSL_REDIRECT=0`.
 3. **Set up the business.** The setup wizard runs on first sign-in. Then follow the getting-started checklist on the dashboard.
 4. **Nightly room charges.** `python manage.py night_audit` posts last night's room charge for every in-house guest, so revenue is reported on the right day. The Docker setup runs it at 03:00; otherwise schedule it with cron or Windows Task Scheduler. Check-out always posts any nights still missing, so a missed run never loses money.
-5. **Backups.** Schedule `python manage.py backup` daily (keeps the newest 30 in `INNKEEPER_BACKUP_DIR`) and copy them off the server. *Settings → Backup & restore* downloads or restores backups from the browser.
+5. **Channel calendars.** `python manage.py sync_calendars` reads the Booking.com / Airbnb calendars added under *Rooms & rates → Channels*. Docker runs it every 15 minutes, and so does the Windows app; elsewhere schedule it with cron. Channels can only read InnKeeper's room links if the site is reachable from the internet (set the public web address in Settings).
+6. **Backups.** Schedule `python manage.py backup` daily (keeps the newest 30 in `INNKEEPER_BACKUP_DIR`) and copy them off the server. *Settings → Backup & restore* downloads or restores backups from the browser.
 
 `/admin/` (Django admin) is available to superusers for advanced fixes; the ledger is read-only there.
 
@@ -105,6 +108,7 @@ apps/
   housekeeping/    room status, cleaning tasks, maintenance tickets
   outlets/         restaurant/bar/spa/… menus, tables, orders, POS
   finance/         folios, charges, payments, reports
+  inventory/       stock items, suppliers, recipes, deliveries, counts
 templates/         HTML templates (one folder per app)
 static/            CSS and icons (no build step, works offline)
 locale/sq/         Albanian translations
@@ -123,7 +127,7 @@ Each user can switch language (SQ / EN) from the sidebar; the choice is remember
 
 ## Roadmap
 - Fiscal receipt / e-invoice integration (Albania)
-- Channel manager sync (Booking.com, Airbnb)
-- Online card payments for deposits, group bookings
+- Full channel manager (rates and availability via OTA APIs, beyond calendar sync)
+- Online card payments for deposits
+- Purchase orders to suppliers
 - Inventory and purchasing
-- Guest registration export for the authorities

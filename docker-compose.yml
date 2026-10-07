@@ -51,6 +51,18 @@ services:
     volumes:
       - backups:/app/backups
 
+  # Every 15 minutes: read Booking.com / Airbnb / … calendars (Rooms & rates → Channels).
+  calendar-sync:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://innkeeper:${POSTGRES_PASSWORD:-change-me}@db:5432/innkeeper
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c 'while true; do python manage.py sync_calendars; sleep 900; done'
+
 volumes:
   pgdata:
   backups:
