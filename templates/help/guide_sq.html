@@ -89,6 +89,23 @@
   <p>Konfirmimet e pagesave vijnë nëpërmjet internetit, ndaj adresa publike (Cilësimet → Rezervimi online) duhet të jetë e vendosur dhe e arritshme.</p>
 </section>
 
+<section id="fiscal">
+  <h2>Fiskalizimi (tatimet)</h2>
+  <p>Kur <em>Cilësimet → Fiskalizimi</em> është aktiv, InnKeeper dërgon çdo faturë të paguar të restorantit/barit dhe çdo faturë të mbyllur mysafiri drejtpërdrejt te tatimet (DPT), të nënshkruar me certifikatën e vulës elektronike. Kuponi dhe fatura shfaqin <strong>NSLF</strong>, <strong>NIVF</strong> dhe një kod QR që klienti mund ta skanojë për ta verifikuar. Netët e qëndrimit përdorin normën e TVSH-së për akomodimin; ushqimi, pijet dhe shërbimet e tjera normën kryesore.</p>
+  <details open><summary>Konfigurimi</summary>
+    <ol>
+      <li>Aplikoni në e-Albania për certifikatën e vulës elektronike për fiskalizim dhe shkarkoni skedarin <code>.p12</code> me fjalëkalimin e tij.</li>
+      <li>Në portalin self-care të tatimeve regjistroni njësinë e biznesit (ambientin), softuerin (InnKeeper si softuer i vetë biznesit) për të marrë kodet e softuerit dhe të mirëmbajtësit, çdo arkë (TCR) dhe çdo operator.</li>
+      <li>Te <em>Cilësimet → Fiskalizimi</em> vendosni kodet, ngarkoni certifikatën, aktivizoni <em>Fiskalizo kuponat dhe faturat</em> dhe mbajeni <em>Përdor sistemin provë të tatimeve</em> aktiv.</li>
+      <li>Çdo arkëtari vendosini kodin e operatorit te <em>Stafi → ndrysho</em>. Një pikë me arkë të veten merr kodin TCR te <em>Pikat &amp; menutë → ndrysho</em>.</li>
+      <li>Bëni disa shitje provë. Te <em>Financa → Fiskalizimi</em> duhet të shfaqen <em>I regjistruar</em> me NIVF. Pastaj çaktivizoni sistemin provë.</li>
+    </ol>
+  </details>
+  <details><summary>Pa internet</summary><p>Shitjet nuk ndalen kurrë. Pa lidhje kuponi printohet me NSLF dhe shënimin që NIVF do të shtohet më vonë. InnKeeper dërgon dokumentet në pritje çdo minutë sapo kthehet lidhja; <em>Financa → Fiskalizimi → Dërgo në pritje</em> i dërgon menjëherë. Ligji lejon 48 orë: paneli ju paralajmëron kur një dokument i afrohet afatit.</p></details>
+  <details><summary>Paratë në arkë</summary><p>Gjendja fillestare e arkës deklarohet automatikisht para shitjes së parë me para në dorë të ditës (shuma e numëruar në mbylljen e fundit të ditës). Kur tërhiqen para nga arka, deklarojini te <em>Financa → Fiskalizimi → Paratë në arkë</em>.</p></details>
+  <details><summary>Anulimet dhe dokumentet e refuzuara</summary><p>Anulimi i një kuponi të fiskalizuar dërgon një faturë korrigjuese që e anulon. Nëse tatimet refuzojnë një dokument, ai shfaqet me të kuqe me arsyen (zakonisht kod i gabuar ose certifikatë e skaduar). Rregulloni cilësimin dhe shtypni <em>Dërgo sërish</em>.</p></details>
+</section>
+
 <section id="pos">
   <h2>Restorant, bar &amp; shërbime</h2>
   <details open><summary>Marrja e porosisë</summary>
@@ -193,6 +210,24 @@
   </details>
   <details><summary>Kopje rezervë automatike</summary><p>Aplikacioni për Windows ruan çdo ditë një kopje të plotë dhe mban 30 të fundit. Në server, planifikoni <code>python manage.py backup</code>. Kopjoni rregullisht kopjet në një vend tjetër (USB, cloud).</p></details>
   <details><summary>Regjistri i aktivitetit</summary><p><em>Cilësimet → Regjistri i aktivitetit</em> ruan çdo hyrje, pagesë, zbritje, anulim dhe ndryshim cilësimesh, me personin dhe orën.</p></details>
+  <details><summary>Importi nga Excel</summary><p><em>Cilësimet → Importo nga Excel</em> sjell menunë, listën e stokut ose të mysafirëve. Shkarkoni shabllonin, plotësojeni në Excel (një rresht për artikull), zgjidhni <em>File → Save as → CSV UTF-8</em> dhe ngarkojeni. Një parapamje tregon çfarë do të shtohet ose përditësohet dhe cilët rreshta kanë probleme; asgjë nuk ruhet pa konfirmimin tuaj. Artikujt me të njëjtin emër përditësohen, asgjë nuk fshihet. Funksionojnë edhe emrat shqip të kolonave.</p></details>
+</section>
+
+<section id="golive">
+  <h2>Lista për fillimin e punës</h2>
+  <p>Para mysafirit të parë real, në kompjuterin Windows të biznesit:</p>
+  <ol>
+    <li><strong>Kompjuteri</strong> – lidheni me kabëll te ruteri, vendosni në Windows që të mos flejë kurrë dhe çaktivizoni rinisjet automatike për përditësime gjatë orarit të punës. Jepini një adresë fikse te ruteri, që tabletat dhe ekranet e kuzhinës ta gjejnë gjithmonë.</li>
+    <li><strong>Të dhënat e biznesit</strong> – emri, NIPT-i, adresa, normat e TVSH-së dhe teksti i kuponit. Printoni një kupon provë.</li>
+    <li><strong>Dhomat, çmimet dhe sezonet</strong> – kontrolloni çdo tip dhome, çmim dhe sezon; bëni një rezervim provë, hyrje dhe largim, pastaj anulojeni.</li>
+    <li><strong>Menutë dhe stoku</strong> – importojini nga Excel (<em>Cilësimet → Importo nga Excel</em>), pastaj kontrolloni çmimet në një kupon të printuar.</li>
+    <li><strong>Stafi</strong> – një llogari për person me rolin e duhur dhe, për arkëtarët, kodin e operatorit fiskal. Mos e ndani kurrë llogarinë e menaxherit.</li>
+    <li><strong>Printerët dhe ekranet</strong> – printoni një faqe provë në çdo printer kuponash dhe kuzhine; hapni ekranet e kuzhinës/barit në pajisjet e tyre.</li>
+    <li><strong>Fiskalizimi</strong> – fillimisht sistemi provë, disa shitje të regjistruara, pastaj kaloni në punë reale (shih <a href="#fiscal">Fiskalizimi</a>).</li>
+    <li><strong>Rezervimi online, pagesat me kartë dhe menaxheri i kanaleve</strong> – kërkojnë që InnKeeper të arrihet nga interneti. Vendosni adresën publike te <em>Cilësimet → Rezervimi online</em> (p.sh. me Cloudflare Tunnel ose port forwarding në ruter me HTTPS). Përdorni fillimisht mënyrën provë të çdo ofruesi.</li>
+    <li><strong>Kopjet rezervë</strong> – shkarkoni një kopje të plotë dhe kopjojeni në USB ose cloud; përsëriteni çdo javë. Aplikacioni mban edhe 30 kopje ditore në kompjuter.</li>
+    <li><strong>Dita e parë</strong> – në mbyllje bëni mbylljen e ditës dhe numëroni paratë, që gjendja fillestare e ditës tjetër të jetë e saktë.</li>
+  </ol>
 </section>
 
 <section id="windows">
@@ -205,6 +240,6 @@
   <h2>Pyetje</h2>
   <details><summary>Dikush harroi fjalëkalimin</summary><p>Menaxheri hap <em>Stafi</em>, zgjedh personin dhe shtyp <em>Vendos fjalëkalim të ri</em>. Fjalëkalimet nuk mund të shihen, vetëm të zëvendësohen.</p></details>
   <details><summary>"Shumë përpjekje të dështuara"</summary><p>Pas 5 fjalëkalimeve të gabuara llogaria bllokohet për 15 minuta. Prisni, ose kërkojini menaxherit fjalëkalim të ri.</p></details>
-  <details><summary>A është kuponi fiskal?</summary><p>Jo. Kuponat dhe faturat e InnKeeper-it janë dokumente të brendshme. Në Shqipëri shitjet duhet të fiskalizohen edhe përmes një shërbimi ose pajisjeje fiskale të certifikuar.</p></details>
+  <details><summary>A është kuponi fiskal?</summary><p>Po, kur fiskalizimi është aktiv: shfaq NSLF, NIVF dhe kodin QR. Pa të, kuponat shkruajnë “Ky nuk është kupon fiskal.” Shih <a href="#fiscal">Fiskalizimi</a>.</p></details>
   <details><summary>A mund të fshij një pagesë ose një llogari?</summary><p>Jo, qëllimisht: të dhënat e parave nuk fshihen kurrë. Menaxheri i anulon me arsye, që historia të mbetet e plotë dhe e ndershme.</p></details>
 </section>

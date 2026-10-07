@@ -25,11 +25,12 @@ It adapts to the business: a setup wizard asks whether you run a **hotel**, a **
 | **Prices & online booking** | Seasons (percentage or fixed price per room type, minimum stay) priced night by night; public booking page (Albanian/English) with room photos, deposit by bank transfer, request → confirm/decline by reception, guest and staff emails over your own SMTP |
 | **Groups & channels** | Group bookings (many rooms at once, one shared bill, bulk check-in/out); full channel manager connection through Channex (availability, nightly prices and minimum stays out; bookings, changes and cancellations in, every minute) for Booking.com, Airbnb, Expedia and 50+ channels; simple iCal calendar sync as an alternative; guest register for the authorities (print / Excel) |
 | **Card payments** | Deposits and bills paid by card through POK or Paysera (both accept Albanian businesses): pay button on the booking page, payment links from reception (email / copy), confirmations verified with the provider and posted to the guest bill |
+| **Fiscalization** | Direct connection to the Albanian tax authority (DPT/CIS): every paid bill and guest bill is signed with the business's certificate and registered, with NSLF, NIVF and verification QR code on the receipt and invoice. Accommodation and main VAT rates, corrective invoices for voids, daily cash deposit, offline mode with automatic resend within 48 hours, test system |
 | **Stock** | Stock items and suppliers, recipes per menu item (sales and room charges take stock automatically, voids put it back), deliveries with average cost and optional expense, waste, stock counts with variance, low-stock alerts, cost of sales report |
 | **Housekeeping** | Room status board by floor, tasks created automatically at check-out, assign to staff, start → done |
 | **Maintenance** | Tickets with priority and assignee; a ticket can take a room out of order until resolved |
 | **Finance** | Revenue, expenses and profit; end-of-day cash count with printable Z report; best sellers, sales by staff and busiest hours; occupancy, ADR, RevPAR; unpaid bills; full ledger with CSV export (opens correctly in Excel) |
-| **Settings** | Setup wizard, business details, receipt design with preview, modules on/off, staff and roles, activity log |
+| **Settings** | Setup wizard, import of menu, stock and guests from Excel (CSV) with preview, business details, receipt design with preview, modules on/off, staff and roles, activity log |
 | **Backups** | Full backup (move to a new computer) and settings-only export (second location), restore with preview and automatic safety copy, daily automatic backups |
 | **Help** | Built-in user guide in Albanian and English, getting-started checklist for new businesses |
 
@@ -94,7 +95,7 @@ Run the tests with `python manage.py test`.
 `/admin/` (Django admin) is available to superusers for advanced fixes; the ledger is read-only there.
 
 ### Before using it for real money in Albania
-- **Fiscalisation.** Albanian law requires sales to be fiscalised through the tax authority (e-invoices / fiscal receipts with NIVF/NSLF codes). InnKeeper prints internal receipts and invoices; integration with a certified fiscal service or device is **not** included yet and is required before replacing a fiscal cash register.
+- **Fiscalisation.** Enable *Settings → Fiscalization* with the electronic seal certificate and the self-care codes (business unit, TCR, software, maintainer, operators). Test on the tax authority's test system first; *Finance → Fiscal* lists every document and its status. `python manage.py fiscal_resend` sends waiting documents (the Windows app and Docker do this every minute). The built-in help has a full go-live checklist.
 - **Personal data.** Guest IDs and contact details are personal data under Law 124/2024 on personal data protection. Limit staff access, keep backups secure, and set a retention period.
 
 ---
@@ -112,6 +113,7 @@ apps/
   finance/         folios, charges, payments, reports
   inventory/       stock items, suppliers, recipes, deliveries, counts
   payments/        card payment links (POK, Paysera)
+  fiscal/          fiscalization with the tax authority (signing, SOAP, offline queue)
 templates/         HTML templates (one folder per app)
 static/            CSS and icons (no build step, works offline)
 locale/sq/         Albanian translations
@@ -129,6 +131,5 @@ python manage.py compilemessages
 Each user can switch language (SQ / EN) from the sidebar; the choice is remembered.
 
 ## Roadmap
-- Fiscal receipts (with a certified provider)
 - Purchase orders to suppliers
 - Inventory and purchasing

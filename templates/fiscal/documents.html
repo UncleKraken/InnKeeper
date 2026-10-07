@@ -15,7 +15,7 @@
 <div class="grid grid-main" style="align-items:start">
   <section class="card card-flush">
     <div class="card-header">
-      <nav class="seg"><a href="?" class="{% if not status %}active{% endif %}">{% translate "All" %}</a>{% for v, l in statuses %}<a href="?status={{ v }}" class="{% if v == status %}active{% endif %}">{{ l }}</a>{% endfor %}</nav>
+      <nav class="tabs" style="border:0; margin:0"><a href="?" class="{% if not status %}active{% endif %}">{% translate "All" %}</a>{% for v, l in statuses %}<a href="?status={{ v }}" class="{% if v == status %}active{% endif %}">{{ l }}</a>{% endfor %}</nav>
     </div>
     {% if page_obj %}
     <div class="table-wrap"><table class="table table-sm">

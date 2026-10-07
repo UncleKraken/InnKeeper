@@ -73,7 +73,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: sh -c 'python manage.py sync_channel_manager --full; while true; do sleep 60; python manage.py sync_channel_manager; done'
+    command: sh -c 'python manage.py sync_channel_manager --full; while true; do sleep 60; python manage.py sync_channel_manager; python manage.py fiscal_resend; done'
 
 volumes:
   pgdata:

@@ -89,6 +89,23 @@
   <p>Payment confirmations come over the internet, so the public web address (Settings → Online booking) must be set and reachable.</p>
 </section>
 
+<section id="fiscal">
+  <h2>Fiscalization (tax authority)</h2>
+  <p>When <em>Settings → Fiscalization</em> is switched on, InnKeeper sends every paid restaurant/bar bill and every closed guest bill directly to the tax authority (DPT), signed with your electronic seal certificate. The receipt and the invoice then show the <strong>NSLF</strong>, the <strong>NIVF</strong> and a QR code the customer can scan to check it. Room nights use the accommodation VAT rate; food, drinks and other services use the main VAT rate.</p>
+  <details open><summary>Setting it up</summary>
+    <ol>
+      <li>Apply on e-Albania for the electronic seal certificate for fiscalization and download the <code>.p12</code> file and its password.</li>
+      <li>In the tax authority's self-care portal register the business unit (the premises), the software (InnKeeper as your own software) to get the software and maintainer codes, each cash register (TCR) and each operator.</li>
+      <li>In <em>Settings → Fiscalization</em> enter the codes, upload the certificate, tick <em>Fiscalize receipts and invoices</em> and keep <em>Use the tax authority's test system</em> on.</li>
+      <li>Give every cashier their operator code in <em>Staff → edit</em>. An outlet with its own cash register gets its TCR code in <em>Outlets &amp; menus → edit</em>.</li>
+      <li>Make a few test sales. Under <em>Finance → Fiscal</em> they must show <em>Registered</em> with an NIVF. Then switch the test system off.</li>
+    </ol>
+  </details>
+  <details><summary>No internet</summary><p>Sales never stop. Without a connection the receipt is printed with its NSLF and the note that the NIVF will be added later. InnKeeper sends waiting documents every minute once the connection returns; <em>Finance → Fiscal → Send waiting</em> sends them immediately. The law allows 48 hours: the dashboard warns you when a document gets close to the limit.</p></details>
+  <details><summary>Cash in the drawer</summary><p>The opening cash is reported automatically before the first cash sale of the day (the amount counted at the last day close). When cash is taken out of the drawer, report it under <em>Finance → Fiscal → Cash in the drawer</em>.</p></details>
+  <details><summary>Voids and rejected documents</summary><p>Voiding a fiscalized receipt sends a correction invoice that cancels it. If the tax authority rejects a document, it is shown in red with the reason (usually a wrong code or an expired certificate). Fix the setting and press <em>Send again</em>.</p></details>
+</section>
+
 <section id="pos">
   <h2>Restaurant, bar &amp; services</h2>
   <details open><summary>Taking an order</summary>
@@ -193,6 +210,24 @@
   </details>
   <details><summary>Automatic backups</summary><p>The Windows app saves a full backup every day and keeps the last 30. On a server, schedule <code>python manage.py backup</code>. Copy backups to another place (USB drive, cloud) regularly.</p></details>
   <details><summary>Activity log</summary><p><em>Settings → Activity log</em> records every check-in, payment, discount, void and setting change, with who did it and when.</p></details>
+  <details><summary>Import from Excel</summary><p><em>Settings → Import from Excel</em> brings in your menu, stock list or guest list. Download the template, fill it in Excel (one row per item), choose <em>File → Save as → CSV UTF-8</em> and upload it. A preview shows what will be added or updated and which rows have problems; nothing is saved until you confirm. Entries with the same name are updated, nothing is deleted. Albanian column names work too.</p></details>
+</section>
+
+<section id="golive">
+  <h2>Go-live checklist</h2>
+  <p>Before the first real guest, on the Windows PC at the property:</p>
+  <ol>
+    <li><strong>The PC</strong> – connect it by cable to the router, set Windows power options so it never sleeps, and turn off automatic restarts for updates during opening hours. Give it a fixed address in the router so tablets and kitchen screens always find it.</li>
+    <li><strong>Business details</strong> – name, NIPT, address, VAT rates and the receipt header/footer. Print a test receipt.</li>
+    <li><strong>Rooms, rates and seasons</strong> – check every room type, price and season; make a test reservation, check it in and out, then cancel or void it.</li>
+    <li><strong>Menus and stock</strong> – import them from Excel (<em>Settings → Import from Excel</em>), then check prices on a printed receipt.</li>
+    <li><strong>Staff</strong> – one account per person with the right role and, for cashiers, their fiscal operator code. Never share the manager account.</li>
+    <li><strong>Printers and screens</strong> – print a test page on every receipt and kitchen printer; open the kitchen/bar screens on their devices.</li>
+    <li><strong>Fiscalization</strong> – test system first, a few sales registered, then switch to live (see <a href="#fiscal">Fiscalization</a>).</li>
+    <li><strong>Online booking, card payments and channel manager</strong> – these need InnKeeper to be reachable from the internet. Set the public web address in <em>Settings → Online booking</em> (for example through a Cloudflare Tunnel or your router's port forwarding with HTTPS). Use each provider's test mode first.</li>
+    <li><strong>Backups</strong> – download a full backup and copy it to a USB drive or cloud folder; repeat every week. The app also keeps 30 daily backups on the PC.</li>
+    <li><strong>First day</strong> – at closing do a day close and count the cash, so the next day's opening cash is right.</li>
+  </ol>
 </section>
 
 <section id="windows">
@@ -205,6 +240,6 @@
   <h2>Questions</h2>
   <details><summary>Someone forgot their password</summary><p>A manager opens <em>Staff</em>, chooses the person and presses <em>Set a new password</em>. Passwords can't be viewed, only replaced.</p></details>
   <details><summary>"Too many failed attempts"</summary><p>After 5 wrong passwords the account is locked for 15 minutes. Wait, or ask a manager to set a new password.</p></details>
-  <details><summary>Is the receipt a fiscal receipt?</summary><p>No. InnKeeper's receipts and invoices are internal documents. In Albania, sales must also be fiscalised through a certified fiscal service or device.</p></details>
+  <details><summary>Is the receipt a fiscal receipt?</summary><p>Yes, when fiscalization is switched on: it shows the NSLF, NIVF and QR code. Without it, receipts say “This is not a fiscal receipt.” See <a href="#fiscal">Fiscalization</a>.</p></details>
   <details><summary>Can I delete a payment or a bill?</summary><p>No, on purpose: money records are never deleted. A manager voids them with a reason, which keeps the history honest and complete.</p></details>
 </section>

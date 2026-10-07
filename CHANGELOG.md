@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.5.0 — fiscalization and Excel import
+
+**Shqip**
+
+- **Fiskalizimi direkt me tatimet (DPT):** çdo faturë e paguar e restorantit/barit dhe çdo faturë mysafiri nënshkruhet me certifikatën e biznesit dhe regjistrohet te tatimet. Kuponi dhe fatura shfaqin NSLF, NIVF dhe kodin QR të verifikimit. TVSH e veçantë për akomodimin, fatura korrigjuese për anulimet, deklarimi ditor i arkës, punë pa internet me dërgim automatik brenda 48 orëve, sistemi provë i tatimeve. Faqja e re *Financa → Fiskalizimi* tregon çdo dokument dhe gjendjen e tij.
+- **Importi nga Excel:** menuja, stoku dhe mysafirët nga një skedar CSV, me parapamje para ruajtjes dhe emra kolonash shqip ose anglisht.
+- **Udhëzuesi:** seksione të reja për fiskalizimin, importin dhe një listë kontrolli për fillimin e punës.
+
+**English**
+
+- **Direct fiscalization with the tax authority (DPT):** every paid restaurant/bar bill and every guest bill is signed with the business's certificate and registered with the tax authority. Receipts and invoices show the NSLF, NIVF and verification QR code. Separate accommodation VAT, corrective invoices for voids, daily cash deposit, offline mode with automatic resend within 48 hours, and the tax authority's test system. The new *Finance → Fiscal* page lists every document and its status.
+- **Import from Excel:** menu, stock and guests from a CSV file, with a preview before saving and Albanian or English column names.
+- **Guide:** new sections on fiscalization, import and a go-live checklist.
+
+### Install or update on Windows
+1. Download **InnKeeper-Setup-2.5.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not yet code-signed. Click **More info → Run anyway**.
+
+> Fiscalization is off until you enable it in Settings. Keep the tax authority's test system on until your test sales show as Registered.
+
 ## 2.4.0 — channel manager and card payments
 
 **Shqip**
