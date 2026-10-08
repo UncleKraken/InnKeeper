@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.5.2 — night bars and clubs
+
+**Shqip**
+
+- **Dita e punës mbyllet në:** për lokalet që punojnë pas mesnate (p.sh. 04:00). Shitjet, pagesat, shpenzimet dhe stoku deri në atë orë llogariten në natën që u përkasin, që e gjithë nata të jetë në një mbyllje dite; mbyllja e ditës e hapur në 02:00 tregon atë natë. Netët e dhomave dhe kuponat fiskalë mbajnë datën e kalendarit. Te Cilësimet → Të dhënat e biznesit.
+- **Lloj i ri biznesi:** “Bar nate, klub ose lounge” në konfigurim, me barin dhe mbylljen e ditës në 05:00 të gatshme.
+
+**English**
+
+- **Business day ends at:** for places open after midnight (e.g. 04:00). Sales, payments, expenses and stock until that hour count on the night they belong to, so the whole night is in one day close; the day close opened at 02:00 shows that night. Room nights and fiscal receipts keep the calendar date. In Settings → Business details.
+- **New business type:** “Night bar, club or lounge” in the setup wizard, with a bar and a 05:00 day end ready.
+
+### Install or update on Windows
+1. Download **InnKeeper-Setup-2.5.2.exe** below and run it. Updating keeps all your data; a copy of the database is made first.
+2. Windows may show "Windows protected your PC" because the installer is not yet code-signed. Click **More info → Run anyway**.
+
 ## 2.5.1 — audit fixes before go-live
 
 **Shqip**

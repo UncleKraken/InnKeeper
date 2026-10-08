@@ -38,6 +38,7 @@ class BusinessForm(StyledFormMixin, forms.ModelForm):
             "currency_symbol",
             "vat_rate",
             "default_language",
+            "day_ends_at",
             "check_in_time",
             "check_out_time",
         ]

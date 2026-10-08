@@ -15,10 +15,13 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.db import models
-from django.db.models import functions  # noqa: F401  (models.functions)
-from django.db.models import Sum
-from django.utils import timezone
+from django.db.models import (
+    Sum,
+    functions,  # noqa: F401  (models.functions)
+)
 from django.utils.translation import gettext_lazy as _
+
+from apps.core.businessday import business_date
 
 MONEY = {"max_digits": 12, "decimal_places": 2}
 ZERO = Decimal("0.00")
@@ -78,9 +81,15 @@ class VoidableQuerySet(models.QuerySet):
 
     def period(self, start, end=None):
         end = end or start
-        return self.filter(
-            models.Q(business_date__range=(start, end)) | models.Q(voided=True, voided_at__date__range=(start, end))
-        )
+        return self.filter(models.Q(business_date__range=(start, end)) | _voided_in(start, end))
+
+
+def _voided_in(start, end) -> models.Q:
+    """Voids made during the business days start…end (they may run past midnight, see core.businessday)."""
+    from apps.core.businessday import day_range
+
+    since, until = day_range(start, end)
+    return models.Q(voided=True, voided_at__gte=since, voided_at__lt=until)
 
 
 def net(field: str, start, end=None, integer: bool = False):
@@ -90,7 +99,7 @@ def net(field: str, start, end=None, integer: bool = False):
     zero = models.Value(0, output_field=out)
     plus = models.Case(models.When(business_date__range=(start, end), then=models.F(field)), default=zero, output_field=out)
     minus = models.Case(
-        models.When(voided=True, voided_at__date__range=(start, end), then=models.F(field)),
+        models.When(_voided_in(start, end), then=models.F(field)),
         default=zero,
         output_field=out,
     )
@@ -98,7 +107,7 @@ def net(field: str, start, end=None, integer: bool = False):
 
 
 class LedgerEntry(models.Model):
-    business_date = models.DateField(_("date"), default=timezone.localdate, db_index=True)
+    business_date = models.DateField(_("date"), default=business_date, db_index=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
     voided = models.BooleanField(_("voided"), default=False)

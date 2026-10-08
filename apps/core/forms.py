@@ -81,6 +81,13 @@ class SetupForm(StyledFormMixin, forms.Form):
     outlets = forms.MultipleChoiceField(
         label=gettext_lazy("Your outlets and services"), widget=forms.CheckboxSelectMultiple, required=False
     )
+    day_ends_at = forms.TypedChoiceField(
+        label=gettext_lazy("Business day ends at"),
+        coerce=int,
+        required=False,
+        empty_value=None,
+        help_text=gettext_lazy("Open after midnight? Sales until this hour count on the night they belong to."),
+    )
 
     def __init__(self, *args, **kwargs):
         from apps.core.models import HotelSettings
@@ -89,6 +96,7 @@ class SetupForm(StyledFormMixin, forms.Form):
         super().__init__(*args, **kwargs)
         self.fields["business_type"].choices = HotelSettings.BusinessType.choices
         self.fields["outlets"].choices = [(k, v[0]) for k, v in STARTER_OUTLETS.items()]
+        self.fields["day_ends_at"].choices = HotelSettings.DAY_ENDS_CHOICES
 
     def clean(self):
         cleaned = super().clean()

@@ -69,7 +69,10 @@ def dashboard(request):
         ctx["open_order_list"] = [o for o in open_qs.order_by("opened_at")[:10] if o.outlet.user_can_use(user)]
 
     if can_access(user, "finance"):
-        ctx["revenue_today"] = Charge.objects.period(today).aggregate(t=net("amount", today))["t"] or 0
+        from apps.core.businessday import business_date
+
+        day = business_date()  # a night bar at 01:30 still sees tonight's takings
+        ctx["revenue_today"] = Charge.objects.period(day).aggregate(t=net("amount", day))["t"] or 0
 
     if can_access(user, "frontdesk") and HotelSettings.load().channex_enabled:
         from datetime import timedelta as _td
@@ -160,6 +163,7 @@ def setup_wizard(request):
                     rooms_per_floor=d.get("rooms_per_floor") or 0,
                     room_rate=d.get("room_rate") or Decimal("0"),
                     outlets=set(d["outlets"]),
+                    day_ends_at=d.get("day_ends_at"),
                 ),
                 request.user,
             )
@@ -191,10 +195,12 @@ def setup_wizard(request):
                 "vat_rate": hs.vat_rate,
                 "modules": current,
                 "outlets": sorted(DEFAULTS_BY_TYPE[hs.business_type]["outlets"]),
+                "day_ends_at": hs.day_ends_at,
             }
         )
     defaults = {
-        k: {"modules": sorted(v["modules"]), "outlets": sorted(v["outlets"])} for k, v in DEFAULTS_BY_TYPE.items()
+        k: {"modules": sorted(v["modules"]), "outlets": sorted(v["outlets"]), "day_ends_at": v["day_ends_at"]}
+        for k, v in DEFAULTS_BY_TYPE.items()
     }
     from apps.frontdesk.models import Room
     from apps.outlets.models import Outlet

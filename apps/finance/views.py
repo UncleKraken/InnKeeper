@@ -4,19 +4,18 @@ from decimal import Decimal
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.permissions import module_required
-from apps.frontdesk.models import Reservation, Room
-
+from apps.core.businessday import business_date
 from apps.core.models import SafeCSVWriter
+from apps.frontdesk.models import Reservation, Room
 
 from .models import ZERO, Charge, Expense, Folio, Payment, net
 
 
 def _range(request) -> tuple[date, date]:
-    today = timezone.localdate()
+    today = business_date()
     default_start = today.replace(day=1)
     try:
         start = date.fromisoformat(request.GET.get("from", ""))
@@ -71,7 +70,7 @@ def dashboard(request):
     for row in charges.filter(business_date__range=(start, end)).values("business_date").annotate(t=Sum("amount")):
         per_day[row["business_date"]] = per_day.get(row["business_date"], ZERO) + row["t"]
     for c in charges.filter(voided=True, voided_at__isnull=False).only("voided_at", "amount"):
-        d = timezone.localdate(c.voided_at)
+        d = business_date(c.voided_at)
         if start <= d <= end:
             per_day[d] = per_day.get(d, ZERO) - c.amount
     daily = [

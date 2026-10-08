@@ -13,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 
 from apps.accounts.permissions import module_required
+from apps.core.businessday import business_date, day_range
 from apps.core.exceptions import BusinessError
 from apps.core.forms import DateInput, StyledFormMixin
 from apps.core.models import audit
@@ -62,7 +63,7 @@ def expense_list(request):
 @module_required("finance")
 def expense_form(request, pk=None):
     expense = get_object_or_404(Expense, pk=pk, voided=False) if pk else None
-    form = ExpenseForm(request.POST or None, instance=expense, initial={"business_date": timezone.localdate()})
+    form = ExpenseForm(request.POST or None, instance=expense, initial={"business_date": business_date()})
     if request.method == "POST" and form.is_valid():
         obj = form.save(commit=False)
         if not obj.pk:
@@ -125,7 +126,8 @@ def day_summary(day: date) -> dict:
         .annotate(t=amount, n=Count("id"))
         .order_by("-t")
     )
-    receipts = Order.objects.filter(closed_at__date=day, status=Order.Status.CLOSED)
+    since, until = day_range(day)
+    receipts = Order.objects.filter(closed_at__gte=since, closed_at__lt=until, status=Order.Status.CLOSED)
     return {
         "by_method": by_method,
         "method_rows": [(label, by_method[value]) for value, label in Payment.Method.choices if by_method[value]],
@@ -148,7 +150,7 @@ def day_summary(day: date) -> dict:
         ],
         "receipt_count": receipts.count(),
         "discounts": receipts.aggregate(t=Sum("discount"))["t"] or ZERO,
-        "voids": Order.objects.filter(closed_at__date=day, status=Order.Status.CANCELLED)
+        "voids": Order.objects.filter(closed_at__gte=since, closed_at__lt=until, status=Order.Status.CANCELLED)
         .exclude(receipt_number="")
         .count(),
     }
@@ -167,7 +169,7 @@ def day_close(request):
     try:
         day = date.fromisoformat(request.GET.get("date", ""))
     except ValueError:
-        day = timezone.localdate()
+        day = business_date()  # at 01:30 a night bar is still closing yesterday
     summary = day_summary(day)
     existing = DayClose.objects.filter(business_date=day).first()
     previous = DayClose.objects.filter(business_date__lt=day).first()
@@ -231,15 +233,16 @@ def day_close(request):
 @module_required("finance")
 def sales(request):
     start, end = _range(request)
+    since, until = day_range(start, end)
     lines = OrderLine.objects.filter(
-        order__status=Order.Status.CLOSED, order__closed_at__date__gte=start, order__closed_at__date__lte=end
+        order__status=Order.Status.CLOSED, order__closed_at__gte=since, order__closed_at__lt=until
     )
     top_items = (
         lines.values("name", "order__outlet__name")
         .annotate(qty=Sum("quantity"), revenue=Sum(F("quantity") * F("unit_price")))
         .order_by("-revenue")[:30]
     )
-    orders = Order.objects.filter(status=Order.Status.CLOSED, closed_at__date__gte=start, closed_at__date__lte=end)
+    orders = Order.objects.filter(status=Order.Status.CLOSED, closed_at__gte=since, closed_at__lt=until)
     staff_totals = {}
     for o in orders.prefetch_related("lines"):
         key = o.opened_by_id

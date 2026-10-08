@@ -55,14 +55,23 @@ DEFAULTS_BY_TYPE = {
     HotelSettings.BusinessType.HOTEL: {
         "modules": {"rooms", "housekeeping", "maintenance", "outlets"},
         "outlets": {"restaurant", "bar", "room_service"},
+        "day_ends_at": 0,
     },
     HotelSettings.BusinessType.GUESTHOUSE: {
         "modules": {"rooms", "housekeeping", "maintenance"},
         "outlets": set(),
+        "day_ends_at": 0,
     },
     HotelSettings.BusinessType.RESTAURANT: {
         "modules": {"outlets", "maintenance"},
         "outlets": {"restaurant", "bar"},
+        "day_ends_at": 0,
+    },
+    # Night bars and clubs: the night's takings belong to the evening it started.
+    HotelSettings.BusinessType.NIGHTLIFE: {
+        "modules": {"outlets", "maintenance"},
+        "outlets": {"bar"},
+        "day_ends_at": 5,
     },
 }
 
@@ -83,6 +92,7 @@ class SetupAnswers:
     rooms_per_floor: int = 0
     room_rate: Decimal = Decimal("60")
     outlets: set[str] = field(default_factory=set)
+    day_ends_at: int | None = None  # None: the usual for this type of business
 
 
 def grid_positions(count: int, per_row: int = 6) -> list[tuple[int, int]]:
@@ -122,6 +132,11 @@ def apply_setup(answers: SetupAnswers, user) -> HotelSettings:
     hs.module_housekeeping = "housekeeping" in answers.modules and hs.module_rooms
     hs.module_maintenance = "maintenance" in answers.modules
     hs.module_outlets = "outlets" in answers.modules
+    hs.day_ends_at = (
+        answers.day_ends_at
+        if answers.day_ends_at is not None
+        else DEFAULTS_BY_TYPE.get(answers.business_type, {}).get("day_ends_at", 0)
+    )
     hs.setup_completed = True
     hs.save()
 

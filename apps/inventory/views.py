@@ -7,10 +7,10 @@ from django.db.models import Count, F, Q, Sum
 from django.forms import modelform_factory
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.permissions import module_required
+from apps.core import businessday
 from apps.core.crud import CrudCreateView, CrudListView, CrudUpdateView
 from apps.core.exceptions import BusinessError
 from apps.core.forms import DateInput, StyledFormMixin
@@ -19,7 +19,15 @@ from apps.finance.views import _range
 from apps.outlets.models import Item, Outlet
 
 from . import services
-from .models import ZERO, Delivery, RecipeLine, StockCount, StockItem, StockMove, Supplier
+from .models import (
+    ZERO,
+    Delivery,
+    RecipeLine,
+    StockCount,
+    StockItem,
+    StockMove,
+    Supplier,
+)
 
 TABS = [
     ("inventory:stock", _("Stock")),
@@ -189,7 +197,7 @@ def delivery_list(request):
 
 class DeliveryHeaderForm(StyledFormMixin, forms.Form):
     supplier = forms.ModelChoiceField(label=_("Supplier"), queryset=Supplier.objects.none(), required=False)
-    business_date = forms.DateField(label=_("Date"), widget=DateInput, initial=timezone.localdate)
+    business_date = forms.DateField(label=_("Date"), widget=DateInput, initial=businessday.business_date)
     reference = forms.CharField(label=_("Invoice / reference"), max_length=80, required=False)
     note = forms.CharField(label=_("Note"), max_length=255, required=False)
     record_expense = forms.BooleanField(

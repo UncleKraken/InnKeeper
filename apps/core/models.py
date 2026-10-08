@@ -38,9 +38,20 @@ class HotelSettings(models.Model):
         HOTEL = "hotel", _("Hotel with restaurant, bar and services")
         GUESTHOUSE = "guesthouse", _("Guesthouse, B&B, hostel or apartments")
         RESTAURANT = "restaurant", _("Restaurant, bar or café (no rooms)")
+        NIGHTLIFE = "nightlife", _("Night bar, club or lounge (open after midnight)")
 
     business_type = models.CharField(
         _("type of business"), max_length=20, choices=BusinessType.choices, default=BusinessType.HOTEL
+    )
+    DAY_ENDS_CHOICES = [(0, _("Midnight (00:00)"))] + [(h, f"{h:02d}:00") for h in range(1, 9)]
+    day_ends_at = models.PositiveSmallIntegerField(
+        _("business day ends at"),
+        default=0,
+        choices=DAY_ENDS_CHOICES,
+        help_text=_(
+            "For places open after midnight: sales until this hour count on the previous day, so the "
+            "night's takings are in one day close. Room nights and fiscal receipts keep the calendar date."
+        ),
     )
     module_rooms = models.BooleanField(
         _("rooms & front desk"), default=True, help_text=_("Reservations, room rack, guests and guest bills.")

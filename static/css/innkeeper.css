@@ -428,7 +428,7 @@ textarea.input { min-height: 90px; resize: vertical; }
 .steps li.active::before, .steps li.done::before { background: var(--primary); }
 .steps li::after { content: counter(step) ". "; display: none; }
 .wizard-nav { margin-top: 1.25rem; }
-.choice-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .9rem; }
+.choice-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
 .choice-card {
   position: relative; display: flex; flex-direction: column; gap: .4rem; cursor: pointer;
   padding: 1.1rem; border: 2px solid var(--border); border-radius: var(--radius); background: var(--surface);

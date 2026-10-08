@@ -33,9 +33,9 @@
           {% for value, label in form.fields.business_type.choices %}
             <label class="choice-card">
               <input type="radio" name="business_type" value="{{ value }}" {% if form.business_type.value == value %}checked{% endif %}>
-              <span class="choice-icon">{% if value == "hotel" %}{% icon "building" %}{% elif value == "guesthouse" %}{% icon "bed" %}{% else %}{% icon "utensils" %}{% endif %}</span>
+              <span class="choice-icon">{% if value == "hotel" %}{% icon "building" %}{% elif value == "guesthouse" %}{% icon "bed" %}{% elif value == "nightlife" %}{% icon "moon" %}{% else %}{% icon "utensils" %}{% endif %}</span>
               <strong>{{ label }}</strong>
-              <small>{% if value == "hotel" %}{% translate "Rooms, front desk, housekeeping, restaurant, bar, spa and more." %}{% elif value == "guesthouse" %}{% translate "Rooms, reservations, cleaning and guest bills. Simple and light." %}{% else %}{% translate "Tables, menu, orders, receipts and daily cash — no rooms." %}{% endif %}</small>
+              <small>{% if value == "hotel" %}{% translate "Rooms, front desk, housekeeping, restaurant, bar, spa and more." %}{% elif value == "guesthouse" %}{% translate "Rooms, reservations, cleaning and guest bills. Simple and light." %}{% elif value == "nightlife" %}{% translate "Bar, tables, quick orders and the night's cash in one day close, also after midnight." %}{% else %}{% translate "Tables, menu, orders, receipts and daily cash — no rooms." %}{% endif %}</small>
             </label>
           {% endfor %}
         </div>
@@ -51,8 +51,8 @@
         <h2 style="margin-bottom:.35rem">{% translate "Business details" %}</h2>
         <p class="muted">{% translate "Printed on receipts and invoices." %}</p>
         <div class="form-grid" style="margin-top:1rem">
-          {% for f in form %}{% if f.name in "address tax_id phone email currency vat_rate" and f.name != "name" %}
-            <div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}</div>
+          {% for f in form %}{% if f.name in "address tax_id phone email currency vat_rate day_ends_at" and f.name != "name" %}
+            <div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% if f.help_text %}<div class="help">{{ f.help_text }}</div>{% endif %}</div>
           {% endif %}{% endfor %}
         </div>
       </div>
@@ -148,6 +148,7 @@
       var d = defaults[r.value]; if (!d) return;
       document.querySelectorAll('input[name=modules]').forEach(function (c) { c.checked = d.modules.indexOf(c.value) !== -1; });
       document.querySelectorAll('input[name=outlets]:not([disabled])').forEach(function (c) { c.checked = d.outlets.indexOf(c.value) !== -1; });
+      var dayEnd = document.getElementById('id_day_ends_at'); if (dayEnd) dayEnd.value = String(d.day_ends_at);
     });
   });
   next.addEventListener('click', function () {

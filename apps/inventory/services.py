@@ -6,13 +6,21 @@ from decimal import Decimal
 
 from django.db import transaction
 from django.db.models import Sum
-from django.utils import timezone
 from django.utils.translation import gettext as _
 
+from apps.core import businessday
 from apps.core.exceptions import BusinessError
 from apps.core.models import HotelSettings, audit
 
-from .models import ZERO, Delivery, RecipeLine, StockCount, StockItem, StockMove, Supplier
+from .models import (
+    ZERO,
+    Delivery,
+    RecipeLine,
+    StockCount,
+    StockItem,
+    StockMove,
+    Supplier,
+)
 
 CENT = Decimal("0.01")
 
@@ -59,7 +67,7 @@ def consume_for_order(order, user=None) -> int:
             -qty,
             user=user,
             order=order,
-            business_date=timezone.localdate(),
+            business_date=businessday.business_date(),
             note=f"{order.outlet} #{order.number}",
         )
     return len(needed)
@@ -110,7 +118,7 @@ def receive_delivery(
         raise BusinessError(_("Add at least one item to the delivery."))
     if any(ln.quantity < 0 or ln.unit_cost < 0 for ln in lines):
         raise BusinessError(_("Quantities and prices can't be negative."))
-    business_date = business_date or timezone.localdate()
+    business_date = business_date or businessday.business_date()
     delivery = Delivery.objects.create(
         supplier=supplier, business_date=business_date, reference=reference, note=note, created_by=user
     )
@@ -173,7 +181,7 @@ def apply_count(counted: dict[int, Decimal], *, user, note: str = "", business_d
     """Set stock to what was physically counted. Items left blank are not changed."""
     if not counted:
         raise BusinessError(_("Enter at least one counted quantity."))
-    count = StockCount.objects.create(business_date=business_date or timezone.localdate(), note=note, created_by=user)
+    count = StockCount.objects.create(business_date=business_date or businessday.business_date(), note=note, created_by=user)
     diff_value = ZERO
     for item in StockItem.objects.select_for_update().filter(pk__in=counted):
         new = counted[item.pk]

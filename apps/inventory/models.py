@@ -10,8 +10,9 @@ from decimal import Decimal
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
+from apps.core.businessday import business_date
 
 QTY = {"max_digits": 12, "decimal_places": 3}
 MONEY = {"max_digits": 12, "decimal_places": 2}
@@ -124,7 +125,7 @@ class Delivery(models.Model):
         related_name="deliveries",
         verbose_name=_("supplier"),
     )
-    business_date = models.DateField(_("date"), default=timezone.localdate)
+    business_date = models.DateField(_("date"), default=business_date)
     reference = models.CharField(_("invoice / reference"), max_length=80, blank=True)
     note = models.CharField(_("note"), max_length=255, blank=True)
     total = models.DecimalField(_("total"), default=ZERO, **MONEY)
@@ -144,7 +145,7 @@ class Delivery(models.Model):
 
 
 class StockCount(models.Model):
-    business_date = models.DateField(_("date"), default=timezone.localdate)
+    business_date = models.DateField(_("date"), default=business_date)
     note = models.CharField(_("note"), max_length=255, blank=True)
     difference_value = models.DecimalField(_("difference"), default=ZERO, **MONEY)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
@@ -172,7 +173,7 @@ class StockMove(models.Model):
     kind = models.CharField(_("type"), max_length=12, choices=Kind.choices)
     quantity = models.DecimalField(_("quantity"), help_text=_("Positive in, negative out."), **QTY)
     unit_cost = models.DecimalField(_("cost per unit"), default=ZERO, **COST)
-    business_date = models.DateField(_("date"), default=timezone.localdate, db_index=True)
+    business_date = models.DateField(_("date"), default=business_date, db_index=True)
     note = models.CharField(_("note"), max_length=255, blank=True)
     order = models.ForeignKey(
         "outlets.Order", null=True, blank=True, on_delete=models.SET_NULL, related_name="stock_moves"

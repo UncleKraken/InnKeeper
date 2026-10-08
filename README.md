@@ -30,7 +30,7 @@ It adapts to the business: a setup wizard asks whether you run a **hotel**, a **
 | **Housekeeping** | Room status board by floor, tasks created automatically at check-out, assign to staff, start → done |
 | **Maintenance** | Tickets with priority and assignee; a ticket can take a room out of order until resolved |
 | **Finance** | Revenue, expenses and profit; end-of-day cash count with printable Z report; best sellers, sales by staff and busiest hours; occupancy, ADR, RevPAR; unpaid bills; full ledger with CSV export (opens correctly in Excel) |
-| **Settings** | Setup wizard, import of menu, stock and guests from Excel (CSV) with preview, business details, receipt design with preview, modules on/off, staff and roles, activity log |
+| **Settings** | Setup wizard for hotels, guesthouses, restaurants and night bars/clubs, business day that can end after midnight, import of menu, stock and guests from Excel (CSV) with preview, business details, receipt design with preview, modules on/off, staff and roles, activity log |
 | **Backups** | Full backup (move to a new computer) and settings-only export (second location), restore with preview and automatic safety copy, daily automatic backups |
 | **Help** | Built-in user guide in Albanian and English, getting-started checklist for new businesses |
 

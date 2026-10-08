@@ -17,13 +17,23 @@ from apps.core.exceptions import BusinessError
 from apps.core.forms import StyledFormMixin
 from apps.core.templatetags.innkeeper import money
 from apps.finance.models import Payment
-from apps.frontdesk.models import Reservation
-
 from apps.fiscal.views import fiscal_block
+from apps.frontdesk.models import Reservation
 
 from . import services
 from .floorplan import floor_plan, floor_plan_save  # noqa: F401  (routed in urls.py)
-from .models import Category, Item, KitchenTicket, Order, OrderLine, Outlet, Printer, PrintJob, Station, Table
+from .models import (
+    Category,
+    Item,
+    KitchenTicket,
+    Order,
+    OrderLine,
+    Outlet,
+    Printer,
+    PrintJob,
+    Station,
+    Table,
+)
 
 
 def _outlet_for(request, pk) -> Outlet:
@@ -471,7 +481,16 @@ def receipts(request):
     qs = qs.filter(outlet__in=outlets)
     day = request.GET.get("date", "")
     if day:
-        qs = qs.filter(closed_at__date=day)
+        from datetime import date
+
+        from apps.core.businessday import day_range
+
+        try:
+            since, until = day_range(date.fromisoformat(day))  # a night's bills, also those after midnight
+        except ValueError:
+            pass
+        else:
+            qs = qs.filter(closed_at__gte=since, closed_at__lt=until)
     if request.GET.get("outlet"):
         qs = qs.filter(outlet_id=request.GET["outlet"])
     q = request.GET.get("q", "").strip()
