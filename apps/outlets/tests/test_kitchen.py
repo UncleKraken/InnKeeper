@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from django.urls import reverse
 
+from apps.core.exceptions import BusinessError
 from apps.core.testing import PASSWORD, HotelTestCase
 from apps.accounts.models import Role, User
 from apps.outlets import printing, services
@@ -122,7 +123,9 @@ class KitchenFlowTests(HotelTestCase):
         services.add_item(order, self.soup, user=self.waiter)
         (ticket,) = services.send_to_kitchen(order, user=self.waiter)
         services.change_quantity(order.lines.get(), -1, user=self.waiter)
-        services.cancel_order(order, user=self.waiter)
+        with self.assertRaises(BusinessError):  # items reached the kitchen: only a manager may cancel
+            services.cancel_order(order, user=self.waiter)
+        services.cancel_order(order, user=self.manager)
         ticket.refresh_from_db()
         self.assertEqual(ticket.status, KitchenTicket.Status.CANCELLED)
 

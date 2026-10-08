@@ -82,6 +82,19 @@ def export_room(room: Room) -> str:
         f"X-WR-CALNAME:{_escape(f'{hs.name} – {room.number}')}",
     ]
     since = timezone.localdate() - timedelta(days=30)
+    if room.out_of_order:  # close today and the next week on the channels while it is out of order
+        today = timezone.localdate()
+        lines += [
+            "BEGIN:VEVENT",
+            f"UID:ooo-{room.pk}@innkeeper",
+            f"DTSTAMP:{stamp}",
+            f"DTSTART;VALUE=DATE:{today:%Y%m%d}",
+            f"DTEND;VALUE=DATE:{today + timedelta(days=7):%Y%m%d}",
+            "SUMMARY:" + _escape(_("Not available")),
+            "STATUS:CONFIRMED",
+            "TRANSP:OPAQUE",
+            "END:VEVENT",
+        ]
     for r in room.reservations.filter(status__in=Reservation.ACTIVE_STATUSES, departure__gte=since):
         lines += [
             "BEGIN:VEVENT",
@@ -238,7 +251,20 @@ def sync_feed(feed: CalendarFeed) -> SyncResult:
         except ValidationError as e:
             result.conflicts.append(_conflict(ev, e))
 
+    # A calendar that suddenly comes back empty is usually a channel hiccup, not every guest cancelling.
+    # Only cancel everything when it is empty twice in a row.
+    previously_empty = feed.last_empty
+    feed.last_empty = not live
+    hold_cancellations = not live and not previously_empty
+    for uid, ev in live.items():
+        res = existing.get(uid)
+        if res is not None and res.status == Reservation.Status.CANCELLED and res.departure > today:
+            result.conflicts.append(
+                _conflict(ev, _("This booking is on the channel again but cancelled here. Rebook it or close the dates on the channel."))
+            )
     for uid, res in existing.items():
+        if hold_cancellations:
+            break
         if uid not in live and res.status == Reservation.Status.BOOKED and res.departure > today:
             with transaction.atomic():
                 services.cancel(res, None)
@@ -250,7 +276,7 @@ def sync_feed(feed: CalendarFeed) -> SyncResult:
     feed.last_sync = timezone.now()
     feed.last_error = ""
     feed.conflicts = result.conflicts
-    feed.save(update_fields=["last_sync", "last_error", "conflicts"])
+    feed.save(update_fields=["last_sync", "last_error", "conflicts", "last_empty"])
     if result.created or result.updated or result.cancelled:
         audit(
             None,

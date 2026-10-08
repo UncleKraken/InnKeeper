@@ -196,6 +196,7 @@ class FiscalSettingsForm(StyledFormMixin, forms.ModelForm):
             "fiscal_operator_code",
             "fiscal_town",
             "vat_rate_accommodation",
+            "fiscal_exchange_rate",
             "certificate_file",
             "fiscal_certificate_password",
         ]
@@ -229,6 +230,17 @@ class FiscalSettingsForm(StyledFormMixin, forms.ModelForm):
                     self.add_error(f, _("Needed to fiscalize."))
             if not data:
                 self.add_error("certificate_file", _("Upload the certificate."))
+            if (self.instance.currency or "ALL").upper() != "ALL" and not cleaned.get("fiscal_exchange_rate"):
+                self.add_error(
+                    "fiscal_exchange_rate",
+                    _("Your prices are in %(c)s: the tax authority needs the rate to lekë.") % {"c": self.instance.currency},
+                )
+            if not self.instance.fiscal_enabled or not self.instance.fiscal_since:
+                # Turned on now (the instance still holds the saved values): sales from here on are
+                # checked for a fiscal receipt, never the ones made while it was off.
+                from django.utils import timezone
+
+                self.instance.fiscal_since = timezone.now()
         return cleaned
 
 

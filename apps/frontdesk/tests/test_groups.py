@@ -59,10 +59,15 @@ class GroupTests(HotelTestCase):
         self.assertEqual(main.folio.balance, Decimal("87.00"))  # 1 night + minibar of the other room
         with self.assertRaises(BusinessError):
             group_check_out(main, self.reception)  # the payer must settle
-        services.add_payment(main.folio, amount=Decimal("200"), method="card", user=self.reception)
+        main.folio.refresh_from_db()
+        self.assertEqual(main.folio.balance, Decimal("87.00"))  # the refused check-out left nothing behind
+        services.add_payment(main.folio, amount=Decimal("167"), method="card", user=self.reception)
         group_check_out(main, self.reception)
         main.refresh_from_db()
         self.assertEqual(main.status, Reservation.Status.CHECKED_OUT)
+        self.assertEqual((main.folio.balance, main.folio.status), (Decimal("0"), Folio.Status.CLOSED))
+        # Each stay was charged its own night exactly once.
+        self.assertEqual((main.accommodation_nights_posted(), other.accommodation_nights_posted()), (1, 1))
 
     def test_each_room_pays_when_one_bill_is_off(self):
         group = self.make_group(one_bill=False)

@@ -22,10 +22,18 @@ def _lock_room(room_id: int) -> Room:
 @transaction.atomic
 def save_reservation(reservation: Reservation, user) -> Reservation:
     """Create or update a reservation after validating dates, capacity and availability."""
-    _lock_room(reservation.room_id)
+    room = _lock_room(reservation.room_id)
     is_new = reservation.pk is None
-    if not is_new and reservation.status not in Reservation.ACTIVE_STATUSES:
+    old = None if is_new else Reservation.objects.get(pk=reservation.pk)
+    if old and old.status not in Reservation.ACTIVE_STATUSES:
         raise BusinessError(_("Closed or cancelled reservations cannot be changed."))
+    if old and old.status == Reservation.Status.CHECKED_IN:
+        if old.room_id != reservation.room_id:
+            raise BusinessError(_("Use “Move room” to change the room of a guest in house."))
+        if old.arrival != reservation.arrival:
+            raise BusinessError(_("The arrival date can't change after check-in."))
+    if (is_new or old.room_id != reservation.room_id) and room.out_of_order and reservation.arrival <= timezone.localdate():
+        raise BusinessError(_("Room %(n)s is out of order.") % {"n": room.number})
     reservation.full_clean()
     if is_new:
         reservation.created_by = user
@@ -82,7 +90,7 @@ def post_accommodation(
         nights_due = min((on_date - reservation.arrival).days, reservation.nights)
     else:
         nights_due = reservation.nights_to_charge(on_date)
-    posted = folio.accommodation_nights_posted()
+    posted = reservation.accommodation_nights_posted()
     if nights_due <= posted:
         return None
     # One charge per run of nights with the same price (seasons can change the price mid-stay).
@@ -91,15 +99,17 @@ def post_accommodation(
     while start < nights_due:
         price = reservation.rate_for_night(start)
         end = start + 1
-        while end < nights_due and reservation.rate_for_night(end) == price:
+        # The night audit posts each night on its own date (also when catching up after the PC was off).
+        while not night_audit and end < nights_due and reservation.rate_for_night(end) == price:
             end += 1
         charge = Charge.objects.create(
             folio=folio,
+            reservation=reservation,
             kind=Charge.Kind.ACCOMMODATION,
             description=_("Accommodation – room %(room)s") % {"room": reservation.room.number},
             quantity=end - start,
             unit_price=price,
-            business_date=on_date - timedelta(days=1) if night_audit else on_date,
+            business_date=reservation.arrival + timedelta(days=start) if night_audit else on_date,
             created_by=user,
         )
         audit(user, "folio.accommodation", f"{folio.number}: {end - start} × {price}", folio)
@@ -131,15 +141,26 @@ def check_out(reservation: Reservation, user, *, allow_balance: bool = False) ->
             raise BusinessError(
                 _("The guest still owes %(amount)s. Take payment before checking out.") % {"amount": f"{balance:.2f}"}
             )
+        if balance < 0 and not allow_balance:
+            raise BusinessError(
+                _(
+                    "The guest has paid %(amount)s more than the bill. Give it back and record it as a refund "
+                    "(a payment with a minus sign) before checking out."
+                )
+                % {"amount": f"{-balance:.2f}"}
+            )
 
         today = timezone.localdate()
         reservation.status = Reservation.Status.CHECKED_OUT
         reservation.checked_out_at = timezone.now()
-        if reservation.departure != today and today > reservation.arrival:
-            reservation.departure = today
+        # The stay ends today (at least one night). A late departure is only recorded if the room is
+        # free, so it never runs into the next guest's booking on the room rack.
+        actual = max(today, reservation.arrival + timedelta(days=1))
+        if actual < reservation.departure or (actual > reservation.departure and _room_free_between(reservation, reservation.departure, actual)):
+            reservation.departure = actual
         reservation.save(update_fields=["status", "checked_out_at", "departure"])
 
-        if balance <= 0:
+        if balance == 0:
             _close_folio(folio)
 
         from apps.housekeeping.services import room_vacated
@@ -162,6 +183,9 @@ def cancel(reservation: Reservation, user, *, no_show: bool = False) -> Reservat
     reservation.status = Reservation.Status.NO_SHOW if no_show else Reservation.Status.CANCELLED
     reservation.cancelled_at = timezone.now()
     reservation.save(update_fields=["status", "cancelled_at"])
+    folio = Folio.objects.filter(reservation=reservation).first()
+    if folio:
+        _close_if_settled(folio)
     audit(
         user,
         "reservation.no_show" if no_show else "reservation.cancel",
@@ -169,6 +193,25 @@ def cancel(reservation: Reservation, user, *, no_show: bool = False) -> Reservat
         reservation,
     )
     return reservation
+
+
+def _room_free_between(reservation: Reservation, start: date, end: date) -> bool:
+    return not Reservation.objects.filter(
+        room_id=reservation.room_id,
+        status__in=Reservation.ACTIVE_STATUSES,
+        arrival__lt=end,
+        departure__gt=start,
+    ).exclude(pk=reservation.pk).exists()
+
+
+FINISHED = (Reservation.Status.CHECKED_OUT, Reservation.Status.CANCELLED, Reservation.Status.NO_SHOW)
+
+
+def _close_if_settled(folio: Folio) -> None:
+    """A bill of a stay that is over closes (and gets its invoice number) once it adds up to zero."""
+    if folio.status == Folio.Status.OPEN and folio.balance == 0 and folio.reservation.status in FINISHED:
+        if folio.charges.filter(voided=False).exists() or folio.payments.filter(voided=False).exists():
+            _close_folio(folio)
 
 
 def _close_folio(folio: Folio) -> None:
@@ -209,6 +252,7 @@ def add_charge(
         created_by=user,
     )
     audit(user, "folio.charge", f"{folio.number}: {description} {charge.amount}", folio)
+    _close_if_settled(folio)
     return charge
 
 
@@ -218,13 +262,14 @@ def add_payment(folio: Folio, *, amount: Decimal, method: str, reference: str = 
     _require_open(folio)
     if amount == 0:
         raise BusinessError(_("Enter an amount."))
+    if amount < 0 and not getattr(user, "is_manager", False) and -amount > max(-folio.balance, Decimal("0")):
+        # Staff may give back what the guest overpaid; larger refunds need a manager.
+        raise BusinessError(
+            _("Only a manager can refund more than the guest's credit (%(c)s).") % {"c": f"{max(-folio.balance, 0):.2f}"}
+        )
     payment = Payment.objects.create(folio=folio, amount=amount, method=method, reference=reference, created_by=user)
     audit(user, "folio.payment", f"{folio.number}: {payment.get_method_display()} {amount}", folio)
-    if folio.balance == 0 and folio.reservation.status in (
-        Reservation.Status.CHECKED_OUT,
-        Reservation.Status.CANCELLED,
-    ):
-        _close_folio(folio)
+    _close_if_settled(folio)
     return payment
 
 
@@ -240,12 +285,18 @@ def void_entry(entry, *, reason: str, user):
         raise BusinessError(_("Already voided."))
     if entry.folio_id:
         _require_open(entry.folio)
+    if getattr(entry, "order_id", None):
+        raise BusinessError(
+            _("This comes from a restaurant/bar bill. Void that receipt instead (Receipts → void), so stock and the fiscal receipt are corrected too.")
+        )
     entry.voided = True
     entry.void_reason = reason.strip()[:255]
     entry.voided_by = user
     entry.voided_at = timezone.now()
     entry.save(update_fields=["voided", "void_reason", "voided_by", "voided_at"])
     audit(user, f"{entry._meta.model_name}.void", f"{entry} – {reason}", entry)
+    if entry.folio_id:
+        _close_if_settled(entry.folio)
     return entry
 
 
@@ -271,8 +322,9 @@ def move_room(reservation: Reservation, new_room: Room, user, *, use_new_rate: b
             )
     if use_new_rate:
         reservation.rate = new_room.room_type.base_rate
+        reservation.nightly_rates = []  # otherwise the old per-night prices would still apply
     reservation.full_clean()
-    reservation.save(update_fields=["room", "rate"])
+    reservation.save(update_fields=["room", "rate", "nightly_rates"])
     if reservation.status == Reservation.Status.CHECKED_IN:
         from apps.housekeeping.services import room_vacated
 

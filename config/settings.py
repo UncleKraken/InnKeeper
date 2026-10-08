@@ -73,6 +73,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "apps.core.middleware.SecureCookieMiddleware",
     "apps.core.middleware.SettingsCacheMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -114,6 +115,10 @@ DATABASES = {
         conn_max_age=600,
     )
 }
+if DATABASES["default"]["ENGINE"].endswith("sqlite3"):
+    # Take the write lock when a transaction starts and wait for it, instead of failing with
+    # "database is locked" when two people save at the same moment (SQLite ignores select_for_update).
+    DATABASES["default"].setdefault("OPTIONS", {}).update({"transaction_mode": "IMMEDIATE", "timeout": 20})
 
 AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "accounts:login"

@@ -73,7 +73,9 @@ def _require_open():
 
 
 def _client_key(request) -> str:
-    return f"innkeeper:booking-ip:{request.META.get('REMOTE_ADDR', '-')}"
+    from apps.core.middleware import client_ip
+
+    return f"innkeeper:booking-ip:{client_ip(request)}"
 
 
 def _type_name(rt: RoomType, lang: str) -> str:

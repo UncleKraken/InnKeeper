@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.5.1 — audit fixes before go-live
+
+**Shqip**
+
+- **Paratë:** një prekje e dyfishtë në “Merr para” nuk regjistron më dy pagesa; netët e anuluara nuk shtohen sërish nga auditi i natës; në grupet me një faturë, asnjë dhomë nuk paguhet dy herë dhe dhoma kryesore e anuluar nuk mbledh faturat e të tjerëve; tepricat duhet të kthehen para largimit; anulimet e ditëve të kaluara dalin në ditën e anulimit dhe nuk ndryshojnë mbylljet e ditëve; pagesat online janë në mbylljen e ditës; faturat e mosparaqitjeve mbyllen.
+- **Fiskalizimi:** zbritjet japin gjithmonë totalin e saktë; pjesa e paguar në tavolinë kur pjesa tjetër kalon në dhomë merr kupon fiskal; shitjet pa kupon (p.sh. certifikatë e gabuar) fiskalizohen vetë kur rregullohet problemi, me paralajmërim në panel; paralajmërim 30 ditë para skadimit të certifikatës; një dokument me problem nuk bllokon të tjerët; kursi i këmbimit për çmimet në EUR; deklarimi i arkës në sistemin provë nuk vlen për punën reale.
+- **Restoranti & bari:** zbritja mbetet brenda kufirit kur hiqen artikuj; faturat me zbritje 100% mbyllen; bashkimi i tavolinave ruan zbritjen; artikujt e mbaruar nuk shtohen me “+”; paralajmërim kur printeri i kuzhinës nuk printon.
+- **Recepsioni:** ndryshimi i shënimeve nuk ndryshon çmimet e kanaleve; dhomat jashtë funksionit nuk rezervohen; një kalendar bosh nga kanali nuk anulon rezervimet; largimi me vonesë nuk mbivendoset me mysafirin tjetër.
+- **Siguria & Windows:** bllokim pas fjalëkalimeve të gabuara edhe për /admin; adresa e vërtetë e vizitorit pas Cloudflare Tunnel; cookies të sigurta mbi HTTPS; eksportet CSV të sigurta për Excel; s'mund të hapen dy InnKeeper njëherësh; kopje e bazës së të dhënave para çdo përditësimi; ndryshimet e cilësimeve vlejnë menjëherë edhe për punët në sfond; asnjë “database is locked” kur dy veta ruajnë njëkohësisht.
+
+**English**
+
+- **Money:** a double tap on “Take cash” no longer records two payments; voided room nights aren't posted again by the night audit; on one-bill groups no room is charged twice and a cancelled main room no longer collects the others' bills; overpayments must be refunded before check-out; voids of past days count on the day they're made, so closed days never change; online payments are in the day close; no-show bills close.
+- **Fiscalization:** discounts always give the exact total; the part paid at the table when the rest goes to a room gets a fiscal receipt; sales left without a receipt (e.g. wrong certificate password) are fiscalized automatically once fixed, with a dashboard warning; a warning 30 days before the certificate expires; one bad document no longer blocks the others; exchange rate for prices in EUR; test-system cash reports don't count once live.
+- **Restaurant & bar:** discounts stay within the staff limit when items are removed; 100% discounted bills can be closed; merging tables keeps the discount; sold-out items can't be increased; a warning when a kitchen printer fails.
+- **Front desk:** editing notes keeps channel prices; out-of-order rooms can't be booked; one empty channel calendar no longer cancels bookings; late check-out never overlaps the next guest.
+- **Security & Windows:** login lockout also covers /admin; real visitor address behind Cloudflare Tunnel; secure cookies over HTTPS; Excel-safe CSV exports; only one InnKeeper can run; a copy of the database before every update; settings changes reach background jobs at once; no more “database is locked” when two people save at the same time.
+
+### Install or update on Windows
+1. Download **InnKeeper-Setup-2.5.1.exe** below and run it. Updating keeps all your data; a copy of the database is made first.
+2. Windows may show "Windows protected your PC" because the installer is not yet code-signed. Click **More info → Run anyway**.
+
 ## 2.5.0 — fiscalization and Excel import
 
 **Shqip**

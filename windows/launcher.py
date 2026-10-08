@@ -71,6 +71,41 @@ def already_running() -> bool:
         return False
 
 
+def copy_database(data: Path, prefix: str, keep: int = 5) -> Path:
+    """A consistent copy of the SQLite file, made before migrating.
+
+    A full backup can't be used here: it is written by the new version's code, which expects
+    the new tables. Restore it by replacing innkeeper.sqlite3 with this file while InnKeeper is stopped.
+    """
+    import sqlite3
+
+    target = data / "backups" / f"{prefix}-{datetime.now():%Y-%m-%d_%H%M%S}.sqlite3"
+    src = sqlite3.connect(str(data / "innkeeper.sqlite3"))
+    dst = sqlite3.connect(str(target))
+    try:
+        src.backup(dst)
+    finally:
+        dst.close()
+        src.close()
+    for old in sorted((data / "backups").glob("before-update-*.sqlite3"))[:-keep]:
+        old.unlink(missing_ok=True)
+    return target
+
+
+def single_instance() -> bool:
+    """False if another InnKeeper is already starting or running on this computer."""
+    global _MUTEX
+    if os.name != "nt":
+        return True
+    import ctypes
+
+    _MUTEX = ctypes.windll.kernel32.CreateMutexW(None, False, "Local\\InnKeeperApp")
+    return ctypes.windll.kernel32.GetLastError() != 183  # ERROR_ALREADY_EXISTS
+
+
+_MUTEX = None
+
+
 def prepare_database(log) -> None:
     import django
     from django.core.management import call_command
@@ -79,7 +114,6 @@ def prepare_database(log) -> None:
     from django.db import connection
 
     from apps import __version__
-    from apps.core.backup import save_backup_to_disk
 
     data = data_dir()
     version_file = data / "version.txt"
@@ -88,7 +122,7 @@ def prepare_database(log) -> None:
     if db_exists and previous and previous != __version__:
         # An update: keep a copy of the data from before migrating.
         try:
-            path = save_backup_to_disk(f"before-update-{previous}", keep=5)
+            path = copy_database(data, f"before-update-{previous}")
             log(f"Backup before update: {path.name}")
         except Exception as e:  # an unreadable old database shouldn't block startup
             log(f"Backup before update failed: {e}")
@@ -106,8 +140,14 @@ def daily_jobs(log, stop: threading.Event) -> None:
     from apps.core.backup import backup_dir, save_backup_to_disk
     from apps.frontdesk.services import night_audit
 
+    from django.db import close_old_connections
+
+    from apps.core.models import clear_settings_cache
+
     state = data_dir() / "last_audit.txt"
     while not stop.is_set():
+        clear_settings_cache()  # pick up settings changed in the browser
+        close_old_connections()
         try:
             autos = sorted(backup_dir().glob("auto-*.innkeeper"), key=lambda p: p.stat().st_mtime)
             if not autos or datetime.fromtimestamp(autos[-1].stat().st_mtime) < datetime.now() - timedelta(hours=20):
@@ -137,8 +177,14 @@ def channel_jobs(log, stop: threading.Event) -> None:
     from apps.core.models import HotelSettings
     from apps.frontdesk.channex import sync
 
+    from django.db import close_old_connections
+
+    from apps.core.models import clear_settings_cache
+
     last_full = None
     while not stop.is_set():
+        clear_settings_cache()  # pick up settings changed in the browser (fiscal, Channex)
+        close_old_connections()
         try:
             from apps.fiscal.services import resend_pending
 
@@ -164,8 +210,30 @@ def serve(log, ready: threading.Event) -> None:
 
     from config.wsgi import application
 
+    try:
+        # Waitress shares a port another program already uses (SO_REUSEADDR on Windows), so
+        # check first with an exclusive bind; otherwise the browser would open the other program.
+        probe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+            probe.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        try:
+            probe.bind(("0.0.0.0", PORT))
+        finally:
+            probe.close()
+    except OSError as e:
+        log(f"Could not start on port {PORT}: {e}. Close the program using it, or set INNKEEPER_PORT.")
+        SERVE_ERROR.append(str(e))
+        ready.set()
+        return
     ready.set()
-    waitress_serve(application, host="0.0.0.0", port=PORT, threads=8, ident=APP_NAME, _quiet=True)
+    try:
+        waitress_serve(application, host="0.0.0.0", port=PORT, threads=8, ident=APP_NAME, _quiet=True)
+    except OSError as e:
+        log(f"Could not start on port {PORT}: {e}. Close the program using it, or set INNKEEPER_PORT.")
+        SERVE_ERROR.append(str(e))
+
+
+SERVE_ERROR: list[str] = []
 
 
 def selftest_fiscal() -> None:
@@ -238,7 +306,7 @@ def main() -> int:
             sys.stdout.flush()
 
     local_url = f"http://localhost:{PORT}/"
-    if already_running():
+    if already_running() or not single_instance():
         webbrowser.open(local_url)
         return 0
 
@@ -266,12 +334,13 @@ def main() -> int:
     threading.Thread(target=channel_jobs, args=(log, stop), daemon=True).start()
     ready.wait(30)
     for _ in range(40):
-        if already_running():
+        if SERVE_ERROR or already_running():
             break
         time.sleep(0.25)
     lan_url = f"http://{lan_address()}:{PORT}/"
-    log(f"Running at {local_url} and {lan_url}")
-    webbrowser.open(local_url)
+    if not SERVE_ERROR:
+        log(f"Running at {local_url} and {lan_url}")
+        webbrowser.open(local_url)
 
     try:
         import tkinter as tk
@@ -300,7 +369,10 @@ def main() -> int:
         return w
 
     label("InnKeeper", 16, True, "#ffffff", (16, 2))
-    label("InnKeeper po punon · is running", 10, False, "#b9c3d2")
+    if SERVE_ERROR:
+        label(f"Porta {PORT} është e zënë · Port {PORT} is in use", 10, True, "#f08a7e")
+    else:
+        label("InnKeeper po punon · is running", 10, False, "#b9c3d2")
     label("Në këtë kompjuter · On this computer:", 9, False, "#7d8899", (12, 0))
     label(local_url, 11, True, "#d9b679", 0)
     label("Pajisjet e tjera në Wi-Fi · Other devices on Wi-Fi:", 9, False, "#7d8899", (8, 0))

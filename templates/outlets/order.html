@@ -115,6 +115,7 @@
       </div>
 
       <form method="post" action="{% url 'outlets:settle' order.pk %}" class="pane" data-pane="cash">{% csrf_token %}
+        <input type="hidden" name="remaining" value="{{ order.remaining|stringformat:'.2f' }}">
         <input type="hidden" name="how" value="cash">
         <div class="form-grid" style="grid-template-columns:1fr 1fr; gap:.6rem">
           <div class="field"><label>{% translate "Amount" %}</label><input class="input pay-amount" name="amount" inputmode="decimal" value="{{ order.remaining|stringformat:'.2f' }}"></div>
@@ -130,6 +131,7 @@
       </form>
 
       <form method="post" action="{% url 'outlets:settle' order.pk %}" class="pane hidden" data-pane="card">{% csrf_token %}
+        <input type="hidden" name="remaining" value="{{ order.remaining|stringformat:'.2f' }}">
         <input type="hidden" name="how" value="card">
         <div class="form-grid" style="grid-template-columns:1fr 1fr; gap:.6rem">
           <div class="field"><label>{% translate "Amount" %}</label><input class="input pay-amount" name="amount" inputmode="decimal" value="{{ order.remaining|stringformat:'.2f' }}"></div>
@@ -144,6 +146,7 @@
 
       {% if in_house %}
       <form method="post" action="{% url 'outlets:settle' order.pk %}" class="pane hidden" data-pane="room">{% csrf_token %}
+        <input type="hidden" name="remaining" value="{{ order.remaining|stringformat:'.2f' }}">
         <input type="hidden" name="how" value="room">
         <div class="field"><label>{% translate "Guest" %}</label>
           <select class="input" name="reservation" required>

@@ -245,6 +245,16 @@ class Reservation(models.Model):
         if errors:
             raise ValidationError(errors)
 
+    def accommodation_nights_posted(self) -> int:
+        """Room nights already posted for this stay, on any bill. Voided nights count too: voiding a
+        night waives it, it must not be posted again by the night audit or at check-out."""
+        from apps.finance.models import Charge
+
+        value = Charge.objects.filter(kind=Charge.Kind.ACCOMMODATION, reservation=self).aggregate(
+            n=models.Sum("quantity")
+        )["n"]
+        return int(value or 0)
+
     def nights_to_charge(self, on_date: date | None = None) -> int:
         """Nights actually stayed if the guest leaves on `on_date` (at least one)."""
         on_date = on_date or timezone.localdate()
@@ -313,6 +323,7 @@ class CalendarFeed(models.Model):
     is_active = models.BooleanField(_("active"), default=True)
     last_sync = models.DateTimeField(_("last synced"), null=True, blank=True)
     last_error = models.CharField(_("last problem"), max_length=255, blank=True)
+    last_empty = models.BooleanField(default=False, editable=False)  # the last sync found no bookings
     conflicts = models.JSONField(default=list, blank=True)
 
     class Meta:

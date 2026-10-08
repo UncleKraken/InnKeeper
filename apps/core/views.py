@@ -2,7 +2,6 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
@@ -11,7 +10,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 
 from apps.accounts.permissions import ModuleRequiredMixin, can_access, module_required
-from apps.finance.models import Charge
+from apps.finance.models import Charge, net
 from apps.frontdesk.models import Reservation, Room
 from apps.housekeeping.models import HousekeepingTask, MaintenanceTicket
 from apps.outlets.models import Order
@@ -70,7 +69,7 @@ def dashboard(request):
         ctx["open_order_list"] = [o for o in open_qs.order_by("opened_at")[:10] if o.outlet.user_can_use(user)]
 
     if can_access(user, "finance"):
-        ctx["revenue_today"] = Charge.objects.active().filter(business_date=today).aggregate(t=Sum("amount"))["t"] or 0
+        ctx["revenue_today"] = Charge.objects.period(today).aggregate(t=net("amount", today))["t"] or 0
 
     if can_access(user, "frontdesk") and HotelSettings.load().channex_enabled:
         from datetime import timedelta as _td
@@ -87,6 +86,21 @@ def dashboard(request):
 
         ctx["fiscal_failed"] = FiscalDocument.objects.filter(status=FiscalDocument.Status.FAILED).count()
         ctx["fiscal_overdue"] = overdue()
+        from apps.fiscal.services import unfiscalized
+
+        ctx["fiscal_missing"] = len(unfiscalized())
+        hs = HotelSettings.load()
+        if hs.fiscal_certificate:
+            from apps.fiscal.signing import Certificate, CertificateError
+
+            try:
+                expires = Certificate.from_settings(hs).not_after
+            except CertificateError:
+                ctx["fiscal_cert_problem"] = True
+            else:
+                days = (expires - timezone.now()).days
+                if days < 30:
+                    ctx["fiscal_cert_days"] = max(days, 0)
 
     if can_access(user, "inventory"):
         from apps.inventory.views import low_stock_count

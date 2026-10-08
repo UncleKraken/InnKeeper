@@ -18,12 +18,17 @@ CLEANING_KINDS = {
 def room_vacated(room: Room, user) -> HousekeepingTask:
     """Called at check-out: the room becomes dirty and a departure clean is queued."""
     Room.objects.filter(pk=room.pk).update(hk_status=Room.HKStatus.DIRTY)
-    task, _created = HousekeepingTask.objects.get_or_create(
-        room=room,
-        kind=HousekeepingTask.Kind.DEPARTURE,
-        status=HousekeepingTask.Status.PENDING,
-        defaults={"created_by": user, "due_date": timezone.localdate()},
-    )
+    task = HousekeepingTask.objects.filter(
+        room=room, kind=HousekeepingTask.Kind.DEPARTURE, status=HousekeepingTask.Status.PENDING
+    ).first()  # there may already be one (or several, added by hand)
+    if task is None:
+        task = HousekeepingTask.objects.create(
+            room=room,
+            kind=HousekeepingTask.Kind.DEPARTURE,
+            status=HousekeepingTask.Status.PENDING,
+            created_by=user,
+            due_date=timezone.localdate(),
+        )
     return task
 
 
@@ -88,9 +93,12 @@ def save_ticket(ticket: MaintenanceTicket, user) -> MaintenanceTicket:
         ticket.reported_by = user
     if ticket.blocks_room and not ticket.room_id:
         raise BusinessError(_("Choose a room to mark it out of order."))
+    previous_room_id = None if is_new else MaintenanceTicket.objects.filter(pk=ticket.pk).values_list("room_id", flat=True).first()
     ticket.save()
     if ticket.room_id:
         _sync_room_out_of_order(ticket.room)
+    if previous_room_id and previous_room_id != ticket.room_id:
+        _sync_room_out_of_order(Room.objects.get(pk=previous_room_id))  # moved to another room
     audit(user, "ticket.create" if is_new else "ticket.update", ticket.title, ticket)
     return ticket
 

@@ -76,6 +76,12 @@ class ReservationForm(StyledFormMixin, forms.ModelForm):
             if self.instance.nightly_rates:
                 # Priced from the price list: keep it automatic unless someone types a rate.
                 self.initial["rate"] = None
+            if self.instance.status == Reservation.Status.CHECKED_IN:
+                # In house: room changes go through "Move room" (housekeeping, occupancy checks),
+                # and the arrival is history.
+                self.fields["room"].disabled = True
+                self.fields["arrival"].disabled = True
+                self.fields["room"].help_text = _("Use “Move room” to change the room of a guest in house.")
         else:
             self.order_fields(["guest", "new_first_name", "new_last_name", "new_phone", "new_email"])
 
@@ -88,7 +94,18 @@ class ReservationForm(StyledFormMixin, forms.ModelForm):
                 raise forms.ValidationError(_("Choose an existing guest or enter the new guest's first and last name."))
         room, arrival, departure = cleaned.get("room"), cleaned.get("arrival"), cleaned.get("departure")
         self.quote = None
-        if cleaned.get("rate") is None and room and arrival and departure and departure > arrival:
+        unchanged = bool(
+            self.instance.pk
+            and self.instance.nightly_rates
+            and room
+            and room.pk == self.instance.room_id
+            and arrival == self.instance.arrival
+            and departure == self.instance.departure
+        )
+        if cleaned.get("rate") is None and unchanged:
+            # Same room and dates: keep the agreed nightly prices (e.g. a channel's price).
+            cleaned["rate"] = self.instance.rate
+        elif cleaned.get("rate") is None and room and arrival and departure and departure > arrival:
             from .pricing import apply_quote, quote
 
             self.quote = quote(room.room_type, arrival, departure)

@@ -3,6 +3,7 @@
 from decimal import Decimal
 
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -79,6 +80,8 @@ def change_quantity(line: OrderLine, delta: int, *, user) -> OrderLine | None:
         if line.item_id is None:
             raise BusinessError(_("This item is no longer on the menu."))
         return add_item(order, line.item, user=user, quantity=delta, note=line.note)
+    if delta > 0 and line.item_id and not line.item.is_active:
+        raise BusinessError(_("%(item)s is sold out.") % {"item": line.name})
     new_qty = line.quantity + delta
     if delta < 0 and order.total - line.unit_price * min(-delta, line.quantity) < order.paid:
         raise BusinessError(_("Part of this bill is already paid. Void the payment before removing items."))
@@ -92,14 +95,38 @@ def change_quantity(line: OrderLine, delta: int, *, user) -> OrderLine | None:
             if not ticket.lines.filter(quantity__gt=0).exists() and ticket.status in KitchenTicket.ON_BOARD:
                 ticket.status = KitchenTicket.Status.CANCELLED
                 ticket.save(update_fields=["status"])
+        _fit_discount(order, user)
         return line if line.quantity else None
     if new_qty <= 0:
         audit(user, "order.line_removed", f"#{order.number}: {line}", order)
         line.delete()
+        _fit_discount(order, user)
         return None
     line.quantity = new_qty
     line.save(update_fields=["quantity"])
+    if delta < 0:
+        _fit_discount(order, user)
     return line
+
+
+def _fit_discount(order: Order, user) -> None:
+    """After items are taken off, keep the discount within the bill and (for staff) within their limit."""
+    from apps.core.models import HotelSettings
+
+    if not order.discount:
+        return
+    order = Order.objects.get(pk=order.pk)
+    subtotal = order.subtotal
+    allowed = subtotal
+    if not getattr(user, "is_manager", False):
+        limit = HotelSettings.load().max_staff_discount
+        allowed = min(allowed, (subtotal * limit / Decimal("100")).quantize(Decimal("0.01")))
+    if order.discount > allowed:
+        audit(user, "order.discount", f"#{order.number}: {order.discount} → {allowed} (items removed)", order)
+        order.discount = allowed
+        if not allowed:
+            order.discount_reason = ""
+        order.save(update_fields=["discount", "discount_reason"])
 
 
 def send_to_kitchen(order: Order, *, user) -> list[KitchenTicket]:
@@ -130,7 +157,7 @@ def _print_ticket(ticket: KitchenTicket, user) -> None:
 
     station = ticket.station
     if station.printer_id and station.printer.is_active:
-        printing.submit(
+        ticket.print_job = printing.submit(
             station.printer,
             f"{station.name}: {ticket.order.display_name}",
             printing.kitchen_document(ticket, station.printer),
@@ -142,6 +169,9 @@ def set_ticket_status(ticket: KitchenTicket, status: str, *, user) -> KitchenTic
     now = timezone.now()
     if status not in KitchenTicket.Status.values:
         raise BusinessError(_("Unknown status."))
+    ticket = KitchenTicket.objects.get(pk=ticket.pk)  # the screen may be a few seconds old
+    if ticket.status in (KitchenTicket.Status.CANCELLED, KitchenTicket.Status.SERVED) and status != KitchenTicket.Status.SERVED:
+        return ticket  # a cancelled or served ticket can only be cleared, never brought back
     ticket.status = status
     fields = ["status"]
     if status == KitchenTicket.Status.PREPARING and not ticket.started_at:
@@ -203,6 +233,20 @@ def pay_order(
     """
     order = Order.objects.select_for_update().get(pk=order.pk)
     _require_open(order)
+    if order.total <= 0 and order.subtotal > 0 and not order.payments.filter(voided=False).exists():
+        # Fully discounted (staff meal, on the house): close it without money, so it is on record
+        # with its discount and the stock is taken.
+        Charge.objects.create(
+            order=order,
+            outlet=order.outlet,
+            kind=Charge.Kind.OUTLET,
+            description=f"{order.outlet} – {order.display_name}",
+            quantity=1,
+            unit_price=Decimal("0"),
+            created_by=user,
+        )
+        _close(order, Order.Settlement.PAID, user)
+        return None
     if order.total <= 0:
         raise BusinessError(_("The order is empty."))
     remaining = order.remaining
@@ -270,6 +314,10 @@ def charge_to_room(order: Order, reservation: Reservation, *, user) -> Order:
         created_by=user,
     )
     _close(order, Order.Settlement.ROOM, user)
+    if paid > 0:  # the part paid at the table gets its own fiscal receipt
+        from apps.fiscal import services as fiscal
+
+        transaction.on_commit(lambda: fiscal.safely(fiscal.fiscalize_order, order, user))
     audit(user, "order.room_charge", f"{order.outlet} #{order.number} {remaining} → {reservation.room.number}", order)
     return order
 
@@ -296,7 +344,10 @@ def move_order(order: Order, table: Table, *, user) -> Order:
     order.tickets.update(order=target)
     target.guests += order.guests
     target.note = " · ".join(n for n in (target.note, order.note) if n)[:255]
-    target.save(update_fields=["guests", "note"])
+    if order.discount:
+        target.discount += order.discount
+        target.discount_reason = " · ".join(x for x in (target.discount_reason, order.discount_reason) if x)[:120]
+    target.save(update_fields=["guests", "note", "discount", "discount_reason"])
     order.status = Order.Status.CANCELLED
     order.note = (_("Merged into #%(n)s") % {"n": target.number})[:255]
     order.closed_at = timezone.now()
@@ -310,7 +361,8 @@ def move_order(order: Order, table: Table, *, user) -> Order:
 def cancel_order(order: Order, *, user) -> Order:
     order = Order.objects.select_for_update().get(pk=order.pk)
     _require_open(order)
-    if order.lines.filter(quantity__gt=0).exists() and not user.is_manager:
+    if order.lines.filter(Q(quantity__gt=0) | Q(sent_quantity__gt=0)).exists() and not user.is_manager:
+        # Also when the items sent to the kitchen were taken off first.
         raise BusinessError(_("Only a manager can cancel an order that has items."))
     if order.payments.filter(voided=False).exists():
         raise BusinessError(_("This bill has payments. Void them first."))

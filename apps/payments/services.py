@@ -63,6 +63,18 @@ def start_checkout(link: PaymentLink, base_url: str = "", lang: str = "en") -> s
     if provider is None or provider.name != link.provider:
         raise BusinessError(_("Card payments are not available at the moment."))
     done = public_url(reverse("payments:done", args=[link.token]), base_url)
+    if provider.name == "pok" and link.external_id and link.checkout_url:
+        # Reuse the order already opened (the guest may pay it in another tab); a new one would
+        # replace the id we check, and a payment on the old order would never be recorded.
+        try:
+            result = provider.check(link.external_id)
+        except ProviderError:
+            result = None
+        if result is not None and result.paid:
+            record_result(link, result, source="checkout")
+            return done
+        if result is None or result.uncertain:
+            return link.checkout_url
     try:
         if provider.name == "pok":
             checkout = provider.create(
@@ -114,7 +126,7 @@ def record_result(link: PaymentLink, result: Result, *, source: str) -> PaymentL
         return link
     _mark_paid(link, reference=f"{link.provider.upper()} {result.external_id or link.external_id}"[:80], user=None)
     audit(None, "payment_link.paid", f"{link.description} {link.amount} ({source})", link)
-    _notify_staff(link)
+    transaction.on_commit(lambda: _notify_staff(link))  # don't hold the database while emailing
     return link
 
 

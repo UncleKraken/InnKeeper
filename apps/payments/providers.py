@@ -119,9 +119,7 @@ class Pok:
         for key in ("capturedAt", "completedAt", "paidAt", "confirmedAt"):
             if order.get(key):
                 return True
-        if order.get("transactions") or order.get("transaction"):
-            return True
-        return None
+        return None  # unclear (e.g. only a transaction attempt): staff check the POK app
 
     def check(self, external_id: str) -> Result:
         res = _http(

@@ -85,6 +85,7 @@ SETTINGS_FIELDS_SKIP = {
     "channex_api_key",
     "fiscal_certificate",
     "fiscal_certificate_password",
+    "fiscal_since",
 }
 
 
@@ -164,6 +165,9 @@ def restore_full(doc: dict) -> None:
         raise BackupError("wrong-kind")
     objects = list(serializers.deserialize("json", json.dumps(doc["data"]), ignorenonexistent=True))
     models = _models(FULL_MODELS)
+    from apps.fiscal.models import FiscalDocument
+
+    FiscalDocument.objects.exclude(corrects=None).delete()  # corrections protect the documents they correct
     for model in reversed(models):
         model._default_manager.all().delete()
     Session.objects.all().delete()
@@ -190,7 +194,7 @@ def export_settings() -> bytes:
     hotel = {f.name: getattr(hs, f.name) for f in hs._meta.concrete_fields if f.name not in SETTINGS_FIELDS_SKIP}
     payload = {
         "hotel": {
-            k: (v.isoformat() if hasattr(v, "isoformat") else str(v) if not isinstance(v, (bool, int, str)) else v)
+            k: (v.isoformat() if hasattr(v, "isoformat") else str(v) if not isinstance(v, (bool, int, str, type(None))) else v)
             for k, v in hotel.items()
         },
         "room_types": [

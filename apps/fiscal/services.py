@@ -69,14 +69,31 @@ def _payments(rows: list[tuple[str, Decimal]], total: Decimal) -> tuple[str, lis
 
 
 def _make_exact(lines: list[dict], target: Decimal) -> None:
-    """Rounding after a discount can leave a cent or two: put it on a single-quantity line."""
+    """Rounding after a discount can leave a cent or two: put it on a single unit, so the fiscal
+    total is exactly what was paid (otherwise a cash sale could turn into NONCASH)."""
     total = sum(Decimal(x["unit_price"]) * Decimal(x["quantity"]) for x in lines).quantize(CENT)
     diff = target - total
-    if diff and lines:
-        for x in lines:
-            if Decimal(x["quantity"]) == 1 and Decimal(x["unit_price"]) + diff >= 0:
-                x["unit_price"] = str((Decimal(x["unit_price"]) + diff).quantize(CENT))
-                return
+    if not diff or not lines:
+        return
+    for x in lines:
+        if Decimal(x["quantity"]) == 1 and Decimal(x["unit_price"]) + diff >= 0:
+            x["unit_price"] = str((Decimal(x["unit_price"]) + diff).quantize(CENT))
+            return
+    # No single-unit line: take one unit off the largest line into a line of its own.
+    for x in sorted(lines, key=lambda x: Decimal(x["unit_price"]) * Decimal(x["quantity"]), reverse=True):
+        q, price = Decimal(x["quantity"]), Decimal(x["unit_price"])
+        if q > 1 and q == q.to_integral_value() and price + diff >= 0:
+            x["quantity"] = str(q - 1)
+            lines.insert(lines.index(x) + 1, {**x, "quantity": "1", "unit_price": str((price + diff).quantize(CENT))})
+            return
+
+
+_CONTROL = dict.fromkeys(range(32), " ")
+
+
+def _clean_text(value: str) -> str:
+    """Names from imports or channels may contain tabs, line breaks or control characters XML can't carry."""
+    return " ".join(str(value).translate(_CONTROL).split())
 
 
 @transaction.atomic
@@ -94,6 +111,8 @@ def create_document(
 ) -> FiscalDocument:
     hs = HotelSettings.load()
     cert = Certificate.from_settings(hs)
+    for x in lines:
+        x["name"] = _clean_text(x["name"]) or "-"
     calc = cis.totals(
         [
             cis.Line(
@@ -127,6 +146,7 @@ def create_document(
         "nuis": nuis,
         "in_vat": bool(hs.vat_rate),
         "currency": hs.currency,
+        "ex_rate": str(hs.fiscal_exchange_rate) if hs.fiscal_exchange_rate else None,
         "seller": _seller(hs),
         "lines": lines,
         "payments": pay,
@@ -180,7 +200,9 @@ def transmit(doc: FiscalDocument) -> FiscalDocument:
         cert = Certificate.from_settings(hs)
         if doc.type_of_inv == "CASH":
             ensure_initial_deposit(doc.tcr_code, None, cert=cert)
-        xml = cis.invoice_request(doc.payload, cert, subsequent="NOINTERNET" if doc.was_offline else "")
+        late = doc.created_at and timezone.now() - doc.created_at > timedelta(minutes=2)
+        subsequent = "NOINTERNET" if doc.was_offline else ("TECHNICALERROR" if late else "")
+        xml = cis.invoice_request(doc.payload, cert, subsequent=subsequent)
         fic = cis.register_invoice(xml, test=doc.test)
     except cis.CISUnavailable as e:
         if str(e) != _("offline"):
@@ -191,6 +213,10 @@ def transmit(doc: FiscalDocument) -> FiscalDocument:
         doc.status = FiscalDocument.Status.FAILED
         doc.last_error = f"{getattr(e, 'code', '')} {e}".strip()
         log.warning("Fiscal document %s rejected: %s", doc.inv_num, doc.last_error)
+    except Exception as e:  # anything else (bad data, unexpected reply): one document must never block the queue
+        doc.status = FiscalDocument.Status.FAILED
+        doc.last_error = f"{type(e).__name__}: {e}"[:500]
+        log.exception("Fiscal document %s could not be sent", doc.inv_num)
     else:
         _offline_until = None
         doc.status, doc.fic, doc.last_error, doc.registered_at = (
@@ -205,14 +231,57 @@ def transmit(doc: FiscalDocument) -> FiscalDocument:
 
 
 def resend_pending() -> int:
-    """Send documents that are still waiting (no internet earlier). Run every minute."""
+    """Send documents that are still waiting (no internet earlier), and fiscalize any sale that
+    couldn't get a document at all (e.g. the certificate was missing). Run every minute."""
     if not enabled():
         return 0
     n = 0
-    for doc in FiscalDocument.objects.filter(status=FiscalDocument.Status.PENDING).order_by("created_at")[:50]:
-        if transmit(doc).status == FiscalDocument.Status.REGISTERED:
+    # Documents a sale is sending right now are left to it, so nothing is sent twice.
+    recent = timezone.now() - timedelta(minutes=2)
+    waiting = FiscalDocument.objects.filter(status=FiscalDocument.Status.PENDING).exclude(
+        was_offline=False, created_at__gt=recent
+    )
+    for doc in waiting.order_by("created_at")[:50]:
+        doc = transmit(doc)
+        if doc.status == FiscalDocument.Status.REGISTERED:
             n += 1
+        elif doc.status == FiscalDocument.Status.PENDING:
+            break  # still no connection: try the rest next time
+    for kind, obj in unfiscalized(limit=20):
+        safely(fiscalize_order if kind == "order" else fiscalize_folio, obj, None)
     return n
+
+
+def unfiscalized(limit: int = 100) -> list[tuple[str, object]]:
+    """Paid bills and closed guest bills since fiscalization was turned on that have no document."""
+    from django.db.models import Q
+
+    from apps.finance.models import Folio
+    from apps.outlets.models import Order
+
+    hs = HotelSettings.load()
+    if not hs.fiscal_since:
+        return []
+    since = max(hs.fiscal_since, timezone.now() - timedelta(days=3))
+    settled = timezone.now() - timedelta(minutes=2)  # leave a sale a moment to fiscalize itself
+    found: list[tuple[str, object]] = []
+    orders = (
+        Order.objects.filter(status=Order.Status.CLOSED, closed_at__gte=since, closed_at__lt=settled)
+        .filter(Q(settlement=Order.Settlement.PAID) | Q(settlement=Order.Settlement.ROOM, payments__voided=False))
+        .filter(fiscal_documents__isnull=True)
+        .distinct()
+        .select_related("outlet")
+    )
+    for o in orders[:limit]:
+        if _order_target(o) > 0:
+            found.append(("order", o))
+    folios = Folio.objects.filter(
+        status=Folio.Status.CLOSED, closed_at__gte=since, closed_at__lt=settled, fiscal_documents__isnull=True
+    )
+    for f in folios[:limit]:
+        if f.total_charges > 0:
+            found.append(("folio", f))
+    return found[:limit]
 
 
 def overdue() -> int:
@@ -231,7 +300,11 @@ def ensure_initial_deposit(
 ) -> CashDeposit:
     today = timezone.localdate()
     existing = CashDeposit.objects.filter(
-        business_date=today, tcr_code=tcr, operation=CashDeposit.Operation.INITIAL, status="registered"
+        business_date=today,
+        tcr_code=tcr,
+        operation=CashDeposit.Operation.INITIAL,
+        status="registered",
+        test=HotelSettings.load().fiscal_test,  # a test-system report doesn't count once live
     ).first()
     if existing:
         return existing
@@ -249,11 +322,14 @@ def register_cash(
     hs = HotelSettings.load()
     cert = cert or Certificate.from_settings(hs)
     when = cis.now_str()
+    amount = Decimal(amount)
+    if (hs.currency or "ALL").upper() != "ALL" and hs.fiscal_exchange_rate:
+        amount = amount * hs.fiscal_exchange_rate  # cash in the drawer is reported in lekë
     dep = CashDeposit.objects.create(
         business_date=timezone.localdate(),
         tcr_code=tcr,
         operation=operation,
-        amount=Decimal(amount).quantize(CENT, ROUND_HALF_UP),
+        amount=amount.quantize(CENT, ROUND_HALF_UP),
         change_datetime=when,
         test=hs.fiscal_test,
         created_by=user if getattr(user, "is_authenticated", False) else None,
@@ -284,15 +360,26 @@ def tcr_for_outlet(outlet) -> str:
     return (getattr(outlet, "fiscal_tcr_code", "") or HotelSettings.load().fiscal_tcr_code).strip()
 
 
+def _order_target(order) -> Decimal:
+    """What a restaurant/bar bill's receipt is for: all of it when paid, or the part paid at the table
+    when the rest went to a room (that rest is on the guest's bill and its invoice)."""
+    from apps.outlets.models import Order
+
+    if order.settlement == Order.Settlement.ROOM:
+        return order.paid
+    return order.total
+
+
 def fiscalize_order(order, user) -> FiscalDocument | None:
-    """A paid restaurant/bar/service bill."""
+    """A paid restaurant/bar/service bill (or the paid part of one charged to a room)."""
     if not enabled() or order.fiscal_documents.exists():
         return None
     hs = HotelSettings.load()
     lines_qs = list(order.active_lines)
-    if not lines_qs:
-        return None
-    factor = (order.total / order.subtotal) if order.subtotal else Decimal("1")
+    target = _order_target(order)
+    if not lines_qs or target <= 0:
+        return None  # nothing paid (e.g. fully discounted)
+    factor = (target / order.subtotal) if order.subtotal else Decimal("1")
     vat = _vat(hs)
     lines = [
         {
@@ -305,7 +392,7 @@ def fiscalize_order(order, user) -> FiscalDocument | None:
         }
         for ln in lines_qs
     ]
-    _make_exact(lines, order.total)
+    _make_exact(lines, target)
     payments = [(p.method, p.amount) for p in order.payments.filter(voided=False)]
     doc = create_document(
         kind=FiscalDocument.Kind.RECEIPT,

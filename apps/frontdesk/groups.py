@@ -92,28 +92,40 @@ def move_to_master(reservation: Reservation, user) -> int:
     return moved
 
 
+def _shared_bill(group) -> bool:
+    """The group shares one bill while the main room's stay is active and its bill open."""
+    return bool(
+        group
+        and group.one_bill
+        and group.master_id
+        and Folio.objects.filter(
+            reservation_id=group.master_id,
+            status=Folio.Status.OPEN,
+            reservation__status__in=Reservation.ACTIVE_STATUSES,
+        ).exists()
+    )
+
+
 def group_check_out(reservation: Reservation, user, *, allow_balance: bool = False) -> Reservation:
     """Check-out for a group room. On a shared bill, other rooms' charges go to the main room's bill."""
     reservation = Reservation.objects.select_related("group").get(pk=reservation.pk)
     group = reservation.group
-    shared = bool(
-        group
-        and group.one_bill
-        and group.master_id
-        and Folio.objects.filter(reservation_id=group.master_id, status=Folio.Status.OPEN).exists()
-    )
-    if shared and group.master_id != reservation.pk:
-        # Post the nights on this room's bill, then hand everything over to the main room.
-        reservation = services.check_out(reservation, user, allow_balance=True)
-        if move_to_master(reservation, user):
-            Folio.objects.filter(reservation=reservation, status=Folio.Status.OPEN).update(
-                status=Folio.Status.CLOSED, closed_at=timezone.now()
-            )
-        return reservation
-    if shared:
-        for other in group.reservations.filter(status__in=Reservation.ACTIVE_STATUSES).exclude(pk=reservation.pk):
-            move_to_master(other, user)
-    return services.check_out(reservation, user, allow_balance=allow_balance)
+    shared = _shared_bill(group)
+    with transaction.atomic():  # a refused check-out must not leave bills half moved
+        if shared and group.master_id != reservation.pk:
+            # Post the nights on this room's bill, then hand everything over to the main room.
+            reservation = services.check_out(reservation, user, allow_balance=True)
+            if move_to_master(reservation, user):
+                Folio.objects.filter(reservation=reservation, status=Folio.Status.OPEN).update(
+                    status=Folio.Status.CLOSED, closed_at=timezone.now()
+                )
+            return reservation
+        if shared:
+            for other in group.reservations.filter(status__in=Reservation.ACTIVE_STATUSES).exclude(pk=reservation.pk):
+                if other.status == Reservation.Status.CHECKED_IN:
+                    services.post_accommodation(other, user)  # nights so far, so the main room pays them
+                move_to_master(other, user)
+        return services.check_out(reservation, user, allow_balance=allow_balance)
 
 
 # ---------- Views ----------
@@ -278,7 +290,9 @@ def group_action(request, pk):
         audit(request.user, "group.cancel", f"{group.code} {group}", group)
         messages.success(request, _("%(n)s room(s) cancelled.") % {"n": done})
     elif action == "master":
-        res = get_object_or_404(Reservation, pk=request.POST.get("reservation"), group=group)
+        res = get_object_or_404(
+            Reservation, pk=request.POST.get("reservation"), group=group, status__in=Reservation.ACTIVE_STATUSES
+        )
         group.master = res
         group.save(update_fields=["master"])
         messages.success(request, _("Room %(room)s now pays for the group.") % {"room": res.room.number})

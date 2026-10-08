@@ -1,8 +1,7 @@
-import csv
 from datetime import date, timedelta
 from decimal import Decimal
 
-from django.db.models import Count, Sum
+from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
@@ -11,7 +10,9 @@ from django.utils.translation import gettext_lazy as _
 from apps.accounts.permissions import module_required
 from apps.frontdesk.models import Reservation, Room
 
-from .models import ZERO, Charge, Expense, Folio, Payment
+from apps.core.models import SafeCSVWriter
+
+from .models import ZERO, Charge, Expense, Folio, Payment, net
 
 
 def _range(request) -> tuple[date, date]:
@@ -46,39 +47,43 @@ def _nights_sold(start: date, end: date) -> int:
 @module_required("finance")
 def dashboard(request):
     start, end = _range(request)
-    charges = Charge.objects.active().filter(business_date__range=(start, end))
-    payments = Payment.objects.active().filter(business_date__range=(start, end))
+    amount = net("amount", start, end)
+    charges = Charge.objects.period(start, end)
+    payments = Payment.objects.period(start, end)
 
-    total = charges.aggregate(t=Sum("amount"))["t"] or ZERO
-    accommodation = charges.filter(kind=Charge.Kind.ACCOMMODATION).aggregate(t=Sum("amount"), n=Sum("quantity"))
+    total = charges.aggregate(t=amount)["t"] or ZERO
+    accommodation = charges.filter(kind=Charge.Kind.ACCOMMODATION).aggregate(
+        t=amount, n=net("quantity", start, end, integer=True)
+    )
 
     departments = [
         {"name": _("Accommodation"), "amount": accommodation["t"] or ZERO},
     ]
-    for row in (
-        charges.filter(kind=Charge.Kind.OUTLET)
-        .values("outlet__name")
-        .annotate(amount=Sum("amount"), count=Count("id"))
-        .order_by("-amount")
-    ):
+    for row in charges.filter(kind=Charge.Kind.OUTLET).values("outlet__name").annotate(amount=amount).order_by("-amount"):
         departments.append({"name": row["outlet__name"], "amount": row["amount"]})
-    extras = charges.filter(kind=Charge.Kind.EXTRA).aggregate(t=Sum("amount"))["t"]
+    extras = charges.filter(kind=Charge.Kind.EXTRA).aggregate(t=amount)["t"]
     if extras:
         departments.append({"name": _("Extras"), "amount": extras})
     departments = [d for d in departments if d["amount"]]
 
     days = (end - start).days + 1
-    per_day = {row["business_date"]: row["t"] for row in charges.values("business_date").annotate(t=Sum("amount"))}
+    per_day: dict = {}
+    for row in charges.filter(business_date__range=(start, end)).values("business_date").annotate(t=Sum("amount")):
+        per_day[row["business_date"]] = per_day.get(row["business_date"], ZERO) + row["t"]
+    for c in charges.filter(voided=True, voided_at__isnull=False).only("voided_at", "amount"):
+        d = timezone.localdate(c.voided_at)
+        if start <= d <= end:
+            per_day[d] = per_day.get(d, ZERO) - c.amount
     daily = [
         {"date": start + timedelta(days=i), "amount": per_day.get(start + timedelta(days=i), ZERO)} for i in range(days)
     ]
     daily_max = max([d["amount"] for d in daily] + [Decimal("1")])
 
-    by_method = list(payments.values("method").annotate(t=Sum("amount")).order_by("-t"))
+    by_method = [r for r in payments.values("method").annotate(t=amount).order_by("-t") if r["t"]]
     method_labels = dict(Payment.Method.choices)
     for row in by_method:
         row["label"] = method_labels.get(row["method"], row["method"])
-    received = payments.aggregate(t=Sum("amount"))["t"] or ZERO
+    received = payments.aggregate(t=amount)["t"] or ZERO
 
     rooms = Room.objects.filter(is_active=True).count()
     nights_sold = _nights_sold(start, end)
@@ -91,12 +96,13 @@ def dashboard(request):
         "nights_sold": nights_sold,
     }
 
-    expenses = Expense.objects.active().filter(business_date__range=(start, end))
-    expenses_total = expenses.aggregate(t=Sum("amount"))["t"] or ZERO
+    expenses = Expense.objects.period(start, end)
+    expenses_total = expenses.aggregate(t=amount)["t"] or ZERO
     category_labels = dict(Expense.Category.choices)
     expense_rows = [
         {"label": category_labels.get(r["category"], r["category"]), "amount": r["t"]}
-        for r in expenses.values("category").annotate(t=Sum("amount")).order_by("-t")
+        for r in expenses.values("category").annotate(t=amount).order_by("-t")
+        if r["t"]
     ]
 
     outstanding = []
@@ -158,7 +164,7 @@ def _csv(rows, kind, start, end) -> HttpResponse:
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = f'attachment; filename="innkeeper-{kind}-{start}-{end}.csv"'
     response.write("﻿")  # so Excel opens UTF-8 (ë, ç) correctly
-    writer = csv.writer(response)
+    writer = SafeCSVWriter(response)
     if kind == "payments":
         writer.writerow(
             [

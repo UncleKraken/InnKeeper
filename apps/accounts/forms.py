@@ -13,9 +13,9 @@ LOCKOUT_SECONDS = 15 * 60
 
 
 def _client_ip(request) -> str:
-    if request is None:
-        return "-"
-    return request.META.get("REMOTE_ADDR", "-")
+    from apps.core.middleware import client_ip
+
+    return client_ip(request)
 
 
 class LoginForm(StyledFormMixin, AuthenticationForm):

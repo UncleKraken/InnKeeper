@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 from decimal import Decimal
 
+from django.db import transaction
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
@@ -55,7 +56,10 @@ def _business_error(request, exc: Exception) -> None:
 @module_required("frontdesk")
 def rack(request):
     today = timezone.localdate()
-    days = min(max(int(request.GET.get("days", 14) or 14), 7), 31)
+    try:
+        days = min(max(int(request.GET.get("days", 14) or 14), 7), 31)
+    except ValueError:
+        days = 14
     start = _parse_date(request.GET.get("start"), today - timedelta(days=1))
     end = start + timedelta(days=days)
     dates = [start + timedelta(days=i) for i in range(days)]
@@ -188,9 +192,10 @@ def reservation_form(request, pk=None):
     if request.method == "POST" and form.is_valid():
         res = form.save(commit=False)
         try:
-            if not res.pk:
-                res.guest = form.get_guest()
-            services.save_reservation(res, request.user)
+            with transaction.atomic():  # a refused booking must not leave a new guest behind
+                if not res.pk:
+                    res.guest = form.get_guest()
+                services.save_reservation(res, request.user)
         except ValidationError as e:
             for field, errs in e.message_dict.items():
                 form.add_error(field if field in form.fields else None, errs)

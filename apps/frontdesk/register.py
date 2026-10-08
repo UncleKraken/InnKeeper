@@ -3,7 +3,7 @@ Guest register: who stayed in the property on a given day, with their identity d
 in the form the police / tourism authorities ask for. Printable and exportable to Excel (CSV).
 """
 
-import csv
+
 from datetime import date, timedelta
 
 from django.db.models import Q
@@ -13,7 +13,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from apps.accounts.permissions import module_required
-from apps.core.models import audit
+from apps.core.models import SafeCSVWriter, audit
 
 from .models import Reservation
 
@@ -78,7 +78,7 @@ def guest_register(request):
         response = HttpResponse(content_type="text/csv; charset=utf-8")
         response["Content-Disposition"] = f'attachment; filename="guest-register-{start}-{end}.csv"'
         response.write("﻿")  # so Excel opens accented names correctly
-        w = csv.writer(response, delimiter=";")
+        w = SafeCSVWriter(response, delimiter=";")
         w.writerow(
             [
                 _("Room"),

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import redirect
 from django.urls import reverse
 
@@ -17,6 +18,39 @@ SETUP_EXEMPT_PREFIXES = (
     "/pay/",
     "/channex/",
 )
+
+
+LOOPBACK = {"127.0.0.1", "::1"}
+
+
+def client_ip(request) -> str:
+    """The visitor's address. A tunnel running on this computer (Cloudflare Tunnel) connects from
+    127.0.0.1, so for those requests the address the tunnel reports is used instead."""
+    if request is None:
+        return "-"
+    remote = request.META.get("REMOTE_ADDR", "-")
+    if remote in LOOPBACK:
+        forwarded = request.META.get("HTTP_CF_CONNECTING_IP") or request.META.get("HTTP_X_FORWARDED_FOR", "")
+        forwarded = forwarded.split(",")[0].strip()
+        if forwarded:
+            return forwarded[:64]
+    return remote
+
+
+class SecureCookieMiddleware:
+    """Mark the session and CSRF cookies Secure whenever the page came over HTTPS (e.g. through the
+    tunnel), even though the Windows app also serves plain HTTP on the local network."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        if request.is_secure():
+            for name in (settings.SESSION_COOKIE_NAME, settings.CSRF_COOKIE_NAME):
+                if name in response.cookies:
+                    response.cookies[name]["secure"] = True
+        return response
 
 
 class SettingsCacheMiddleware:

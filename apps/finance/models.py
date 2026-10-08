@@ -15,6 +15,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.db import models
+from django.db.models import functions  # noqa: F401  (models.functions)
 from django.db.models import Sum
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -61,13 +62,39 @@ class Folio(models.Model):
         return self.total_charges - self.total_payments
 
     def accommodation_nights_posted(self) -> int:
-        value = self.charges.filter(kind=Charge.Kind.ACCOMMODATION, voided=False).aggregate(n=Sum("quantity"))["n"]
-        return int(value or 0)
+        return self.reservation.accommodation_nights_posted()
 
 
 class VoidableQuerySet(models.QuerySet):
+    """Ledger entries.
+
+    For reports over dates, use `period()` with `net()`: an entry counts on its own date, and a void
+    counts (as minus) on the day it was voided. So voiding yesterday's receipt today doesn't change
+    yesterday's closed day; it shows up in today's totals, where the money actually went back.
+    """
+
     def active(self):
         return self.filter(voided=False)
+
+    def period(self, start, end=None):
+        end = end or start
+        return self.filter(
+            models.Q(business_date__range=(start, end)) | models.Q(voided=True, voided_at__date__range=(start, end))
+        )
+
+
+def net(field: str, start, end=None, integer: bool = False):
+    """Sum of `field` over a period: entries dated in it, minus entries voided in it. Use with `period()`."""
+    end = end or start
+    out = models.IntegerField() if integer else models.DecimalField(**MONEY)
+    zero = models.Value(0, output_field=out)
+    plus = models.Case(models.When(business_date__range=(start, end), then=models.F(field)), default=zero, output_field=out)
+    minus = models.Case(
+        models.When(voided=True, voided_at__date__range=(start, end), then=models.F(field)),
+        default=zero,
+        output_field=out,
+    )
+    return models.functions.Coalesce(models.Sum(plus), zero) - models.functions.Coalesce(models.Sum(minus), zero)
 
 
 class LedgerEntry(models.Model):
@@ -95,6 +122,11 @@ class Charge(LedgerEntry):
 
     folio = models.ForeignKey(Folio, null=True, blank=True, on_delete=models.PROTECT, related_name="charges")
     order = models.ForeignKey("outlets.Order", null=True, blank=True, on_delete=models.PROTECT, related_name="charges")
+    # The stay a room-night charge belongs to. It stays set when a group's charges move to the
+    # main room's bill, so nights are counted per stay and never posted twice.
+    reservation = models.ForeignKey(
+        "frontdesk.Reservation", null=True, blank=True, on_delete=models.PROTECT, related_name="room_charges"
+    )
     outlet = models.ForeignKey(
         "outlets.Outlet",
         null=True,

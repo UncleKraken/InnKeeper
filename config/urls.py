@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.shortcuts import redirect
 from django.urls import include, path
 
 from apps.frontdesk.channel_manager import channex_webhook
@@ -8,8 +9,18 @@ admin.site.site_header = "InnKeeper"
 admin.site.site_title = "InnKeeper"
 admin.site.index_title = "Administration"
 
+
+def admin_login(request):
+    """The admin uses InnKeeper's own sign-in, which locks out after repeated wrong passwords."""
+    from django.urls import reverse
+
+    query = request.META.get("QUERY_STRING", "")
+    return redirect(reverse("accounts:login") + (f"?{query}" if query else ""))
+
+
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
+    path("admin/login/", admin_login),
     path("admin/", admin.site.urls),
     path("accounts/", include("apps.accounts.urls")),
     path("front-desk/", include("apps.frontdesk.urls")),

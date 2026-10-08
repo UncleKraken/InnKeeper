@@ -14,7 +14,7 @@ from apps.accounts.permissions import module_required
 from apps.core.crud import CrudCreateView, CrudListView, CrudUpdateView
 from apps.core.exceptions import BusinessError
 from apps.core.forms import DateInput, StyledFormMixin
-from apps.finance.models import Charge, Payment
+from apps.finance.models import Charge, Payment, net
 from apps.finance.views import _range
 from apps.outlets.models import Item, Outlet
 
@@ -434,9 +434,9 @@ def usage(request):
     wasted_value = sum((r["wasted_value"] for r in rows), ZERO)
     counted_value = sum((r["counted_value"] for r in rows), ZERO)
     sales = (
-        Charge.objects.active()
-        .filter(kind=Charge.Kind.OUTLET, business_date__range=(start, end))
-        .aggregate(t=Sum("amount"))["t"]
+        Charge.objects.period(start, end)
+        .filter(kind=Charge.Kind.OUTLET)
+        .aggregate(t=net("amount", start, end))["t"]
         or ZERO
     )
     return render(

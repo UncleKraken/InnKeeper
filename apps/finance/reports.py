@@ -18,7 +18,7 @@ from apps.core.forms import DateInput, StyledFormMixin
 from apps.core.models import audit
 from apps.outlets.models import Order, OrderLine
 
-from .models import ZERO, Charge, DayClose, Expense, Payment
+from .models import ZERO, Charge, DayClose, Expense, Payment, net
 from .views import _range
 
 
@@ -100,27 +100,29 @@ def expense_void(request, pk):
 
 
 def day_summary(day: date) -> dict:
-    payments = Payment.objects.active().filter(business_date=day)
+    # Voids count on the day they were made (see VoidableQuerySet), so a closed day never changes.
+    amount = net("amount", day)
+    payments = Payment.objects.period(day)
     by_method = {m: ZERO for m in Payment.Method.values}
-    for row in payments.values("method").annotate(t=Sum("amount")):
+    for row in payments.values("method").annotate(t=amount):
         by_method[row["method"]] = row["t"]
     cash_expenses = (
-        Expense.objects.active().filter(business_date=day, method=Payment.Method.CASH).aggregate(t=Sum("amount"))["t"]
-        or ZERO
+        Expense.objects.period(day).filter(method=Payment.Method.CASH).aggregate(t=amount)["t"] or ZERO
     )
-    charges = Charge.objects.active().filter(business_date=day)
+    charges = Charge.objects.period(day)
     departments = []
-    acc = charges.filter(kind=Charge.Kind.ACCOMMODATION).aggregate(t=Sum("amount"))["t"]
+    acc = charges.filter(kind=Charge.Kind.ACCOMMODATION).aggregate(t=amount)["t"]
     if acc:
         departments.append((_("Accommodation"), acc))
-    for row in charges.filter(kind=Charge.Kind.OUTLET).values("outlet__name").annotate(t=Sum("amount")).order_by("-t"):
-        departments.append((row["outlet__name"], row["t"]))
-    extras = charges.filter(kind=Charge.Kind.EXTRA).aggregate(t=Sum("amount"))["t"]
+    for row in charges.filter(kind=Charge.Kind.OUTLET).values("outlet__name").annotate(t=amount).order_by("-t"):
+        if row["t"]:
+            departments.append((row["outlet__name"], row["t"]))
+    extras = charges.filter(kind=Charge.Kind.EXTRA).aggregate(t=amount)["t"]
     if extras:
         departments.append((_("Extras"), extras))
     staff = (
         payments.values("created_by__first_name", "created_by__last_name", "created_by__username")
-        .annotate(t=Sum("amount"), n=Count("id"))
+        .annotate(t=amount, n=Count("id"))
         .order_by("-t")
     )
     receipts = Order.objects.filter(closed_at__date=day, status=Order.Status.CLOSED)
@@ -129,11 +131,11 @@ def day_summary(day: date) -> dict:
         "method_rows": [(label, by_method[value]) for value, label in Payment.Method.choices if by_method[value]],
         "cash": by_method[Payment.Method.CASH],
         "card": by_method[Payment.Method.CARD],
-        "other": by_method[Payment.Method.BANK_TRANSFER] + by_method[Payment.Method.OTHER],
+        "other": sum((v for k, v in by_method.items() if k not in (Payment.Method.CASH, Payment.Method.CARD)), ZERO),
         "received": sum(by_method.values(), ZERO),
         "cash_expenses": cash_expenses,
         "departments": departments,
-        "revenue": charges.aggregate(t=Sum("amount"))["t"] or ZERO,
+        "revenue": charges.aggregate(t=amount)["t"] or ZERO,
         "staff": [
             {
                 "name": f"{r['created_by__first_name']} {r['created_by__last_name']}".strip()

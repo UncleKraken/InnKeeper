@@ -265,3 +265,119 @@ class FiscalFlowTests(HotelTestCase):
         hotel = backup.read_file(backup.export_settings())["data"]["hotel"]
         self.assertNotIn("fiscal_certificate", hotel)
         self.assertNotIn("fiscal_certificate_password", hotel)
+
+
+class FiscalAuditFixTests(HotelTestCase):
+    """Regressions from the 2.5 audit."""
+
+    def setUp(self):
+        configure(fiscal_since=datetime.now(UTC) - timedelta(hours=1))
+        self.cis = FakeCIS()
+        p = mock.patch.object(cis, "send", self.cis)
+        p.start()
+        self.addCleanup(p.stop)
+        services._offline_until = None
+
+    def order(self, *items):
+        order = pos.open_order(self.restaurant, table=self.table, user=self.waiter)
+        for item, qty in items:
+            pos.add_item(order, item, user=self.waiter, quantity=qty)
+        return order
+
+    def test_discount_without_single_items_still_sums_exactly_and_stays_cash(self):
+        order = self.order((self.wine, 3))  # 13.50
+        pos.set_discount(order, user=self.manager, amount=D("1.00"), reason="regular")
+        with self.captureOnCommitCallbacks(execute=True):
+            pos.pay_order(order, method="cash", user=self.waiter)
+        doc = order.fiscal_documents.get()
+        self.assertEqual((doc.total, doc.type_of_inv), (D("12.50"), "CASH"))
+        inv = self.cis.invoices()[0].find(f".//{{{cis.NS}}}Invoice")
+        self.assertEqual(inv.get("TotPrice"), "12.50")
+
+    def test_part_paid_at_the_table_rest_to_the_room(self):
+        res = self.make_reservation(start=0)
+        res = fd.check_in(res, self.reception)
+        order = self.order((self.dish, 2))  # 22.00
+        with self.captureOnCommitCallbacks(execute=True):
+            pos.pay_order(order, method="cash", user=self.waiter, amount=D("10"))
+            pos.charge_to_room(order, res, user=self.waiter)
+        doc = order.fiscal_documents.get()
+        self.assertEqual(doc.total, D("10.00"))
+
+    def test_sale_without_a_working_certificate_is_caught_up_later(self):
+        HotelSettings.objects.update(fiscal_certificate_password="wrong")
+        order = self.order((self.dish, 1))
+        with self.captureOnCommitCallbacks(execute=True):
+            pos.pay_order(order, method="cash", user=self.waiter)
+        self.assertFalse(order.fiscal_documents.exists())
+        HotelSettings.objects.update(fiscal_certificate_password="secret")
+        order.refresh_from_db()
+        type(order).objects.filter(pk=order.pk).update(closed_at=order.closed_at - timedelta(minutes=5))
+        from apps.core.models import clear_settings_cache
+
+        clear_settings_cache()
+        self.assertEqual(len(services.unfiscalized()), 1)
+        services.resend_pending()
+        self.assertEqual(order.fiscal_documents.get().status, FiscalDocument.Status.REGISTERED)
+
+    def test_opening_cash_from_the_test_system_does_not_count_when_live(self):
+        CashDeposit.objects.create(
+            business_date=datetime.now().date(), tcr_code="cd456cd456", operation="INITIAL", amount=D("0"),
+            change_datetime=cis.now_str(), status="registered", test=True,
+        )
+        HotelSettings.objects.update(fiscal_test=False)
+        from apps.core.models import clear_settings_cache
+
+        clear_settings_cache()
+        order = self.order((self.dish, 1))
+        with self.captureOnCommitCallbacks(execute=True):
+            pos.pay_order(order, method="cash", user=self.waiter)
+        self.assertEqual([a for a, _b in self.cis.requests][0], "RegisterCashDeposit")
+
+    def test_one_bad_document_does_not_block_the_queue(self):
+        self.cis.fail = "offline"
+        orders = []
+        for _ in range(2):
+            order = pos.open_order(self.restaurant, label="takeaway", user=self.waiter)
+            pos.add_item(order, self.wine, user=self.waiter)
+            with self.captureOnCommitCallbacks(execute=True):
+                pos.pay_order(order, method="cash", user=self.waiter)
+            orders.append(order)
+        bad = orders[0].fiscal_documents.get()
+        self.assertEqual(bad.status, FiscalDocument.Status.PENDING)
+        self.cis.fail = None
+        services._offline_until = None
+        real = cis.invoice_request
+
+        def request(payload, cert, subsequent=""):
+            if payload["invoice"]["inv_num"] == bad.inv_num:
+                raise ValueError("All strings must be XML compatible")
+            return real(payload, cert, subsequent=subsequent)
+
+        with mock.patch.object(cis, "invoice_request", side_effect=request):
+            services.resend_pending()
+        bad.refresh_from_db()
+        self.assertEqual(bad.status, FiscalDocument.Status.FAILED)
+        self.assertEqual(orders[1].fiscal_documents.get().status, FiscalDocument.Status.REGISTERED)
+
+    def test_foreign_currency_sends_the_exchange_rate(self):
+        HotelSettings.objects.update(currency="EUR", fiscal_exchange_rate=D("100.5000"))
+        from apps.core.models import clear_settings_cache
+
+        clear_settings_cache()
+        order = self.order((self.dish, 1))
+        with self.captureOnCommitCallbacks(execute=True):
+            pos.pay_order(order, method="card", user=self.waiter)
+        cur = self.cis.invoices()[0].find(f".//{{{cis.NS}}}Currency")
+        self.assertEqual((cur.get("Code"), cur.get("ExRate")), ("EUR", "100.5000"))
+
+    def test_restore_over_data_with_a_correction(self):
+        from apps.core import backup
+
+        order = self.order((self.dish, 1))
+        with self.captureOnCommitCallbacks(execute=True):
+            pos.pay_order(order, method="cash", user=self.waiter)
+            pos.void_receipt(order, user=self.manager, reason="wrong table")
+        self.assertEqual(FiscalDocument.objects.count(), 2)
+        backup.restore_full(backup.read_file(backup.export_full()))
+        self.assertEqual(FiscalDocument.objects.count(), 2)

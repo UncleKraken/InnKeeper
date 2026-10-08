@@ -213,7 +213,7 @@ def notify_new_booking(reservation: Reservation, base_url: str = "") -> None:
             "booking/email_staff.html",
             {
                 "r": reservation,
-                "url": base_url.rstrip("/") + reverse("frontdesk:reservation_detail", args=[reservation.pk]),
+                "url": (hs.public_url or base_url).rstrip("/") + reverse("frontdesk:reservation_detail", args=[reservation.pk]),
             },
             reply_to=[reservation.guest.email] if reservation.guest.email else None,
         )

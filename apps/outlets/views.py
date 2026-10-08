@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 
@@ -207,6 +208,19 @@ def update_order(request, pk):
     return _back_to_order(order)
 
 
+def _report_print_failures(request, tickets) -> None:
+    from .models import PrintJob
+
+    for t in tickets:
+        job = getattr(t, "print_job", None)
+        if job is not None and job.status == PrintJob.Status.FAILED:
+            messages.error(
+                request,
+                _("The %(station)s printer did not print (%(error)s). Tell the %(station)s, then check the printer.")
+                % {"station": t.station.name, "error": job.error},
+            )
+
+
 def _decimal(value) -> Decimal | None:
     try:
         return Decimal(str(value).replace(",", ".").strip()) if str(value).strip() else None
@@ -219,7 +233,12 @@ def _decimal(value) -> Decimal | None:
 def settle(request, pk):
     order = _order_for(request, pk)
     how = request.POST.get("how")
+    started = timezone.now()
     try:
+        seen = _decimal(request.POST.get("remaining", ""))
+        if seen is not None and order.is_open and seen != order.remaining:
+            # Usually a double tap: the first tap already took this payment.
+            raise BusinessError(_("This bill was just updated (%(left)s left to pay). Check it before taking more.") % {"left": money(order.remaining)})
         if how == "room":
             reservation = get_object_or_404(Reservation, pk=request.POST.get("reservation"))
             services.charge_to_room(order, reservation, user=request.user)
@@ -235,7 +254,9 @@ def settle(request, pk):
             )
             order.refresh_from_db()
             cash = how == Payment.Method.CASH
-            if order.is_open:
+            if payment is None:
+                messages.success(request, _("Closed without payment (fully discounted)."))
+            elif order.is_open:
                 if cash:
                     _kick_drawer(order, request.user)
                 messages.success(
@@ -244,7 +265,7 @@ def settle(request, pk):
                     % {"amount": money(payment.amount), "left": money(order.remaining)},
                 )
                 return _back_to_order(order)
-            if payment.change:
+            elif payment.change:
                 messages.success(request, _("Paid. Give back %(change)s change.") % {"change": money(payment.change)})
             else:
                 messages.success(request, _("Paid. The table is free again."))
@@ -253,6 +274,15 @@ def settle(request, pk):
     except BusinessError as e:
         messages.error(request, str(e))
         return _back_to_order(order)
+    # Items not sent yet went to the kitchen with the payment: say so if a kitchen printer failed.
+    for job in PrintJob.objects.filter(
+        status=PrintJob.Status.FAILED, created_at__gte=started, title__endswith=f": {order.display_name}"
+    ):
+        messages.error(
+            request,
+            _("%(title)s did not print (%(error)s). Tell the kitchen/bar, then check the printer.")
+            % {"title": job.title, "error": job.error},
+        )
     printer = _receipt_printer(order)
     wants_print = request.POST.get("print") == "1" or (printer and order.outlet.auto_print_receipt)
     if printer:
@@ -326,6 +356,7 @@ def send_order(request, pk):
         return _back_to_order(order)
     if tickets:
         messages.success(request, _("Sent to %(stations)s.") % {"stations": ", ".join(t.station.name for t in tickets)})
+    _report_print_failures(request, tickets)
     if request.POST.get("then") == "floor":
         return redirect("outlets:floor", pk=order.outlet_id)
     return _back_to_order(order)

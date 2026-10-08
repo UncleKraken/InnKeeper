@@ -37,6 +37,7 @@ from .pricing import quote
 
 log = logging.getLogger(__name__)
 _lock = threading.Lock()
+_pull_lock = threading.Lock()  # webhook, background job and the button may pull at once
 
 OTA_SOURCES = {
     "booking.com": Reservation.Source.BOOKING_COM,
@@ -292,7 +293,9 @@ def process_revision(rev: dict) -> ChannelBooking:
     booking_id = rev.get("booking_id") or rev["id"]
     channel = rev.get("ota_name") or "Channex"
     customer = rev.get("customer") or {}
-    cb, _created = ChannelBooking.objects.get_or_create(booking_id=booking_id)
+    cb, created = ChannelBooking.objects.get_or_create(booking_id=booking_id)
+    if not created and cb.revision_id == rev["id"]:
+        return cb  # this revision was already applied (e.g. by another process before the ack)
     cb.revision_id = rev["id"]
     cb.status = rev.get("status", "")
     cb.channel = channel[:60]
@@ -394,6 +397,11 @@ def _room_free(res: Reservation, arrival: date, departure: date) -> bool:
 
 def pull() -> list[ChannelBooking]:
     """Read new booking revisions from Channex, apply them and acknowledge each one."""
+    with _pull_lock:
+        return _pull()
+
+
+def _pull() -> list[ChannelBooking]:
     hs = HotelSettings.load()
     if not hs.channex_configured:
         return []

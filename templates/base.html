@@ -107,6 +107,18 @@
     var msg = e.target.getAttribute('data-confirm');
     if (msg && !window.confirm(msg)) e.preventDefault();
   });
+  // A double tap must not send a form twice (two payments, two bookings…).
+  document.addEventListener('submit', function (e) {
+    var f = e.target;
+    if (e.defaultPrevented || (f.getAttribute('method') || '').toLowerCase() !== 'post' || f.hasAttribute('data-resubmit')) return;
+    if (f.dataset.busy) { e.preventDefault(); return; }
+    f.dataset.busy = '1';
+    setTimeout(function () { f.querySelectorAll('button:not([type=button])').forEach(function (b) { b.disabled = true; }); }, 0);
+    setTimeout(function () { delete f.dataset.busy; f.querySelectorAll('button').forEach(function (b) { b.disabled = false; }); }, 6000);
+  });
+  window.addEventListener('pageshow', function () {
+    document.querySelectorAll('form[data-busy]').forEach(function (f) { delete f.dataset.busy; f.querySelectorAll('button').forEach(function (b) { b.disabled = false; }); });
+  });
 </script>
 {% block scripts %}{% endblock %}
 </body>

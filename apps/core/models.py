@@ -190,6 +190,15 @@ class HotelSettings(models.Model):
         default=Decimal("6.00"),
         help_text=_("Room nights. Food, drinks and other services use the main VAT rate."),
     )
+    fiscal_exchange_rate = models.DecimalField(
+        _("exchange rate (lekë for 1 unit of your currency)"),
+        max_digits=10,
+        decimal_places=4,
+        null=True,
+        blank=True,
+        help_text=_("Only if prices are not in lekë (ALL), e.g. 100.50 for EUR. Use the Bank of Albania rate."),
+    )
+    fiscal_since = models.DateTimeField(null=True, blank=True, editable=False)  # when fiscalization was turned on
 
     # Channel manager (Channex)
     channex_enabled = models.BooleanField(_("connect to the channel manager"), default=False)
@@ -313,6 +322,25 @@ class AuditLog(models.Model):
 
     def __str__(self) -> str:
         return f"{self.created_at:%Y-%m-%d %H:%M} {self.action}: {self.description}"
+
+
+def csv_safe(value):
+    """A cell for a CSV opened in Excel: text starting with = + - @ would run as a formula."""
+    if isinstance(value, str) and value[:1] in ("=", "+", "-", "@", "\t", "\r"):
+        return "'" + value
+    return value
+
+
+class SafeCSVWriter:
+    """csv.writer whose text cells can't run as Excel formulas (names come from guests and channels)."""
+
+    def __init__(self, f, **kwargs):
+        import csv
+
+        self._w = csv.writer(f, **kwargs)
+
+    def writerow(self, row):
+        return self._w.writerow([csv_safe(v) for v in row])
 
 
 def audit(user, action: str, description: str, obj=None) -> AuditLog:
