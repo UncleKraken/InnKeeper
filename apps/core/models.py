@@ -227,6 +227,43 @@ class HotelSettings(models.Model):
     )
     fiscal_since = models.DateTimeField(null=True, blank=True, editable=False)  # when fiscalization was turned on
 
+    # Automatic copies of the data to another place (USB drive, OneDrive / Google Drive folder, NAS)
+    SYNC_EVERY_CHOICES = [
+        (15, _("Every 15 minutes")),
+        (30, _("Every 30 minutes")),
+        (60, _("Every hour")),
+        (240, _("Every 4 hours")),
+        (1440, _("Once a day")),
+    ]
+    sync_enabled = models.BooleanField(
+        _("copy the data to another place automatically"),
+        default=False,
+        help_text=_("A full copy is written there regularly, so a broken or stolen computer never loses your data."),
+    )
+    sync_folder = models.CharField(
+        _("folder"),
+        max_length=500,
+        blank=True,
+        help_text=_(
+            "A USB drive (e.g. E:\\InnKeeper) or a folder that OneDrive, Google Drive or Dropbox keeps in the cloud."
+        ),
+    )
+    sync_every = models.PositiveIntegerField(_("how often"), default=60, choices=SYNC_EVERY_CHOICES)
+    sync_password = models.CharField(
+        _("password for the copies"),
+        max_length=128,
+        blank=True,
+        help_text=_(
+            "Recommended for cloud folders: the copies are encrypted and can only be restored with this password. "
+            "Write it down — without it the copies can't be opened."
+        ),
+    )
+    sync_last_at = models.DateTimeField(null=True, blank=True, editable=False)
+    sync_last_file = models.CharField(max_length=255, blank=True, editable=False)
+    sync_last_error = models.CharField(max_length=500, blank=True, editable=False)
+    sync_last_error_at = models.DateTimeField(null=True, blank=True, editable=False)
+    sync_last_digest = models.CharField(max_length=64, blank=True, editable=False)  # skip identical copies
+
     # Channel manager (Channex)
     channex_enabled = models.BooleanField(_("connect to the channel manager"), default=False)
     channex_api_key = models.CharField(_("Channex API key"), max_length=255, blank=True)

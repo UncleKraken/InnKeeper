@@ -208,7 +208,10 @@
       <li>Hyni përsëri me llogarinë tuaj të zakonshme.</li>
     </ol>
   </details>
-  <details><summary>Kopje rezervë automatike</summary><p>Aplikacioni për Windows ruan çdo ditë një kopje të plotë dhe mban 30 të fundit. Në server, planifikoni <code>python manage.py backup</code>. Kopjoni rregullisht kopjet në një vend tjetër (USB, cloud).</p></details>
+  <details open><summary>Kopje automatike në USB ose në cloud</summary>
+    <p>Aplikacioni për Windows ruan çdo ditë një kopje të plotë në këtë kompjuter dhe mban 30 të fundit. Por nëse kompjuteri prishet ose vidhet, humbin edhe ato. Te <em>Cilësimet → Kopje rezervë &amp; rikthim → Kopje automatike në një vend tjetër</em> zgjidhni një dosje në USB ose në OneDrive / Google Drive / Dropbox (instaloni aplikacionin e tyre dhe hyni më parë) dhe sa shpesh. InnKeeper shkruan atje një kopje të plotë, e lexon sërish për ta kontrolluar dhe mban çdo kopje të dy ditëve të fundit, një në ditë për dy muaj dhe një në muaj më pas. Një fjalëkalim i enkripton kopjet (rekomandohet për cloud; shkruajeni diku).</p>
+    <p>Nëse kopjimi ndalon (USB e hequr, dosja e cloud-it mungon), paneli shfaq një paralajmërim të kuq. Për rikthim, lista poshtë cilësimeve tregon kopjet me butonin <em>Rikthe</em>; në një kompjuter të ri, instaloni InnKeeper, zgjidhni të njëjtën dosje dhe riktheni kopjen më të re.</p>
+  </details>
   <details><summary>Regjistri i aktivitetit</summary><p><em>Cilësimet → Regjistri i aktivitetit</em> ruan çdo hyrje, pagesë, zbritje, anulim dhe ndryshim cilësimesh, me personin dhe orën.</p></details>
   <details><summary>Importi nga Excel</summary><p><em>Cilësimet → Importo nga Excel</em> sjell menunë, listën e stokut ose të mysafirëve. Shkarkoni shabllonin, plotësojeni në Excel (një rresht për artikull), zgjidhni <em>File → Save as → CSV UTF-8</em> dhe ngarkojeni. Një parapamje tregon çfarë do të shtohet ose përditësohet dhe cilët rreshta kanë probleme; asgjë nuk ruhet pa konfirmimin tuaj. Artikujt me të njëjtin emër përditësohen, asgjë nuk fshihet. Funksionojnë edhe emrat shqip të kolonave.</p></details>
 </section>
@@ -233,7 +236,16 @@
 <section id="windows">
   <h2>Aplikacioni për Windows &amp; përditësimet</h2>
   <p>Instaluesi për Windows shton ikonën <strong>InnKeeper</strong>. Kur e hapni, InnKeeper ndizet në sfond dhe hapet në shfletues. Pajisjet e tjera në të njëjtin Wi-Fi mund ta përdorin gjithashtu: adresa shfaqet në dritaren e InnKeeper-it.</p>
-  <p>Kur del një version i ri, menaxherët shohin një njoftim lart në ekran. Shkarkoni dhe hapni instaluesin e ri: të dhënat mbeten në vend dhe para përditësimit bëhet një kopje rezervë.</p>
+  <p>Kur del një version i ri, menaxherët shohin një njoftim lart në ekran. Hapni <em>Cilësimet → Përditësimet</em> dhe shtypni <em>Përditëso tani</em>: InnKeeper ruan një kopje rezervë, shkarkon përditësimin nga GitHub, e kontrollon dhe e instalon. Mbyllet për rreth një minutë dhe hapet sërish vetë. Windows mund të kërkojë leje për ndryshime: zgjidhni <em>Yes</em>.</p>
+  <details><summary>“Windows protected your PC” gjatë instalimit</summary>
+    <p>InnKeeper është falas dhe instaluesi nuk është i nënshkruar me certifikatë me pagesë, ndaj Windows nuk e njeh ende botuesin. Është i sigurt nëse e keni shkarkuar nga faqja zyrtare (github.com/UncleKraken/InnKeeper/releases).</p>
+    <ol>
+      <li>Në shfletues, nëse pyet, zgjidhni <em>Keep</em> (Edge: … → Keep → Show more → Keep anyway).</li>
+      <li>Te dritarja blu e Windows klikoni <em>More info</em>, pastaj <em>Run anyway</em>.</li>
+      <li>Nëse antivirusi e bllokon, riktheni nga karantina dhe lejojeni; programet e bëra me Python ndonjëherë shënohen gabimisht.</li>
+    </ol>
+    <p>Përditësimet nga brenda InnKeeper nuk e shfaqin këtë paralajmërim.</p>
+  </details>
 </section>
 
 <section id="faq">

@@ -90,7 +90,7 @@
       <span style="width:28px"></span>
     </header>
     <main class="content">
-      {% if update_available %}<div class="alert alert-info no-print" style="margin-bottom:1rem">{% blocktranslate with v=update_available.version %}A new version of InnKeeper ({{ v }}) is available.{% endblocktranslate %} <a href="{{ update_available.url }}" target="_blank" rel="noopener">{% translate "See what's new and download" %}</a></div>{% endif %}
+      {% if update_available %}<div class="alert alert-info no-print" style="margin-bottom:1rem">{% blocktranslate with v=update_available.version %}A new version of InnKeeper ({{ v }}) is available.{% endblocktranslate %} <a href="{% url 'core:update' %}">{% translate "See what's new and update" %}</a></div>{% endif %}
       {% include "includes/messages.html" %}
       {% block content %}{% endblock %}
     </main>

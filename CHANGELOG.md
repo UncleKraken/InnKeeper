@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.7.0 — automatic copies and one-click updates
+
+**Shqip**
+
+- **Kopje automatike në një vend tjetër:** te Cilësimet → Kopje rezervë & rikthim zgjidhni një USB ose një dosje të OneDrive / Google Drive / Dropbox. InnKeeper shkruan atje një kopje të plotë sipas orarit (çdo 15 minuta deri një herë në ditë), e lexon sërish për ta kontrolluar dhe mban kopjet e dy ditëve të fundit, një në ditë për dy muaj dhe një në muaj më pas. Me fjalëkalim, kopjet enkriptohen. Kur InnKeeper ndalet bëhet edhe një kopje e fundit. Nëse kopjimi ndalon (p.sh. USB e hequr), paneli shfaq paralajmërim të kuq. Rikthimi i një kopjeje bëhet me një buton.
+- **Përditëso tani:** Cilësimet → Përditësimet shkarkon versionin e ri nga GitHub, kontrollon kodin SHA-256, ruan një kopje rezervë dhe e instalon; InnKeeper hapet sërish vetë.
+- **Udhëzues për “Windows protected your PC”:** si ta instaloni sigurt (More info → Run anyway), paralajmërimet e shfletuesit dhe antivirusit, kontrolli i skedarit. Te Ndihma dhe në [docs/windows-install.md](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md).
+- Paralajmërimet në panel me buton nuk e çojnë më butonin në rresht të ri.
+
+**English**
+
+- **Automatic copies to another place:** in Settings → Backup & restore choose a USB drive or a OneDrive / Google Drive / Dropbox folder. InnKeeper writes a full copy there on a schedule (every 15 minutes to once a day), reads it back to check it, and keeps every copy from the last two days, one per day for two months and one per month after that. With a password the copies are encrypted. A last copy is made when InnKeeper stops. If copying stops working (e.g. the USB drive is out), the dashboard shows a red warning. Restoring a copy is one button.
+- **Update now:** Settings → Updates downloads the new version from GitHub, checks its SHA-256, saves a backup and installs it; InnKeeper reopens by itself.
+- **Guide for “Windows protected your PC”:** how to install safely (More info → Run anyway), browser and antivirus warnings, checking the file. In Help and in [docs/windows-install.md](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md).
+- Dashboard alerts with a button no longer push the button onto a new line.
+
+### Install or update on Windows
+1. Download **InnKeeper-Setup-2.7.0.exe** below and run it. Updating keeps all your data; a copy of the database is made first. From this version on, later updates can be installed from inside InnKeeper.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.6.0 — tax registration options
 
 **Shqip**

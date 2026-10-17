@@ -22,6 +22,7 @@
     {% if hotel.module_outlets %}<a href="{% url 'outlets:setup' %}">{% icon "store" %} {% translate "Outlets & menus" %}</a>{% endif %}
     <a href="{% url 'accounts:staff_list' %}">{% icon "staff" %} {% translate "Staff" %}</a>
     <a href="{% url 'core:audit_log' %}">{% icon "history" %} {% translate "Activity log" %}</a>
+    <a href="{% url 'core:update' %}">{% icon "sync" %} {% translate "Updates" %} <span class="muted" style="margin-left:auto; font-size:.8rem">{{ innkeeper_version }}</span></a>
   </nav>
 
   <div>
@@ -198,6 +199,49 @@
     </section>
 
   {% elif tab == "backup" %}
+    <section class="card" id="sync" style="margin-bottom:1.25rem">
+      <div class="card-header"><h2>{% translate "Automatic copies to another place" %}</h2>
+        {% if sync_status.state == "ok" %}{% translate "Working" as l %}{% status_badge "success" l %}{% elif sync_status.state == "failing" %}{% translate "Not working" as l %}{% status_badge "danger" l %}{% elif sync_status.state == "late" %}{% translate "Late" as l %}{% status_badge "warning" l %}{% elif sync_status.state == "pending" %}{% translate "Waiting for the first copy" as l %}{% status_badge "warning" l %}{% else %}{% translate "Off" as l %}{% status_badge "neutral" l %}{% endif %}</div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0">{% translate "Your data lives on this computer. If it breaks, is stolen or the disk fails, everything is gone unless a copy is somewhere else. InnKeeper can keep a full copy on a USB drive or in a cloud folder (OneDrive, Google Drive, Dropbox) and update it automatically." %}</p>
+        {% if sync_status.state != "off" %}
+          <div class="alert {% if sync_status.state == 'failing' %}alert-error{% elif sync_status.state == 'ok' %}alert-info{% else %}alert-warning{% endif %}" style="margin-bottom:1rem">
+            {% if sync_status.last_at %}{% translate "Last copy" %}: <strong>{{ sync_status.last_at|date:"d.m.Y H:i" }}</strong> · <span class="mono">{{ sync_status.file }}</span>{% else %}{% translate "No copy has been written yet." %}{% endif %}
+            {% if sync_status.state == "failing" %}<br>{% icon "alert" %} {{ sync_status.error }}{% endif %}
+          </div>
+        {% endif %}
+        <form method="post" action="{% url 'core:sync_settings' %}" novalidate>{% csrf_token %}
+          {% include "includes/form_fields.html" with form=sync_form %}
+          {% if sync_suggestions %}<div class="row" style="flex-wrap:wrap; gap:.4rem; margin-top:.5rem"><span class="muted" style="font-size:.85rem">{% translate "Found on this computer:" %}</span>
+            {% for label, path in sync_suggestions %}<button type="button" class="btn btn-ghost btn-sm" data-folder="{{ path }}">{{ label }}</button>{% endfor %}</div>{% endif %}
+          <details class="help-body" style="margin-top:1rem"><summary>{% translate "Which folder should I choose?" %}</summary>
+            <ul>
+              <li>{% translate "Cloud (best): install OneDrive, Google Drive or Dropbox on this computer and sign in. Choose a folder inside it, for example C:\Users\Name\OneDrive\InnKeeper. The copies go to the cloud by themselves and also wait there when the internet is down. Set a password for the copies." %}</li>
+              <li>{% translate "USB drive: plug it in and choose it, for example E:\InnKeeper. Leave it plugged in; take it home now and then and bring another one. If it is missing, InnKeeper warns you on the dashboard." %}</li>
+              <li>{% translate "Network drive (NAS) or another computer's shared folder work too." %}</li>
+            </ul>
+            <p>{% translate "Each copy is a full backup. InnKeeper keeps every copy from the last two days, one per day for two months and one per month after that." %}</p>
+          </details>
+          <div class="form-actions"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
+        </form>
+      </div>
+      {% if sync_status.state != "off" %}
+      <div class="card-footer row" style="justify-content:space-between">
+        <form method="post" action="{% url 'core:sync_now' %}" class="inline">{% csrf_token %}<button class="btn btn-secondary">{% icon "sync" %} {% translate "Copy now" %}</button></form>
+      </div>
+      {% endif %}
+      {% if sync_copies %}
+      <div class="table-wrap" style="border-top:1px solid var(--line)"><table class="table table-sm"><tbody>
+        {% for c in sync_copies %}<tr><td class="mono">{{ c.name }}{% if c.encrypted %} {% icon "lock" %}{% endif %}</td><td class="nowrap">{{ c.modified|date:"d.m.Y H:i" }}</td><td class="num">{{ c.size|filesizeformat }}</td><td class="num"><a class="btn btn-secondary btn-sm" href="{% url 'core:restore_from_copy' %}?name={{ c.name|urlencode }}">{% translate "Restore" %}</a></td></tr>{% endfor %}
+      </tbody></table></div>
+      {% endif %}
+    </section>
+    <script>
+      document.querySelectorAll('[data-folder]').forEach(function (b) {
+        b.addEventListener('click', function () { var f = document.getElementById('id_sync_folder'); f.value = b.getAttribute('data-folder'); f.focus(); });
+      });
+    </script>
+
     <div class="grid grid-2">
       <section class="card">
         <div class="card-header"><h2>{% translate "Full backup" %}</h2></div>

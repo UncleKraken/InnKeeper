@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Updates" %}{% endblock %}
+{% block content %}
+<div class="wizard">
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Management" %}</div><h1>{% translate "Updates" %}</h1>
+    <p>{% blocktranslate %}You have InnKeeper {{ current }}.{% endblocktranslate %}</p></div>
+  <div class="actions"><a class="btn btn-secondary" href="?check=1">{% icon "sync" %} {% translate "Check again" %}</a></div>
+</div>
+
+<section class="card" id="progress" {% if state.state == "idle" %}hidden{% endif %}>
+  <div class="card-body">
+    <h2 style="margin-top:0" id="progress-title">{% translate "Updating…" %}</h2>
+    <div class="progress"><div class="progress-bar" id="progress-bar" style="width:{{ state.percent|default:0 }}%"></div></div>
+    <p class="muted" id="progress-text"></p>
+  </div>
+</section>
+
+{% if newer %}
+<section class="card" id="offer">
+  <div class="card-header"><h2>{% blocktranslate with v=newer.version %}InnKeeper {{ v }} is available{% endblocktranslate %}</h2></div>
+  <div class="card-body">
+    {% if newer.notes %}<div class="release-notes">{{ newer.notes|linebreaksbr }}</div>{% endif %}
+  </div>
+  <div class="card-footer">
+    {% if can_install %}
+      <p class="muted" style="margin-top:0">{% translate "InnKeeper saves a backup (and a copy to your other place, if set up), downloads the update, checks it and installs it. It closes for about a minute and opens again by itself. Windows may ask “Do you want to allow this app to make changes?” — choose Yes. Better outside busy hours." %}</p>
+      <form method="post" action="{% url 'core:update_install' %}" data-confirm="{% translate 'Update InnKeeper now? It will close for about a minute.' %}">{% csrf_token %}
+        <button class="btn" id="update-btn">{% icon "download" %} {% blocktranslate with v=newer.version %}Update to {{ v }} now{% endblocktranslate %}</button>
+      </form>
+    {% else %}
+      <p style="margin-top:0">{% translate "On Windows: download the installer from the release page and run it; your data stays in place. On a server: pull the new version and restart (for Docker: docker compose pull && docker compose up -d)." %}</p>
+      <a class="btn" href="{{ newer.url }}" target="_blank" rel="noopener">{% icon "download" %} {% translate "Open the release page" %}</a>
+    {% endif %}
+  </div>
+</section>
+{% elif info %}
+<section class="card"><div class="card-body"><p style="margin:0">{% icon "check" %} {% translate "You have the latest version." %}</p></div></section>
+{% else %}
+<section class="card"><div class="card-body"><p style="margin:0" class="muted">{% translate "Couldn't reach the update server. Check the internet connection and try again." %}</p></div></section>
+{% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var box = document.getElementById('progress'), bar = document.getElementById('progress-bar'),
+      text = document.getElementById('progress-text'), title = document.getElementById('progress-title'),
+      offer = document.getElementById('offer'), current = '{{ current|escapejs }}', closedSeen = false;
+  var labels = {
+    downloading: '{{ _("Downloading the update…")|escapejs }}',
+    'backing-up': '{{ _("Saving a backup first…")|escapejs }}',
+    installing: '{{ _("Installing. InnKeeper closes now and opens again in about a minute. Keep this page open.")|escapejs }}',
+    error: '{{ _("The update didn't finish. InnKeeper keeps working on the current version.")|escapejs }}'
+  };
+  function show(s) {
+    if (!s || s.state === 'idle') return;
+    box.hidden = false; if (offer) offer.hidden = s.state !== 'error';
+    bar.style.width = (s.state === 'downloading' ? (s.percent || 0) : 100) + '%';
+    text.textContent = (labels[s.state] || '') + (s.message ? ' ' + s.message : '');
+    if (s.state === 'error') title.textContent = '{{ _("Update failed")|escapejs }}';
+  }
+  function waitForRestart() {
+    fetch('/health/', {cache: 'no-store'}).then(function (r) { return r.json(); }).then(function (h) {
+      if (h.version && h.version !== current) {
+        title.textContent = '{{ _("Updated")|escapejs }} → ' + h.version; text.textContent = '';
+        setTimeout(function () { window.location.href = '/'; }, 1500);
+      } else { setTimeout(waitForRestart, 3000); }
+    }).catch(function () { closedSeen = true; setTimeout(waitForRestart, 3000); });
+  }
+  function poll() {
+    fetch('{% url "core:update_status" %}', {cache: 'no-store', credentials: 'same-origin'})
+      .then(function (r) { return r.json(); })
+      .then(function (s) {
+        show(s);
+        if (s.state === 'installing') return waitForRestart();
+        if (s.state === 'downloading' || s.state === 'backing-up') setTimeout(poll, 1000);
+      })
+      .catch(function () { waitForRestart(); });
+  }
+  {% if state.state != "idle" %}poll();{% endif %}
+})();
+</script>
+{% endblock %}

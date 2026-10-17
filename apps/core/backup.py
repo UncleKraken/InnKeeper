@@ -86,6 +86,16 @@ SETTINGS_FIELDS_SKIP = {
     "fiscal_certificate",
     "fiscal_certificate_password",
     "fiscal_since",
+    # The copy target belongs to this computer; its password stays here too.
+    "sync_enabled",
+    "sync_folder",
+    "sync_every",
+    "sync_password",
+    "sync_last_at",
+    "sync_last_file",
+    "sync_last_error",
+    "sync_last_error_at",
+    "sync_last_digest",
 }
 
 
@@ -108,7 +118,48 @@ def _wrap(kind: str, payload) -> bytes:
     return gzip.compress(json.dumps(doc, ensure_ascii=False, default=str).encode("utf-8"))
 
 
-def read_file(raw: bytes) -> dict:
+ENC_MAGIC = b"INNKEEPER-ENC1\n"
+
+
+def _key(password: str, salt: bytes) -> bytes:
+    import base64
+
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
+    kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=390_000)
+    return base64.urlsafe_b64encode(kdf.derive(password.encode("utf-8")))
+
+
+def encrypt(raw: bytes, password: str) -> bytes:
+    """Protect a backup file with a password (AES via Fernet, key from PBKDF2-SHA256)."""
+    import os
+
+    from cryptography.fernet import Fernet
+
+    salt = os.urandom(16)
+    return ENC_MAGIC + salt + Fernet(_key(password, salt)).encrypt(raw)
+
+
+def is_encrypted(raw: bytes) -> bool:
+    return raw.startswith(ENC_MAGIC)
+
+
+def decrypt(raw: bytes, password: str) -> bytes:
+    from cryptography.fernet import Fernet, InvalidToken
+
+    body = raw[len(ENC_MAGIC) :]
+    try:
+        return Fernet(_key(password or "", body[:16])).decrypt(body[16:])
+    except (InvalidToken, ValueError) as e:
+        raise BackupError("wrong-password") from e
+
+
+def read_file(raw: bytes, password: str | None = None) -> dict:
+    if is_encrypted(raw):
+        if not password:
+            raise BackupError("password-needed")
+        raw = decrypt(raw, password)
     try:
         try:
             raw = gzip.decompress(raw)
@@ -129,11 +180,30 @@ def filename(kind: str) -> str:
 # ---------- Full backup ----------
 
 
-def export_full() -> bytes:
+def _full_data() -> list:
     data = []
     for model in _models(FULL_MODELS):
         data.extend(json.loads(serializers.serialize("json", model._default_manager.all().order_by("pk"))))
-    return _wrap("full", data)
+    return data
+
+
+def export_full() -> bytes:
+    return _wrap("full", _full_data())
+
+
+def export_full_with_digest() -> tuple[bytes, str]:
+    """A full backup plus a fingerprint of the data that ignores the copy job's own bookkeeping,
+    so an unchanged business doesn't get a new identical copy every few minutes."""
+    import hashlib
+
+    data = _full_data()
+    fingerprint = []
+    for row in data:
+        if row.get("model") == "core.hotelsettings":
+            row = {**row, "fields": {k: v for k, v in row["fields"].items() if not k.startswith("sync_last")}}
+        fingerprint.append(row)
+    digest = hashlib.sha256(json.dumps(fingerprint, sort_keys=True, default=str).encode("utf-8")).hexdigest()
+    return _wrap("full", data), digest
 
 
 def summarize(doc: dict) -> dict:

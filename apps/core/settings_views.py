@@ -2,6 +2,7 @@
 
 import base64
 import secrets
+from pathlib import Path
 from decimal import Decimal
 
 from django import forms
@@ -258,6 +259,24 @@ class FiscalSettingsForm(StyledFormMixin, forms.ModelForm):
         return cleaned
 
 
+class SyncSettingsForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = HotelSettings
+        fields = ["sync_enabled", "sync_folder", "sync_every", "sync_password"]
+        widgets = {"sync_password": forms.PasswordInput(render_value=True, attrs={"autocomplete": "new-password"})}
+
+    def clean(self):
+        from . import sync
+
+        cleaned = super().clean()
+        cleaned["sync_folder"] = (cleaned.get("sync_folder") or "").strip()
+        if cleaned.get("sync_enabled") or cleaned["sync_folder"]:
+            problem = sync.check_folder(cleaned["sync_folder"])
+            if problem:
+                self.add_error("sync_folder", problem)
+        return cleaned
+
+
 TABS = {
     "fiscal": FiscalSettingsForm,
     "payments": PaymentSettingsForm,
@@ -303,11 +322,80 @@ def settings_hub(request):
 
         ctx["import_kinds"] = [(k, v["label"], v["columns"], v["required"]) for k, v in importer.KINDS.items()]
     elif tab == "backup":
+        from . import sync
+
         ctx["disk_backups"] = backup.disk_backups()
         ctx["backup_dir"] = backup.backup_dir()
+        ctx["sync_form"] = SyncSettingsForm(instance=hs)
+        ctx["sync_status"] = sync.status(hs)
+        ctx["sync_copies"] = sync.copies(hs.sync_folder, limit=15) if hs.sync_folder else []
+        ctx["sync_suggestions"] = sync.suggestions()
     else:
         raise Http404
     return render(request, "core/settings_hub.html", ctx)
+
+
+@require_POST
+@module_required("management")
+def sync_settings(request):
+    """Save the automatic copy settings, then make a first copy straight away so problems show now."""
+    from . import sync
+
+    hs = HotelSettings.load()
+    form = SyncSettingsForm(request.POST, instance=hs)
+    if not form.is_valid():
+        ctx = {
+            "tab": "backup",
+            "disk_backups": backup.disk_backups(),
+            "backup_dir": backup.backup_dir(),
+            "sync_form": form,
+            "sync_status": sync.status(hs),
+            "sync_copies": [],
+            "sync_suggestions": sync.suggestions(),
+        }
+        return render(request, "core/settings_hub.html", ctx)
+    form.save()
+    audit(request.user, "settings.sync", f"{hs.sync_folder} ({'on' if hs.sync_enabled else 'off'})", hs)
+    if hs.sync_enabled:
+        try:
+            path = sync.run(force=True)
+            messages.success(request, _("Saved. First copy written: %(name)s") % {"name": path.name})
+        except sync.SyncError as e:
+            messages.error(request, _("Saved, but the copy failed: %(e)s") % {"e": e})
+    else:
+        messages.success(request, _("Settings saved."))
+    return redirect("/settings/?tab=backup#sync")
+
+
+@require_POST
+@module_required("management")
+def sync_now(request):
+    from . import sync
+
+    try:
+        path = sync.run(force=True)
+        audit(request.user, "backup.copy", path.name)
+        messages.success(request, _("Copy written: %(name)s") % {"name": path.name})
+    except sync.SyncError as e:
+        messages.error(request, _("The copy failed: %(e)s") % {"e": e})
+    return redirect("/settings/?tab=backup#sync")
+
+
+@module_required("management")
+def restore_from_copy(request):
+    """Bring a copy from the other place into InnKeeper's backup folder, then restore it as usual."""
+    import shutil
+
+    from . import sync
+
+    name = request.GET.get("name", "")
+    folder = Path(HotelSettings.load().sync_folder or "")
+    path = folder / name
+    if not name or "/" in name or "\\" in name or not name.startswith(sync.PREFIX) or not path.is_file():
+        raise Http404
+    local = f"copy-{name}"
+    shutil.copyfile(path, backup.backup_dir() / local)
+    return redirect(f"/settings/restore/?file={local}")
 
 
 @module_required("management")
@@ -343,26 +431,37 @@ def backup_file(request, name):
 
 @module_required("management")
 def restore(request):
-    """Step 1: upload (or pick a saved backup) and see what's inside. Step 2: confirm."""
+    """Step 1: upload (or pick a saved backup) and see what's inside. Step 2: confirm.
+    Password-protected copies ask for their password first and are unlocked into a normal backup."""
     if request.method == "POST" and request.FILES.get("file"):
         raw = request.FILES["file"].read()
-        try:
-            doc = backup.read_file(raw)
-        except backup.BackupError:
-            messages.error(request, _("This file is not an InnKeeper backup."))
-            return redirect("/settings/?tab=backup")
         name = f"upload-{secrets.token_hex(4)}.innkeeper"
         (backup.backup_dir() / name).write_bytes(raw)
     else:
-        name = request.GET.get("file", "")
+        name = request.POST.get("file") or request.GET.get("file", "")
         path = backup.backup_dir() / name
         if not name or "/" in name or "\\" in name or not path.is_file():
             return redirect("/settings/?tab=backup")
+        raw = path.read_bytes()
+    if backup.is_encrypted(raw):
+        password = request.POST.get("password", "")
+        if not password:
+            return render(request, "core/restore_password.html", {"file": name})
         try:
-            doc = backup.read_file(path.read_bytes())
+            raw = backup.decrypt(raw, password)
         except backup.BackupError:
-            messages.error(request, _("This file is not an InnKeeper backup."))
-            return redirect("/settings/?tab=backup")
+            return render(request, "core/restore_password.html", {"file": name, "wrong": True})
+        if name.startswith(("upload-", "copy-")):
+            (backup.backup_dir() / name).unlink(missing_ok=True)
+        name = f"upload-{secrets.token_hex(4)}.innkeeper"
+        (backup.backup_dir() / name).write_bytes(raw)
+    try:
+        doc = backup.read_file(raw)
+    except backup.BackupError:
+        if name.startswith(("upload-", "copy-")):
+            (backup.backup_dir() / name).unlink(missing_ok=True)
+        messages.error(request, _("This file is not an InnKeeper backup."))
+        return redirect("/settings/?tab=backup")
     return render(request, "core/restore_confirm.html", {"summary": backup.summarize(doc), "file": name})
 
 
@@ -382,7 +481,7 @@ def restore_confirm(request):
             _("Settings imported: %(o)s outlets, %(i)s menu items, %(t)s tables, %(r)s rooms.")
             % {"o": stats["outlets"], "i": stats["items"], "t": stats["tables"], "r": stats["rooms"]},
         )
-        if name.startswith("upload-"):
+        if name.startswith(("upload-", "copy-")):
             path.unlink(missing_ok=True)
         return redirect("/settings/?tab=backup")
 
@@ -391,7 +490,7 @@ def restore_confirm(request):
         return redirect(f"/settings/restore/?file={name}")
     safety = backup.save_backup_to_disk("before-restore", keep=10)
     backup.restore_full(doc)
-    if name.startswith("upload-"):
+    if name.startswith(("upload-", "copy-")):
         path.unlink(missing_ok=True)
     logout(request)
     messages.success(

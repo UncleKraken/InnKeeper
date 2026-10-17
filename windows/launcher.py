@@ -48,6 +48,7 @@ def configure_environment(data: Path) -> None:
     os.environ["DJANGO_SECRET_KEY"] = key_file.read_text(encoding="utf-8").strip()
     os.environ["DATABASE_URL"] = "sqlite:///" + str(data / "innkeeper.sqlite3").replace("\\", "/")
     os.environ["INNKEEPER_BACKUP_DIR"] = str(data / "backups")
+    os.environ["INNKEEPER_WINDOWS_APP"] = "1"
     os.environ["DJANGO_ALLOWED_HOSTS"] = "*"
     os.environ["DJANGO_SECURE_SSL_REDIRECT"] = "0"
     os.environ["DJANGO_SECURE_COOKIES"] = "0"
@@ -186,6 +187,14 @@ def channel_jobs(log, stop: threading.Event) -> None:
         clear_settings_cache()  # pick up settings changed in the browser (fiscal, Channex)
         close_old_connections()
         try:
+            from apps.core.sync import run as copy_if_due
+
+            copied = copy_if_due()
+            if copied:
+                log(f"Copy saved: {copied}")
+        except Exception as e:
+            log(f"Copy error: {e}")
+        try:
             from apps.fiscal.services import resend_pending
 
             n = resend_pending()
@@ -264,6 +273,14 @@ def selftest_fiscal() -> None:
     signing.iic(c, ["L00000000A", "2026-01-01T00:00:00+01:00", "1", "bu", "tcr", "sw", "1.00"])
 
 
+def selftest_copy() -> None:
+    """A password-protected backup must open again in the .exe (encryption for the automatic copies)."""
+    from apps.core import backup
+
+    sealed = backup.encrypt(backup.export_full(), "selftest")
+    assert backup.read_file(sealed, "selftest")["kind"] == "full"
+
+
 def run_selftest() -> int:
     data = data_dir()
     configure_environment(data)
@@ -273,6 +290,12 @@ def run_selftest() -> int:
         print("Fiscal signing OK")
     except Exception as e:  # the frozen build must be able to sign fiscal receipts
         print(f"SELFTEST FAILED: fiscal signing: {e!r}")
+        return 1
+    try:
+        selftest_copy()
+        print("Encrypted copy OK")
+    except Exception as e:
+        print(f"SELFTEST FAILED: encrypted copy: {e!r}")
         return 1
     ready = threading.Event()
     threading.Thread(target=serve, args=(print, ready), daemon=True).start()
@@ -399,6 +422,12 @@ def main() -> int:
 
     def quit_app():
         stop.set()
+        try:  # a last copy, so the other place has everything up to the moment InnKeeper stopped
+            from apps.core.sync import run as copy_now
+
+            copy_now(if_changed=True)
+        except Exception as e:
+            log(f"Copy on stop failed: {e}")
         root.destroy()
 
     button("Hap · Open", lambda: webbrowser.open(local_url), True)

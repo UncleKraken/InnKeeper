@@ -54,7 +54,7 @@ hiddenimports = (
     + collect_submodules("whitenoise")
     + collect_submodules("waitress")
     + ["dj_database_url", "qrcode", "qrcode.image.svg", "qrcode.image.pure", "win32print", "win32timezone",
-       "lxml.etree", "lxml._elementpath"]
+       "lxml.etree", "lxml._elementpath", "cryptography.fernet"]
     + collect_submodules("cryptography.hazmat")
 )
 

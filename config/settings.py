@@ -161,6 +161,8 @@ STORAGES = {
 INNKEEPER_BACKUP_DIR = Path(os.environ.get("INNKEEPER_BACKUP_DIR", BASE_DIR / "backups"))
 # Optional: check GitHub for new releases and tell managers (set to "" to turn off).
 INNKEEPER_UPDATE_REPO = os.environ.get("INNKEEPER_UPDATE_REPO", "UncleKraken/InnKeeper")
+# Set by the Windows launcher: updates can be downloaded and installed from inside the app.
+INNKEEPER_WINDOWS_APP = env_bool("INNKEEPER_WINDOWS_APP", False)
 # Send availability changes to the channel manager in a background thread right away.
 CHANNEX_BACKGROUND = True
 if len(sys.argv) > 1 and sys.argv[1] == "test":

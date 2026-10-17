@@ -20,7 +20,58 @@ from .models import AuditLog, HotelSettings
 
 def health(request):
     """Used by Docker / uptime monitors."""
-    return JsonResponse({"status": "ok"})
+    from apps import __version__
+
+    return JsonResponse({"status": "ok", "version": __version__})
+
+
+@module_required("management")
+def update_page(request):
+    from apps import __version__
+
+    from . import updates
+
+    if request.GET.get("check"):
+        from django.core.cache import cache
+
+        cache.delete(updates.CACHE_KEY)
+    info = updates.latest_release()
+    newer = updates.update_available()
+    return render(
+        request,
+        "core/update.html",
+        {
+            "current": __version__,
+            "info": info,
+            "newer": newer,
+            "can_install": updates.can_install() and bool(newer and newer.get("installer")),
+            "state": updates.STATE,
+        },
+    )
+
+
+@require_POST
+@module_required("management")
+def update_install(request):
+    from . import updates
+
+    newer = updates.update_available()
+    if not (updates.can_install() and newer and newer.get("installer")):
+        return redirect("core:update")
+    from apps.core.models import audit
+
+    audit(request.user, "app.update", newer["version"])
+    updates.start_install(newer)
+    return redirect("core:update")
+
+
+@module_required("management")
+def update_status(request):
+    from apps import __version__
+
+    from . import updates
+
+    return JsonResponse({**updates.STATE, "current": __version__})
 
 
 @login_required
@@ -104,6 +155,11 @@ def dashboard(request):
                 days = (expires - timezone.now()).days
                 if days < 30:
                     ctx["fiscal_cert_days"] = max(days, 0)
+
+    if user.is_manager:
+        from . import sync
+
+        ctx["sync_status"] = sync.status()
 
     if can_access(user, "inventory"):
         from apps.inventory.views import low_stock_count
@@ -278,9 +334,9 @@ def onboarding_steps(user) -> list[dict]:
             "url": reverse("core:settings") + "?tab=receipts",
         },
         {
-            "label": _("Download your first backup"),
-            "done": AuditLog.objects.filter(action__startswith="backup.").exists(),
-            "url": reverse("core:settings") + "?tab=backup",
+            "label": _("Keep a copy of your data on a USB drive or in the cloud"),
+            "done": bool(hs.sync_enabled and hs.sync_last_at),
+            "url": reverse("core:settings") + "?tab=backup#sync",
         },
     ]
     return steps

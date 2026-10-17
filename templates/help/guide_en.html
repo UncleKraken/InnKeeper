@@ -208,7 +208,10 @@
       <li>Sign in again with your usual account.</li>
     </ol>
   </details>
-  <details><summary>Automatic backups</summary><p>The Windows app saves a full backup every day and keeps the last 30. On a server, schedule <code>python manage.py backup</code>. Copy backups to another place (USB drive, cloud) regularly.</p></details>
+  <details open><summary>Automatic copies to a USB drive or the cloud</summary>
+    <p>The Windows app saves a full backup on this computer every day and keeps the last 30. But if the computer breaks or is stolen, those are gone too. In <em>Settings → Backup &amp; restore → Automatic copies to another place</em> choose a folder on a USB drive or in OneDrive / Google Drive / Dropbox (install their app and sign in first) and how often. InnKeeper writes a full copy there, reads it back to check it, and keeps every copy from the last two days, one per day for two months and one per month after that. A password encrypts the copies (recommended for the cloud; write it down).</p>
+    <p>If the copy stops working (USB drive unplugged, cloud folder gone), the dashboard shows a red warning. To restore, the list under the settings shows the copies with a <em>Restore</em> button; on a new computer, install InnKeeper, choose the same folder and restore the newest copy.</p>
+  </details>
   <details><summary>Activity log</summary><p><em>Settings → Activity log</em> records every check-in, payment, discount, void and setting change, with who did it and when.</p></details>
   <details><summary>Import from Excel</summary><p><em>Settings → Import from Excel</em> brings in your menu, stock list or guest list. Download the template, fill it in Excel (one row per item), choose <em>File → Save as → CSV UTF-8</em> and upload it. A preview shows what will be added or updated and which rows have problems; nothing is saved until you confirm. Entries with the same name are updated, nothing is deleted. Albanian column names work too.</p></details>
 </section>
@@ -233,7 +236,16 @@
 <section id="windows">
   <h2>Windows app &amp; updates</h2>
   <p>The Windows installer adds an <strong>InnKeeper</strong> icon. Opening it starts InnKeeper in the background and opens it in your browser. Other devices on the same Wi-Fi can use it too: the address is shown in the InnKeeper window.</p>
-  <p>When a new version is available, managers see a notice at the top of the screen. Download and run the new installer: your data stays in place, and a backup is made before the update.</p>
+  <p>When a new version is available, managers see a notice at the top of the screen. Open <em>Settings → Updates</em> and press <em>Update now</em>: InnKeeper saves a backup, downloads the update from GitHub, checks it and installs it. It closes for about a minute and opens again by itself. Windows may ask to allow changes: choose <em>Yes</em>.</p>
+  <details><summary>“Windows protected your PC” when installing</summary>
+    <p>InnKeeper is free and its installer isn't signed with a paid certificate, so Windows doesn't know the publisher yet. It is safe if you downloaded it from the official page (github.com/UncleKraken/InnKeeper/releases).</p>
+    <ol>
+      <li>In the browser, if it asks, choose <em>Keep</em> (Edge: … → Keep → Show more → Keep anyway).</li>
+      <li>In the blue Windows window, click <em>More info</em>, then <em>Run anyway</em>.</li>
+      <li>If the antivirus blocks it, restore it from quarantine and allow it; programs made with Python are sometimes flagged by mistake.</li>
+    </ol>
+    <p>Updates from inside InnKeeper don't show this warning.</p>
+  </details>
 </section>
 
 <section id="faq">

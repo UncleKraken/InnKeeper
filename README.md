@@ -48,9 +48,12 @@ It adapts to the business: a setup wizard asks whether you run a **hotel**, a **
 
 Download **InnKeeper-Setup-x.y.z.exe** from the [Releases page](https://github.com/UncleKraken/InnKeeper/releases) and run it. It adds an InnKeeper icon; opening it starts InnKeeper and opens it in your browser. On first start you create the manager account and the setup wizard does the rest.
 
+> **“Windows protected your PC”?** InnKeeper is free and its installer isn't code-signed, so Windows warns the first time. Click **More info → Run anyway**. Step-by-step help (browser warnings, antivirus, checking the file's SHA-256) in English and Albanian: [docs/windows-install.md](docs/windows-install.md).
+
 - Data is kept in `%LOCALAPPDATA%\InnKeeper` (database, daily backups, logs), so updating or reinstalling never touches it.
 - Other devices on the same Wi-Fi (tablets for waiters, a phone for housekeeping) open the address shown in the InnKeeper window.
-- When a new version is published, managers see a notice in the app. Run the new installer; a backup is made automatically before the update.
+- When a new version is published, managers see a notice in the app. **Settings → Updates → Update now** downloads it from GitHub, checks its SHA-256, saves a backup and installs it; InnKeeper reopens by itself.
+- **Automatic copies:** Settings → Backup & restore → *Automatic copies to another place* keeps a full, verified copy on a USB drive or in a OneDrive / Google Drive / Dropbox folder (optionally password-encrypted), thinned out over time. The dashboard warns when it stops working.
 
 The installer is built automatically by GitHub Actions (`.github/workflows/windows.yml`) on every push; pushing a tag such as `v2.1.0` publishes it as a release.
 

@@ -44,5 +44,7 @@ Name: "{userstartup}\InnKeeper"; Filename: "{app}\InnKeeper.exe"; Tasks: autosta
 
 [Run]
 Filename: "{app}\InnKeeper.exe"; Description: "{cm:LaunchProgram,InnKeeper}"; Flags: nowait postinstall skipifsilent
+; An update started from inside InnKeeper runs silently: open InnKeeper again when it is done.
+Filename: "{app}\InnKeeper.exe"; Flags: nowait runasoriginaluser; Check: WizardSilent
 
 ; Data in %LOCALAPPDATA%\InnKeeper (database and backups) is deliberately kept on uninstall.

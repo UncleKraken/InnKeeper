@@ -41,6 +41,17 @@
   <span class="btn btn-sm">{% translate "Review" %}</span>
 </a>
 {% endif %}
+{% if sync_status.state == "failing" or sync_status.state == "late" %}
+<a class="alert alert-error row" style="margin-bottom:1.25rem; justify-content:space-between; color:inherit" href="{% url 'core:settings' %}?tab=backup#sync">
+  <span>{% icon "alert" %} <strong>{% translate "The automatic copy of your data is not working." %}</strong> {% if sync_status.last_at %}{% blocktranslate with t=sync_status.last_at|timesince %}Last copy {{ t }} ago.{% endblocktranslate %}{% endif %} {{ sync_status.error }}</span>
+  <span class="btn btn-sm">{% translate "Check" %}</span>
+</a>
+{% elif sync_status.state == "off" and hotel.setup_completed %}
+<a class="alert alert-warning row" style="margin-bottom:1.25rem; justify-content:space-between; color:inherit" href="{% url 'core:settings' %}?tab=backup#sync">
+  <span>{% icon "alert" %} {% translate "Your data is only on this computer. Set up automatic copies to a USB drive or the cloud, so nothing is lost if it breaks." %}</span>
+  <span class="btn btn-sm">{% translate "Set up" %}</span>
+</a>
+{% endif %}
 {% if fiscal_missing or fiscal_cert_problem or fiscal_cert_days is not None %}
 <a class="alert alert-error row" style="margin-bottom:1.25rem; justify-content:space-between; color:inherit" href="{% url 'core:settings' %}?tab=fiscal">
   <span>{% icon "alert" %} <strong>{% if fiscal_cert_problem %}{% translate "The fiscal certificate can't be opened. Sales are not being fiscalized." %}{% elif fiscal_missing %}{% blocktranslate count n=fiscal_missing %}{{ n }} sale has no fiscal receipt yet. InnKeeper keeps trying; check the fiscal settings and certificate.{% plural %}{{ n }} sales have no fiscal receipt yet. InnKeeper keeps trying; check the fiscal settings and certificate.{% endblocktranslate %}{% else %}{% blocktranslate count n=fiscal_cert_days %}The fiscal certificate expires in {{ n }} day. Renew it on e-Albania and upload the new one.{% plural %}The fiscal certificate expires in {{ n }} days. Renew it on e-Albania and upload the new one.{% endblocktranslate %}{% endif %}</strong></span>
