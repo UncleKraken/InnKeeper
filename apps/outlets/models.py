@@ -2,7 +2,7 @@ import secrets
 from decimal import Decimal
 
 from django.conf import settings
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import F, Sum
 from django.utils.translation import gettext_lazy as _
@@ -207,6 +207,107 @@ class Item(models.Model):
         return self.category.outlet
 
 
+class OptionGroup(models.Model):
+    """Choices offered with an item: a size, sugar, milk, extras… (shown when the item is tapped)."""
+
+    name = models.CharField(_("name"), max_length=60, help_text=_("e.g. Size, Sugar, Extras"))
+    name_en = models.CharField(_("name in English"), max_length=60, blank=True)
+    required = models.BooleanField(
+        _("must choose"), default=False, help_text=_("The order can't be added until one is chosen (e.g. a size).")
+    )
+    multiple = models.BooleanField(
+        _("several allowed"), default=False, help_text=_("Guests may pick more than one (e.g. extras).")
+    )
+    items = models.ManyToManyField(
+        Item, blank=True, related_name="option_groups", verbose_name=_("offered with these items")
+    )
+    sort_order = models.PositiveSmallIntegerField(_("order"), default=0)
+
+    class Meta:
+        verbose_name = _("option group")
+        verbose_name_plural = _("option groups")
+        ordering = ["sort_order", "name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class Option(models.Model):
+    group = models.ForeignKey(OptionGroup, on_delete=models.CASCADE, related_name="options")
+    name = models.CharField(_("name"), max_length=60)
+    name_en = models.CharField(_("name in English"), max_length=60, blank=True)
+    price_change = models.DecimalField(
+        _("price change"), default=Decimal("0"), help_text=_("Added to the price; can be negative."), **MONEY
+    )
+    sort_order = models.PositiveSmallIntegerField(_("order"), default=0)
+    is_active = models.BooleanField(_("available"), default=True)
+
+    class Meta:
+        ordering = ["group", "sort_order", "id"]
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class PriceRule(models.Model):
+    """Time-based prices: happy hour (−20% on drinks 17–19), late-night prices in a club (+20% after 23)…"""
+
+    WEEKDAYS = [
+        ("0", _("Mon")),
+        ("1", _("Tue")),
+        ("2", _("Wed")),
+        ("3", _("Thu")),
+        ("4", _("Fri")),
+        ("5", _("Sat")),
+        ("6", _("Sun")),
+    ]
+
+    name = models.CharField(_("name"), max_length=60, help_text=_("Shown on the bill, e.g. Happy hour"))
+    percent = models.DecimalField(
+        _("price change (%)"),
+        max_digits=5,
+        decimal_places=1,
+        validators=[MinValueValidator(Decimal("-100")), MaxValueValidator(Decimal("300"))],
+        help_text=_("For example −20 for a happy hour (cheaper) or 15 for late-night prices (dearer)."),
+    )
+    days = models.CharField(_("days"), max_length=7, default="0123456")
+    start_time = models.TimeField(_("from"))
+    end_time = models.TimeField(_("until"), help_text=_("If earlier than “from”, the rule runs past midnight."))
+    outlets = models.ManyToManyField(
+        Outlet, blank=True, related_name="price_rules", verbose_name=_("outlets"), help_text=_("Empty: all outlets.")
+    )
+    categories = models.ManyToManyField(
+        Category,
+        blank=True,
+        related_name="price_rules",
+        verbose_name=_("categories"),
+        help_text=_("Empty: the whole menu."),
+    )
+    is_active = models.BooleanField(_("active"), default=True)
+
+    class Meta:
+        verbose_name = _("time-based price")
+        verbose_name_plural = _("time-based prices")
+        ordering = ["start_time", "name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def label(self) -> str:
+        sign = "−" if self.percent < 0 else "+"
+        return f"{self.name} {sign}{abs(self.percent).normalize():f}%"
+
+    def is_on(self, when) -> bool:
+        """Running at local time `when`. A rule from 22:00 to 02:00 belongs to the day it started."""
+        t, day = when.time(), when.weekday()
+        if self.start_time <= self.end_time:
+            return str(day) in self.days and self.start_time <= t < self.end_time
+        if t >= self.start_time:
+            return str(day) in self.days
+        return t < self.end_time and str((day - 1) % 7) in self.days
+
+
 class Table(models.Model):
     class Shape(models.TextChoices):
         SQUARE = "square", _("Square")
@@ -248,6 +349,7 @@ class Order(models.Model):
     class Settlement(models.TextChoices):
         PAID = "paid", _("Paid")
         ROOM = "room", _("Charged to room")
+        ACCOUNT = "account", _("On account")
 
     outlet = models.ForeignKey(Outlet, on_delete=models.PROTECT, related_name="orders", verbose_name=_("outlet"))
     table = models.ForeignKey(
@@ -369,6 +471,10 @@ class OrderLine(models.Model):
     unit_price = models.DecimalField(_("unit price"), **MONEY)
     quantity = models.PositiveSmallIntegerField(_("quantity"), default=1)
     note = models.CharField(_("note"), max_length=120, blank=True)
+    # Chosen options ([{"id", "name", "price"}]); their names are also part of `name`, so kitchen
+    # tickets, receipts and reports show them without knowing about options.
+    options = models.JSONField(default=list, blank=True)
+    price_note = models.CharField(max_length=60, blank=True)  # e.g. "Happy hour −20%"
     station = models.ForeignKey(Station, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     status = models.CharField(max_length=8, choices=Status.choices, default=Status.DIRECT)
     ticket = models.ForeignKey(KitchenTicket, null=True, blank=True, on_delete=models.SET_NULL, related_name="lines")

@@ -19,6 +19,7 @@ from django.db.models import (
     Sum,
     functions,  # noqa: F401  (models.functions)
 )
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.businessday import business_date
@@ -66,6 +67,74 @@ class Folio(models.Model):
 
     def accommodation_nights_posted(self) -> int:
         return self.reservation.accommodation_nights_posted()
+
+
+class CustomerAccount(models.Model):
+    """A regular's tab ("borxh"): sales put on the account now, paid later."""
+
+    name = models.CharField(_("name"), max_length=120)
+    phone = models.CharField(_("phone"), max_length=40, blank=True)
+    note = models.CharField(_("note"), max_length=255, blank=True)
+    credit_limit = models.DecimalField(
+        _("credit limit"),
+        null=True,
+        blank=True,
+        help_text=_("Staff can't put more on the account than this. Empty: no limit."),
+        **MONEY,
+    )
+    opening_balance = models.DecimalField(
+        _("owed from before"),
+        default=ZERO,
+        help_text=_("What the customer already owed when you started using InnKeeper (e.g. from the notebook)."),
+        **MONEY,
+    )
+    is_active = models.BooleanField(_("active"), default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+
+    class Meta:
+        verbose_name = _("customer account")
+        verbose_name_plural = _("customer accounts")
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def balance(self) -> Decimal:
+        owed = self.charges.filter(voided=False).aggregate(t=Sum("amount"))["t"] or ZERO
+        paid = self.payments.filter(voided=False).aggregate(t=Sum("amount"))["t"] or ZERO
+        return self.opening_balance + owed - paid
+
+
+class Shift(models.Model):
+    """A staff member's shift at the till: the cash they start with and hand in at the end."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="shifts")
+    opened_at = models.DateTimeField(default=timezone.now)
+    opening_float = models.DecimalField(_("cash at the start"), default=ZERO, **MONEY)
+    closed_at = models.DateTimeField(null=True, blank=True)
+    counted_cash = models.DecimalField(_("cash counted"), null=True, blank=True, **MONEY)
+    expected_cash = models.DecimalField(null=True, blank=True, **MONEY)
+    notes = models.CharField(_("notes"), max_length=255, blank=True)
+
+    class Meta:
+        verbose_name = _("shift")
+        verbose_name_plural = _("shifts")
+        ordering = ["-opened_at"]
+
+    def __str__(self) -> str:
+        return f"{self.user} {timezone.localtime(self.opened_at):%d.%m %H:%M}"
+
+    @property
+    def is_open(self) -> bool:
+        return self.closed_at is None
+
+    @property
+    def difference(self) -> Decimal | None:
+        if self.counted_cash is None or self.expected_cash is None:
+            return None
+        return self.counted_cash - self.expected_cash
 
 
 class VoidableQuerySet(models.QuerySet):
@@ -131,6 +200,9 @@ class Charge(LedgerEntry):
 
     folio = models.ForeignKey(Folio, null=True, blank=True, on_delete=models.PROTECT, related_name="charges")
     order = models.ForeignKey("outlets.Order", null=True, blank=True, on_delete=models.PROTECT, related_name="charges")
+    account = models.ForeignKey(
+        CustomerAccount, null=True, blank=True, on_delete=models.PROTECT, related_name="charges"
+    )
     # The stay a room-night charge belongs to. It stays set when a group's charges move to the
     # main room's bill, so nights are counted per stay and never posted twice.
     reservation = models.ForeignKey(
@@ -185,6 +257,12 @@ class Payment(LedgerEntry):
     amount = models.DecimalField(_("amount"), **MONEY)
     reference = models.CharField(_("reference"), max_length=80, blank=True)
     tendered = models.DecimalField(_("cash given"), null=True, blank=True, **MONEY)
+    account = models.ForeignKey(
+        CustomerAccount, null=True, blank=True, on_delete=models.PROTECT, related_name="payments"
+    )
+    # A tip is not revenue: it belongs to the staff member (card tips are paid out from the cash).
+    tip = models.DecimalField(_("tip"), default=ZERO, **MONEY)
+    shift = models.ForeignKey(Shift, null=True, blank=True, on_delete=models.SET_NULL, related_name="payments")
 
     class Meta:
         verbose_name = _("payment")
@@ -194,9 +272,14 @@ class Payment(LedgerEntry):
     def __str__(self) -> str:
         return f"{self.get_method_display()} {self.amount}"
 
+    def save(self, *args, **kwargs):
+        if self._state.adding and self.shift_id is None and self.created_by_id:
+            self.shift = Shift.objects.filter(user_id=self.created_by_id, closed_at__isnull=True).first()
+        super().save(*args, **kwargs)
+
     @property
     def change(self) -> Decimal:
-        return max((self.tendered or ZERO) - self.amount, ZERO) if self.tendered else ZERO
+        return max((self.tendered or ZERO) - self.amount - self.tip, ZERO) if self.tendered else ZERO
 
 
 class Expense(LedgerEntry):

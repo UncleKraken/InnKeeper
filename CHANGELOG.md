@@ -1,5 +1,29 @@
 # Changelog
 
+## 2.9.0 — options, happy hour, customer accounts, shifts and tips
+
+**Shqip**
+
+- **Opsionet e artikujve:** madhësia, sheqeri, shtesat… (Pikat & menutë → Opsionet). Në arkë, artikulli hap një listë të shkurtër zgjedhjesh; çmimi ndryshon vetë dhe zgjedhjet printohen në biletën e kuzhinës, në kupon dhe në kuponin fiskal.
+- **Happy hour dhe çmimet e natës:** çmime sipas orarit dhe ditëve, për pika ose kategori të caktuara (p.sh. −20% për pijet 17–19, ose +15% pas orës 23 në klub). Arka tregon çmimin e vjetër të vizatuar dhe të riun.
+- **Llogaritë e klientëve (borxhi):** klientët e rregullt marrin tani dhe paguajnë më vonë. Në arkë “Borxh”, në faqen e klientit pasqyra me bilancin, pagesat dhe printimi. Kufi kredie, borxh i mëparshëm nga fletorja. Shitja fiskalizohet menjëherë.
+- **Turnet e stafit:** çdo kamarier fillon turnin me paratë e fillimit; në fund InnKeeper tregon sa para duhet të dorëzojë dhe diferencën. Menaxheri i sheh te Financa → Turnet.
+- **Bakshishet:** për kartë shkruhet bakshishi, për para në dorë “Klienti e lë si bakshish”. Nuk llogariten si të ardhura; bakshishet me kartë zbriten nga paratë e arkës në mbylljen e ditës.
+- Mbyllja e ditës tregon shitjet me borxh, pagesat e borxheve dhe bakshishet. Opsionet dhe happy hour përfshihen në eksportin e cilësimeve.
+
+**English**
+
+- **Item options:** size, sugar, extras… (Outlets & menus → Options). On the till the item opens a short list of choices; the price changes by itself and the choices are printed on the kitchen ticket, the receipt and the fiscal receipt.
+- **Happy hour and late-night prices:** prices by time and day, for chosen outlets or categories (e.g. −20% on drinks 17–19, or +15% after 23:00 in a club). The till shows the old price struck through and the new one.
+- **Customer accounts (tabs):** regulars take now and pay later. “Account” on the till; the customer's page shows the statement with the balance, payments and printing. Credit limits, and what they owed from before (the notebook). The sale is fiscalized straight away.
+- **Staff shifts:** each waiter starts a shift with the cash they start with; at the end InnKeeper shows how much cash to hand in and the difference. Managers see them under Finance → Shifts.
+- **Tips:** type the tip for a card payment, or tick “Guest leaves it as a tip” for cash. Tips aren't revenue; card tips come off the cash expected in the day close.
+- The day close shows sales on account, account payments and tips. Options and happy hour are part of the settings export.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.9.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.8.0 — phones for waiters and staff
 
 **Shqip**

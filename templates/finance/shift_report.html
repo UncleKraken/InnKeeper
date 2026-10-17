@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Shift" %} · {{ shift.user }}{% endblock %}
+{% block content %}
+<div class="wizard">
+<div class="page-header">
+  <div><div class="eyebrow no-print"><a href="{% url 'finance:my_shift' %}">{% icon "back" %} {% translate "My shift" %}</a></div>
+    <div class="print-only"><strong>{{ hotel.legal_name|default:hotel.name }}</strong></div>
+    <h1>{% translate "Shift" %} · {{ shift.user.get_full_name|default:shift.user.username }}</h1>
+    <p>{{ shift.opened_at|date:"d.m.Y H:i" }} – {% if shift.closed_at %}{{ shift.closed_at|date:"H:i" }}{% else %}{% translate "still open" %}{% endif %}</p></div>
+  <div class="actions no-print"><button class="btn btn-secondary" onclick="window.print()">{% icon "print" %} {% translate "Print" %}</button></div>
+</div>
+<section class="card">
+  <div class="card-body">
+    <table class="table table-sm"><tbody>
+      <tr><td>{% translate "Cash at the start" %}</td><td class="num">{{ shift.opening_float|money }}</td></tr>
+      {% for label, v in summary.methods %}<tr><td>{{ label }}</td><td class="num">{{ v|money }}</td></tr>{% endfor %}
+      {% if summary.tips_card %}<tr><td>{% translate "Card tips paid out" %}</td><td class="num">−{{ summary.tips_card|money }}</td></tr>{% endif %}
+      {% if summary.tips_cash %}<tr class="muted"><td>{% translate "Cash tips" %}</td><td class="num">{{ summary.tips_cash|money }}</td></tr>{% endif %}
+      <tr style="font-weight:700"><td>{% translate "Cash expected" %}</td><td class="num">{{ shift.expected_cash|default:summary.expected_cash|money }}</td></tr>
+      {% if shift.counted_cash is not None %}
+      <tr style="font-weight:700"><td>{% translate "Cash counted" %}</td><td class="num">{{ shift.counted_cash|money }}</td></tr>
+      <tr style="font-weight:700"><td>{% translate "Difference" %}</td><td class="num" style="color:{% if shift.difference < 0 %}var(--danger){% elif shift.difference > 0 %}var(--warning){% else %}var(--success){% endif %}">{{ shift.difference|money }}</td></tr>
+      {% endif %}
+    </tbody></table>
+    {% if shift.notes %}<p><strong>{% translate "Notes" %}:</strong> {{ shift.notes }}</p>{% endif %}
+  </div>
+</section>
+<section class="card card-flush" style="margin-top:1.25rem">
+  <div class="card-header"><h3>{% translate "Payments" %}</h3></div>
+  <div class="table-wrap"><table class="table table-sm"><tbody>
+    {% for p in payments %}
+      <tr class="{% if p.voided %}voided{% endif %}"><td class="nowrap">{{ p.created_at|time:"H:i" }}</td>
+        <td>{% if p.order %}{{ p.order.outlet.name }} #{{ p.order.number }}{% elif p.folio %}{% translate "Room" %} {{ p.folio.reservation.room.number }}{% elif p.account %}{{ p.account.name }}{% endif %}</td>
+        <td>{{ p.get_method_display }}</td><td class="num">{{ p.amount|money }}{% if p.tip %}<br><small class="muted">+{{ p.tip|money }} {% translate "tip" %}</small>{% endif %}</td></tr>
+    {% empty %}<tr><td class="empty">{% translate "No payments in this shift." %}</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+</div>
+{% endblock %}

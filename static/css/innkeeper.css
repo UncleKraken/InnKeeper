@@ -775,3 +775,27 @@ pre.bank { background: var(--surface-2); border: 1px solid var(--border); paddin
   .line { padding: .7rem 1rem; }
   .settle .btn-lg { min-height: 52px; }
 }
+
+/* ---------- Item options picker ---------- */
+dialog.sheet {
+  border: 0; border-radius: 16px; padding: 1.25rem; width: min(440px, calc(100% - 2rem)); max-height: 85vh; overflow: auto;
+  box-shadow: var(--shadow-lg); background: var(--surface); color: var(--text);
+}
+dialog.sheet::backdrop { background: rgba(22, 32, 47, .45); }
+.opt-group { border: 0; padding: 0; margin: 0 0 1rem; }
+.opt-group legend { font-weight: 700; margin-bottom: .4rem; }
+.opt-choice {
+  display: flex; align-items: center; gap: .6rem; padding: .7rem .8rem; border: 1px solid var(--border);
+  border-radius: 10px; margin-bottom: .4rem; cursor: pointer;
+}
+.opt-choice:has(input:checked) { border-color: var(--primary); background: var(--primary-soft, #e8f4f2); }
+.opt-choice input { width: 1.15rem; height: 1.15rem; accent-color: var(--primary); }
+.opt-choice span { flex: 1; font-weight: 600; }
+.opt-choice small { color: var(--muted); }
+.i-rule { display: block; font-size: .72rem; color: var(--accent-dark, #8a5f1d); font-weight: 600; }
+@media (max-width: 860px) {
+  dialog.sheet { margin: auto 0 0; width: 100%; max-width: none; border-radius: 16px 16px 0 0; padding-bottom: calc(1.25rem + env(safe-area-inset-bottom)); }
+}
+[data-field=items] .checks, [data-field=categories] .checks { max-height: 300px; overflow: auto; columns: 2 220px; border: 1px solid var(--border); border-radius: 10px; padding: .5rem .75rem; }
+[data-field=weekdays] .checks > div > div, [data-field=outlets] .checks > div > div { display: inline-block; margin-right: 1.1rem; }
+.nav-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success, #2e8b57); margin-left: auto; box-shadow: 0 0 0 3px rgba(46, 139, 87, .25); }

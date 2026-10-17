@@ -3,6 +3,17 @@
 {% block title %}{% translate "Restaurant, bar & services" %}{% endblock %}
 {% block content %}
 <div class="page-header"><div><div class="eyebrow">{% translate "Services" %}</div><h1>{% translate "Choose an outlet" %}</h1></div></div>
+<div class="alert {% if my_shift %}alert-success{% else %}alert-info{% endif %} row" style="margin-bottom:1.25rem; justify-content:space-between">
+  {% if my_shift %}
+    <span>{% icon "check" %} {% blocktranslate with t=my_shift.opened_at|time:"H:i" %}Your shift is open since {{ t }}.{% endblocktranslate %}</span>
+    <a class="btn btn-sm btn-secondary" href="{% url 'finance:my_shift' %}">{% translate "End shift" %}</a>
+  {% else %}
+    <span>{% translate "Start your shift so the cash you take is counted for you." %}</span>
+    <form method="post" action="{% url 'finance:shift_start' %}" class="row" style="gap:.4rem">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}">
+      <input class="input" name="opening_float" inputmode="decimal" placeholder="{% translate 'Cash at start' %}" style="width:120px">
+      <button class="btn btn-sm">{% translate "Start shift" %}</button></form>
+  {% endif %}
+</div>
 <div class="grid grid-3">
   {% for o in outlets %}
     <a class="card stat" href="{% url 'outlets:floor' o.pk %}">

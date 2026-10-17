@@ -128,7 +128,17 @@ def day_summary(day: date) -> dict:
     )
     since, until = day_range(day)
     receipts = Order.objects.filter(closed_at__gte=since, closed_at__lt=until, status=Order.Status.CLOSED)
+    live_payments = Payment.objects.active().filter(business_date=day)
+    # Tips belong to the staff: card tips are paid out to them from the cash drawer.
+    tips_paid_out = live_payments.exclude(method=Payment.Method.CASH).aggregate(t=Sum("tip"))["t"] or ZERO
+    tips_cash = live_payments.filter(method=Payment.Method.CASH).aggregate(t=Sum("tip"))["t"] or ZERO
+    on_account = charges.filter(account__isnull=False).aggregate(t=amount)["t"] or ZERO
+    account_payments = payments.filter(account__isnull=False).aggregate(t=amount)["t"] or ZERO
     return {
+        "tips_paid_out": tips_paid_out,
+        "tips_cash": tips_cash,
+        "on_account": on_account,
+        "account_payments": account_payments,
         "by_method": by_method,
         "method_rows": [(label, by_method[value]) for value, label in Payment.Method.choices if by_method[value]],
         "cash": by_method[Payment.Method.CASH],
@@ -182,7 +192,7 @@ def day_close(request):
             if existing and not request.user.is_manager:
                 raise BusinessError(_("This day is already closed. Only a manager can close it again."))
             d = form.cleaned_data
-            expected = d["opening_float"] + summary["cash"] - summary["cash_expenses"]
+            expected = d["opening_float"] + summary["cash"] - summary["cash_expenses"] - summary["tips_paid_out"]
             obj, _created = DayClose.objects.update_or_create(
                 business_date=day,
                 defaults={
@@ -209,9 +219,9 @@ def day_close(request):
             messages.error(request, str(e))
     expected_now = form["opening_float"].value() or 0
     try:
-        expected_now = Decimal(str(expected_now)) + summary["cash"] - summary["cash_expenses"]
+        expected_now = Decimal(str(expected_now)) + summary["cash"] - summary["cash_expenses"] - summary["tips_paid_out"]
     except Exception:
-        expected_now = summary["cash"] - summary["cash_expenses"]
+        expected_now = summary["cash"] - summary["cash_expenses"] - summary["tips_paid_out"]
     return render(
         request,
         "finance/day_close.html",

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "My shift" %}{% endblock %}
+{% block content %}
+<div class="wizard">
+<div class="page-header"><div><div class="eyebrow">{{ request.user.get_full_name|default:request.user.username }}</div><h1>{% translate "My shift" %}</h1></div></div>
+{% if shift %}
+  <section class="card">
+    <div class="card-header"><h2>{% blocktranslate with t=shift.opened_at|time:"H:i" %}Open since {{ t }}{% endblocktranslate %}</h2></div>
+    <div class="card-body">
+      <table class="table table-sm"><tbody>
+        <tr><td>{% translate "Cash at the start" %}</td><td class="num">{{ shift.opening_float|money }}</td></tr>
+        {% for label, v in summary.methods %}<tr><td>{{ label }}</td><td class="num">{{ v|money }}</td></tr>{% endfor %}
+        {% if summary.tips_card %}<tr><td>{% translate "Card tips (yours, take them from the cash)" %}</td><td class="num">−{{ summary.tips_card|money }}</td></tr>{% endif %}
+        {% if summary.tips_cash %}<tr class="muted"><td>{% translate "Cash tips (already yours)" %}</td><td class="num">{{ summary.tips_cash|money }}</td></tr>{% endif %}
+        <tr style="font-weight:700"><td>{% translate "Cash to hand in" %}</td><td class="num">{{ summary.expected_cash|money }}</td></tr>
+      </tbody></table>
+      <p class="muted" style="font-size:.85rem">{% blocktranslate count n=summary.count %}{{ n }} payment taken in this shift.{% plural %}{{ n }} payments taken in this shift.{% endblocktranslate %}</p>
+    </div>
+    <form method="post" action="{% url 'finance:shift_end' shift.pk %}" class="card-footer form-grid" style="grid-template-columns:1fr 1fr; align-items:end">{% csrf_token %}
+      <div class="field"><label for="counted">{% translate "Cash counted now" %}</label><input class="input" id="counted" name="counted" inputmode="decimal" required></div>
+      <div class="field"><label for="notes">{% translate "Notes" %}</label><input class="input" id="notes" name="notes" maxlength="255"></div>
+      <div style="grid-column:1/-1"><button class="btn" data-confirm="{% translate 'End the shift now?' %}">{% icon "lock" %} {% translate "End shift" %}</button></div>
+    </form>
+  </section>
+{% else %}
+  <section class="card">
+    <div class="card-body">
+      <p style="margin-top:0">{% translate "Start a shift when you begin work. The payments you take are counted in it, and at the end InnKeeper tells you how much cash to hand in — so any difference is clear for each person." %}</p>
+      <form method="post" action="{% url 'finance:shift_start' %}" class="row" style="gap:.6rem; align-items:end; flex-wrap:wrap">{% csrf_token %}
+        <div class="field"><label for="float">{% translate "Cash you start with" %}</label><input class="input" id="float" name="opening_float" inputmode="decimal" value="0"></div>
+        <button class="btn">{% icon "check" %} {% translate "Start shift" %}</button>
+      </form>
+    </div>
+  </section>
+{% endif %}
+{% if recent %}
+<section class="card card-flush" style="margin-top:1.25rem">
+  <div class="card-header"><h3>{% translate "Earlier shifts" %}</h3></div>
+  <div class="table-wrap"><table class="table table-sm"><tbody>
+    {% for s in recent %}<tr><td><a href="{% url 'finance:shift_report' s.pk %}">{{ s.opened_at|date:"d.m H:i" }} – {{ s.closed_at|date:"H:i" }}</a></td><td class="num">{{ s.counted_cash|money }}</td><td class="num">{% if s.difference %}<strong style="color:{% if s.difference < 0 %}var(--danger){% else %}var(--success){% endif %}">{{ s.difference|money }}</strong>{% else %}✓{% endif %}</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endif %}
+</div>
+{% endblock %}

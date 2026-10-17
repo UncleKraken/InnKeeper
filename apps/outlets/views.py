@@ -18,7 +18,7 @@ from apps.core.crud import CrudCreateView, CrudListView, CrudUpdateView
 from apps.core.exceptions import BusinessError
 from apps.core.forms import StyledFormMixin
 from apps.core.templatetags.innkeeper import money
-from apps.finance.models import Payment
+from apps.finance.models import CustomerAccount, Payment
 from apps.fiscal.views import fiscal_block
 from apps.frontdesk.models import Reservation
 
@@ -150,9 +150,36 @@ def order_view(request, pk):
     order = _order_for(request, pk)
     if not order.is_open:
         return redirect("outlets:receipt", pk=order.pk)
-    categories = order.outlet.categories.prefetch_related("items").all()
+    from .pricing import current_prices
+
+    categories = order.outlet.categories.prefetch_related("items__option_groups__options").all()
     menu = [{"category": c, "items": [i for i in c.items.all() if i.is_active]} for c in categories]
-    return render(request, "outlets/order.html", {**_ticket_context(order), "menu": [m for m in menu if m["items"]]})
+    items = [i for m in menu for i in m["items"]]
+    prices = current_prices(items)
+    options = {}
+    for i in items:
+        i.price_now, i.price_rule, percent = prices[i.pk]
+        groups = [
+            {
+                "name": g.name,
+                "required": g.required,
+                "multiple": g.multiple,
+                "options": [
+                    {"id": o.pk, "name": o.name, "price": str(o.price_change)} for o in g.options.all() if o.is_active
+                ],
+            }
+            for g in i.option_groups.all()
+        ]
+        groups = [g for g in groups if g["options"]]
+        if groups:
+            factor = (100 + percent) / 100  # happy hour applies to the options too
+            options[i.pk] = {"name": i.name, "price": str(i.price), "factor": float(factor), "groups": groups}
+            i.has_options = True
+    return render(
+        request,
+        "outlets/order.html",
+        {**_ticket_context(order), "menu": [m for m in menu if m["items"]], "item_options": options},
+    )
 
 
 def _ticket_context(order) -> dict:
@@ -173,6 +200,7 @@ def _ticket_context(order) -> dict:
         "payments": order.payments.filter(voided=False).select_related("created_by"),
         "move_tables": order.outlet.tables.filter(is_active=True).exclude(pk=order.table_id),
         "item_count": sum(line.quantity for line in order.active_lines),
+        "customer_accounts": CustomerAccount.objects.filter(is_active=True).only("name", "phone"),
     }
 
 
@@ -206,7 +234,13 @@ def add_item(request, pk):
     order = _order_for(request, pk)
     item = get_object_or_404(Item.objects.select_related("category"), pk=request.POST.get("item"))
     try:
-        services.add_item(order, item, user=request.user, note=request.POST.get("note", "").strip()[:120])
+        services.add_item(
+            order,
+            item,
+            user=request.user,
+            note=request.POST.get("note", "").strip()[:120],
+            option_ids=request.POST.getlist("option"),
+        )
     except BusinessError as e:
         return _changed(request, order, str(e))
     return _changed(request, order)
@@ -252,6 +286,17 @@ def _report_print_failures(request, tickets) -> None:
             )
 
 
+def _tip(request, order) -> Decimal:
+    """A card tip typed in, or the cash change the guest leaves."""
+    if request.POST.get("keep_change") == "1":
+        tendered = _decimal(request.POST.get("tendered", ""))
+        amount = _decimal(request.POST.get("amount", "")) or order.remaining
+        if tendered and tendered > amount:
+            return tendered - amount
+        return Decimal("0")
+    return max(_decimal(request.POST.get("tip", "")) or Decimal("0"), Decimal("0"))
+
+
 def _decimal(value) -> Decimal | None:
     try:
         return Decimal(str(value).replace(",", ".").strip()) if str(value).strip() else None
@@ -270,7 +315,18 @@ def settle(request, pk):
         if seen is not None and order.is_open and seen != order.remaining:
             # Usually a double tap: the first tap already took this payment.
             raise BusinessError(_("This bill was just updated (%(left)s left to pay). Check it before taking more.") % {"left": money(order.remaining)})
-        if how == "room":
+        if how == "account":
+            name = request.POST.get("account_name", "").strip()
+            active = CustomerAccount.objects.filter(is_active=True)
+            account = active.filter(name__iexact=name).first() if name else None
+            if account is None and name:
+                matches = list(active.filter(name__icontains=name)[:2])
+                account = matches[0] if len(matches) == 1 else None  # part of the name is enough if it's clear
+            if account is None:
+                raise BusinessError(_("No account called “%(name)s”. A manager creates accounts under Customer accounts.") % {"name": name})
+            services.charge_to_account(order, account, user=request.user)
+            messages.success(request, _("Put on %(name)s's account.") % {"name": account.name})
+        elif how == "room":
             reservation = get_object_or_404(Reservation, pk=request.POST.get("reservation"))
             services.charge_to_room(order, reservation, user=request.user)
             messages.success(request, _("Charged to room %(room)s.") % {"room": reservation.room.number})
@@ -282,6 +338,7 @@ def settle(request, pk):
                 amount=_decimal(request.POST.get("amount", "")),
                 tendered=_decimal(request.POST.get("tendered", "")),
                 reference=request.POST.get("reference", "")[:80],
+                tip=_tip(request, order),
             )
             order.refresh_from_db()
             cash = how == Payment.Method.CASH
@@ -531,6 +588,8 @@ SETUP_TABS = [
     ("outlets:setup", _("Outlets")),
     ("outlets:category_list", _("Categories")),
     ("outlets:item_list", _("Menu & services")),
+    ("outlets:option_list", _("Options")),
+    ("outlets:price_rule_list", _("Happy hour")),
     ("outlets:table_list", _("Tables")),
     ("outlets:station_list", _("Stations")),
     ("outlets:printer_list", _("Printers")),

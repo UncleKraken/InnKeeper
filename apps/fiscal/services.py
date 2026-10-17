@@ -267,7 +267,10 @@ def unfiscalized(limit: int = 100) -> list[tuple[str, object]]:
     found: list[tuple[str, object]] = []
     orders = (
         Order.objects.filter(status=Order.Status.CLOSED, closed_at__gte=since, closed_at__lt=settled)
-        .filter(Q(settlement=Order.Settlement.PAID) | Q(settlement=Order.Settlement.ROOM, payments__voided=False))
+        .filter(
+            Q(settlement__in=[Order.Settlement.PAID, Order.Settlement.ACCOUNT])
+            | Q(settlement=Order.Settlement.ROOM, payments__voided=False)
+        )
         .filter(fiscal_documents__isnull=True)
         .distinct()
         .select_related("outlet")

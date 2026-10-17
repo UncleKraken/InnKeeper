@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Customer accounts" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Restaurant, bar & services" %}</div><h1>{% translate "Customer accounts" %}</h1>
+    <p>{% translate "Regulars who pay later. Put a bill on their account from the till (Account), take payments here." %} {% if total %}{% translate "Owed in total" %}: <strong>{{ total|money }}</strong>{% endif %}</p></div>
+  <div class="actions">
+    <form method="get" class="search">{% icon "search" %}<input class="input" type="search" name="q" value="{{ q }}" placeholder="{% translate 'Name or phone…' %}"></form>
+    {% if request.user.is_manager %}<a class="btn" href="{% url 'finance:account_create' %}">{% icon "plus" %} {% translate "New account" %}</a>{% endif %}
+  </div>
+</div>
+<div class="card card-flush">
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Phone" %}</th><th class="num">{% translate "Credit limit" %}</th><th class="num">{% translate "Owes" %}</th></tr></thead>
+    <tbody>
+    {% for a in rows %}
+      <tr{% if not a.is_active %} class="voided"{% endif %}>
+        <td><a href="{% url 'finance:account' a.pk %}"><strong>{{ a.name }}</strong></a>{% if a.note %}<br><small class="muted">{{ a.note }}</small>{% endif %}</td>
+        <td>{{ a.phone|default:"—" }}</td>
+        <td class="num">{% if a.credit_limit is not None %}{{ a.credit_limit|money }}{% else %}—{% endif %}</td>
+        <td class="num"><strong{% if a.credit_limit is not None and a.current_balance > a.credit_limit %} style="color:var(--danger)"{% endif %}>{{ a.current_balance|money }}</strong></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+    <div class="empty"><strong>{% translate "No customer accounts yet." %}</strong>{% if request.user.is_manager %}<a href="{% url 'finance:account_create' %}">{% translate "New account" %}</a>{% endif %}</div>
+  {% endif %}
+  <div class="card-footer"><a href="?{% if show_closed %}{% else %}closed=1{% endif %}" class="muted" style="font-size:.85rem">{% if show_closed %}{% translate "Hide closed accounts" %}{% else %}{% translate "Show closed accounts" %}{% endif %}</a></div>
+</div>
+{% endblock %}

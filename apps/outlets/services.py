@@ -40,7 +40,11 @@ def open_order(outlet: Outlet, *, user, table: Table | None = None, guests: int 
 
 
 @transaction.atomic
-def add_item(order: Order, item: Item, *, user, quantity: int = 1, note: str = "") -> OrderLine:
+def add_item(
+    order: Order, item: Item, *, user, quantity: int = 1, note: str = "", option_ids: list | None = None
+) -> OrderLine:
+    from .pricing import adjust, rule_for
+
     order = Order.objects.select_for_update().get(pk=order.pk)
     _require_open(order)
     item = Item.objects.select_related("category__station").get(pk=item.pk)
@@ -48,11 +52,19 @@ def add_item(order: Order, item: Item, *, user, quantity: int = 1, note: str = "
         raise BusinessError(_("That item is not sold here."))
     if not item.is_active:
         raise BusinessError(_("%(item)s is not available.") % {"item": item.name})
+    chosen = _chosen_options(item, option_ids or [])
+    rule = rule_for(item)
+    unit_price = adjust(item.price + sum((o.price_change for o in chosen), Decimal("0")), rule)
+    name = item.name
+    if chosen:
+        name = f"{item.name} · {', '.join(o.name for o in chosen)}"[:120]
     station = item.category.station if item.category.station_id and item.category.station.is_active else None
     status = OrderLine.Status.NEW if station else OrderLine.Status.DIRECT
     if not note:
-        # Only merge into lines the kitchen hasn't seen yet.
-        line = order.lines.filter(item=item, note="", unit_price=item.price, status=status, quantity__gt=0).first()
+        # Only merge into lines the kitchen hasn't seen yet, with the same choices and price.
+        line = order.lines.filter(
+            item=item, name=name, note="", unit_price=unit_price, status=status, quantity__gt=0
+        ).first()
         if line:
             line.quantity += max(1, quantity)
             line.save(update_fields=["quantity"])
@@ -60,14 +72,42 @@ def add_item(order: Order, item: Item, *, user, quantity: int = 1, note: str = "
     return OrderLine.objects.create(
         order=order,
         item=item,
-        name=item.name,
-        unit_price=item.price,
+        name=name,
+        unit_price=unit_price,
         quantity=max(1, quantity),
         note=note,
+        options=[{"id": o.pk, "name": o.name, "price": str(o.price_change)} for o in chosen],
+        price_note=rule.label[:60] if rule else "",
         station=station,
         status=status,
         added_by=user,
     )
+
+
+def _chosen_options(item: Item, option_ids: list) -> list:
+    """Check the choices against the item's option groups: one per group unless several are allowed,
+    and every required group answered."""
+    from .models import Option
+
+    groups = list(item.option_groups.prefetch_related("options"))
+    if not groups:
+        return []
+    try:
+        ids = {int(x) for x in option_ids if str(x).strip()}
+    except ValueError:
+        raise BusinessError(_("Unknown option."))
+    valid = {o.pk: o for g in groups for o in g.options.all() if o.is_active}
+    if ids - set(valid):
+        raise BusinessError(_("Unknown option."))
+    chosen: list[Option] = []
+    for g in groups:
+        picked = [valid[i] for i in sorted(ids) if valid[i].group_id == g.pk]
+        if g.required and not picked:
+            raise BusinessError(_("Choose %(group)s for %(item)s.") % {"group": g.name.lower(), "item": item.name})
+        if not g.multiple and len(picked) > 1:
+            raise BusinessError(_("Choose only one %(group)s.") % {"group": g.name.lower()})
+        chosen += sorted(picked, key=lambda o: (o.sort_order, o.pk))
+    return chosen
 
 
 @transaction.atomic
@@ -79,7 +119,9 @@ def change_quantity(line: OrderLine, delta: int, *, user) -> OrderLine | None:
         # The kitchen already has this one: more of it is a new item to send.
         if line.item_id is None:
             raise BusinessError(_("This item is no longer on the menu."))
-        return add_item(order, line.item, user=user, quantity=delta, note=line.note)
+        return add_item(
+            order, line.item, user=user, quantity=delta, note=line.note, option_ids=[o["id"] for o in line.options]
+        )
     if delta > 0 and line.item_id and not line.item.is_active:
         raise BusinessError(_("%(item)s is sold out.") % {"item": line.name})
     new_qty = line.quantity + delta
@@ -226,6 +268,7 @@ def pay_order(
     amount: Decimal | None = None,
     tendered: Decimal | None = None,
     reference: str = "",
+    tip: Decimal | None = None,
 ) -> Payment:
     """Take a full or partial payment. The order closes when nothing is left to pay.
 
@@ -263,8 +306,13 @@ def pay_order(
             tendered = None
         elif tendered < amount:
             raise BusinessError(_("The cash given is less than the amount."))
+    tip = Decimal(tip or 0).quantize(Decimal("0.01"))
+    if tip < 0:
+        raise BusinessError(_("The tip can't be negative."))
+    if tendered is not None and tip > tendered - amount:
+        raise BusinessError(_("The tip can't be more than the change."))
     payment = Payment.objects.create(
-        order=order, amount=amount, method=method, reference=reference, tendered=tendered, created_by=user
+        order=order, amount=amount, method=method, reference=reference, tendered=tendered, tip=tip, created_by=user
     )
     audit(user, "order.payment", f"{order.outlet} #{order.number} {amount} ({method})", order)
     if order.remaining <= 0:
@@ -319,6 +367,50 @@ def charge_to_room(order: Order, reservation: Reservation, *, user) -> Order:
 
         transaction.on_commit(lambda: fiscal.safely(fiscal.fiscalize_order, order, user))
     audit(user, "order.room_charge", f"{order.outlet} #{order.number} {remaining} → {reservation.room.number}", order)
+    return order
+
+
+@transaction.atomic
+def charge_to_account(order: Order, account, *, user) -> Order:
+    """Put what is left of the bill on a regular's account (their tab), to be paid later."""
+    from apps.finance.models import CustomerAccount
+
+    order = Order.objects.select_for_update().get(pk=order.pk)
+    _require_open(order)
+    if order.total <= 0:
+        raise BusinessError(_("The order is empty."))
+    account = CustomerAccount.objects.select_for_update().get(pk=account.pk)
+    if not account.is_active:
+        raise BusinessError(_("This account is closed."))
+    paid, remaining = order.paid, order.remaining
+    balance = account.balance
+    if account.credit_limit is not None and balance + remaining > account.credit_limit and not user.is_manager:
+        raise BusinessError(
+            _("This would take %(name)s over the credit limit of %(limit)s (owes %(balance)s now). A manager can allow it.")
+            % {"name": account.name, "limit": f"{account.credit_limit:.2f}", "balance": f"{balance:.2f}"}
+        )
+    if paid > 0:  # part already paid at the table
+        Charge.objects.create(
+            order=order,
+            outlet=order.outlet,
+            kind=Charge.Kind.OUTLET,
+            description=f"{order.outlet} – {order.display_name}",
+            quantity=1,
+            unit_price=paid,
+            created_by=user,
+        )
+    Charge.objects.create(
+        account=account,
+        order=order,
+        outlet=order.outlet,
+        kind=Charge.Kind.OUTLET,
+        description=f"{order.outlet} – #{order.number}",
+        quantity=1,
+        unit_price=remaining,
+        created_by=user,
+    )
+    _close(order, Order.Settlement.ACCOUNT, user)
+    audit(user, "order.account", f"{order.outlet} #{order.number} {remaining} → {account.name}", order)
     return order
 
 
@@ -435,7 +527,7 @@ def _close(order: Order, settlement: str, user) -> None:
     from apps.inventory.services import consume_for_order
 
     consume_for_order(order, user)
-    if settlement == Order.Settlement.PAID:
+    if settlement in (Order.Settlement.PAID, Order.Settlement.ACCOUNT):  # a sale on account is fiscalized now
         from apps.fiscal import services as fiscal
 
         transaction.on_commit(lambda: fiscal.safely(fiscal.fiscalize_order, order, user))

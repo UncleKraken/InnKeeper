@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import kitchen, menu, views
+from . import kitchen, menu, menu_setup, views
 
 app_name = "outlets"
 
@@ -45,6 +45,12 @@ urlpatterns = [
     path("setup/items/", views.ItemList.as_view(), name="item_list"),
     path("setup/items/new/", views.ItemCreate.as_view(), name="item_create"),
     path("setup/items/<int:pk>/", views.ItemEdit.as_view(), name="item_edit"),
+    path("setup/options/", menu_setup.OptionGroupList.as_view(), name="option_list"),
+    path("setup/options/new/", menu_setup.OptionGroupCreate.as_view(), name="option_create"),
+    path("setup/options/<int:pk>/", menu_setup.OptionGroupEdit.as_view(), name="option_edit"),
+    path("setup/prices/", menu_setup.PriceRuleList.as_view(), name="price_rule_list"),
+    path("setup/prices/new/", menu_setup.PriceRuleCreate.as_view(), name="price_rule_create"),
+    path("setup/prices/<int:pk>/", menu_setup.PriceRuleEdit.as_view(), name="price_rule_edit"),
     path("setup/stations/", views.StationList.as_view(), name="station_list"),
     path("setup/stations/new/", views.StationCreate.as_view(), name="station_create"),
     path("setup/stations/<int:pk>/", views.StationEdit.as_view(), name="station_edit"),

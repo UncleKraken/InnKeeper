@@ -18,11 +18,11 @@
     </div>
     <div class="items" id="items">
       {% for m in menu %}{% for item in m.items %}
-        <form method="post" action="{% url 'outlets:add_item' order.pk %}" data-ajax data-resubmit data-label="{{ item.name }}" data-cat="{{ m.category.pk }}" data-name="{{ item.name|lower }} {{ item.name_en|lower }}">{% csrf_token %}
+        <form method="post" action="{% url 'outlets:add_item' order.pk %}" data-ajax data-resubmit data-label="{{ item.name }}" data-cat="{{ m.category.pk }}" data-name="{{ item.name|lower }} {{ item.name_en|lower }}"{% if item.has_options %} data-options="{{ item.pk }}"{% endif %}>{% csrf_token %}
           <input type="hidden" name="item" value="{{ item.pk }}">
           <button class="item-btn" type="submit">
-            <span class="i-name">{{ item.name }}{% if item.duration_minutes %} <small class="muted">· {{ item.duration_minutes }}′</small>{% endif %}</span>
-            <span class="i-price">{{ item.price|money }}</span>
+            <span class="i-name">{{ item.name }}{% if item.duration_minutes %} <small class="muted">· {{ item.duration_minutes }}′</small>{% endif %}{% if item.has_options %} <small class="muted">…</small>{% endif %}</span>
+            <span class="i-price">{% if item.price_rule %}<s class="muted">{{ item.price|money }}</s> {% endif %}{{ item.price_now|money }}{% if item.price_rule %}<span class="i-rule">{{ item.price_rule }}</span>{% endif %}</span>
           </button>
         </form>
       {% endfor %}{% empty %}
@@ -39,6 +39,18 @@
 {% endblock %}
 {% block scripts %}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+{{ item_options|json_script:"item-options" }}
+<dialog class="sheet" id="opt-dialog">
+  <form method="dialog" id="opt-form">
+    <h2 id="opt-title" style="margin:0 0 .75rem"></h2>
+    <div id="opt-groups"></div>
+    <p class="error" id="opt-error" hidden></p>
+    <div class="row" style="gap:.5rem; margin-top:1rem">
+      <button type="button" class="btn btn-secondary" id="opt-cancel">{% translate "Cancel" %}</button>
+      <button type="submit" class="btn spacer" id="opt-add">{% translate "Add" %}</button>
+    </div>
+  </form>
+</dialog>
 <script>
 (function () {
   var tabs = document.querySelectorAll('#cat-tabs button');
@@ -83,13 +95,72 @@
     clearTimeout(toastTimer); toastTimer = setTimeout(function () { toast.classList.remove('show'); }, bad ? 3500 : 1200);
   }
 
+  // Items with options (size, sugar, extras…): ask first, then add.
+  var optionData = JSON.parse(document.getElementById('item-options').textContent || '{}');
+  var dlg = document.getElementById('opt-dialog'), pendingForm = null;
+  var money = function (v) { return (Math.round(v * 100) / 100).toFixed(2) + ' {{ hotel.currency_symbol|escapejs }}'; };
+  function openPicker(f) {
+    var spec = optionData[f.dataset.options]; pendingForm = f;
+    document.getElementById('opt-title').textContent = spec.name;
+    var box = document.getElementById('opt-groups'); box.innerHTML = '';
+    spec.groups.forEach(function (g, gi) {
+      var fs = document.createElement('fieldset'); fs.className = 'opt-group';
+      var lg = document.createElement('legend');
+      lg.textContent = g.name + (g.required ? ' *' : '');
+      fs.appendChild(lg);
+      g.options.forEach(function (o, oi) {
+        var lab = document.createElement('label'); lab.className = 'opt-choice';
+        var inp = document.createElement('input');
+        inp.type = g.multiple ? 'checkbox' : 'radio'; inp.name = 'g' + gi; inp.value = o.id;
+        inp.dataset.price = o.price;
+        if (!g.multiple && g.required && oi === 0) inp.checked = true;
+        var span = document.createElement('span'); span.textContent = o.name;
+        var price = document.createElement('small'); var p = parseFloat(o.price);
+        price.textContent = p ? (p > 0 ? '+' : '−') + money(Math.abs(p)) : '';
+        lab.appendChild(inp); lab.appendChild(span); lab.appendChild(price); fs.appendChild(lab);
+      });
+      fs.dataset.required = g.required ? '1' : '';
+      box.appendChild(fs);
+    });
+    function total() {
+      var t = parseFloat(spec.price);
+      box.querySelectorAll('input:checked').forEach(function (i) { t += parseFloat(i.dataset.price); });
+      document.getElementById('opt-add').textContent = '{{ _("Add")|escapejs }} · ' + money(Math.max(0, t * (spec.factor || 1)));
+    }
+    box.onchange = total; total();
+    document.getElementById('opt-error').hidden = true;
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+  }
+  document.getElementById('opt-cancel').onclick = function () { dlg.close(); };
+  document.getElementById('opt-form').addEventListener('submit', function (e) {
+    var missing = [];
+    document.querySelectorAll('#opt-groups fieldset').forEach(function (fs) {
+      if (fs.dataset.required && !fs.querySelector('input:checked')) missing.push(fs.querySelector('legend').textContent.replace(' *', ''));
+    });
+    if (missing.length) {
+      e.preventDefault();
+      var err = document.getElementById('opt-error'); err.hidden = false;
+      err.textContent = '{{ _("Choose:")|escapejs }} ' + missing.join(', ');
+      return;
+    }
+    var f = pendingForm;
+    f.querySelectorAll('input[name=option]').forEach(function (i) { i.remove(); });
+    document.querySelectorAll('#opt-groups input:checked').forEach(function (i) {
+      var h = document.createElement('input'); h.type = 'hidden'; h.name = 'option'; h.value = i.value; f.appendChild(h);
+    });
+    f.dataset.chosen = '1';
+    setTimeout(function () { f.requestSubmit(); }, 0);
+  });
+
   // Adding items and − / + update the bill in place: no reload, the menu stays where it was.
   document.addEventListener('submit', function (e) {
     var f = e.target;
+    if (f.dataset.options && !f.dataset.chosen) { e.preventDefault(); openPicker(f); return; }
     if (!f.hasAttribute('data-ajax') || !window.fetch) return;
     e.preventDefault();
     var btn = e.submitter, data = new FormData(f);
     if (btn && btn.name) data.append(btn.name, btn.value);
+    if (f.dataset.chosen) { delete f.dataset.chosen; f.querySelectorAll('input[name=option]').forEach(function (i) { i.remove(); }); }
     fetch(f.action, {method: 'POST', body: data, headers: {'X-Requested-With': 'fetch'}, credentials: 'same-origin'})
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (res) {

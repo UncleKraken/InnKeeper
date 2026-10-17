@@ -37,6 +37,14 @@
             </tbody></table>
           </div>
         </div>
+        {% if s.on_account or s.account_payments or s.tips_paid_out or s.tips_cash %}
+        <table class="table table-sm" style="margin-top:1rem"><tbody>
+          {% if s.on_account %}<tr><td>{% translate "Sold on customer accounts (to be paid later)" %}</td><td class="num">{{ s.on_account|money }}</td></tr>{% endif %}
+          {% if s.account_payments %}<tr><td>{% translate "Paid on customer accounts" %}</td><td class="num">{{ s.account_payments|money }}</td></tr>{% endif %}
+          {% if s.tips_paid_out %}<tr><td>{% translate "Card tips (paid out to staff from the cash)" %}</td><td class="num">{{ s.tips_paid_out|money }}</td></tr>{% endif %}
+          {% if s.tips_cash %}<tr class="muted"><td>{% translate "Cash tips (kept by staff)" %}</td><td class="num">{{ s.tips_cash|money }}</td></tr>{% endif %}
+        </tbody></table>
+        {% endif %}
         {% if s.staff %}
         <h3 style="margin:1.25rem 0 .5rem">{% translate "Taken by staff" %}</h3>
         <table class="table table-sm"><tbody>
@@ -49,6 +57,7 @@
           <tr><td>{% translate "Opening float" %}</td><td class="num">{{ existing.opening_float|money }}</td></tr>
           <tr><td>+ {% translate "Cash received" %}</td><td class="num">{{ existing.cash_sales|money }}</td></tr>
           <tr><td>− {% translate "Cash paid out" %}</td><td class="num">{{ existing.cash_expenses|money }}</td></tr>
+          {% if s.tips_paid_out %}<tr><td>− {% translate "Card tips paid out to staff" %}</td><td class="num">{{ s.tips_paid_out|money }}</td></tr>{% endif %}
           <tr><td><strong>{% translate "Expected in drawer" %}</strong></td><td class="num"><strong>{{ existing.expected_cash|money }}</strong></td></tr>
           <tr><td>{% translate "Counted" %}</td><td class="num">{{ existing.counted_cash|money }}</td></tr>
           <tr><td><strong>{% translate "Difference" %}</strong></td><td class="num"><strong style="color:{% if existing.difference < 0 %}var(--danger){% elif existing.difference > 0 %}var(--warning){% else %}var(--success){% endif %}">{{ existing.difference|money }}</strong></td></tr>
@@ -67,6 +76,7 @@
         <dl class="dl" style="margin-bottom:1rem">
           <dt>{% translate "Cash received" %}</dt><dd>{{ s.cash|money }}</dd>
           <dt>{% translate "Cash paid out" %}</dt><dd>{{ s.cash_expenses|money }}</dd>
+          {% if s.tips_paid_out %}<dt>{% translate "Card tips paid out to staff" %}</dt><dd>{{ s.tips_paid_out|money }}</dd>{% endif %}
         </dl>
         {% include "includes/form_fields.html" %}
         <div class="alert alert-info" style="margin-top:1rem" id="expected-box">{% translate "Expected in drawer" %}: <strong id="expected">{{ expected_now|money }}</strong></div>
@@ -89,7 +99,7 @@
 <script>
 (function () {
   var f = document.getElementById('id_opening_float'); if (!f) return;
-  var cash = {{ s.cash|stringformat:".2f" }}, out = {{ s.cash_expenses|stringformat:".2f" }};
+  var cash = {{ s.cash|stringformat:".2f" }}, out = {{ s.cash_expenses|stringformat:".2f" }} + {{ s.tips_paid_out|stringformat:".2f" }};
   function upd() { var v = parseFloat(String(f.value).replace(',', '.')) || 0; document.getElementById('expected').textContent = (v + cash - out).toFixed(2) + ' {{ hotel.currency_symbol|escapejs }}'; }
   f.addEventListener('input', upd); upd();
 })();

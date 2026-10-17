@@ -4,5 +4,6 @@
   <a href="{% url 'finance:day_close' %}" class="{% if request.resolver_match.url_name == 'day_close' %}active{% endif %}">{% translate "Day close" %}</a>
   <a href="{% url 'finance:expenses' %}" class="{% if 'expense' in request.resolver_match.url_name %}active{% endif %}">{% translate "Expenses" %}</a>
   {% if hotel.module_outlets %}<a href="{% url 'finance:sales' %}" class="{% if request.resolver_match.url_name == 'sales' %}active{% endif %}">{% translate "Sales" %}</a>{% endif %}
+  {% if hotel.module_outlets %}<a href="{% url 'finance:shifts' %}" class="{% if request.resolver_match.url_name == 'shifts' %}active{% endif %}">{% translate "Shifts" %}</a>{% endif %}
   <a href="{% url 'finance:ledger' %}" class="{% if request.resolver_match.url_name == 'ledger' %}active{% endif %}">{% translate "Ledger" %}</a>
 </nav>

@@ -47,10 +47,15 @@ FULL_MODELS = [
     "outlets.Outlet",
     "outlets.Category",
     "outlets.Item",
+    "outlets.OptionGroup",
+    "outlets.Option",
+    "outlets.PriceRule",
     "outlets.Table",
     "outlets.Order",
     "outlets.KitchenTicket",
     "outlets.OrderLine",
+    "finance.CustomerAccount",
+    "finance.Shift",
     "finance.Folio",
     "finance.Charge",
     "finance.Payment",
@@ -417,6 +422,36 @@ def export_settings() -> bytes:
         }
         for r in RecipeLine.objects.select_related("item__category__outlet", "stock_item")
     ]
+    from apps.outlets.models import OptionGroup, PriceRule
+
+    payload["option_groups"] = [
+        {
+            "name": g.name,
+            "name_en": g.name_en,
+            "required": g.required,
+            "multiple": g.multiple,
+            "sort_order": g.sort_order,
+            "options": [
+                {"name": o.name, "name_en": o.name_en, "price_change": str(o.price_change), "is_active": o.is_active}
+                for o in g.options.all()
+            ],
+            "items": [[i.category.outlet.name, i.category.name, i.name] for i in g.items.select_related("category__outlet")],
+        }
+        for g in OptionGroup.objects.prefetch_related("options")
+    ]
+    payload["price_rules"] = [
+        {
+            "name": r.name,
+            "percent": str(r.percent),
+            "days": r.days,
+            "start_time": r.start_time.isoformat(),
+            "end_time": r.end_time.isoformat(),
+            "is_active": r.is_active,
+            "outlets": [o.name for o in r.outlets.all()],
+            "categories": [[c.outlet.name, c.name] for c in r.categories.select_related("outlet")],
+        }
+        for r in PriceRule.objects.prefetch_related("outlets")
+    ]
     return _wrap("settings", payload)
 
 
@@ -545,7 +580,51 @@ def import_settings(doc: dict) -> dict:
             )
             stats["tables"] += 1
     _import_stock_settings(data)
+    _import_menu_extras(data)
     return stats
+
+
+def _import_menu_extras(data: dict) -> None:
+    """Option groups and time-based prices, matched by name (nothing is deleted)."""
+    from decimal import Decimal
+
+    from apps.outlets.models import Category, Item, Option, OptionGroup, Outlet, PriceRule
+
+    for g in data.get("option_groups", []):
+        group, _c = OptionGroup.objects.update_or_create(
+            name=g["name"],
+            defaults={k: g[k] for k in ("name_en", "required", "multiple", "sort_order") if k in g},
+        )
+        for i, o in enumerate(g.get("options", [])):
+            Option.objects.update_or_create(
+                group=group,
+                name=o["name"],
+                defaults={
+                    "name_en": o.get("name_en", ""),
+                    "price_change": Decimal(o.get("price_change", "0")),
+                    "is_active": o.get("is_active", True),
+                    "sort_order": i,
+                },
+            )
+        for outlet, category, name in g.get("items", []):
+            item = Item.objects.filter(category__outlet__name=outlet, category__name=category, name=name).first()
+            if item:
+                group.items.add(item)
+    for r in data.get("price_rules", []):
+        rule, _c = PriceRule.objects.update_or_create(
+            name=r["name"],
+            defaults={
+                "percent": Decimal(r["percent"]),
+                "days": r.get("days", "0123456"),
+                "start_time": r["start_time"],
+                "end_time": r["end_time"],
+                "is_active": r.get("is_active", True),
+            },
+        )
+        rule.outlets.set(Outlet.objects.filter(name__in=r.get("outlets", [])))
+        rule.categories.set(
+            [c for o, n in r.get("categories", []) for c in Category.objects.filter(outlet__name=o, name=n)[:1]]
+        )
 
 
 def _import_stock_settings(data: dict) -> None:

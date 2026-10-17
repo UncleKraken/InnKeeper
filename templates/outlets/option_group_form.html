@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="eyebrow"><a href="{{ list_url }}">{% icon "back" %} {% translate "Options" %}</a></div>
+    <h1>{% if object %}{{ object }}{% else %}{% translate "New option group" %}{% endif %}</h1>
+    <p>{% translate "For example “Size” with Small / Large, “Sugar” with No sugar / Little / Normal, or “Extras” with several choices. When a waiter taps one of the chosen items, InnKeeper asks for these." %}</p>
+  </div>
+</div>
+<form method="post" class="stack" style="max-width:900px" novalidate>{% csrf_token %}
+  <section class="card">
+    <div class="card-body">{% include "includes/form_fields.html" with form=form %}
+      <input type="search" class="input" id="item-filter" placeholder="{% translate 'Filter items…' %}" style="margin-top:.5rem; max-width:320px">
+    </div>
+  </section>
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "Choices" %}</h2></div>
+    {{ formset.management_form }}
+    {% if formset.non_form_errors %}<div class="alert alert-error">{{ formset.non_form_errors }}</div>{% endif %}
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Name in English" %}</th><th>{% translate "Price change" %}</th><th>{% translate "Available" %}</th><th>{% translate "Remove" %}</th></tr></thead>
+      <tbody>
+      {% for f in formset %}
+        <tr>{% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+          <td>{{ f.name }}{% for e in f.name.errors %}<div class="error">{{ e }}</div>{% endfor %}</td>
+          <td>{{ f.name_en }}</td>
+          <td style="max-width:120px">{{ f.price_change }}{% for e in f.price_change.errors %}<div class="error">{{ e }}</div>{% endfor %}</td>
+          <td>{{ f.is_active }}</td>
+          <td>{% if f.instance.pk %}{{ f.DELETE }}{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    <div class="card-footer muted" style="font-size:.85rem">{% translate "Price change is added to the item's price, e.g. 0.50 for a large size; 0 when it costs the same. Need more rows? Save, and three new empty rows appear." %}</div>
+  </section>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="{{ list_url }}">{% translate "Cancel" %}</a>
+    <button class="btn" type="submit">{% icon "check" %} {% translate "Save" %}</button>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+  (function () {
+    var f = document.getElementById('item-filter'), box = document.querySelector('[data-field=items] .checks');
+    if (!f || !box) return;
+    box.parentNode.appendChild(f);
+    f.addEventListener('input', function () {
+      var q = f.value.trim().toLowerCase();
+      box.querySelectorAll('label').forEach(function (l) { l.closest('div').classList.toggle('hidden', q && l.textContent.toLowerCase().indexOf(q) === -1); });
+    });
+  })();
+</script>
+{% endblock %}

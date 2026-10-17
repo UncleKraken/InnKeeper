@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Shifts" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="eyebrow">{% translate "Finance" %}</div><h1>{% translate "Shifts" %}</h1>
+  <p>{% translate "Each staff member's cash: expected against counted at the end of their shift." %}</p></div></div>
+{% include "finance/_tabs.html" %}
+<div class="card card-flush">
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Staff" %}</th><th>{% translate "Shift" %}</th><th class="num">{% translate "Cash expected" %}</th><th class="num">{% translate "Cash counted" %}</th><th class="num">{% translate "Difference" %}</th></tr></thead>
+    <tbody>
+    {% for s in rows %}
+      <tr><td><a href="{% url 'finance:shift_report' s.pk %}">{{ s.user.get_full_name|default:s.user.username }}</a></td>
+        <td class="nowrap">{{ s.opened_at|date:"d.m.Y H:i" }} – {% if s.closed_at %}{{ s.closed_at|date:"H:i" }}{% else %}{% translate "open" as l %}{% status_badge "info" l %}{% endif %}</td>
+        <td class="num">{{ s.expected_cash|money }}</td><td class="num">{{ s.counted_cash|money }}</td>
+        <td class="num">{% if s.difference is not None %}<strong style="color:{% if s.difference < 0 %}var(--danger){% elif s.difference > 0 %}var(--warning){% else %}var(--success){% endif %}">{{ s.difference|money }}</strong>{% endif %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}<div class="empty"><strong>{% translate "No shifts yet." %}</strong>{% translate "Staff start their shift from the menu (My shift)." %}</div>{% endif %}
+</div>
+{% endblock %}

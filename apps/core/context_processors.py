@@ -13,7 +13,13 @@ def innkeeper(request):
         update = update_available()
     from apps import __version__
 
+    my_shift = None
+    if user is not None and user.is_authenticated and "outlets" in modules:
+        from apps.finance.tabs import open_shift_for
+
+        my_shift = open_shift_for(user)
     return {
+        "my_shift": my_shift,
         "hotel": HotelSettings.load(),
         "modules": modules,
         "update_available": update,

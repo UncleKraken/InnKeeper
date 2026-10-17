@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ account.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow no-print"><a href="{% url 'finance:accounts' %}">{% icon "back" %} {% translate "Customer accounts" %}</a></div>
+    <div class="print-only"><strong>{{ hotel.legal_name|default:hotel.name }}</strong> · {% now "d.m.Y H:i" %}</div>
+    <h1>{{ account.name }}</h1>
+    <p>{% if account.phone %}{{ account.phone }} · {% endif %}{% translate "Owes" %} <strong style="font-size:1.15rem">{{ balance|money }}</strong>{% if account.credit_limit is not None %} · {% translate "Credit limit" %} {{ account.credit_limit|money }}{% endif %}{% if not account.is_active %} · {% translate "Closed" %}{% endif %}</p></div>
+  <div class="actions no-print">
+    <button class="btn btn-secondary" onclick="window.print()">{% icon "print" %} {% translate "Print statement" %}</button>
+    {% if request.user.is_manager %}<a class="btn btn-secondary" href="{% url 'finance:account_edit' account.pk %}">{% icon "edit" %} {% translate "Edit" %}</a>{% endif %}
+  </div>
+</div>
+<div class="grid grid-main" style="align-items:start">
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "Statement" %}</h2></div>
+    <div class="table-wrap"><table class="table table-sm">
+      <thead><tr><th>{% translate "Date" %}</th><th>{% translate "Description" %}</th><th class="num">{% translate "Bought" %}</th><th class="num">{% translate "Paid" %}</th><th class="num">{% translate "Balance" %}</th></tr></thead>
+      <tbody>
+        {% if account.opening_balance %}<tr><td>{{ account.created_at|date:"d.m.Y" }}</td><td>{% translate "Owed from before" %}</td><td class="num">{{ account.opening_balance|money }}</td><td></td><td class="num">{{ account.opening_balance|money }}</td></tr>{% endif %}
+        {% for r in rows %}
+        <tr class="{% if r.voided %}voided{% endif %}">
+          <td class="nowrap">{{ r.date|date:"d.m.Y" }}</td>
+          <td>{% if r.order %}<a href="{% url 'outlets:receipt' r.order.pk %}">{{ r.text }}</a>{% else %}{{ r.text }}{% endif %}{% if r.voided %} <small>({% translate "voided" %})</small>{% endif %}</td>
+          <td class="num">{% if r.charge is not None %}{{ r.charge|money }}{% endif %}</td>
+          <td class="num">{% if r.payment is not None %}{{ r.payment|money }}{% endif %}</td>
+          <td class="num"><strong>{{ r.balance|money }}</strong></td>
+        </tr>
+        {% empty %}
+        {% if not account.opening_balance %}<tr><td colspan="5" class="empty">{% translate "Nothing on this account yet." %}</td></tr>{% endif %}
+        {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+  <aside class="stack no-print">
+    <section class="card">
+      <div class="card-header"><h3>{% translate "Take a payment" %}</h3></div>
+      <form method="post" action="{% url 'finance:account_pay' account.pk %}" class="card-body form-grid" style="grid-template-columns:1fr">{% csrf_token %}
+        <div class="field"><label for="amt">{% translate "Amount" %}</label><input class="input" id="amt" name="amount" inputmode="decimal" value="{% if balance > 0 %}{{ balance|stringformat:'.2f' }}{% endif %}" required></div>
+        <div class="field"><label for="m">{% translate "Method" %}</label><select class="input" id="m" name="method">{% for v, l in methods %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select></div>
+        <div class="field"><label for="ref">{% translate "Reference" %}</label><input class="input" id="ref" name="reference" maxlength="80"></div>
+        <div><button class="btn">{% icon "money" %} {% translate "Record payment" %}</button></div>
+      </form>
+    </section>
+  </aside>
+</div>
+{% endblock %}
+{% block scripts %}{% if print %}<script>window.addEventListener('load', function () { window.print(); });</script>{% endif %}{% endblock %}
