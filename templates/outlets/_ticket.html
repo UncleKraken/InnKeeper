@@ -46,6 +46,16 @@
         <div class="t-row t-discount"><span>{% translate "Discount" %}{% if order.discount_reason %} <small>({{ order.discount_reason }})</small>{% endif %}</span><span>−{{ order.discount|money }}</span></div>
       {% endif %}
       <div class="t-row t-total"><span>{% translate "Total" %}</span><span class="amount">{{ order.total|money }}</span></div>
+      {% if booking.minimum_spend %}
+        <div class="min-spend{% if not minimum_left %} done{% endif %}">
+          {% if minimum_left %}
+            <span>{% blocktranslate with min=booking.minimum_spend|money left=minimum_left|money %}Minimum spend {{ min }}: {{ left }} still to reach.{% endblocktranslate %}</span>
+            <form method="post" action="{% url 'outlets:minimum_spend' order.pk %}" class="inline">{% csrf_token %}<button class="btn btn-sm btn-secondary">{% icon "plus" %} {% translate "Add the difference" %}</button></form>
+          {% else %}
+            <span>{% icon "check" %} {% blocktranslate with min=booking.minimum_spend|money %}Minimum spend {{ min }} reached.{% endblocktranslate %}</span>
+          {% endif %}
+        </div>
+      {% endif %}
       {% for p in payments %}
         <div class="t-row t-paid">
           <span>{% translate "Paid" %} · {{ p.get_method_display }}

@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import kitchen, menu, menu_setup, views
+from . import booking_views, kitchen, menu, menu_setup, views
 
 app_name = "outlets"
 
@@ -21,6 +21,12 @@ urlpatterns = [
     path("orders/<int:pk>/payments/<int:payment_id>/void/", views.void_payment, name="void_payment"),
     path("orders/<int:pk>/void/", views.void_receipt, name="void_receipt"),
     path("receipts/", views.receipts, name="receipts"),
+    path("<int:pk>/bookings/", booking_views.booking_list, name="bookings"),
+    path("<int:pk>/bookings/new/", booking_views.booking_form, name="booking_create"),
+    path("<int:pk>/bookings/<int:booking_id>/", booking_views.booking_form, name="booking_edit"),
+    path("<int:pk>/bookings/<int:booking_id>/action/", booking_views.booking_action, name="booking_action"),
+    path("<int:pk>/sell/", booking_views.quick_sell, name="quick_sell"),
+    path("orders/<int:pk>/minimum-spend/", booking_views.minimum_spend, name="minimum_spend"),
     path("orders/<int:pk>/send/", views.send_order, name="send"),
     path("orders/<int:pk>/print/", views.print_bill, name="print_bill"),
     path("orders/<int:order_id>/served/", kitchen.serve_ready, name="serve_ready"),

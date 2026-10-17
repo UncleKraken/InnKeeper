@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Bookings" %} · {{ outlet.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'outlets:floor' outlet.pk %}">{% icon "back" %} {{ outlet.name }}</a></div>
+    <h1>{% translate "Bookings" %}</h1>
+    <p>{% translate "Guests who reserved a table. When they arrive, tap Seat: their bill opens on the table." %}</p></div>
+  <div class="actions">
+    <a class="btn" href="{% url 'outlets:booking_create' outlet.pk %}?date={{ day|date:'Y-m-d' }}">{% icon "plus" %} {% translate "New booking" %}</a>
+  </div>
+</div>
+
+<div class="row day-nav" style="gap:.5rem; margin-bottom:1rem; flex-wrap:wrap">
+  <a class="btn btn-secondary btn-sm" href="?date={{ prev|date:'Y-m-d' }}" aria-label="{% translate 'Previous day' %}">‹</a>
+  <form method="get" class="inline"><input class="input" type="date" name="date" value="{{ day|date:'Y-m-d' }}" onchange="this.form.submit()" style="width:auto"></form>
+  <a class="btn btn-secondary btn-sm" href="?date={{ next|date:'Y-m-d' }}" aria-label="{% translate 'Next day' %}">›</a>
+  <strong style="margin-left:.5rem">{{ day|date:"l j F" }}</strong>
+  {% if counts.n %}<span class="muted">· {% blocktranslate count n=counts.n with people=counts.people %}{{ n }} booking, {{ people }} people{% plural %}{{ n }} bookings, {{ people }} people{% endblocktranslate %}</span>{% endif %}
+</div>
+
+<div class="card card-flush">
+  {% if rows %}
+  <div class="table-wrap"><table class="table bookings-table">
+    <thead><tr><th>{% translate "Time" %}</th><th>{% translate "Name" %}</th><th class="num">{% translate "People" %}</th><th>{% translate "Table" %}</th><th>{% translate "Status" %}</th><th></th></tr></thead>
+    <tbody>
+    {% for b in rows %}
+      <tr{% if b.status == "cancelled" or b.status == "no_show" %} class="voided"{% endif %}>
+        <td class="bk-time"><strong>{{ b.time|time:"H:i" }}</strong></td>
+        <td class="bk-name"><strong>{{ b.name }}</strong>{% if b.phone %}<br><a class="muted" href="tel:{{ b.phone }}">{{ b.phone }}</a>{% endif %}
+          {% if b.minimum_spend %}<br><small>{% translate "Minimum spend" %}: {{ b.minimum_spend|money }}</small>{% endif %}
+          {% if b.note %}<br><small class="muted">{{ b.note }}</small>{% endif %}</td>
+        <td class="num bk-people" data-label="{% translate 'People' %}">{{ b.party_size }}</td>
+        <td class="bk-table" data-label="{% translate 'Table' %}">{{ b.table.name|default:"—" }}</td>
+        <td class="bk-status">{% status_badge b.status b.get_status_display %}</td>
+        <td class="row-actions">
+          {% if b.status == "booked" %}
+            <form method="post" action="{% url 'outlets:booking_action' outlet.pk b.pk %}" class="row seat-form" style="gap:.35rem">{% csrf_token %}
+              <input type="hidden" name="action" value="seat">
+              {% if not b.table %}
+              <select class="input" name="table" required style="width:auto">
+                <option value="">{% translate "Table…" %}</option>
+                {% for t in free_tables %}<option value="{{ t.pk }}">{{ t.name }} ({{ t.seats }})</option>{% endfor %}
+              </select>
+              {% endif %}
+              <button class="btn btn-sm">{% icon "check" %} {% translate "Seat" %}</button>
+            </form>
+            <a class="btn btn-sm btn-secondary" href="{% url 'outlets:booking_edit' outlet.pk b.pk %}" title="{% translate 'Edit' %}">{% icon "edit" %}</a>
+            <form method="post" action="{% url 'outlets:booking_action' outlet.pk b.pk %}" class="inline" data-confirm="{% translate 'Mark this booking as a no-show?' %}">{% csrf_token %}<button class="btn btn-sm btn-secondary" name="action" value="no_show">{% translate "No-show" %}</button></form>
+            <form method="post" action="{% url 'outlets:booking_action' outlet.pk b.pk %}" class="inline" data-confirm="{% translate 'Cancel this booking?' %}">{% csrf_token %}<button class="btn btn-sm btn-secondary" name="action" value="cancel" title="{% translate 'Cancel booking' %}">{% icon "x" %}</button></form>
+          {% elif b.status == "seated" and b.order %}
+            <a class="btn btn-sm btn-secondary" href="{% url 'outlets:order' b.order.pk %}">{% translate "Open bill" %}</a>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+    <div class="empty"><strong>{% translate "No bookings for this day." %}</strong><a href="{% url 'outlets:booking_create' outlet.pk %}?date={{ day|date:'Y-m-d' }}">{% translate "New booking" %}</a></div>
+  {% endif %}
+</div>
+{% endblock %}

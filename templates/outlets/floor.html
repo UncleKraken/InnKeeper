@@ -5,7 +5,8 @@
 <div class="page-header">
   <div><div class="eyebrow"><a href="{% url 'outlets:home' %}">{% icon "back" %} {% translate "Outlets" %}</a></div><h1>{{ outlet.name }}</h1></div>
   <div class="actions">
-    {% if request.user.is_manager and outlet.uses_tables %}<a class="btn btn-secondary" href="{% url 'outlets:floor_plan' outlet.pk %}">{% icon "move" %} {% translate "Edit floor plan" %}</a>{% endif %}
+    {% if show_tables %}<a class="btn btn-secondary" href="{% url 'outlets:bookings' outlet.pk %}">{% icon "calendar" %} {% translate "Bookings" %}{% if bookings_today %} <span class="pb-badge" style="background:var(--primary); color:#fff">{{ bookings_today }}</span>{% endif %}</a>{% endif %}
+    {% if request.user.is_manager and show_tables %}<a class="btn btn-secondary desktop-only" href="{% url 'outlets:floor_plan' outlet.pk %}">{% icon "move" %} {% translate "Edit floor plan" %}</a>{% endif %}
     <form method="post" action="{% url 'outlets:new_order' outlet.pk %}" class="row" style="gap:.5rem">{% csrf_token %}
       <input class="input" name="label" placeholder="{% if outlet.uses_tables %}{% translate 'Takeaway / customer name' %}{% else %}{% translate 'Customer name or room' %}{% endif %}" style="width:220px">
       <button class="btn">{% icon "plus" %} {% translate "New order" %}</button>
@@ -13,7 +14,35 @@
   </div>
 </div>
 
-{% if outlet.uses_tables %}
+{% include "outlets/_shift_bar.html" %}
+
+{% if outlet.quick_sale %}
+<section class="card quick-sale">
+  <div class="card-header"><h2>{% translate "One-tap sale" %}</h2>
+    <span class="muted">{% blocktranslate count n=sold_total %}{{ n }} sold today{% plural %}{{ n }} sold today{% endblocktranslate %}</span></div>
+  <div class="card-body">
+    <div class="seg qs-method" role="tablist" style="max-width:320px; margin-bottom:1rem">
+      <button type="button" data-method="cash" class="{% if quick_method != 'card' %}active{% endif %}">{% icon "money" %} {% translate "Cash" %}</button>
+      <button type="button" data-method="card" class="{% if quick_method == 'card' %}active{% endif %}">{% translate "Card" %}</button>
+    </div>
+    {% for m in quick_menu %}
+      {% if quick_menu|length > 1 %}<h3 class="qs-cat">{{ m.category.name }}</h3>{% endif %}
+      <div class="qs-items">
+      {% for item in m.items %}
+        <form method="post" action="{% url 'outlets:quick_sell' outlet.pk %}" class="qs-form">{% csrf_token %}
+          <input type="hidden" name="item" value="{{ item.pk }}"><input type="hidden" name="method" value="{% if quick_method == 'card' %}card{% else %}cash{% endif %}">
+          <button class="qs-btn"><span class="qs-name">{{ item.name }}</span><span class="qs-price">{{ item.price|money }}</span><span class="qs-count">{{ item.sold_today }} {% translate "today" %}</span></button>
+        </form>
+      {% endfor %}
+      </div>
+    {% empty %}
+      <p class="muted">{% translate "Add items to this outlet's menu (e.g. Entrance, VIP entrance) to sell them here." %}</p>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if show_tables %}
   {% if zones|length > 1 %}
   <nav class="zone-tabs">
     {% for z in zones %}<a href="?zone={{ z|urlencode }}" class="{% if z == zone %}active{% endif %}">{{ z|default:_("Main") }}{% with n=busy_counts|get_item:z %}{% if n %} · {{ n }}{% endif %}{% endwith %}</a>{% endfor %}
@@ -30,6 +59,7 @@
           {% if t.order.has_unsent %}<span class="p-new" title="{% translate 'Not sent to the kitchen' %}"></span>{% endif %}
           <span class="p-name">{{ t.table.name }}</span>
           {% if t.order %}<span class="p-total">{{ t.order.total|money }}</span><span class="p-meta">{{ t.order.opened_at|time:"H:i" }}</span>
+          {% elif t.booking %}<span class="p-booked">{{ t.booking.time|time:"H:i" }} · {{ t.booking.name|truncatechars:14 }} ({{ t.booking.party_size }})</span>
           {% else %}<span class="p-meta">{{ t.table.seats }} {% translate "seats" %}</span>{% endif %}
         </a>
       {% endfor %}
@@ -41,6 +71,7 @@
         {% if t.order.has_ready %}<span class="p-ready"></span>{% endif %}
         <div><div class="t-name">{{ t.table.name }}</div><div class="t-meta">{% blocktranslate count n=t.table.seats %}{{ n }} seat{% plural %}{{ n }} seats{% endblocktranslate %}</div></div>
         {% if t.order %}<div><div class="t-total">{{ t.order.total|money }}</div><div class="t-meta">{{ t.order.opened_by|default:"" }} · {{ t.order.opened_at|time:"H:i" }}</div></div>
+        {% elif t.booking %}<div class="t-meta p-booked">{% translate "Reserved" %} {{ t.booking.time|time:"H:i" }}<br>{{ t.booking.name }} ({{ t.booking.party_size }}){% if t.booking.minimum_spend %} · min. {{ t.booking.minimum_spend|money }}{% endif %}</div>
         {% else %}<div class="t-meta">{% translate "Free" %}</div>{% endif %}
       </a>
     {% endfor %}
@@ -50,7 +81,7 @@
   {% endif %}
 {% endif %}
 
-{% if loose_orders or not outlet.uses_tables %}
+{% if loose_orders or not outlet.uses_tables and not outlet.quick_sale %}
 <section class="card card-flush" style="margin-top:1.5rem">
   <div class="card-header"><h2>{% translate "Open orders" %}</h2></div>
   <div class="table-wrap"><table class="table">
@@ -79,5 +110,12 @@
   }
   check(); setInterval(check, 8000);
 })();
+// One-tap sale: remember cash or card for the next taps.
+document.querySelectorAll('.qs-method button').forEach(function (b) {
+  b.addEventListener('click', function () {
+    document.querySelectorAll('.qs-method button').forEach(function (x) { x.classList.toggle('active', x === b); });
+    document.querySelectorAll('.qs-form input[name=method]').forEach(function (i) { i.value = b.dataset.method; });
+  });
+});
 </script>
 {% endblock %}

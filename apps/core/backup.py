@@ -52,6 +52,7 @@ FULL_MODELS = [
     "outlets.PriceRule",
     "outlets.Table",
     "outlets.Order",
+    "outlets.TableBooking",
     "outlets.KitchenTicket",
     "outlets.OrderLine",
     "finance.CustomerAccount",
@@ -355,6 +356,7 @@ def export_settings() -> bytes:
                 "menu_intro": o.menu_intro,
                 "receipt_printer": o.receipt_printer.name if o.receipt_printer_id else None,
                 "auto_print_receipt": o.auto_print_receipt,
+                "quick_sale": o.quick_sale,
                 "categories": [
                     {
                         "name": c.name,
@@ -549,6 +551,7 @@ def import_settings(doc: dict) -> dict:
                 "menu_public",
                 "menu_intro",
                 "auto_print_receipt",
+                "quick_sale",
             )
             if k in o
         }

@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import F, Sum
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 MONEY = {"max_digits": 12, "decimal_places": 2}
@@ -131,6 +132,11 @@ class Outlet(models.Model):
         max_length=20,
         blank=True,
         help_text=_("For fiscal receipts. Leave empty to use the main cash register code from Settings."),
+    )
+    quick_sale = models.BooleanField(
+        _("one-tap sale"),
+        default=False,
+        help_text=_("For an entrance, a ticket desk or takeaway: each tap on an item sells it and takes the payment at once."),
     )
     auto_print_receipt = models.BooleanField(
         _("print a receipt for every payment"), default=False, help_text=_("Needs a receipt printer.")
@@ -338,6 +344,68 @@ class Table(models.Model):
 
     def open_order(self):
         return self.orders.filter(status=Order.Status.OPEN).first()
+
+
+class TableBooking(models.Model):
+    """A table booked for later: a dinner for six at 20:00, a club table with a minimum spend."""
+
+    class Status(models.TextChoices):
+        BOOKED = "booked", _("Booked")
+        SEATED = "seated", _("Seated")
+        CANCELLED = "cancelled", _("Cancelled")
+        NO_SHOW = "no_show", _("No-show")
+
+    outlet = models.ForeignKey(Outlet, on_delete=models.CASCADE, related_name="bookings", verbose_name=_("outlet"))
+    table = models.ForeignKey(
+        Table, null=True, blank=True, on_delete=models.SET_NULL, related_name="bookings", verbose_name=_("table"),
+        help_text=_("Can be chosen later."),
+    )
+    date = models.DateField(_("date"))
+    time = models.TimeField(_("time"))
+    duration_minutes = models.PositiveSmallIntegerField(
+        _("keep the table for (minutes)"), default=120, validators=[MinValueValidator(15)]
+    )
+    party_size = models.PositiveSmallIntegerField(_("people"), default=2, validators=[MinValueValidator(1)])
+    name = models.CharField(_("name"), max_length=120)
+    phone = models.CharField(_("phone"), max_length=40, blank=True)
+    note = models.CharField(_("note"), max_length=255, blank=True, help_text=_("Birthday, high chair, allergies…"))
+    minimum_spend = models.DecimalField(
+        _("minimum spend"),
+        null=True,
+        blank=True,
+        help_text=_("For reserved club tables: the guests spend at least this much."),
+        **MONEY,
+    )
+    status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.BOOKED)
+    order = models.OneToOneField(
+        "Order", null=True, blank=True, on_delete=models.SET_NULL, related_name="booking", editable=False
+    )
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("table booking")
+        verbose_name_plural = _("table bookings")
+        ordering = ["date", "time", "id"]
+
+    def __str__(self) -> str:
+        return f"{self.name} · {self.date:%d.%m} {self.time:%H:%M} ({self.party_size})"
+
+    @property
+    def starts_at(self):
+        """The day is a business day: with the day ending at 05:00, "Saturday 01:30" is Sunday 01:30."""
+        from datetime import datetime, timedelta
+
+        from apps.core.businessday import _cutoff
+
+        day = self.date + timedelta(days=1) if self.time.hour < _cutoff() else self.date
+        return timezone.make_aware(datetime.combine(day, self.time))
+
+    @property
+    def ends_at(self):
+        from datetime import timedelta
+
+        return self.starts_at + timedelta(minutes=self.duration_minutes)
 
 
 class Order(models.Model):

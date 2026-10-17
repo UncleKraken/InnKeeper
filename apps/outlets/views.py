@@ -15,6 +15,7 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.permissions import module_required
 from apps.core.crud import CrudCreateView, CrudListView, CrudUpdateView
+from apps.core.businessday import business_date
 from apps.core.exceptions import BusinessError
 from apps.core.forms import StyledFormMixin
 from apps.core.templatetags.innkeeper import money
@@ -23,6 +24,7 @@ from apps.fiscal.views import fiscal_block
 from apps.frontdesk.models import Reservation
 
 from . import services
+from .bookings import minimum_spend_left
 from .floorplan import floor_plan, floor_plan_save  # noqa: F401  (routed in urls.py)
 from .models import (
     Category,
@@ -35,6 +37,7 @@ from .models import (
     PrintJob,
     Station,
     Table,
+    TableBooking,
 )
 
 
@@ -86,6 +89,9 @@ def floor(request, pk):
     for o in open_orders:
         o.has_ready, o.has_unsent = o.pk in ready_orders, o.pk in unsent_orders
     all_tables = list(outlet.tables.filter(is_active=True))
+    from .bookings import upcoming_by_table
+
+    upcoming = upcoming_by_table(outlet)
     zones = []
     for t in all_tables:
         if t.zone not in zones:
@@ -101,24 +107,32 @@ def floor(request, pk):
             "top": t.pos_y / 6.4,
             "width": t.width / 10,
             "height": t.height / 6.4,
+            "booking": upcoming.get(t.pk),
         }
         for t in all_tables
         if t.zone == zone
     ]
     open_orders = list(open_orders)
     loose_orders = [o for o in open_orders if not o.table_id]
-    return render(
-        request,
-        "outlets/floor.html",
-        {
-            "outlet": outlet,
-            "tables": tables,
-            "loose_orders": loose_orders,
-            "zones": zones,
-            "zone": zone,
-            "busy_counts": {z: sum(1 for t in all_tables if t.zone == z and t.pk in by_table) for z in zones},
-        },
-    )
+    ctx = {
+        "outlet": outlet,
+        "tables": tables,
+        "loose_orders": loose_orders,
+        "zones": zones,
+        "zone": zone,
+        # A one-tap door or ticket desk usually has no tables: don't show an empty plan or bookings.
+        "show_tables": outlet.uses_tables and (bool(all_tables) or not outlet.quick_sale),
+        "busy_counts": {z: sum(1 for t in all_tables if t.zone == z and t.pk in by_table) for z in zones},
+        "bookings_today": TableBooking.objects.filter(
+            outlet=outlet, date=business_date(), status=TableBooking.Status.BOOKED
+        ).count(),
+    }
+    if outlet.quick_sale:
+        from .booking_views import quick_sale_context
+
+        ctx.update(quick_sale_context(outlet))
+        ctx["quick_method"] = request.GET.get("method", "cash")
+    return render(request, "outlets/floor.html", ctx)
 
 
 @module_required("outlets")
@@ -201,6 +215,8 @@ def _ticket_context(order) -> dict:
         "move_tables": order.outlet.tables.filter(is_active=True).exclude(pk=order.table_id),
         "item_count": sum(line.quantity for line in order.active_lines),
         "customer_accounts": CustomerAccount.objects.filter(is_active=True).only("name", "phone"),
+        "booking": getattr(order, "booking", None),
+        "minimum_left": minimum_spend_left(order),
     }
 
 
@@ -603,6 +619,7 @@ class OutletForm(StyledFormMixin, forms.ModelForm):
             "name",
             "kind",
             "uses_tables",
+            "quick_sale",
             "receipt_printer",
             "auto_print_receipt",
             "fiscal_tcr_code",

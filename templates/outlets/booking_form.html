@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Booking" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div>
+  <div class="eyebrow"><a href="{% url 'outlets:bookings' outlet.pk %}">{% icon "back" %} {% translate "Bookings" %} · {{ outlet.name }}</a></div>
+  <h1>{% if object %}{{ object.name }}{% else %}{% translate "New booking" %}{% endif %}</h1>
+  <p>{% translate "Only the name, day, time and number of people are needed. Leave the table empty to choose it when they arrive." %}</p>
+</div></div>
+<form method="post" class="card" style="max-width:760px" novalidate>{% csrf_token %}
+  <div class="card-body">{% include "includes/form_fields.html" %}</div>
+  <div class="card-footer form-actions" style="margin-top:0">
+    <a class="btn btn-secondary" href="{% url 'outlets:bookings' outlet.pk %}{% if object %}?date={{ object.date|date:'Y-m-d' }}{% endif %}">{% translate "Cancel" %}</a>
+    <button class="btn">{% icon "check" %} {% translate "Save" %}</button>
+  </div>
+</form>
+{% endblock %}

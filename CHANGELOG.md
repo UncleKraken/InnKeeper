@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.10.0 — table bookings, club tables and entrance sales
+
+**Shqip**
+
+- **Rezervimet e tavolinave:** te ekrani i tavolinave → *Rezervimet*. Mjaftojnë emri, dita, ora dhe numri i personave; telefoni, tavolina dhe shënimi nuk janë të detyrueshëm. Tavolina e rezervuar shfaqet në planimetri “20:00 · Emri (6)” tre orë përpara. Kur vijnë, *Uli* hap llogarinë në tavolinë me emrin dhe numrin e personave. Dy rezervime nuk mbivendosen dot në të njëjtën tavolinë. Në telefon, çdo rezervim është një kartë me butonat poshtë.
+- **Tavolinat e klubit me shpenzim minimal:** shkruani minimumin te rezervimi; arka tregon sa mungon ende dhe *Shto diferencën* e shton si një rresht.
+- **Shitja me një prekje (hyrja, biletat, marrja me vete):** shënoni *Shitje me një prekje* te pika. Ekrani shfaq butona të mëdhenj; zgjidhni një herë para në dorë ose kartë, dhe çdo prekje shet dhe merr pagesën menjëherë (fiskalizohet kur fiskalizimi është aktiv). Çdo buton numëron shitjet e sontme.
+- Për lokalet e natës, data e rezervimit është data e mbrëmjes: një rezervim në 01:00 të së shtunës natën shënohet të shtunën.
+
+**English**
+
+- **Table bookings:** on the tables screen → *Bookings*. Name, day, time and number of people are enough; phone, table and a note are optional. A booked table shows “20:00 · Name (6)” on the floor plan from three hours before. When they arrive, *Seat* opens the bill on the table with their name and party size. Two bookings can't overlap on the same table. On a phone each booking is a card with its buttons underneath.
+- **Club tables with a minimum spend:** type the minimum on the booking; the till shows how much is still missing and *Add the difference* adds it as one line.
+- **One-tap sale (entrance, tickets, takeaway):** tick *One-tap sale* on the outlet. Its screen shows big buttons; choose cash or card once, and every tap sells and takes the payment at once (fiscalized when that is on). Each button counts tonight's sales.
+- For late-night venues the booking date is the evening's date: a booking at 01:00 on Saturday night goes on Saturday.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.10.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.9.0 — options, happy hour, customer accounts, shifts and tips
 
 **Shqip**
