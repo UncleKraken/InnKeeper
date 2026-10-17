@@ -1,5 +1,31 @@
 # Changelog
 
+## 2.6.0 — tax registration options
+
+**Shqip**
+
+- **Regjistrimi tatimor** (në konfigurim dhe te Cilësimet → Të dhënat e biznesit), me tri zgjedhje:
+  - **I regjistruar, me TVSH:** si deri tani.
+  - **I regjistruar, pa TVSH:** për bizneset e vogla. Pa rreshta TVSH në kupona, fatura dhe menu; NIPT-i dhe fiskalizimi mbeten.
+  - **I paregjistruar:** për shoqata, lokale jashtë Shqipërisë, përdorim të brendshëm ose provë. Asnjë NIPT, TVSH apo fiskalizim, regjistri i mysafirëve fshihet, faturat e mysafirëve quhen kupona dhe çdo kupon shkruan “Kupon i brendshëm”.
+- Arka, dhomat, stoku, raportet, kopjet rezervë dhe mbyllja e ditës punojnë njësoj në të tria rastet.
+- “Emri i hotelit” tani quhet “Emri i biznesit”. Në kupon TVSH-ja shfaqet si “20%”, jo “20.00%”.
+
+**English**
+
+- **Tax registration** (in the setup wizard and in Settings → Business details), with three options:
+  - **Registered, with VAT:** as before.
+  - **Registered, without VAT:** for small businesses. No VAT lines on receipts, invoices and menus; the NIPT and fiscalization stay available.
+  - **Not registered:** for associations, places outside Albania, internal use or trying the app. No NIPT, VAT or fiscalization anywhere, the guest register is hidden, guest bills are called receipts and every receipt says “Internal receipt”.
+- The till, rooms, stock, reports, backups and day close work the same in all three.
+- “Hotel name” is now “Business name”. The printed receipt shows VAT as “20%”, not “20.00%”.
+
+Existing installs keep working as before: with a VAT rate they become “Registered, with VAT”, without one “Registered, without VAT”.
+
+### Install or update on Windows
+1. Download **InnKeeper-Setup-2.6.0.exe** below and run it. Updating keeps all your data; a copy of the database is made first.
+2. Windows may show "Windows protected your PC" because the installer is not yet code-signed. Click **More info → Run anyway**.
+
 ## 2.5.2 — night bars and clubs
 
 **Shqip**

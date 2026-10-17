@@ -196,7 +196,7 @@ def receipt_document(order, printer: Printer, *, open_drawer: bool = False) -> b
     sym = hs.currency_symbol
     r = Receipt(printer.paper_width)
     r.wrap(hs.legal_name or hs.name, bold=True, align="center")
-    for line in (order.outlet.name, hs.address, hs.phone, f"NIPT {hs.tax_id}" if hs.tax_id else ""):
+    for line in (order.outlet.name, hs.address, hs.phone, f"NIPT {hs.tax_id}" if hs.tax_id and hs.registered else ""):
         if line:
             r.wrap(line, align="center")
     if hs.receipt_header:
@@ -218,10 +218,10 @@ def receipt_document(order, printer: Printer, *, open_drawer: bool = False) -> b
         r.pair(_("Discount"), "-" + money(order.discount, sym))
     total = order.total
     r.pair(_("TOTAL"), money(total, sym), bold=True, big=printer.paper_width >= 80)
-    if hs.receipt_show_vat and hs.vat_rate:
+    if hs.receipt_show_vat and hs.charges_vat:
         vat = (total * hs.vat_fraction).quantize(Decimal("0.01"))
         r.pair(_("Without VAT"), money(total - vat, sym))
-        r.pair(_("VAT %(r)s%%") % {"r": f"{hs.vat_rate:g}"}, money(vat, sym))
+        r.pair(_("VAT %(r)s%%") % {"r": f"{hs.vat_rate.normalize():f}"}, money(vat, sym))
     r.rule()
     if order.status == order.Status.OPEN:
         r.text(_("Bill — not yet paid"), bold=True, align="center")
@@ -251,8 +251,10 @@ def receipt_document(order, printer: Printer, *, open_drawer: bool = False) -> b
         r.text(_("Operator") + f": {fdoc.operator_code}  TCR: {fdoc.tcr_code}", align="center")
         if fdoc.test:
             r.text(_("TEST – not valid for tax"), bold=True, align="center")
-    else:
+    elif hs.registered:
         r.text(_("This is not a fiscal receipt."), align="center")
+    else:
+        r.text(_("Internal receipt"), align="center")
     if open_drawer and printer.open_drawer:
         r.open_drawer()
     return r.cut().to_bytes()

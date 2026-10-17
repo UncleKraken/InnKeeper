@@ -16,7 +16,7 @@
     <section class="card z-report">
       <div class="card-header"><h2>{% blocktranslate with d=day|date:"l, d.m.Y" %}Z report · {{ d }}{% endblocktranslate %}</h2>{% if existing %}{% translate "Closed" as l %}{% status_badge "success" l %}{% else %}{% translate "Open" as l %}{% status_badge "info" l %}{% endif %}</div>
       <div class="card-body">
-        <div class="print-only" style="margin-bottom:1rem"><strong>{{ hotel.legal_name|default:hotel.name }}</strong>{% if hotel.tax_id %} · NIPT {{ hotel.tax_id }}{% endif %}</div>
+        <div class="print-only" style="margin-bottom:1rem"><strong>{{ hotel.legal_name|default:hotel.name }}</strong>{% if hotel.tax_id and hotel.registered %} · NIPT {{ hotel.tax_id }}{% endif %}</div>
         <div class="grid grid-3" style="gap:1rem; margin-bottom:1.25rem">
           <div><div class="stat-label">{% translate "Revenue" %}</div><div class="stat-value" style="font-size:1.4rem">{{ s.revenue|money }}</div></div>
           <div><div class="stat-label">{% translate "Payments received" %}</div><div class="stat-value" style="font-size:1.4rem">{{ s.received|money }}</div></div>

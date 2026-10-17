@@ -87,6 +87,7 @@ class SetupAnswers:
     email: str = ""
     currency: str = "EUR"
     vat_rate: Decimal = Decimal("20")
+    tax_status: str = "vat"
     modules: set[str] = field(default_factory=set)
     floors: int = 0
     rooms_per_floor: int = 0
@@ -127,7 +128,8 @@ def apply_setup(answers: SetupAnswers, user) -> HotelSettings:
     hs.email = answers.email
     hs.currency = answers.currency
     hs.currency_symbol = CURRENCIES.get(answers.currency, answers.currency)
-    hs.vat_rate = answers.vat_rate
+    hs.tax_status = answers.tax_status
+    hs.vat_rate = answers.vat_rate if answers.tax_status == "vat" else Decimal("0")
     hs.module_rooms = "rooms" in answers.modules
     hs.module_housekeeping = "housekeeping" in answers.modules and hs.module_rooms
     hs.module_maintenance = "maintenance" in answers.modules

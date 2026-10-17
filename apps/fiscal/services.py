@@ -36,7 +36,7 @@ def enabled() -> bool:
 
 
 def _vat(hs, accommodation: bool = False) -> Decimal | None:
-    if not hs.vat_rate:
+    if not hs.charges_vat:
         return None  # not registered for VAT
     return hs.vat_rate_accommodation if accommodation else hs.vat_rate
 
@@ -144,7 +144,7 @@ def create_document(
     )
     payload = {
         "nuis": nuis,
-        "in_vat": bool(hs.vat_rate),
+        "in_vat": hs.charges_vat,
         "currency": hs.currency,
         "ex_rate": str(hs.fiscal_exchange_rate) if hs.fiscal_exchange_rate else None,
         "seller": _seller(hs),

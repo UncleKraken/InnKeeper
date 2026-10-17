@@ -42,7 +42,7 @@
           <table class="table table-sm" style="margin-top:.75rem">{% for price in offer.quote.nightly %}<tr><td class="muted">{% translate "Night" %} {{ forloop.counter }}</td><td class="num">{{ price|money }}</td></tr>{% endfor %}</table>
         {% endif %}
         <div class="t-row t-total" style="margin-top:1rem"><span>{% translate "Total" %}</span><span class="amount">{{ offer.quote.total|money }}</span></div>
-        <p class="muted" style="font-size:.85rem">{% blocktranslate with rate=hotel.vat_rate|floatformat:"-2" %}Prices include VAT ({{ rate }}%){% endblocktranslate %}</p>
+        <p class="muted" style="font-size:.85rem">{% if hotel.charges_vat %}{% blocktranslate with rate=hotel.vat_rate|floatformat:"-2" %}Prices include VAT ({{ rate }}%){% endblocktranslate %}{% endif %}</p>
         {% if deposit %}<div class="alert alert-info">{% blocktranslate with d=deposit|money %}A deposit of {{ d }} is requested by bank transfer. You'll see the details after booking.{% endblocktranslate %}</div>
         {% else %}<div class="alert alert-info">{% translate "Nothing to pay now. You pay at the hotel." %}</div>{% endif %}
       {% endif %}

@@ -49,6 +49,7 @@ class SetupForm(StyledFormMixin, forms.Form):
     name = forms.CharField(label=gettext_lazy("Business name"), max_length=120)
     language = forms.ChoiceField(label=gettext_lazy("Main language"), choices=[("sq", "Shqip"), ("en", "English")])
     address = forms.CharField(label=gettext_lazy("Address"), max_length=255, required=False)
+    tax_status = forms.ChoiceField(label=gettext_lazy("Tax registration"), widget=forms.RadioSelect, initial="vat")
     tax_id = forms.CharField(label=gettext_lazy("Tax ID (NIPT)"), max_length=40, required=False)
     phone = forms.CharField(label=gettext_lazy("Phone"), max_length=40, required=False)
     email = forms.EmailField(label=gettext_lazy("Email"), required=False)
@@ -63,7 +64,7 @@ class SetupForm(StyledFormMixin, forms.Form):
         ],
     )
     vat_rate = forms.DecimalField(
-        label=gettext_lazy("VAT rate (%)"), min_value=0, max_value=50, decimal_places=2, initial=20
+        label=gettext_lazy("VAT rate (%)"), min_value=0, max_value=50, decimal_places=2, initial=20, required=False
     )
     modules = forms.MultipleChoiceField(
         label=gettext_lazy("What do you use?"),
@@ -97,9 +98,12 @@ class SetupForm(StyledFormMixin, forms.Form):
         self.fields["business_type"].choices = HotelSettings.BusinessType.choices
         self.fields["outlets"].choices = [(k, v[0]) for k, v in STARTER_OUTLETS.items()]
         self.fields["day_ends_at"].choices = HotelSettings.DAY_ENDS_CHOICES
+        self.fields["tax_status"].choices = HotelSettings.TaxStatus.choices
 
     def clean(self):
         cleaned = super().clean()
+        if cleaned.get("tax_status") == "vat" and not cleaned.get("vat_rate"):
+            self.add_error("vat_rate", gettext_lazy("Enter the VAT rate, or choose “Registered, without VAT”."))
         if not cleaned.get("modules"):
             raise forms.ValidationError(gettext_lazy("Choose at least one area of the app to use."))
         return cleaned

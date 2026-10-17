@@ -29,7 +29,7 @@
       </section>
     {% endfor %}
   </div>
-  <p class="menu-foot">{% blocktranslate with rate=hotel.vat_rate|floatformat:"-2" %}Prices include VAT ({{ rate }}%){% endblocktranslate %}</p>
+  <p class="menu-foot">{% if hotel.charges_vat %}{% blocktranslate with rate=hotel.vat_rate|floatformat:"-2" %}Prices include VAT ({{ rate }}%){% endblocktranslate %}{% endif %}</p>
 </div>
 </body>
 </html>

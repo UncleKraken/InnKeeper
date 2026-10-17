@@ -7,7 +7,7 @@
   <div>{% translate "Operator" %}: {{ fdoc.operator_code }} · TCR {{ fdoc.tcr_code }}</div>
   {% if fdoc.test %}<div><strong>{% translate "TEST – not valid for tax" %}</strong></div>{% endif %}
 </div>
-{% elif hotel.fiscal_enabled %}
+{% elif hotel.fiscal_on %}
 <div class="r-center r-small" style="margin-top:.6rem">{% translate "Fiscal codes are being issued…" %}</div>
 {% else %}
 <div class="r-center r-small" style="margin-top:.6rem">{{ not_fiscal_text }}</div>

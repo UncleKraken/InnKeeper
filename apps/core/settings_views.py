@@ -2,6 +2,7 @@
 
 import base64
 import secrets
+from decimal import Decimal
 
 from django import forms
 from django.contrib import messages
@@ -30,6 +31,7 @@ class BusinessForm(StyledFormMixin, forms.ModelForm):
         fields = [
             "name",
             "legal_name",
+            "tax_status",
             "tax_id",
             "phone",
             "email",
@@ -42,13 +44,22 @@ class BusinessForm(StyledFormMixin, forms.ModelForm):
             "check_in_time",
             "check_out_time",
         ]
-        widgets = {"check_in_time": TimeInput(), "check_out_time": TimeInput()}
+        widgets = {"check_in_time": TimeInput(), "check_out_time": TimeInput(), "tax_status": forms.RadioSelect(attrs={"data-full": "1"})}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self.instance.module_rooms:
             del self.fields["check_in_time"]
             del self.fields["check_out_time"]
+
+    def clean(self):
+        cleaned = super().clean()
+        status = cleaned.get("tax_status")
+        if status == HotelSettings.TaxStatus.VAT and not cleaned.get("vat_rate"):
+            self.add_error("vat_rate", _("Enter the VAT rate, or choose “Registered, without VAT”."))
+        if status != HotelSettings.TaxStatus.VAT:
+            cleaned["vat_rate"] = Decimal("0")
+        return cleaned
 
 
 class ReceiptForm(StyledFormMixin, forms.ModelForm):
@@ -224,6 +235,8 @@ class FiscalSettingsForm(StyledFormMixin, forms.ModelForm):
             else:
                 self.instance.fiscal_certificate = base64.b64encode(data).decode()
         if cleaned.get("fiscal_enabled"):
+            if not self.instance.registered:
+                raise forms.ValidationError(_("Fiscalization is for businesses registered with the tax authority (Business details)."))
             if not self.instance.tax_id:
                 raise forms.ValidationError(_("Enter the NIPT in Business details first."))
             for f in ("fiscal_business_unit", "fiscal_tcr_code", "fiscal_software_code", "fiscal_operator_code"):
@@ -260,6 +273,9 @@ TABS = {
 def settings_hub(request):
     tab = request.GET.get("tab", "business")
     hs = HotelSettings.load()
+    if tab == "fiscal" and not hs.registered:
+        messages.info(request, _("Fiscalization is for businesses registered with the tax authority (Business details)."))
+        return redirect(f"{request.path}?tab=business")
     ctx = {"tab": tab}
     if tab in TABS:
         form = TABS[tab](request.POST or None, request.FILES or None, instance=hs)

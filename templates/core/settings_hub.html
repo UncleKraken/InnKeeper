@@ -13,7 +13,7 @@
     <a href="?tab=modules" class="{% if tab == 'modules' %}active{% endif %}">{% icon "grid" %} {% translate "Modules" %}</a>
     {% if hotel.module_rooms %}<a href="?tab=booking" class="{% if tab == 'booking' %}active{% endif %}">{% icon "calendar" %} {% translate "Online booking" %}</a>{% endif %}
     <a href="?tab=email" class="{% if tab == 'email' %}active{% endif %}">{% icon "mail" %} {% translate "Email" %}</a>
-    <a href="?tab=fiscal" class="{% if tab == 'fiscal' %}active{% endif %}">{% icon "qr" %} {% translate "Fiscalization" %}</a>
+    {% if hotel.registered %}<a href="?tab=fiscal" class="{% if tab == 'fiscal' %}active{% endif %}">{% icon "qr" %} {% translate "Fiscalization" %}</a>{% endif %}
     <a href="?tab=payments" class="{% if tab == 'payments' %}active{% endif %}">{% icon "wallet" %} {% translate "Card payments" %}</a>
     <a href="?tab=import" class="{% if tab == 'import' %}active{% endif %}">{% icon "upload" %} {% translate "Import from Excel" %}</a>
     <a href="?tab=backup" class="{% if tab == 'backup' %}active{% endif %}">{% icon "download" %} {% translate "Backup & restore" %}</a>
@@ -31,6 +31,18 @@
       <div class="card-body"><p class="muted" style="margin-top:0">{% translate "These details appear on receipts, invoices and the guest menu." %}</p>{% include "includes/form_fields.html" %}</div>
       <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
     </form>
+    <script>
+    (function () {
+      function sync() {
+        var s = (document.querySelector('input[name=tax_status]:checked') || {}).value || 'vat';
+        var nipt = document.querySelector('[data-field=tax_id]'), vat = document.querySelector('[data-field=vat_rate]');
+        if (nipt) nipt.classList.toggle('hidden', s === 'none');
+        if (vat) vat.classList.toggle('hidden', s !== 'vat');
+      }
+      document.querySelectorAll('input[name=tax_status]').forEach(function (r) { r.addEventListener('change', sync); });
+      sync();
+    })();
+    </script>
 
   {% elif tab == "receipts" %}
     <form method="post" enctype="multipart/form-data" class="card" novalidate>{% csrf_token %}
@@ -49,14 +61,14 @@
             {% if hotel.logo and hotel.receipt_show_logo %}<img src="{{ hotel.logo }}" alt="" class="r-logo">{% endif %}
             <strong class="r-title">{{ hotel.legal_name|default:hotel.name }}</strong>
             {% if hotel.address %}<div>{{ hotel.address }}</div>{% endif %}
-            {% if hotel.tax_id %}<div>NIPT {{ hotel.tax_id }}</div>{% endif %}
+            {% if hotel.tax_id and hotel.registered %}<div>NIPT {{ hotel.tax_id }}</div>{% endif %}
             {% if hotel.receipt_header %}<div class="r-pre">{{ hotel.receipt_header }}</div>{% endif %}
           </div>
           <hr>
           <table><tr><td>2 × Espresso</td><td class="num">{{ 3|money }}</td></tr><tr><td>1 × {% translate "Sandwich" %}</td><td class="num">{{ 5|money }}</td></tr></table>
           <hr>
           <table><tr class="r-grand"><td>{% translate "TOTAL" %}</td><td class="num">{{ 8|money }}</td></tr>
-          {% if hotel.receipt_show_vat %}<tr class="r-small"><td>{% translate "VAT" %}</td><td class="num">{{ 1.33|money }}</td></tr>{% endif %}</table>
+          {% if hotel.receipt_show_vat and hotel.charges_vat %}<tr class="r-small"><td>{% translate "VAT" %}</td><td class="num">{{ 1.33|money }}</td></tr>{% endif %}</table>
           {% if hotel.receipt_footer %}<hr><div class="r-center r-pre">{{ hotel.receipt_footer }}</div>{% endif %}
         </div>
       </div>

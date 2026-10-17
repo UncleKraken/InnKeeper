@@ -3,7 +3,7 @@
 <html lang="{{ LANG }}">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% translate "Invoice" %} {{ folio.number }} · {{ hotel.name }}</title>
+  <title>{% if hotel.registered %}{% translate "Invoice" %}{% else %}{% translate "Receipt" %}{% endif %} {{ folio.number }} · {{ hotel.name }}</title>
   <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
 </head>
 <body style="background:#eceae6">
@@ -13,10 +13,10 @@
     <div>
       {% if hotel.logo %}<img src="{{ hotel.logo }}" alt="" style="max-height:70px; max-width:220px; margin-bottom:.6rem">{% endif %}
       <div class="doc-title">{{ hotel.legal_name|default:hotel.name }}</div>
-      <div class="muted">{{ hotel.address }}<br>{% if hotel.phone %}{{ hotel.phone }} · {% endif %}{{ hotel.email }}{% if hotel.tax_id %}<br>NIPT: {{ hotel.tax_id }}{% endif %}</div>
+      <div class="muted">{{ hotel.address }}<br>{% if hotel.phone %}{{ hotel.phone }} · {% endif %}{{ hotel.email }}{% if hotel.tax_id and hotel.registered %}<br>NIPT: {{ hotel.tax_id }}{% endif %}</div>
     </div>
     <div style="text-align:right">
-      <div class="doc-title">{% if folio.status == "closed" %}{% translate "Invoice" %}{% else %}{% translate "Pro-forma bill" %}{% endif %}</div>
+      <div class="doc-title">{% if folio.status == "closed" %}{% if hotel.registered %}{% translate "Invoice" %}{% else %}{% translate "Receipt" %}{% endif %}{% else %}{% translate "Pro-forma bill" %}{% endif %}</div>
       <div class="mono">{% if folio.invoice_number %}{% translate "No." %} {{ folio.invoice_number }}{% else %}{{ folio.number }}{% endif %}</div>
       <div class="muted">{{ printed_at|date:"d.m.Y H:i" }}</div>
     </div>
@@ -31,7 +31,7 @@
       {% for c in charges %}<tr><td>{{ c.business_date|date:"d.m.Y" }}</td><td>{{ c.description }}</td><td class="num">{{ c.quantity }}</td><td class="num">{{ c.unit_price|money }}</td><td class="num">{{ c.amount|money }}</td></tr>{% endfor %}
     </tbody>
     <tfoot>
-      {% if hotel.vat_rate %}
+      {% if hotel.charges_vat %}
       <tr style="font-weight:400"><td colspan="4">{% translate "Without VAT" %}</td><td class="num">{{ net|money }}</td></tr>
       <tr style="font-weight:400"><td colspan="4">{% translate "VAT included" %}</td><td class="num">{{ vat|money }}</td></tr>
       {% endif %}
@@ -46,7 +46,7 @@
     <tfoot><tr><td colspan="2">{% translate "Balance due" %}</td><td class="num">{{ folio.balance|money }}</td></tr></tfoot>
   </table>
   {% endif %}
-  <div style="margin-top:1.5rem; font-size:.85rem">{% translate "This is not a fiscal invoice." as not_fiscal_text %}{% include "fiscal/_block.html" %}</div>
+  <div style="margin-top:1.5rem; font-size:.85rem">{% if hotel.registered %}{% translate "This is not a fiscal invoice." as not_fiscal_text %}{% else %}{% translate "Internal receipt" as not_fiscal_text %}{% endif %}{% include "fiscal/_block.html" %}</div>
   {% if hotel.invoice_footer %}<p class="muted" style="white-space:pre-line; font-size:.85rem">{{ hotel.invoice_footer }}</p>{% endif %}
 </div>
 </body>

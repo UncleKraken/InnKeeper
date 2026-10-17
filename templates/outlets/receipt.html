@@ -28,7 +28,7 @@
     {% if hotel.legal_name and hotel.legal_name != hotel.name %}<div>{{ hotel.name }}</div>{% endif %}
     {% if hotel.address %}<div>{{ hotel.address }}</div>{% endif %}
     {% if hotel.phone %}<div>{{ hotel.phone }}</div>{% endif %}
-    {% if hotel.tax_id %}<div>NIPT {{ hotel.tax_id }}</div>{% endif %}
+    {% if hotel.tax_id and hotel.registered %}<div>NIPT {{ hotel.tax_id }}</div>{% endif %}
     {% if hotel.receipt_header %}<div class="r-pre">{{ hotel.receipt_header }}</div>{% endif %}
   </div>
   <hr>
@@ -51,7 +51,7 @@
       <tr><td>{% translate "Discount" %}</td><td class="num">−{{ order.discount|money }}</td></tr>
     {% endif %}
     <tr class="r-grand"><td>{% translate "TOTAL" %}</td><td class="num">{{ order.total|money }}</td></tr>
-    {% if hotel.receipt_show_vat and hotel.vat_rate %}
+    {% if hotel.receipt_show_vat and hotel.charges_vat %}
       <tr class="r-small"><td>{% translate "Without VAT" %}</td><td class="num">{{ net|money }}</td></tr>
       <tr class="r-small"><td>{% blocktranslate with r=hotel.vat_rate|floatformat:"-2" %}VAT {{ r }}%{% endblocktranslate %}</td><td class="num">{{ vat|money }}</td></tr>
     {% endif %}
@@ -74,7 +74,7 @@
     {% if room_charge %}<p style="margin-top:.75rem">{{ room_charge.folio.reservation.guest }}<br><br>{% translate "Signature" %}: ____________________</p>{% endif %}
   {% endif %}
   {% if hotel.receipt_footer %}<hr><div class="r-center r-pre">{{ hotel.receipt_footer }}</div>{% endif %}
-  {% translate "This is not a fiscal receipt." as not_fiscal_text %}{% include "fiscal/_block.html" %}
+  {% if hotel.registered %}{% translate "This is not a fiscal receipt." as not_fiscal_text %}{% else %}{% translate "Internal receipt" as not_fiscal_text %}{% endif %}{% include "fiscal/_block.html" %}
 </div>
 <script>
   {% if auto_print %}window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 250); });{% endif %}

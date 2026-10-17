@@ -16,7 +16,7 @@
     <button class="btn" onclick="window.print()">{% icon "print" %} {% translate "Print" %}</button>
   </div>
 </div>
-<div class="print-only" style="margin-bottom:1rem"><strong>{{ hotel.legal_name|default:hotel.name }}</strong>{% if hotel.tax_id %} · NIPT {{ hotel.tax_id }}{% endif %}{% if hotel.address %} · {{ hotel.address }}{% endif %}</div>
+<div class="print-only" style="margin-bottom:1rem"><strong>{{ hotel.legal_name|default:hotel.name }}</strong>{% if hotel.tax_id and hotel.registered %} · NIPT {{ hotel.tax_id }}{% endif %}{% if hotel.address %} · {{ hotel.address }}{% endif %}</div>
 
 {% if incomplete %}
 <div class="alert alert-warning no-print" style="margin-bottom:1rem">{% icon "alert" %} {% blocktranslate count n=incomplete %}{{ n }} guest is missing identity details. Open the guest and complete them.{% plural %}{{ n }} guests are missing identity details. Open each guest and complete them.{% endblocktranslate %}</div>

@@ -35,7 +35,7 @@
     {% empty %}
       <p class="empty">{% translate "The menu is being updated. Please ask our staff." %}</p>
     {% endfor %}
-    <p class="menu-foot">{% blocktranslate with rate=hotel.vat_rate|floatformat:"-2" %}Prices include VAT ({{ rate }}%){% endblocktranslate %}{% if hotel.address %} · {{ hotel.address }}{% endif %}</p>
+    <p class="menu-foot">{% if hotel.charges_vat %}{% blocktranslate with rate=hotel.vat_rate|floatformat:"-2" %}Prices include VAT ({{ rate }}%){% endblocktranslate %}{% endif %}{% if hotel.address %} · {{ hotel.address }}{% endif %}</p>
   </main>
 </body>
 </html>

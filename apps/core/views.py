@@ -83,7 +83,7 @@ def dashboard(request):
             ChannelBooking.objects.exclude(problem="").filter(updated_at__gte=timezone.now() - _td(days=14)).count()
         )
 
-    if can_access(user, "finance") and HotelSettings.load().fiscal_enabled:
+    if can_access(user, "finance") and HotelSettings.load().fiscal_on:
         from apps.fiscal.models import FiscalDocument
         from apps.fiscal.services import overdue
 
@@ -157,7 +157,8 @@ def setup_wizard(request):
                     phone=d["phone"],
                     email=d["email"],
                     currency=d["currency"],
-                    vat_rate=d["vat_rate"],
+                    vat_rate=d["vat_rate"] or Decimal("0"),
+                    tax_status=d["tax_status"],
                     modules=set(d["modules"]),
                     floors=d.get("floors") or 0,
                     rooms_per_floor=d.get("rooms_per_floor") or 0,
@@ -192,7 +193,8 @@ def setup_wizard(request):
                 "phone": hs.phone,
                 "email": hs.email,
                 "currency": hs.currency,
-                "vat_rate": hs.vat_rate,
+                "vat_rate": hs.vat_rate if hs.charges_vat else Decimal("20"),
+                "tax_status": hs.tax_status,
                 "modules": current,
                 "outlets": sorted(DEFAULTS_BY_TYPE[hs.business_type]["outlets"]),
                 "day_ends_at": hs.day_ends_at,

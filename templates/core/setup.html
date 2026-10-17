@@ -50,9 +50,14 @@
       <div class="card-body">
         <h2 style="margin-bottom:.35rem">{% translate "Business details" %}</h2>
         <p class="muted">{% translate "Printed on receipts and invoices." %}</p>
+        <h3 style="margin:1rem 0 .5rem; font-size:1rem">{{ form.tax_status.label }}</h3>
+        <div class="toggle-list" id="tax-status">
+          {% for radio in form.tax_status %}<label class="toggle-row">{{ radio.tag }}<span><strong>{{ radio.choice_label }}</strong></span></label>{% endfor %}
+        </div>
+        <p class="muted" style="font-size:.85rem; margin:.5rem 0 0">{% translate "In Albania a business selling to the public usually needs a NIPT and fiscal receipts. Not sure? Ask your accountant. You can change this later in Settings." %}</p>
         <div class="form-grid" style="margin-top:1rem">
           {% for f in form %}{% if f.name in "address tax_id phone email currency vat_rate day_ends_at" and f.name != "name" %}
-            <div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% if f.help_text %}<div class="help">{{ f.help_text }}</div>{% endif %}</div>
+            <div class="field" data-field="{{ f.name }}"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% if f.help_text %}<div class="help">{{ f.help_text }}</div>{% endif %}</div>
           {% endif %}{% endfor %}
         </div>
       </div>
@@ -151,6 +156,14 @@
       var dayEnd = document.getElementById('id_day_ends_at'); if (dayEnd) dayEnd.value = String(d.day_ends_at);
     });
   });
+  function syncTax() {
+    var s = (document.querySelector('input[name=tax_status]:checked') || {}).value || 'vat';
+    var nipt = document.querySelector('[data-field=tax_id]'), vat = document.querySelector('[data-field=vat_rate]');
+    if (nipt) nipt.classList.toggle('hidden', s === 'none');
+    if (vat) vat.classList.toggle('hidden', s !== 'vat');
+  }
+  document.querySelectorAll('input[name=tax_status]').forEach(function (r) { r.addEventListener('change', syncTax); });
+  syncTax();
   next.addEventListener('click', function () {
     if (current === 0) {
       var name = document.getElementById('id_name');

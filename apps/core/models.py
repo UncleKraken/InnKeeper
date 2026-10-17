@@ -15,9 +15,25 @@ def clear_settings_cache() -> None:
 class HotelSettings(models.Model):
     """Single row holding the property's details. Use `HotelSettings.load()`."""
 
-    name = models.CharField(_("hotel name"), max_length=120, default="InnKeeper Hotel")
+    name = models.CharField(_("business name"), max_length=120, default="InnKeeper Hotel")
     legal_name = models.CharField(_("legal name"), max_length=160, blank=True)
     tax_id = models.CharField(_("tax ID (NIPT)"), max_length=40, blank=True)
+
+    class TaxStatus(models.TextChoices):
+        VAT = "vat", _("Registered, with VAT")
+        NO_VAT = "no_vat", _("Registered, without VAT (small business)")
+        NONE = "none", _("Not registered (association, outside Albania, internal use or trial)")
+
+    tax_status = models.CharField(
+        _("tax registration"),
+        max_length=8,
+        choices=TaxStatus.choices,
+        default=TaxStatus.VAT,
+        help_text=_(
+            "Without VAT, receipts and invoices show no VAT. Not registered: no NIPT, VAT or fiscalization "
+            "anywhere, and receipts say they are internal receipts. Ask your accountant if unsure."
+        ),
+    )
     address = models.CharField(_("address"), max_length=255, blank=True)
     phone = models.CharField(_("phone"), max_length=40, blank=True)
     email = models.EmailField(_("email"), blank=True)
@@ -231,6 +247,10 @@ class HotelSettings(models.Model):
 
     def save(self, *args, **kwargs):
         self.pk = 1
+        if self.tax_status != self.TaxStatus.VAT:
+            self.vat_rate = Decimal("0")
+        if self.tax_status == self.TaxStatus.NONE:
+            self.fiscal_enabled = False  # fiscalization is for registered businesses only
         super().save(*args, **kwargs)
         clear_settings_cache()
 
@@ -247,9 +267,22 @@ class HotelSettings(models.Model):
         return obj
 
     @property
+    def registered(self) -> bool:
+        """Registered with the tax authority (has a NIPT; may fiscalize)."""
+        return self.tax_status != self.TaxStatus.NONE
+
+    @property
+    def charges_vat(self) -> bool:
+        return self.tax_status == self.TaxStatus.VAT and bool(self.vat_rate)
+
+    @property
+    def fiscal_on(self) -> bool:
+        return self.fiscal_enabled and self.registered
+
+    @property
     def vat_fraction(self) -> Decimal:
         """Share of a VAT-inclusive price that is VAT, e.g. 20% → 1/6."""
-        return self.vat_rate / (Decimal("100") + self.vat_rate) if self.vat_rate else Decimal("0")
+        return self.vat_rate / (Decimal("100") + self.vat_rate) if self.charges_vat else Decimal("0")
 
     @property
     def email_configured(self) -> bool:
@@ -266,7 +299,7 @@ class HotelSettings(models.Model):
     @property
     def fiscal_configured(self) -> bool:
         return bool(
-            self.fiscal_enabled
+            self.fiscal_on
             and self.tax_id
             and self.fiscal_business_unit
             and self.fiscal_tcr_code

@@ -11,7 +11,7 @@
   <div class="actions">
     {% status_badge r.status r.get_status_display %}
     {% if r.is_active %}<a class="btn btn-secondary" href="{% url 'frontdesk:reservation_edit' r.pk %}">{% icon "edit" %} {% translate "Edit" %}</a>{% endif %}
-    <a class="btn btn-secondary" href="{% url 'frontdesk:invoice' r.pk %}" target="_blank">{% icon "print" %} {% translate "Invoice" %}</a>
+    <a class="btn btn-secondary" href="{% url 'frontdesk:invoice' r.pk %}" target="_blank">{% icon "print" %} {% if hotel.registered %}{% translate "Invoice" %}{% else %}{% translate "Bill" %}{% endif %}</a>
     {% if r.status == "booked" %}
       <form method="post" action="{% url 'frontdesk:check_in' r.pk %}" class="inline">{% csrf_token %}<button class="btn">{% icon "login" %} {% translate "Check in" %}</button></form>
     {% elif r.status == "checked_in" %}

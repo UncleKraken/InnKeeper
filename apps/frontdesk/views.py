@@ -454,7 +454,7 @@ def invoice(request, pk):
     vat = Decimal("0")
     for c in folio.charges.active():
         rate = hs.vat_rate_accommodation if c.kind == "accommodation" else hs.vat_rate
-        vat += c.amount * rate / (Decimal("100") + rate) if hs.vat_rate else Decimal("0")
+        vat += c.amount * rate / (Decimal("100") + rate) if hs.charges_vat else Decimal("0")
     vat = vat.quantize(Decimal("0.01"))
     return render(
         request,
