@@ -5,7 +5,9 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -150,28 +152,47 @@ def order_view(request, pk):
         return redirect("outlets:receipt", pk=order.pk)
     categories = order.outlet.categories.prefetch_related("items").all()
     menu = [{"category": c, "items": [i for i in c.items.all() if i.is_active]} for c in categories]
+    return render(request, "outlets/order.html", {**_ticket_context(order), "menu": [m for m in menu if m["items"]]})
+
+
+def _ticket_context(order) -> dict:
+    """Everything the bill panel and the phone bar need (also rendered on their own after a tap)."""
     in_house = (
         Reservation.objects.filter(status=Reservation.Status.CHECKED_IN)
         .select_related("guest", "room")
         .order_by("room__number")
     )
-    return render(
-        request,
-        "outlets/order.html",
+    return {
+        "order": order,
+        "outlet": order.outlet,
+        "lines": order.active_lines.select_related("ticket").order_by("added_at", "id"),
+        "unsent": order.unsent_count,
+        "ready_count": order.tickets.filter(status=KitchenTicket.Status.READY).count(),
+        "in_house": in_house,
+        "methods": Payment.Method.choices,
+        "payments": order.payments.filter(voided=False).select_related("created_by"),
+        "move_tables": order.outlet.tables.filter(is_active=True).exclude(pk=order.table_id),
+        "item_count": sum(line.quantity for line in order.active_lines),
+    }
+
+
+def _changed(request, order, error: str = ""):
+    """After adding or changing an item: the page asks with fetch and gets the new bill back, so the
+    waiter keeps their place in the menu; a plain form post (no JavaScript) reloads the page."""
+    if request.headers.get("X-Requested-With") != "fetch":
+        if error:
+            messages.error(request, error)
+        return _back_to_order(order)
+    order.refresh_from_db()
+    if not order.is_open:
+        return JsonResponse({"redirect": reverse("outlets:receipt", args=[order.pk])})
+    ctx = _ticket_context(order)
+    return JsonResponse(
         {
-            "order": order,
-            "outlet": order.outlet,
-            "lines": order.active_lines.select_related("ticket").order_by("added_at", "id"),
-            "removed_lines": order.lines.filter(quantity=0),
-            "unsent": order.unsent_count,
-            "ready_count": order.tickets.filter(status=KitchenTicket.Status.READY).count(),
-            "menu": [m for m in menu if m["items"]],
-            "in_house": in_house,
-            "methods": Payment.Method.choices,
-            "payments": order.payments.filter(voided=False).select_related("created_by"),
-            "move_tables": order.outlet.tables.filter(is_active=True).exclude(pk=order.table_id),
-            "item_count": sum(line.quantity for line in order.active_lines),
-        },
+            "ticket": render_to_string("outlets/_ticket.html", ctx, request=request),
+            "bar": render_to_string("outlets/_ticket_bar.html", ctx, request=request),
+            "error": error,
+        }
     )
 
 
@@ -187,8 +208,8 @@ def add_item(request, pk):
     try:
         services.add_item(order, item, user=request.user, note=request.POST.get("note", "").strip()[:120])
     except BusinessError as e:
-        messages.error(request, str(e))
-    return _back_to_order(order)
+        return _changed(request, order, str(e))
+    return _changed(request, order)
 
 
 @require_POST
@@ -200,8 +221,8 @@ def change_line(request, pk, line_id):
         delta = int(request.POST.get("delta", "0"))
         services.change_quantity(line, delta, user=request.user)
     except (BusinessError, ValueError) as e:
-        messages.error(request, str(e))
-    return _back_to_order(order)
+        return _changed(request, order, str(e))
+    return _changed(request, order)
 
 
 @require_POST

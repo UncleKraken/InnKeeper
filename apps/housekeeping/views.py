@@ -44,7 +44,8 @@ class TicketForm(StyledFormMixin, forms.ModelForm):
 @module_required("housekeeping")
 def board(request):
     today = timezone.localdate()
-    show = request.GET.get("show", "all")
+    # Cleaners start on the rooms that need them; everyone else sees the whole house.
+    show = request.GET.get("show", "dirty" if request.user.role == Role.HOUSEKEEPING else "all")
     rooms = Room.objects.filter(is_active=True).select_related("room_type")
     if show == "dirty":
         rooms = rooms.filter(hk_status=Room.HKStatus.DIRTY)

@@ -1,5 +1,29 @@
 # Changelog
 
+## 2.8.0 — phones for waiters and staff
+
+**Shqip**
+
+- **Arka në telefon:** në telefon, porosia ka dy ekrane — Menuja dhe Llogaria — me një shirit poshtë që tregon numrin e artikujve, totalin dhe butonin Dërgo. Prekja e një artikulli e shton menjëherë pa ringarkuar faqen: menuja mbetet aty ku ishit dhe një mesazh i shkurtër konfirmon artikullin. Kategoritë rrëshqasin në një rresht, butonat − / + janë më të mëdhenj, ndryshimi i tavolinës dhe printimi janë te “Më shumë”.
+- Edhe në kompjuter dhe tablet, shtimi i artikujve dhe − / + nuk e ringarkojnë më faqen.
+- **Si aplikacion:** InnKeeper mund të shtohet në ekranin kryesor të telefonit (Add to Home screen) me ikonën e vet.
+- **Pastrimi** në telefon hapet te dhomat që duhen pastruar.
+- Rregullime: faqja e porosisë dhe kopjet rezervë nuk zmadhoheshin më gjerë se ekrani i telefonit.
+- Udhëzuesi: seksion i ri “Përdorimi me telefon”.
+
+**English**
+
+- **Till on phones:** on a phone an order has two screens — Menu and Bill — with a bar at the bottom showing the item count, the total and a Send button. Tapping an item adds it straight away without reloading: the menu stays where you were and a short message confirms the item. Categories scroll in one line, − / + buttons are bigger, moving the table and printing are under “More”.
+- On computers and tablets too, adding items and − / + no longer reload the page.
+- **Like an app:** InnKeeper can be added to the phone's home screen (Add to Home screen) with its own icon.
+- **Housekeeping** on a phone opens on the rooms that need cleaning.
+- Fixes: the order page and the backup page no longer became wider than a phone screen.
+- Guide: new section “Using a phone”.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.8.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.7.0 — automatic copies and one-click updates
 
 **Shqip**

@@ -1,0 +1,10 @@
+{% load i18n innkeeper %}<button type="button" class="pb-tab pb-menu" data-show="menu">{% icon "menu" %}<span>{% translate "Menu" %}</span></button>
+<button type="button" class="pb-tab pb-bill" data-show="bill">
+  <span class="pb-count">{% blocktranslate count n=item_count %}{{ n }} item{% plural %}{{ n }} items{% endblocktranslate %}</span>
+  <strong>{% if payments %}{{ order.remaining|money }}{% else %}{{ order.total|money }}{% endif %}</strong>
+</button>
+{% if unsent %}
+<form method="post" action="{% url 'outlets:send' order.pk %}" class="pb-send">{% csrf_token %}
+  <button class="btn btn-accent">{% translate "Send" %} <span class="pb-badge">{{ unsent }}</span></button>
+</form>
+{% endif %}
