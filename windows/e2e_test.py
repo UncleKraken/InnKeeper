@@ -213,50 +213,40 @@ def main() -> int:
 
 
 def fiscal_probe():
-    import base64
-    from datetime import UTC, datetime, timedelta
+    """Probe the tax authority's TEST system with made-up certificates (informational)."""
     from decimal import Decimal
 
-    from cryptography import x509
-    from cryptography.hazmat.primitives import hashes, serialization
-    from cryptography.hazmat.primitives.asymmetric import rsa
-    from cryptography.hazmat.primitives.serialization import pkcs12
     from cryptography.x509.oid import NameOID
 
     from apps.core.models import HotelSettings, clear_settings_cache
     from apps.fiscal import cis
     from apps.fiscal.signing import Certificate
 
-    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "L12345678A InnKeeper e2e")])
-    now = datetime.now(UTC)
-    cert = (
-        x509.CertificateBuilder().subject_name(name).issuer_name(name).public_key(key.public_key())
-        .serial_number(1).not_valid_before(now - timedelta(days=1)).not_valid_after(now + timedelta(days=30))
-        .sign(key, hashes.SHA256())
-    )
-    p12 = pkcs12.serialize_key_and_certificates(b"e2e", key, cert, None, serialization.BestAvailableEncryption(b"pw"))
-    HotelSettings.objects.update(
-        tax_id="L12345678A", legal_name="InnKeeper E2E sh.p.k.", address="Rruga Test 1", fiscal_town="Tiranë",
-        fiscal_enabled=True, fiscal_test=True, fiscal_business_unit="aa111aa111", fiscal_tcr_code="bb222bb222",
-        fiscal_software_code="cc333cc333", fiscal_operator_code="dd444dd444", fiscal_maintainer_code="ee555ee555",
-        fiscal_certificate=base64.b64encode(p12).decode(), fiscal_certificate_password="pw", demo_data=False,
-    )
-    clear_settings_cache()
-    hs = HotelSettings.load()
-    c = Certificate.from_settings(hs)
-    try:
-        xml = cis.cash_deposit_request(
-            nuis=hs.tax_id, tcr=hs.fiscal_tcr_code, operation="INITIAL", amount=Decimal("0.00"), when=cis.now_str(), cert=c
-        )
-        cis.register_cash_deposit(xml, test=True)
-        check("Tax authority test system: cash deposit", True, "accepted (unexpected with a made-up certificate)", required=False)
-    except cis.CISError as e:
-        check("Tax authority test system reached (cash deposit)", True, f"answered with fault {e.code}: {e}", required=False)
-    except cis.CISUnavailable as e:
-        check("Tax authority test system reached", False, f"unreachable: {e}", required=False)
-    except Exception as e:  # informational only
-        check("Tax authority probe (cash deposit)", False, f"{type(e).__name__}: {e}", required=False)
+    variants = [
+        ("name only", [(NameOID.COMMON_NAME, "InnKeeper e2e")]),
+        ("serialNumber=NIPT", [(NameOID.COMMON_NAME, "InnKeeper e2e"), (NameOID.SERIAL_NUMBER, "L12345678A")]),
+        ("organizationIdentifier=NIPT", [(NameOID.COMMON_NAME, "InnKeeper e2e"), (NameOID.ORGANIZATION_IDENTIFIER, "L12345678A")]),
+        ("OU=NIPT", [(NameOID.COMMON_NAME, "InnKeeper e2e"), (NameOID.ORGANIZATIONAL_UNIT_NAME, "L12345678A")]),
+    ]
+    for label, attrs in variants:
+        p12 = _make_p12(attrs)
+        _configure_fiscal(p12)
+        clear_settings_cache()
+        hs = HotelSettings.load()
+        c = Certificate.from_settings(hs)
+        try:
+            xml = cis.cash_deposit_request(
+                nuis=hs.tax_id, tcr=hs.fiscal_tcr_code, operation="INITIAL", amount=Decimal("0.00"), when=cis.now_str(), cert=c
+            )
+            fcdc = cis.register_cash_deposit(xml, test=True)
+            check(f"Tax authority test system, certificate {label}", True, f"ACCEPTED, FCDC {fcdc}", required=False)
+        except cis.CISError as e:
+            check(f"Tax authority test system, certificate {label}", True, f"fault {e.code}: {str(e)[:160]}", required=False)
+        except cis.CISUnavailable as e:
+            check("Tax authority test system reached", False, f"unreachable: {e}", required=False)
+            return
+        except Exception as e:  # informational only
+            check(f"Tax authority probe ({label})", False, f"{type(e).__name__}: {e}", required=False)
 
     # A real sale through the till: InnKeeper signs it and sends it to the test system.
     try:
@@ -276,13 +266,45 @@ def fiscal_probe():
         else:
             doc.refresh_from_db()
             check(
-                "Tax authority test system reached (receipt)",
+                "Tax authority test system (receipt from the till)",
                 True,
-                f"status {doc.status}; NSLF {doc.iic[:12]}…; answer: {doc.last_error or doc.fic}",
+                f"status {doc.status}; NSLF {doc.iic[:12]}…; answer: {(doc.last_error or doc.fic)[:200]}",
                 required=False,
             )
     except Exception as e:
         check("Tax authority probe (receipt)", False, f"{type(e).__name__}: {e}", required=False)
+
+
+def _make_p12(attrs) -> bytes:
+    from datetime import UTC, datetime, timedelta
+
+    from cryptography import x509
+    from cryptography.hazmat.primitives import hashes, serialization
+    from cryptography.hazmat.primitives.asymmetric import rsa
+    from cryptography.hazmat.primitives.serialization import pkcs12
+
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    name = x509.Name([x509.NameAttribute(oid, value) for oid, value in attrs])
+    now = datetime.now(UTC)
+    cert = (
+        x509.CertificateBuilder().subject_name(name).issuer_name(name).public_key(key.public_key())
+        .serial_number(x509.random_serial_number()).not_valid_before(now - timedelta(days=1))
+        .not_valid_after(now + timedelta(days=30)).sign(key, hashes.SHA256())
+    )
+    return pkcs12.serialize_key_and_certificates(b"e2e", key, cert, None, serialization.BestAvailableEncryption(b"pw"))
+
+
+def _configure_fiscal(p12: bytes) -> None:
+    import base64
+
+    from apps.core.models import HotelSettings
+
+    HotelSettings.objects.update(
+        tax_id="L12345678A", legal_name="InnKeeper E2E sh.p.k.", address="Rruga Test 1", fiscal_town="Tiranë",
+        fiscal_enabled=True, fiscal_test=True, fiscal_business_unit="aa111aa111", fiscal_tcr_code="bb222bb222",
+        fiscal_software_code="cc333cc333", fiscal_operator_code="dd444dd444", fiscal_maintainer_code="ee555ee555",
+        fiscal_certificate=base64.b64encode(p12).decode(), fiscal_certificate_password="pw", demo_data=False,
+    )
 
 
 def _annotation(level: str, title: str, text: str) -> None:
