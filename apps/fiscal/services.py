@@ -312,11 +312,30 @@ def ensure_initial_deposit(
     if existing:
         return existing
     if amount is None:
-        from apps.finance.models import DayClose
-
-        last = DayClose.objects.filter(business_date__lt=today).order_by("-business_date").first()
-        amount = last.counted_cash if last else Decimal("0.00")
+        amount = opening_cash(tcr, today)
     return register_cash(tcr, CashDeposit.Operation.INITIAL, amount, user, cert=cert, raise_unavailable=True)
+
+
+def opening_cash(tcr: str, today) -> Decimal:
+    """The cash a register starts the day with.
+
+    An outlet with its own register reports the change set for it (Outlets & menus → edit).
+    The main register reports the cash counted at the last day close minus what the other
+    registers keep, so the same money is never reported twice."""
+    from apps.finance.models import DayClose
+    from apps.outlets.models import Outlet
+
+    own = Outlet.objects.filter(is_active=True).exclude(fiscal_tcr_code="")
+    hs = HotelSettings.load()
+    if tcr != hs.fiscal_tcr_code:
+        found = own.filter(fiscal_tcr_code=tcr).first()
+        return found.fiscal_opening_cash if found else Decimal("0.00")
+    last = DayClose.objects.filter(business_date__lt=today).order_by("-business_date").first()
+    counted = last.counted_cash if last else Decimal("0.00")
+    others = {
+        o.fiscal_tcr_code: o.fiscal_opening_cash for o in own.exclude(fiscal_tcr_code=hs.fiscal_tcr_code)
+    }
+    return max(Decimal("0.00"), counted - sum(others.values(), Decimal("0.00")))
 
 
 def register_cash(

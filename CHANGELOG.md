@@ -1,5 +1,29 @@
 # Changelog
 
+## 2.14.0 — access from outside, month report, minimum stay at reception, opening cash per register
+
+**Shqip**
+
+- **Hyrja nga jashtë** (Cilësimet → Hyrja nga jashtë): adresa për telefonat në Wi-Fi të biznesit; udhëzues për **Tailscale** (falas, privat) që pronari ta hapë InnKeeper nga telefoni kudo pa hapur asgjë në internet, me kod QR; dhe **Cloudflare Tunnel** për adresën publike (rezervimi online, pagesat me kartë): ngjitni tokenin dhe aplikacioni Windows e shkarkon dhe e mban tunelin në punë.
+- PIN-et e arkave punojnë vetëm brenda rrjetit të biznesit; nga jashtë kërkohet gjithmonë fjalëkalimi.
+- **Raporti mujor** (Financa → Raporti mujor): shitjet sipas departamentit, TVSH sipas normës, paratë sipas mënyrës së pagesës, shpenzimet, fitimi, kontrollet dhe çdo ditë me numërimin e arkës. Printohet ose ruhet si PDF, ose shkarkohet në Excel.
+- **Qëndrimi minimal në recepsion:** kur një rezervim është më i shkurtër se minimumi i sezonit, kërkohet “Rezervoje gjithsesi”, dhe shënohet në regjistrin e aktivitetit.
+- **Paratë e fillimit për çdo arkë fiskale:** çdo pikë me arkën e vet deklaron kusurin e saj; arka kryesore deklaron pjesën tjetër të numërimit, pa e dyfishuar.
+- Paneli i Financës nuk i llogarit më pagesat me kupon dhuratë si para të marra.
+
+**English**
+
+- **Access from outside** (Settings → Access from outside): the address for phones on the business Wi-Fi; a guide to **Tailscale** (free, private) so the owner reaches InnKeeper from their phone anywhere without opening anything to the internet, with a QR code; and **Cloudflare Tunnel** for the public address (online booking, card payments): paste the token and the Windows app downloads it and keeps the tunnel running.
+- Till PINs only work inside the business network; from outside the password is always needed.
+- **Month report** (Finance → Month report): sales by department, VAT by rate, money by payment method, expenses, profit, checks and every day with its cash count. Print or save as PDF, or download to Excel.
+- **Minimum stay at reception:** a booking shorter than the season's minimum needs “Book it anyway”, and it is noted in the activity log.
+- **Opening cash per fiscal register:** each outlet with its own register reports its own change; the main register reports the rest of the count, never twice.
+- The Finance overview no longer counts gift-voucher payments as money received.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.14.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.13.0 — loyalty cards and gift vouchers
 
 **Shqip**

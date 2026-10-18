@@ -89,7 +89,7 @@ Run the tests with `python manage.py test`.
    docker compose up -d
    ```
    This runs InnKeeper, PostgreSQL, and the nightly room-charge job. Open the site and create the first manager account.
-2. **HTTPS.** Put it behind a reverse proxy (Caddy, Nginx, or Cloudflare Tunnel) with a certificate. On a closed office LAN without HTTPS, set `DJANGO_SECURE_SSL_REDIRECT=0`.
+2. **HTTPS.** Put it behind a reverse proxy (Caddy, Nginx, or Cloudflare Tunnel: `cloudflared tunnel run --token …` pointing at the web service) with a certificate. The Windows app runs Cloudflare Tunnel itself from *Settings → Access from outside*; for the owner's phone, Tailscale is the private alternative. On a closed office LAN without HTTPS, set `DJANGO_SECURE_SSL_REDIRECT=0`.
 3. **Set up the business.** The setup wizard runs on first sign-in. Then follow the getting-started checklist on the dashboard.
 4. **Nightly room charges.** `python manage.py night_audit` posts last night's room charge for every in-house guest, so revenue is reported on the right day. The Docker setup runs it at 03:00; otherwise schedule it with cron or Windows Task Scheduler. Check-out always posts any nights still missing, so a missed run never loses money.
 5. **Channel calendars.** `python manage.py sync_calendars` reads the Booking.com / Airbnb calendars added under *Rooms & rates → Calendar links*. Docker runs it every 15 minutes, and so does the Windows app; elsewhere schedule it with cron. Channels can only read InnKeeper's room links if the site is reachable from the internet (set the public web address in Settings).

@@ -902,3 +902,14 @@ body.kds-flash { animation: kds-flash 1.2s ease-out 2; }
 .voucher-card { max-width: 420px; margin: 0 auto; border: 2px dashed var(--accent); border-radius: 14px; padding: 1.5rem; text-align: center; background: var(--surface); }
 .voucher-card .v-code { font-family: ui-monospace, monospace; font-size: 1.7rem; letter-spacing: .12em; font-weight: 700; margin: .75rem 0; }
 .voucher-card .v-amount { font-size: 2.2rem; font-weight: 800; }
+.remote-url { font-size: 1.15rem; font-weight: 700; margin: .4rem 0; word-break: break-all; }
+.steps-list { margin: 0 0 .75rem; padding-left: 1.2rem; }
+.steps-list li { margin-bottom: .4rem; }
+.checklist-plain { margin: 0; padding-left: 1.2rem; }
+.checklist-plain li { margin-bottom: .35rem; }
+@media print {
+  .month-doc .card { box-shadow: none; break-inside: avoid; }
+  .month-doc .month-days { break-before: page; }
+  .month-doc .table-sm td, .month-doc .table-sm th { padding: .2rem .4rem; font-size: 9pt; }
+}
+.month-doc .doc-head { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }

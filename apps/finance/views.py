@@ -82,7 +82,7 @@ def dashboard(request):
     method_labels = dict(Payment.Method.choices)
     for row in by_method:
         row["label"] = method_labels.get(row["method"], row["method"])
-    received = payments.aggregate(t=amount)["t"] or ZERO
+    received = payments.exclude(method=Payment.Method.VOUCHER).aggregate(t=amount)["t"] or ZERO
 
     rooms = Room.objects.filter(is_active=True).count()
     nights_sold = _nights_sold(start, end)

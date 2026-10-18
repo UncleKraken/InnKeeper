@@ -46,7 +46,7 @@
 <section id="booking">
   <h2>Prices, seasons &amp; online booking</h2>
   <details open><summary>Seasonal prices</summary>
-    <p>In <em>Rooms &amp; rates → Seasons</em> add periods such as Summer or New Year. A season either changes every room type by a percentage (+30 for 30% more, −15 for a discount) or sets a fixed nightly price for one room type. You can also require a minimum number of nights.</p>
+    <p>In <em>Rooms &amp; rates → Seasons</em> add periods such as Summer or New Year. A season either changes every room type by a percentage (+30 for 30% more, −15 for a discount) or sets a fixed nightly price for one room type. You can also require a minimum number of nights: the booking page refuses shorter stays, and at reception InnKeeper asks you to tick <em>Book it anyway</em> first (it is noted in the activity log).</p>
     <p>Leave the rate empty when making a reservation and InnKeeper prices each night from the price list. A stay that crosses into a season shows the price per night, and the bill gets one line per price.</p>
   </details>
   <details><summary>Taking bookings on your website</summary>
@@ -103,7 +103,7 @@
     </ol>
   </details>
   <details><summary>No internet</summary><p>Sales never stop. Without a connection the receipt is printed with its NSLF and the note that the NIVF will be added later. InnKeeper sends waiting documents every minute once the connection returns; <em>Finance → Fiscal → Send waiting</em> sends them immediately. The law allows 48 hours: the dashboard warns you when a document gets close to the limit.</p></details>
-  <details><summary>Cash in the drawer</summary><p>The opening cash is reported automatically before the first cash sale of the day (the amount counted at the last day close). When cash is taken out of the drawer, report it under <em>Finance → Fiscal → Cash in the drawer</em>.</p></details>
+  <details><summary>Cash in the drawer</summary><p>The opening cash is reported automatically before the first cash sale of the day (the amount counted at the last day close). With several cash registers, set each outlet's own change under <em>Outlets &amp; menus → edit → cash in this register each morning</em>; the main register reports the rest, so the same money is never reported twice. When cash is taken out of the drawer, report it under <em>Finance → Fiscal → Cash in the drawer</em>.</p></details>
   <details><summary>Voids and rejected documents</summary><p>Voiding a fiscalized receipt sends a correction invoice that cancels it. If the tax authority rejects a document, it is shown in red with the reason (usually a wrong code or an expired certificate). Fix the setting and press <em>Send again</em>.</p></details>
 </section>
 
@@ -227,6 +227,7 @@
   <details><summary>Expenses</summary><p>Record purchases, salaries, bills and other costs under <em>Expenses</em> so reports show real profit. Cash expenses are taken into account in the day close.</p></details>
   <details><summary>Sales report</summary><p>Best-selling items, sales by staff member, average bill and busiest hours for your restaurant, bar and services.</p></details>
   <details><summary>Ledger and Excel</summary><p>The <em>Ledger</em> lists every charge and payment. <em>Excel</em> downloads a real Excel file (.xlsx) for your accountant, with money as numbers and a filter on every column; <em>CSV</em> is there too. The sales report, the stock list and the guest register download to Excel the same way.</p></details>
+  <details><summary>Month report for the accountant</summary><p><em>Finance → Month report</em> puts the month on one page: sales by department, VAT by rate, money received by payment method, expenses by category, profit, checks (bills, discounts, voids, cash differences, fiscal documents) and every day of the month with its cash count. Choose the month, then <em>Print / PDF</em> (choose “Save as PDF” in the print window) or <em>Excel</em>. Early in a month it opens on the month before.</p></details>
   <details><summary>Daily summary by email</summary><p>In <em>Settings → Email</em>, under <em>Daily summary for the owner</em>, type one or more email addresses and the hour. Every morning InnKeeper emails how the day before went: sales compared with a week ago, money by payment method, the cash count and any difference, discounts, voids, cancelled bills, shifts with a cash difference, best sellers, rooms, and warnings (stock running low, receipts not yet fiscalized, copies not working). It is also sent right after the day close. Days with no sales send nothing. <em>Send now</em> shows you how it looks.</p></details>
 </section>
 
@@ -269,6 +270,7 @@
     <p>If the copy stops working (USB drive unplugged, cloud folder gone), the dashboard shows a red warning. To restore, the list under the settings shows the copies with a <em>Restore</em> button; on a new computer, install InnKeeper, choose the same folder and restore the newest copy.</p>
   </details>
   <details><summary>Activity log</summary><p><em>Settings → Activity log</em> records every check-in, payment, discount, void and setting change, with who did it and when.</p></details>
+  <details open><summary>Using InnKeeper from home or on the go</summary><p><em>Settings → Access from outside</em>. For the owner, the safe way is <strong>Tailscale</strong>: a free app on this computer and on your phone, signed in with the same account. Your phone then reaches InnKeeper privately from anywhere, and nothing is opened to the internet; the page shows the address and a code to scan. For the online booking page and card payments, which need a public https address, paste a <strong>Cloudflare Tunnel</strong> token there (free Cloudflare account and a domain name); InnKeeper keeps the tunnel running. From outside, sign-in always needs the username and password: PINs work only inside the business.</p></details>
   <details><summary>Import from Excel</summary><p><em>Settings → Import from Excel</em> brings in your menu, stock list or guest list. Download the Excel template (the second sheet explains each column), fill it in with one row per item, save it and upload the .xlsx file. CSV files work too. A preview shows what will be added or updated and which rows have problems; nothing is saved until you confirm. Entries with the same name are updated, nothing is deleted. Albanian column names work too.</p></details>
 </section>
 

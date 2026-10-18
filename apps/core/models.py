@@ -189,6 +189,13 @@ class HotelSettings(models.Model):
     voucher_months = models.PositiveSmallIntegerField(
         _("vouchers are valid for (months)"), default=12, help_text=_("0: they never expire.")
     )
+    tunnel_enabled = models.BooleanField(_("public address through Cloudflare Tunnel"), default=False)
+    tunnel_token = models.CharField(
+        _("tunnel token"),
+        max_length=600,
+        blank=True,
+        help_text=_("From Cloudflare Zero Trust → Networks → Tunnels → your tunnel → Install connector (the long text after --token)."),
+    )
     pin_lock_minutes = models.PositiveSmallIntegerField(
         _("lock shared tills after"),
         default=3,

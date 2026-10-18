@@ -12,6 +12,7 @@
     <a href="?tab=receipts" class="{% if tab == 'receipts' %}active{% endif %}">{% icon "receipt" %} {% translate "Receipts & invoices" %}</a>
     <a href="?tab=modules" class="{% if tab == 'modules' %}active{% endif %}">{% icon "grid" %} {% translate "Modules" %}</a>
     {% if hotel.module_rooms %}<a href="?tab=booking" class="{% if tab == 'booking' %}active{% endif %}">{% icon "calendar" %} {% translate "Online booking" %}</a>{% endif %}
+    <a href="?tab=remote" class="{% if tab == 'remote' %}active{% endif %}">{% icon "sync" %} {% translate "Access from outside" %}</a>
     <a href="?tab=tills" class="{% if tab == 'tills' %}active{% endif %}">{% icon "lock" %} {% translate "Shared tills & PINs" %}</a>
     {% if hotel.module_outlets %}<a href="?tab=loyalty" class="{% if tab == 'loyalty' %}active{% endif %}">{% icon "gift" %} {% translate "Loyalty & gift vouchers" %}</a>{% endif %}
     <a href="?tab=email" class="{% if tab == 'email' %}active{% endif %}">{% icon "mail" %} {% translate "Email" %}</a>
@@ -115,6 +116,71 @@
         <pre class="bank">&lt;a href="{{ booking_link }}" style="display:inline-block;background:#0e6e64;color:#fff;padding:12px 22px;border-radius:8px;font-weight:600;text-decoration:none"&gt;{% translate "Book now" %}&lt;/a&gt;</pre>
         {% if not hotel.public_url %}<div class="alert alert-warning" style="margin-top:1rem">{% translate "Guests can only reach this page if InnKeeper is online. Set the public web address above once it is." %}</div>{% endif %}
         {% if not hotel.email_configured %}<div class="alert alert-info" style="margin-top:1rem">{% translate "Set up Email so guests receive confirmations automatically." %} <a href="?tab=email">{% translate "Email settings" %}</a></div>{% endif %}
+      </div>
+    </section>
+
+  {% elif tab == "remote" %}
+    <section class="card">
+      <div class="card-header"><h2>{% translate "On the business's Wi-Fi" %}</h2></div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0">{% translate "Phones and tablets connected to the same Wi-Fi as this computer open InnKeeper at:" %}</p>
+        {% if lan_url %}<p class="remote-url mono">{{ lan_url }}</p>{% else %}<p class="muted">{% translate "This computer has no local network address right now." %}</p>{% endif %}
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:1.25rem">
+      <div class="card-header"><h2>{% translate "The owner's phone, from anywhere (private)" %}</h2>{% if tailscale_url %}{% translate "Ready" as l %}{% status_badge "success" l %}{% else %}<span class="badge b-low">{% translate "Recommended" %}</span>{% endif %}</div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0">{% translate "Tailscale is a free app that links your phone and this computer privately, as if they were on the same Wi-Fi. Nothing is opened to the internet, so nobody else can even reach the sign-in page." %}</p>
+        {% if tailscale_url %}
+          <div class="row" style="gap:1.25rem; align-items:center; flex-wrap:wrap">
+            <div class="qr-box" style="width:150px">{{ tailscale_qr|safe }}</div>
+            <div><p style="margin:0">{% translate "Tailscale is working on this computer. On your phone (with Tailscale on), open:" %}</p><p class="remote-url mono">{{ tailscale_url }}</p><p class="muted" style="font-size:.85rem; margin:0">{% translate "Scan the code with the phone's camera, then choose Add to Home Screen." %}</p></div>
+          </div>
+        {% else %}
+          <ol class="steps-list">
+            <li>{% blocktranslate %}On this computer, install Tailscale from <a href="https://tailscale.com/download" target="_blank" rel="noopener">tailscale.com/download</a> and sign in (a Google, Microsoft or Apple account is enough).{% endblocktranslate %}</li>
+            <li>{% translate "On your phone, install the Tailscale app and sign in with the same account. Leave it switched on." %}</li>
+            <li>{% translate "Come back to this page: it shows the address and a code to scan with the phone." %}</li>
+          </ol>
+          <p class="muted" style="font-size:.85rem; margin-bottom:0">{% translate "Free for personal use (up to 3 people and 100 devices). Each person who should reach InnKeeper from outside needs Tailscale on their phone." %}</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <form method="post" class="card" style="margin-top:1.25rem" novalidate>{% csrf_token %}
+      <div class="card-header"><h2>{% translate "Public address (online booking, card payments)" %}</h2>
+        {% if hotel.tunnel_enabled %}{% if tunnel.state == "running" %}{% translate "Connected" as l %}{% status_badge "success" l %}{% elif tunnel.state == "error" %}{% translate "Problem" as l %}{% status_badge "danger" l %}{% else %}{% translate "Starting…" as l %}{% status_badge "warning" l %}{% endif %}{% endif %}</div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0">{% translate "Only needed for the online booking page, card payments and channel managers, which must reach InnKeeper from the internet over https. It uses a free Cloudflare account and a domain name you own (for example book.yourhotel.al)." %}</p>
+        {% if tunnel.state == "error" and hotel.tunnel_enabled %}<div class="alert alert-error" style="margin-bottom:1rem">{{ tunnel.message }}</div>{% endif %}
+        {% if windows_app %}
+          {% include "includes/form_fields.html" %}
+          <details class="help-body" style="margin-top:1rem"><summary>{% translate "How to get the token" %}</summary>
+            <ol>
+              <li>{% translate "Create a free account at dash.cloudflare.com and add your domain (Cloudflare shows how to change the domain's name servers)." %}</li>
+              <li>{% translate "Open Zero Trust → Networks → Tunnels → Create a tunnel → Cloudflared. Give it a name, e.g. InnKeeper." %}</li>
+              <li>{% translate "On the “Install connector” page choose Windows and copy the long text after --token. Paste it here, tick the box above and save. InnKeeper downloads Cloudflare's program and keeps the tunnel running." %}</li>
+              <li>{% blocktranslate with port=port %}In Cloudflare, add a Public hostname: e.g. book · yourhotel.al, type HTTP, URL localhost:{{ port }}.{% endblocktranslate %}</li>
+              <li>{% translate "Put the address (https://book.yourhotel.al) in Settings → Online booking → public web address." %}</li>
+            </ol>
+          </details>
+        {% else %}
+          <p class="muted">{% translate "On a server, run cloudflared next to InnKeeper (see the README)." %}</p>
+        {% endif %}
+      </div>
+      {% if windows_app %}<div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>{% endif %}
+    </form>
+
+    <section class="card" style="margin-top:1.25rem">
+      <div class="card-header"><h2>{% translate "Safety" %}</h2></div>
+      <div class="card-body">
+        <ul class="checklist-plain">
+          <li>{% translate "Sign-in from outside always needs the username and password; PINs work only on the business's own network." %}</li>
+          <li>{% translate "Five wrong passwords lock an account for 15 minutes." %}</li>
+          <li>{% translate "Give every person their own account and a long password, and deactivate accounts of people who leave." %}</li>
+          <li>{% translate "The Activity log shows every sign-in." %}</li>
+        </ul>
       </div>
     </section>
 

@@ -152,6 +152,12 @@ def pin_pad(request):
     """The lock screen of a shared till: tap your name, type your PIN."""
     if not is_shared_till(request):
         return redirect("accounts:login")
+    from apps.core.remote import is_local_request
+
+    if not is_local_request(request):  # a PIN is short: never accept one from the internet
+        from urllib.parse import quote
+
+        return redirect(f"/accounts/login/?password=1&next={quote(_safe_next(request))}")
     staff = list(User.objects.filter(is_active=True).exclude(pin="").order_by("first_name", "username"))
     error = ""
     chosen = None

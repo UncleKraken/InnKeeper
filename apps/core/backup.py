@@ -98,6 +98,8 @@ SETTINGS_FIELDS_SKIP = {
     "fiscal_since",
     "summary_sent_for",
     "demo_data",
+    "tunnel_enabled",
+    "tunnel_token",
     # The copy target belongs to this computer; its password stays here too.
     "sync_enabled",
     "sync_folder",

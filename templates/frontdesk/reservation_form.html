@@ -36,7 +36,9 @@
     <div class="card-header"><h2>{% translate "Stay" %}</h2></div>
     <div class="card-body">
       <div class="form-grid">
-        {% for field in form %}{% if field.name not in "guest new_first_name new_last_name new_phone new_email" %}
+        {% for field in form %}{% if field.name == "allow_short_stay" %}{% if field.is_hidden %}{{ field }}{% else %}
+          <div class="field full"><label class="check" style="font-weight:600; color:var(--warning)">{{ field }} {{ field.label }}</label></div>{% endif %}
+        {% elif field.name not in "guest new_first_name new_last_name new_phone new_email" %}
           <div class="field{% if field.errors %} has-error{% endif %}{% if field.name == 'notes' %} full{% endif %}">
             <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span style="color:var(--danger)">*</span>{% endif %}</label>
             {{ field }}

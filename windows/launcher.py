@@ -221,6 +221,86 @@ def channel_jobs(log, stop: threading.Event) -> None:
         stop.wait(60)
 
 
+def download_cloudflared(target: Path, log) -> None:
+    """Cloudflare's tunnel program, from its official GitHub releases (about 50 MB, once)."""
+    from apps.core.remote import CLOUDFLARED_URL
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    part = target.with_suffix(".part")
+    req = urllib.request.Request(CLOUDFLARED_URL, headers={"User-Agent": "InnKeeper"})
+    with urllib.request.urlopen(req, timeout=60) as resp, open(part, "wb") as f:  # noqa: S310 (fixed https URL)
+        final = resp.geturl()
+        if not final.startswith(("https://github.com/", "https://objects.githubusercontent.com/", "https://release-assets.githubusercontent.com/")):
+            raise RuntimeError(f"unexpected download address {final}")
+        while chunk := resp.read(1 << 20):
+            f.write(chunk)
+    if part.stat().st_size < 5_000_000 or part.read_bytes()[:2] != b"MZ":
+        part.unlink(missing_ok=True)
+        raise RuntimeError("the download is not a Windows program")
+    part.replace(target)
+    log("Cloudflare Tunnel program downloaded.")
+
+
+TUNNEL = {"proc": None}  # so Stop can end cloudflared too
+
+
+def tunnel_jobs(log, stop: threading.Event) -> None:
+    """Keep Cloudflare Tunnel running while it is switched on in Settings → Access from outside."""
+    import subprocess
+
+    from django.db import close_old_connections
+
+    from apps.core import remote
+    from apps.core.models import HotelSettings, clear_settings_cache
+
+    proc = None
+    started_token = ""
+    failures = 0
+    while not stop.is_set():
+        clear_settings_cache()
+        close_old_connections()
+        try:
+            hs = HotelSettings.load()
+            wanted = hs.tunnel_enabled and hs.tunnel_token.strip()
+            if proc is not None and (not wanted or hs.tunnel_token.strip() != started_token):
+                proc.terminate()
+                proc = None
+                remote.write_status("off")
+            if wanted:
+                exe = remote.cloudflared_path()
+                if not exe.exists():
+                    remote.write_status("starting", "Downloading Cloudflare Tunnel…")
+                    download_cloudflared(exe, log)
+                if proc is None or proc.poll() is not None:
+                    if proc is not None:
+                        failures += 1
+                        log(f"Tunnel stopped (exit {proc.returncode}); starting again.")
+                    started_token = hs.tunnel_token.strip()
+                    proc = subprocess.Popen(  # noqa: S603 (our own downloaded cloudflared, fixed arguments)
+                        [str(exe), "tunnel", "--no-autoupdate", "run"],
+                        env={**os.environ, "TUNNEL_TOKEN": started_token},  # not on the command line
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                    )
+                    TUNNEL["proc"] = proc
+                    time.sleep(5)
+                if proc.poll() is None:
+                    failures = 0
+                    remote.write_status("running")
+                else:
+                    remote.write_status("error", "Cloudflare Tunnel stopped right away: check the token.")
+            elif proc is None:
+                remote.write_status("off")
+        except Exception as e:
+            log(f"Tunnel error: {e}")
+            remote.write_status("error", str(e))
+        stop.wait(30 if failures < 5 else 300)
+    if proc is not None:
+        proc.terminate()
+        remote.write_status("off")
+
+
 def serve(log, ready: threading.Event) -> None:
     from waitress import serve as waitress_serve
 
@@ -362,6 +442,7 @@ def main() -> int:
     threading.Thread(target=serve, args=(log, ready), daemon=True).start()
     threading.Thread(target=daily_jobs, args=(log, stop), daemon=True).start()
     threading.Thread(target=channel_jobs, args=(log, stop), daemon=True).start()
+    threading.Thread(target=tunnel_jobs, args=(log, stop), daemon=True).start()
     ready.wait(30)
     for _ in range(40):
         if SERVE_ERROR or already_running():
@@ -429,6 +510,8 @@ def main() -> int:
 
     def quit_app():
         stop.set()
+        if TUNNEL["proc"] is not None and TUNNEL["proc"].poll() is None:
+            TUNNEL["proc"].terminate()
         try:  # a last copy, so the other place has everything up to the moment InnKeeper stopped
             from apps.core.sync import run as copy_now
 

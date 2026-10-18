@@ -646,6 +646,7 @@ class OutletForm(StyledFormMixin, forms.ModelForm):
             "receipt_printer",
             "auto_print_receipt",
             "fiscal_tcr_code",
+            "fiscal_opening_cash",
             "menu_public",
             "menu_intro",
             "sort_order",

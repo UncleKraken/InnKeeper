@@ -61,6 +61,9 @@ class ReservationForm(StyledFormMixin, forms.ModelForm):
         decimal_places=2,
         help_text=_("Leave empty to use the price list (room type rate and seasons)."),
     )
+    allow_short_stay = forms.BooleanField(
+        label=_("Book it anyway, shorter than the minimum stay"), required=False, widget=forms.HiddenInput
+    )
 
     class Meta:
         model = Reservation
@@ -113,6 +116,22 @@ class ReservationForm(StyledFormMixin, forms.ModelForm):
             cleaned["rate"] = self.instance.rate
         elif cleaned.get("rate") is not None:
             self.instance.nightly_rates = []
+        self.short_stay = False
+        if not unchanged and room and arrival and departure and departure > arrival:
+            from .pricing import quote
+
+            q = self.quote or quote(room.room_type, arrival, departure)
+            if not q.meets_min_nights:
+                if cleaned.get("allow_short_stay"):
+                    self.short_stay = True
+                else:
+                    self.fields["allow_short_stay"].widget = forms.CheckboxInput(attrs={"class": "check-input"})
+                    self.fields["allow_short_stay"].widget.attrs["data-full"] = "1"
+                    self.add_error(
+                        "departure",
+                        _("The minimum stay for these dates is %(n)s nights (season price list). Tick “Book it anyway” below to accept a shorter stay.")
+                        % {"n": q.min_nights},
+                    )
         return cleaned
 
     def _post_clean(self):

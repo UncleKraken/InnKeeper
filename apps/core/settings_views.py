@@ -158,6 +158,23 @@ class EmailSettingsForm(StyledFormMixin, forms.ModelForm):
         widgets = {"smtp_password": forms.PasswordInput(render_value=True)}
 
 
+class RemoteSettingsForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = HotelSettings
+        fields = ["tunnel_enabled", "tunnel_token"]
+        widgets = {"tunnel_token": forms.PasswordInput(render_value=True, attrs={"autocomplete": "off", "data-full": "1"})}
+
+    def clean(self):
+        cleaned = super().clean()
+        token = (cleaned.get("tunnel_token") or "").strip()
+        if token.startswith("cloudflared") or " " in token:
+            token = token.split()[-1]  # the whole install command was pasted: keep the token
+        cleaned["tunnel_token"] = token
+        if cleaned.get("tunnel_enabled") and len(token) < 80:
+            self.add_error("tunnel_token", _("Paste the tunnel token from Cloudflare (a long text)."))
+        return cleaned
+
+
 class LoyaltySettingsForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = HotelSettings
@@ -320,6 +337,7 @@ TABS = {
     "email": EmailSettingsForm,
     "tills": TillSettingsForm,
     "loyalty": LoyaltySettingsForm,
+    "remote": RemoteSettingsForm,
 }
 
 
@@ -346,6 +364,22 @@ def settings_hub(request):
                 ctx["certificate"] = Certificate.from_settings(hs)
             except CertificateError as e:
                 ctx["certificate_error"] = str(e)
+        if tab == "remote":
+            from apps.outlets.menu import qr_svg
+
+            from . import remote
+
+            addresses = remote.local_addresses()
+            ts = remote.tailscale_address(addresses)
+            lan = remote.lan_address(addresses)
+            ctx.update(
+                windows_app=remote.is_windows_app(),
+                port=remote.port(),
+                lan_url=f"http://{lan}:{remote.port()}/" if lan else "",
+                tailscale_url=f"http://{ts}:{remote.port()}/" if ts else "",
+                tailscale_qr=qr_svg(f"http://{ts}:{remote.port()}/") if ts else "",
+                tunnel=remote.read_status(),
+            )
         if tab == "tills":
             from apps.accounts.models import User
 

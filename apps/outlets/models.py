@@ -133,6 +133,13 @@ class Outlet(models.Model):
         blank=True,
         help_text=_("For fiscal receipts. Leave empty to use the main cash register code from Settings."),
     )
+    fiscal_opening_cash = models.DecimalField(
+        _("cash in this register each morning"),
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(0)],
+        help_text=_("Only for an outlet with its own cash register: the change left in its drawer, reported to the tax authority as its opening cash."),
+        **MONEY,
+    )
     quick_sale = models.BooleanField(
         _("one-tap sale"),
         default=False,

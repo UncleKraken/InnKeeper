@@ -202,6 +202,10 @@ def reservation_form(request, pk=None):
         except BusinessError as e:
             form.add_error(None, str(e))
         else:
+            if getattr(form, "short_stay", False):
+                from apps.core.models import audit
+
+                audit(request.user, "reservation.short_stay", f"{res.code}: {res.nights} < minimum stay", res)
             messages.success(request, _("Reservation %(code)s saved.") % {"code": res.code})
             return redirect("frontdesk:reservation_detail", pk=res.pk)
     guest_id = form["guest"].value() if "guest" in form.fields else None

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Month report" %} {{ start|date:"m.Y" }}{% endblock %}
+{% block content %}
+<div class="page-header no-print">
+  <div><div class="eyebrow">{% translate "Finance" %}</div><h1>{% translate "Month report" %}</h1><p>{% translate "For your accountant: print it or save it as PDF, or download it to Excel." %}</p></div>
+  <div class="actions">
+    <form method="get" class="filters"><div class="field"><label for="month">{% translate "Month" %}</label><input class="input" type="month" id="month" name="month" value="{{ month_value }}" onchange="this.form.submit()"></div></form>
+    <a class="btn btn-secondary" href="?month={{ month_value }}&format=xlsx">{% icon "download" %} {% translate "Excel" %}</a>
+    <button class="btn" onclick="window.print()">{% icon "print" %} {% translate "Print / PDF" %}</button>
+  </div>
+</div>
+<div class="no-print">{% include "finance/_tabs.html" %}</div>
+{% if days_not_closed %}<div class="alert alert-warning no-print" style="margin-bottom:1rem">{% blocktranslate count n=days_not_closed %}{{ n }} day with sales has no day close (cash count).{% plural %}{{ n }} days with sales have no day close (cash count).{% endblocktranslate %}</div>{% endif %}
+
+<div class="month-doc">
+  <div class="doc-head">
+    <div><div class="doc-title">{{ hotel.legal_name|default:hotel.name }}</div><div class="muted">{{ hotel.address }}{% if hotel.tax_id and hotel.registered %}<br>NIPT: {{ hotel.tax_id }}{% endif %}</div></div>
+    <div style="text-align:right"><div class="doc-title">{% translate "Month report" %}</div><div>{{ start|date:"d.m.Y" }} – {{ end|date:"d.m.Y" }}</div><div class="muted" style="font-size:.85rem">{% translate "Printed" %} {{ printed_at|date:"d.m.Y H:i" }}</div></div>
+  </div>
+
+  <div class="grid grid-4 month-stats">
+    <div class="card stat"><div class="stat-label">{% translate "Sales" %}</div><div class="stat-value">{{ revenue|money }}</div></div>
+    <div class="card stat"><div class="stat-label">{% translate "Money received" %}</div><div class="stat-value">{{ received|money }}</div></div>
+    <div class="card stat"><div class="stat-label">{% translate "Expenses" %}</div><div class="stat-value">{{ expenses_total|money }}</div></div>
+    <div class="card stat"><div class="stat-label">{% translate "Profit" %}</div><div class="stat-value" {% if profit < 0 %}style="color:var(--danger)"{% endif %}>{{ profit|money }}</div><div class="stat-note">{% translate "Sales minus recorded expenses" %}</div></div>
+  </div>
+
+  <div class="grid grid-2" style="align-items:start; margin-top:1.25rem">
+    <div class="stack">
+      <section class="card card-flush"><div class="card-header"><h2>{% translate "Sales by department" %}</h2></div>
+        <table class="table table-sm"><tbody>{% for name, amount in departments %}<tr><td>{{ name }}</td><td class="num">{{ amount|money }}</td></tr>{% empty %}<tr><td class="muted">{% translate "No sales." %}</td></tr>{% endfor %}</tbody>
+        <tfoot><tr><td>{% translate "Total" %}</td><td class="num">{{ revenue|money }}</td></tr></tfoot></table></section>
+      {% if vat_rows %}
+      <section class="card card-flush"><div class="card-header"><h2>{% translate "VAT" %}</h2></div>
+        <table class="table table-sm"><thead><tr><th>{% translate "VAT rate" %}</th><th class="num">{% translate "With VAT" %}</th><th class="num">{% translate "Without VAT" %}</th><th class="num">{% translate "VAT" %}</th></tr></thead>
+        <tbody>{% for v in vat_rows %}<tr><td>{{ v.rate }}%</td><td class="num">{{ v.gross|money }}</td><td class="num">{{ v.net|money }}</td><td class="num">{{ v.vat|money }}</td></tr>{% endfor %}</tbody>
+        <tfoot><tr><td colspan="3">{% translate "VAT in sales" %}</td><td class="num">{{ vat_total|money }}</td></tr></tfoot></table></section>
+      {% endif %}
+      <section class="card card-flush"><div class="card-header"><h2>{% translate "Money received" %}</h2></div>
+        <table class="table table-sm"><tbody>{% for label, amount in methods %}<tr><td>{{ label }}</td><td class="num">{{ amount|money }}</td></tr>{% empty %}<tr><td class="muted">{% translate "No payments." %}</td></tr>{% endfor %}
+          {% if vouchers_sold %}<tr class="muted"><td>{% translate "of which gift vouchers sold (paid in advance)" %}</td><td class="num">{{ vouchers_sold|money }}</td></tr>{% endif %}
+          {% if vouchers_spent %}<tr class="muted"><td>{% translate "Paid with gift vouchers (no money)" %}</td><td class="num">{{ vouchers_spent|money }}</td></tr>{% endif %}
+          {% if tips %}<tr class="muted"><td>{% translate "Tips (staff's, not sales)" %}</td><td class="num">{{ tips|money }}</td></tr>{% endif %}
+        </tbody><tfoot><tr><td>{% translate "Total" %}</td><td class="num">{{ received|money }}</td></tr></tfoot></table></section>
+    </div>
+    <div class="stack">
+      <section class="card card-flush"><div class="card-header"><h2>{% translate "Expenses" %}</h2></div>
+        <table class="table table-sm"><tbody>{% for label, amount in expense_rows %}<tr><td>{{ label }}</td><td class="num">{{ amount|money }}</td></tr>{% empty %}<tr><td class="muted">{% translate "No expenses recorded." %}</td></tr>{% endfor %}</tbody>
+        <tfoot><tr><td>{% translate "Total" %}</td><td class="num">{{ expenses_total|money }}</td></tr></tfoot></table></section>
+      <section class="card card-flush"><div class="card-header"><h2>{% translate "Checks" %}</h2></div>
+        <table class="table table-sm"><tbody>
+          <tr><td>{% translate "Bills" %}</td><td class="num">{{ bill_count }}</td></tr>
+          <tr><td>{% translate "Discounts given" %}</td><td class="num">{{ discounts|money }}</td></tr>
+          <tr><td>{% translate "Voided bills" %}</td><td class="num">{{ voided_count }}</td></tr>
+          <tr><td>{% translate "Cash differences at day close" %}</td><td class="num" {% if cash_difference %}style="color:var(--danger)"{% endif %}>{{ cash_difference|money }}</td></tr>
+          {% if fiscal %}<tr><td>{% translate "Fiscal documents registered" %}</td><td class="num">{{ fiscal_registered }}</td></tr>
+          {% if fiscal_missing %}<tr><td>{% translate "Fiscal documents not registered" %}</td><td class="num" style="color:var(--danger)">{{ fiscal_missing }}</td></tr>{% endif %}{% endif %}
+        </tbody></table></section>
+    </div>
+  </div>
+
+  <section class="card card-flush month-days" style="margin-top:1.25rem"><div class="card-header"><h2>{% translate "Day by day" %}</h2></div>
+    <div class="table-wrap"><table class="table table-sm">
+      <thead><tr><th>{% translate "Date" %}</th><th class="num">{% translate "Sales" %}</th><th class="num">{% translate "Cash" %}</th><th class="num">{% translate "Card" %}</th><th class="num">{% translate "Other" %}</th><th class="num">{% translate "Expenses" %}</th><th class="num">{% translate "Cash count" %}</th></tr></thead>
+      <tbody>{% for d in days %}<tr class="{% if not d.sales and not d.cash and not d.card and not d.expenses %}muted{% endif %}">
+        <td class="nowrap"><a href="{% url 'finance:day_close' %}?date={{ d.date|date:'Y-m-d' }}">{{ d.date|date:"D d.m" }}</a></td>
+        <td class="num">{% if d.sales %}{{ d.sales|money }}{% endif %}</td><td class="num">{% if d.cash %}{{ d.cash|money }}{% endif %}</td><td class="num">{% if d.card %}{{ d.card|money }}{% endif %}</td><td class="num">{% if d.other %}{{ d.other|money }}{% endif %}</td><td class="num">{% if d.expenses %}{{ d.expenses|money }}{% endif %}</td>
+        <td class="num">{% if d.closed %}{% if d.difference %}<span style="color:var(--danger)">{{ d.difference|money }}</span>{% else %}✓{% endif %}{% elif d.sales or d.cash %}<span class="muted">{% translate "not closed" %}</span>{% endif %}</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+</div>
+{% endblock %}
