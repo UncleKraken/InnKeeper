@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
 </head>
 <body style="background:#eceae6">
-<div class="no-print" style="text-align:center; padding:1rem"><button class="btn" onclick="window.print()">{% translate "Print" %}</button></div>
+<div class="no-print row" style="justify-content:center; gap:.5rem; padding:1rem"><button class="btn" onclick="window.print()">{% translate "Print" %}</button><a class="btn btn-sm {% if bill_lang == 'sq' %}btn-secondary{% else %}btn-ghost{% endif %}" href="?lang=sq">Shqip</a><a class="btn btn-sm {% if bill_lang == 'en' %}btn-secondary{% else %}btn-ghost{% endif %}" href="?lang=en">English</a></div>
 <div class="doc card">
   <div class="doc-head">
     <div>

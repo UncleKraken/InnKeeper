@@ -853,3 +853,43 @@ dialog.sheet::backdrop { background: rgba(22, 32, 47, .45); }
   #lines tfoot td:empty { display: none; }
 }
 .send-help { margin: .75rem 0 0; font-size: .85rem; }
+
+/* Shared till: PIN pad */
+.pinpad-body { background: var(--sidebar, #16202f); min-height: 100vh; color: #fff; }
+.pinpad { max-width: 760px; margin: 0 auto; padding: 1.25rem 16px 2rem; }
+.pinpad-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.pinpad-head .brand { color: #fff; }
+.pinpad h1 { color: #fff; font-size: 1.5rem; margin: 0 0 1rem; }
+.pinpad .alert { margin-bottom: 1rem; }
+.pin-staff { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .75rem; }
+.pin-person { display: flex; flex-direction: column; align-items: center; gap: .5rem; padding: 1rem .5rem; border-radius: 14px; border: 2px solid transparent; background: rgba(255,255,255,.07); color: #fff; font: inherit; cursor: pointer; min-height: 112px; }
+.pin-person:hover { background: rgba(255,255,255,.12); }
+.pin-person.active { border-color: var(--accent, #c8963e); background: rgba(255,255,255,.14); }
+.pin-avatar { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--accent, #c8963e); color: #16202f; font-weight: 700; font-size: 1.1rem; }
+.pin-name { font-weight: 600; text-align: center; word-break: break-word; }
+.pin-entry { margin: 1.75rem auto 0; max-width: 320px; }
+.pin-entry.is-hidden { display: none; }
+.pin-dots { display: flex; justify-content: center; gap: .75rem; margin-bottom: 1.25rem; min-height: 18px; }
+.pin-dots span { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.6); }
+.pin-dots span.on { background: #fff; border-color: #fff; }
+.pin-keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; }
+.pin-key { height: 68px; border-radius: 14px; border: 0; background: rgba(255,255,255,.1); color: #fff; font-size: 1.6rem; font-weight: 600; cursor: pointer; display: grid; place-items: center; }
+.pin-key:active { background: rgba(255,255,255,.25); }
+.pin-key .icon { width: 26px; height: 26px; }
+.pin-key-muted { background: rgba(255,255,255,.04); }
+.pin-key-ok { background: var(--primary, #0e6e64); }
+.pinpad-foot { text-align: center; margin-top: 2rem; font-size: .9rem; }
+.pinpad-foot a { color: rgba(255,255,255,.75); }
+.pinpad .lang-switch button { color: rgba(255,255,255,.75); border-color: rgba(255,255,255,.3); }
+.pinpad .lang-switch button.active { color: #fff; }
+.topbar-lock { display: inline-flex; align-items: center; gap: .3rem; background: none; border: 1px solid rgba(255,255,255,.35); color: inherit; border-radius: 8px; padding: .3rem .55rem; font: inherit; font-size: .85rem; cursor: pointer; }
+.sidebar-lock { justify-content: center; }
+.kds-unlock { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); background: #c8963e; color: #16202f; border: 0; border-radius: 10px; padding: .9rem 1.2rem; font: inherit; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 6px 24px rgba(0,0,0,.35); display: inline-flex; gap: .5rem; align-items: center; z-index: 5; }
+.kds-unlock.hidden { display: none; }
+@keyframes kds-flash { 0%, 100% { box-shadow: inset 0 0 0 0 rgba(200,150,62,0); } 30% { box-shadow: inset 0 0 0 10px rgba(200,150,62,.9); } }
+body.kds-flash { animation: kds-flash 1.2s ease-out 2; }
+.ready-toast { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 50; background: var(--success, #1f7a46); color: #fff; padding: .85rem 1.1rem; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.25); font-size: 1rem; display: flex; gap: .4rem; align-items: center; max-width: calc(100vw - 32px); }
+.ready-toast.hidden { display: none; }
+.print-bill { display: inline-flex; }
+.print-bill .btn:first-child { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.print-bill .btn-lang { border-top-left-radius: 0; border-bottom-left-radius: 0; margin-left: -1px; padding-left: .6rem; padding-right: .6rem; font-weight: 700; }

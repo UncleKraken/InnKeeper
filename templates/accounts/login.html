@@ -39,6 +39,7 @@
         <input type="hidden" name="next" value="{{ next }}">
         <button class="btn btn-lg btn-block" type="submit">{% translate "Sign in" %}</button>
       </form>
+      {% if shared_till %}<a class="btn btn-secondary btn-block" style="margin-top:1rem" href="{% url 'accounts:pin_pad' %}?next={{ next|urlencode }}">{% translate "Sign in with PIN" %}</a>{% endif %}
       <p class="muted" style="margin-top:1.5rem; font-size:.85rem">{% translate "Forgot your password? Ask a manager to set a new one." %}</p>
     </div>
   </section>

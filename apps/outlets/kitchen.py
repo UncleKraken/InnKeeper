@@ -117,4 +117,13 @@ def floor_signature(request, pk):
     )
     lines = OrderLine.objects.filter(order__outlet_id=pk, order__status=Order.Status.OPEN).values_list("pk", "quantity")
     raw = f"{sorted(orders)}|{sorted(ready)}|{sorted(lines)}"
-    return JsonResponse({"sig": hashlib.sha1(raw.encode()).hexdigest()[:16]})
+    ready_orders = (
+        Order.objects.filter(pk__in=KitchenTicket.objects.filter(pk__in=list(ready)).values("order_id"))
+        .select_related("table")
+    )
+    return JsonResponse(
+        {
+            "sig": hashlib.sha1(raw.encode()).hexdigest()[:16],
+            "ready": sorted(f"{o.pk}:{o.display_name}" for o in ready_orders),
+        }
+    )

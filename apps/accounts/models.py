@@ -32,6 +32,8 @@ class User(AbstractUser):
         help_text=_("Interface language for this user. Leave empty to use the hotel default."),
     )
 
+    pin = models.CharField(_("PIN"), max_length=128, blank=True, editable=False)  # hashed, like passwords
+
     class Meta:
         verbose_name = _("staff member")
         verbose_name_plural = _("staff")
@@ -43,3 +45,17 @@ class User(AbstractUser):
     @property
     def is_manager(self) -> bool:
         return self.is_superuser or self.role == Role.MANAGER
+
+    @property
+    def has_pin(self) -> bool:
+        return bool(self.pin)
+
+    def set_pin(self, raw: str) -> None:
+        from django.contrib.auth.hashers import make_password
+
+        self.pin = make_password(raw) if raw else ""
+
+    def check_pin(self, raw: str) -> bool:
+        from django.contrib.auth.hashers import check_password
+
+        return bool(self.pin) and check_password(raw, self.pin)

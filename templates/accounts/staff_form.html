@@ -6,4 +6,8 @@
   <div class="card-header"><h2>{% translate "Password" %}</h2><a class="btn btn-secondary btn-sm" href="{% url 'accounts:staff_set_password' object.pk %}">{% icon "key" %} {% translate "Set a new password" %}</a></div>
   <div class="card-body muted">{% translate "Passwords are stored encrypted and can never be viewed — only replaced." %}</div>
 </div>
+<div class="card" style="max-width:860px; margin-top:1.25rem">
+  <div class="card-header"><h2>{% translate "PIN for shared tills" %}</h2><a class="btn btn-secondary btn-sm" href="{% url 'accounts:staff_set_pin' object.pk %}">{% icon "grid" %} {% if object.has_pin %}{% translate "Change the PIN" %}{% else %}{% translate "Set a PIN" %}{% endif %}</a></div>
+  <div class="card-body muted">{% if object.has_pin %}{% translate "Has a PIN: can switch in on a shared till with their name and PIN." %}{% else %}{% translate "No PIN yet: signs in with username and password." %}{% endif %}</div>
+</div>
 {% endblock %}

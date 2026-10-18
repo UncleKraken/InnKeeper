@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "PIN" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="eyebrow">{% if own %}<a href="{% url 'accounts:password_change' %}">{% icon "back" %} {% translate "Your account" %}</a>{% else %}<a href="{% url 'accounts:staff_edit' who.pk %}">{% icon "back" %} {{ who }}</a>{% endif %}</div>
+    <h1>{% if own %}{% translate "Your PIN for shared tills" %}{% else %}{% blocktranslate with name=who %}PIN for {{ name }}{% endblocktranslate %}{% endif %}</h1>
+    <p>{% translate "On a shared till, staff tap their name and type this PIN instead of a username and password. Every sale is still recorded under their name." %}</p>
+  </div>
+</div>
+<form method="post" class="card" style="max-width:640px" novalidate>{% csrf_token %}
+  <div class="card-header"><h2>{% if who.has_pin %}{% translate "Change the PIN" %}{% else %}{% translate "Set a PIN" %}{% endif %}</h2>{% if who.has_pin %}{% translate "Set" as l %}{% status_badge "success" l %}{% endif %}</div>
+  <div class="card-body">
+    {% include "includes/form_fields.html" %}
+    <p class="muted" style="font-size:.85rem; margin-bottom:0">{% translate "4 to 6 digits. Not your birthday and not 1234. Five wrong tries lock it for 15 minutes." %}</p>
+  </div>
+  <div class="card-footer form-actions" style="margin-top:0">
+    {% if who.has_pin %}<button type="submit" name="remove" value="1" formnovalidate class="btn btn-ghost" style="margin-right:auto; color:var(--danger)">{% translate "Remove the PIN" %}</button>{% endif %}
+    <button class="btn">{% icon "check" %} {% translate "Save" %}</button>
+  </div>
+</form>
+{% endblock %}

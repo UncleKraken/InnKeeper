@@ -36,6 +36,7 @@ TABS = [
     ("inventory:recipes", _("Recipes")),
     ("inventory:count_list", _("Counts")),
     ("inventory:usage", _("Usage report")),
+    ("inventory:menu_profit", _("Profit per item")),
     ("inventory:supplier_list", _("Suppliers")),
 ]
 

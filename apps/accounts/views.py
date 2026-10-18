@@ -27,6 +27,17 @@ class LoginView(auth_views.LoginView):
     def dispatch(self, request, *args, **kwargs):
         if not User.objects.exists():
             return redirect("accounts:first_run")
+        from .pin import is_shared_till
+
+        if (
+            request.method == "GET"
+            and is_shared_till(request)
+            and not request.GET.get("password")
+            and User.objects.filter(is_active=True).exclude(pin="").exists()
+        ):
+            from urllib.parse import quote
+
+            return redirect(f"/accounts/pin/?next={quote(request.GET.get('next') or '/')}")
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):

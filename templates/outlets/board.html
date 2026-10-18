@@ -20,31 +20,39 @@
   <span class="spacer"></span>
   <span class="kds-clock" id="clock"></span>
   <form method="post" action="{% url 'outlets:board_recall' station.pk %}" class="inline">{% csrf_token %}<button class="kds-btn" title="{% translate 'Bring back the last cleared ticket' %}">{% icon "history" %} {% translate "Recall" %}</button></form>
-  <button class="kds-btn" id="sound" type="button" aria-pressed="false">{% translate "Sound off" %}</button>
+  <button class="kds-btn" id="sound" type="button" aria-pressed="false">{% translate "Sound on" %}</button>
   <button class="kds-btn" id="fullscreen" type="button">{% translate "Full screen" %}</button>
 </header>
 <main id="tickets" data-url="{% url 'outlets:board_tickets' station.pk %}">{% include "outlets/_board_tickets.html" %}</main>
+<button type="button" class="kds-unlock hidden" id="kds-unlock">{% icon "check" %} {% translate "Tap here to turn on the sound for new orders" %}</button>
 <div class="kds-offline hidden" id="offline">{% translate "Connection lost — retrying…" %}</div>
 <script>
 (function () {
   var box = document.getElementById('tickets'), url = box.dataset.url, csrf = '{{ csrf_token }}';
-  var known = null, soundOn = false, ctx = null;
-  try { soundOn = localStorage.getItem('kds-sound') === '1'; } catch (e) {}
-  var soundBtn = document.getElementById('sound');
+  var known = null, soundOn = true, ctx = null, firstSeen = {}, lastReminder = 0;
+  try { soundOn = localStorage.getItem('kds-sound') !== '0'; } catch (e) {}
+  var soundBtn = document.getElementById('sound'), unlock = document.getElementById('kds-unlock');
   function paintSound() { soundBtn.textContent = soundOn ? '{{ _("Sound on")|escapejs }}' : '{{ _("Sound off")|escapejs }}'; soundBtn.setAttribute('aria-pressed', soundOn); }
-  soundBtn.onclick = function () { soundOn = !soundOn; try { localStorage.setItem('kds-sound', soundOn ? '1' : '0'); } catch (e) {} if (soundOn) beep(); paintSound(); };
-  paintSound();
-  function beep() {
-    try {
-      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
-      [0, 0.18].forEach(function (t) {
-        var o = ctx.createOscillator(), g = ctx.createGain();
-        o.frequency.value = 880; o.connect(g); g.connect(ctx.destination);
-        g.gain.setValueAtTime(0.25, ctx.currentTime + t); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.15);
-        o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.16);
-      });
-    } catch (e) {}
+  function audio() {
+    try { ctx = ctx || new (window.AudioContext || window.webkitAudioContext)(); if (ctx.state === 'suspended') ctx.resume(); } catch (e) {}
+    return ctx;
   }
+  function needsTap() { return soundOn && (!ctx || ctx.state !== 'running'); }
+  function paintUnlock() { unlock.classList.toggle('hidden', !needsTap()); }
+  soundBtn.onclick = function () { soundOn = !soundOn; try { localStorage.setItem('kds-sound', soundOn ? '1' : '0'); } catch (e) {} if (soundOn) { audio(); beep(); } paintSound(); paintUnlock(); };
+  unlock.onclick = function () { audio(); beep(); setTimeout(paintUnlock, 200); };
+  document.addEventListener('pointerdown', function () { if (soundOn) { audio(); setTimeout(paintUnlock, 200); } });
+  paintSound(); setTimeout(paintUnlock, 300);
+  function beep(times) {
+    var c = audio(); if (!c) return;
+    (times || [0, 0.2, 0.4]).forEach(function (t, i) {
+      var o = c.createOscillator(), g = c.createGain();
+      o.type = 'triangle'; o.frequency.value = i % 2 ? 1175 : 880; o.connect(g); g.connect(c.destination);
+      g.gain.setValueAtTime(0.5, c.currentTime + t); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + t + 0.18);
+      o.start(c.currentTime + t); o.stop(c.currentTime + t + 0.2);
+    });
+  }
+  function flash() { document.body.classList.remove('kds-flash'); void document.body.offsetWidth; document.body.classList.add('kds-flash'); }
   function refresh() {
     fetch(url, { headers: { 'X-Requested-With': 'fetch' } }).then(function (r) {
       if (r.status === 302 || r.redirected) { location.reload(); return; }
@@ -52,8 +60,14 @@
       return r.text().then(function (html) {
         document.getElementById('offline').classList.add('hidden');
         box.innerHTML = html;
-        if (known !== null && ids.some(function (id) { return known.indexOf(id) === -1; }) && soundOn) beep();
+        var now = Date.now();
+        ids.forEach(function (id) { if (!firstSeen[id]) firstSeen[id] = now; });
+        var fresh = known !== null && ids.some(function (id) { return known.indexOf(id) === -1; });
+        if (fresh) { flash(); if (soundOn) beep(); lastReminder = now; }
+        // A ticket nobody has started for 2 minutes: remind once a minute.
+        else if (soundOn && ids.some(function (id) { return now - firstSeen[id] > 120000; }) && now - lastReminder > 60000) { beep([0, 0.25]); lastReminder = now; }
         known = ids;
+        paintUnlock();
       });
     }).catch(function () { document.getElementById('offline').classList.remove('hidden'); });
   }

@@ -175,6 +175,12 @@ class HotelSettings(models.Model):
     )
     summary_sent_for = models.DateField(null=True, blank=True, editable=False)
     demo_data = models.BooleanField(default=False, editable=False)  # filled with the sample business
+    pin_lock_minutes = models.PositiveSmallIntegerField(
+        _("lock shared tills after"),
+        default=3,
+        choices=[(0, _("Never")), (1, _("1 minute")), (2, _("2 minutes")), (3, _("3 minutes")), (5, _("5 minutes")), (10, _("10 minutes"))],
+        help_text=_("On a shared till, the screen goes back to the PIN pad after this long without a tap."),
+    )
 
     # Online card payments
     payment_provider = models.CharField(

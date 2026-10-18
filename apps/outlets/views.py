@@ -407,13 +407,13 @@ def _receipt_printer(order):
     return p if p is not None and p.is_active else None
 
 
-def _print_receipt(request, order, printer, *, cash=False) -> bool:
+def _print_receipt(request, order, printer, *, cash=False, language=None) -> bool:
     from . import printing
 
     job = printing.submit(
         printer,
         f"{order.outlet}: {order.receipt_number or order.number}",
-        printing.receipt_document(order, printer, open_drawer=cash),
+        printing.receipt_document(order, printer, open_drawer=cash, language=language),
         request.user,
     )
     if job.status == job.Status.DONE:
@@ -441,9 +441,10 @@ def print_bill(request, pk):
     """Print the bill on the outlet's printer, or open the browser print page if it has none."""
     order = _order_for(request, pk)
     printer = _receipt_printer(order)
+    lang = request.POST.get("lang") if request.POST.get("lang") in ("sq", "en") else None
     if not printer:
-        return redirect(reverse("outlets:receipt", args=[order.pk]) + "?print=1")
-    _print_receipt(request, order, printer)
+        return redirect(reverse("outlets:receipt", args=[order.pk]) + "?print=1" + (f"&lang={lang}" if lang else ""))
+    _print_receipt(request, order, printer, language=lang)
     if order.is_open:
         return _back_to_order(order)
     return redirect(request.POST.get("next") or reverse("outlets:receipt", args=[order.pk]))
@@ -539,9 +540,14 @@ def cancel(request, pk):
 
 @module_required("outlets")
 def receipt(request, pk):
+    from django.utils import translation
+
     from apps.core.models import HotelSettings
 
+    from .printing import line_name
+
     order = _order_for(request, pk)
+    lang = request.GET.get("lang") if request.GET.get("lang") in ("sq", "en") else translation.get_language()
     hs = HotelSettings.load()
     total = order.total
     vat = (total * hs.vat_fraction).quantize(Decimal("0.01"))
@@ -550,12 +556,17 @@ def receipt(request, pk):
         .select_related("folio__reservation__room", "folio__reservation__guest")
         .first()
     )
-    return render(
-        request,
-        "outlets/receipt.html",
-        {
+    lines = list(order.active_lines)
+    for line in lines:
+        line.print_name = line_name(line, lang)
+    with translation.override(lang):
+        return render(
+            request,
+            "outlets/receipt.html",
+            {
+            "bill_lang": lang,
             "order": order,
-            "lines": order.active_lines,
+            "lines": lines,
             "payments": order.payments.filter(voided=False),
             "room_charge": room_charge,
             "vat": vat,

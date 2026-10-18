@@ -158,6 +158,12 @@ class EmailSettingsForm(StyledFormMixin, forms.ModelForm):
         widgets = {"smtp_password": forms.PasswordInput(render_value=True)}
 
 
+class TillSettingsForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = HotelSettings
+        fields = ["pin_lock_minutes"]
+
+
 class SummarySettingsForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = HotelSettings
@@ -306,6 +312,7 @@ TABS = {
     "modules": ModulesForm,
     "booking": BookingSettingsForm,
     "email": EmailSettingsForm,
+    "tills": TillSettingsForm,
 }
 
 
@@ -332,6 +339,10 @@ def settings_hub(request):
                 ctx["certificate"] = Certificate.from_settings(hs)
             except CertificateError as e:
                 ctx["certificate_error"] = str(e)
+        if tab == "tills":
+            from apps.accounts.models import User
+
+            ctx["pin_staff"] = User.objects.filter(is_active=True).exclude(username__startswith="sample.")
         if tab == "email":
             ctx["summary_form"] = SummarySettingsForm(instance=hs)
         if tab == "booking":

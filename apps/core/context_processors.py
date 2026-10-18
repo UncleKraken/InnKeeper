@@ -18,7 +18,10 @@ def innkeeper(request):
         from apps.finance.tabs import open_shift_for
 
         my_shift = open_shift_for(user)
+    from apps.accounts.pin import is_shared_till
+
     return {
+        "shared_till": is_shared_till(request),
         "my_shift": my_shift,
         "hotel": HotelSettings.load(),
         "modules": modules,

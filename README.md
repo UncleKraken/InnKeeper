@@ -35,7 +35,7 @@ It adapts to the business: a setup wizard asks whether you run a **hotel**, a **
 | **Help** | Built-in user guide in Albanian and English, getting-started checklist for new businesses |
 
 ### Security and data integrity
-- Passwords hashed (Django PBKDF2); never shown, only replaced. Lockout after 5 failed sign-ins.
+- Passwords and till PINs hashed (Django PBKDF2); never shown, only replaced. Shared tills switch staff by name and PIN and lock themselves when idle. Lockout after 5 failed sign-ins.
 - Role-based access: Manager, Reception, Housekeeping, Maintenance, Service staff (optionally limited to specific outlets), Kitchen & bar (order screens only), Finance (also stock).
 - Money is stored as exact decimals, never floats.
 - Nothing financial is deleted. Mistakes are **voided** by a manager with a reason, and every action is written to the activity log.

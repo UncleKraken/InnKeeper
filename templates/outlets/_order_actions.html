@@ -8,7 +8,7 @@
 </form>
 {% endif %}
 {% if outlet.receipt_printer_id %}
-  <form method="post" action="{% url 'outlets:print_bill' order.pk %}" class="inline">{% csrf_token %}<button class="btn btn-secondary">{% icon "print" %} {% translate "Print bill" %}</button></form>
+  <form method="post" action="{% url 'outlets:print_bill' order.pk %}" class="inline print-bill">{% csrf_token %}<button class="btn btn-secondary">{% icon "print" %} {% translate "Print bill" %}</button><button class="btn btn-secondary btn-lang" name="lang" value="{% if LANGUAGE_CODE == 'en' %}sq{% else %}en{% endif %}" title="{% if LANGUAGE_CODE == 'en' %}{% translate 'Print in Albanian' %}{% else %}{% translate 'Print in English' %}{% endif %}">{% if LANGUAGE_CODE == 'en' %}SQ{% else %}EN{% endif %}</button></form>
 {% else %}
-  <a class="btn btn-secondary" href="{% url 'outlets:receipt' order.pk %}?print=1" target="_blank">{% icon "print" %} {% translate "Print bill" %}</a>
+  <span class="inline print-bill"><a class="btn btn-secondary" href="{% url 'outlets:receipt' order.pk %}?print=1" target="_blank">{% icon "print" %} {% translate "Print bill" %}</a><a class="btn btn-secondary btn-lang" href="{% url 'outlets:receipt' order.pk %}?print=1&amp;lang={% if LANGUAGE_CODE == 'en' %}sq{% else %}en{% endif %}" target="_blank" title="{% if LANGUAGE_CODE == 'en' %}{% translate 'Print in Albanian' %}{% else %}{% translate 'Print in English' %}{% endif %}">{% if LANGUAGE_CODE == 'en' %}SQ{% else %}EN{% endif %}</a></span>
 {% endif %}

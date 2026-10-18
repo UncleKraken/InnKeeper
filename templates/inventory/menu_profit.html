@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Profit per item" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Stock" %}</div><h1>{% translate "Profit per item" %}</h1><p>{{ start|date:"d.m.Y" }} – {{ end|date:"d.m.Y" }}</p></div>
+  <div class="actions">
+    <form method="get" class="filters">
+      <input type="hidden" name="sort" value="{{ sort }}">
+      <div class="field"><label for="from">{% translate "From" %}</label><input class="input" type="date" id="from" name="from" value="{{ start|date:'Y-m-d' }}"></div>
+      <div class="field"><label for="to">{% translate "To" %}</label><input class="input" type="date" id="to" name="to" value="{{ end|date:'Y-m-d' }}"></div>
+      <button class="btn btn-secondary">{% translate "Show" %}</button>
+    </form>
+    <a class="btn btn-secondary" href="?from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}&format=xlsx">{% icon "download" %} {% translate "Excel" %}</a>
+  </div>
+</div>
+{% include "inventory/_tabs.html" %}
+<div class="grid grid-4" style="margin-bottom:1.25rem">
+  <div class="card stat"><div class="stat-label">{% translate "Profit from items with a recipe" %}</div><div class="stat-value">{{ profit|money }}</div><div class="stat-note">{% translate "Sales minus what the ingredients cost" %}</div></div>
+  <div class="card stat"><div class="stat-label">{% translate "Margin" %}</div><div class="stat-value">{% if profit_pct is not None %}{{ profit_pct }}%{% else %}—{% endif %}</div><div class="stat-note">{% translate "Food & drink usually aims for 65–75%" %}</div></div>
+  <div class="card stat"><div class="stat-label">{% translate "Low margin" %}</div><div class="stat-value" {% if low_count %}style="color:var(--danger)"{% endif %}>{{ low_count }}</div><div class="stat-note">{% blocktranslate %}Items under {{ low_margin }}% — check the price or the recipe{% endblocktranslate %}</div></div>
+  <a class="card stat" href="{% url 'inventory:recipes' %}"><div class="stat-label">{% translate "Without a recipe" %}</div><div class="stat-value">{{ missing }}</div><div class="stat-note">{% translate "Add recipes to see their cost" %} →</div></a>
+</div>
+<div class="card card-flush">
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr>
+      <th><a href="?from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}&sort=name">{% translate "Item" %}</a></th>
+      <th class="num">{% if charges_vat %}{% translate "Price without VAT" %}{% else %}{% translate "Price" %}{% endif %}</th>
+      <th class="num">{% translate "Cost" %}</th>
+      <th class="num"><a href="?from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}&sort=pct">{% translate "Margin" %}</a></th>
+      <th class="num"><a href="?from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}&sort=qty">{% translate "Sold" %}</a></th>
+      <th class="num"><a href="?from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}&sort=profit">{% translate "Profit" %}</a></th>
+    </tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td><strong>{{ r.item.name }}</strong> <span class="muted" style="font-size:.85rem">{{ r.item.category.outlet.name }}</span></td>
+        <td class="num">{{ r.net_price|money }}</td>
+        <td class="num">{% if r.has_recipe %}{{ r.cost|money }}{% else %}<a class="muted" href="{% url 'inventory:recipe_edit' r.item.pk %}">{% translate "add recipe" %}</a>{% endif %}</td>
+        <td class="num">{% if r.pct is not None %}<span class="badge {% if r.low %}b-danger{% elif r.pct < 70 %}b-warning{% else %}b-success{% endif %}">{{ r.pct }}%</span> <span class="muted" style="font-size:.85rem">{{ r.margin|money }}</span>{% else %}—{% endif %}</td>
+        <td class="num">{{ r.qty }}</td>
+        <td class="num">{% if r.profit is not None %}<strong>{{ r.profit|money }}</strong>{% else %}—{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+    <div class="empty"><strong>{% translate "No menu items yet." %}</strong></div>
+  {% endif %}
+</div>
+<p class="muted" style="font-size:.85rem; margin-top:1rem">{% translate "Cost = the recipe's ingredients at their average purchase price. Margin = price without VAT minus cost. Profit = sales of the period without VAT minus the cost of what was sold. Discounts given on whole bills are not included." %}</p>
+{% endblock %}

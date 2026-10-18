@@ -12,10 +12,12 @@
   </style>
 </head>
 <body style="background:#eceae6">
+{% include "includes/icons.svg" %}
 <div class="no-print receipt-actions">
   <a class="btn btn-secondary" href="{% url 'outlets:floor' order.outlet_id %}">{% icon "back" %} {{ order.outlet }}</a>
   <a class="btn btn-secondary" href="{% url 'outlets:receipts' %}">{% icon "receipt" %} {% translate "All receipts" %}</a>
   <button class="btn" onclick="window.print()">{% icon "print" %} {% translate "Print" %}</button>
+  <span class="inline row" style="gap:.25rem" role="group" aria-label="{% translate 'Language of the bill' %}"><a class="btn btn-sm {% if bill_lang == 'sq' %}btn-secondary{% else %}btn-ghost{% endif %}" href="?lang=sq">Shqip</a><a class="btn btn-sm {% if bill_lang == 'en' %}btn-secondary{% else %}btn-ghost{% endif %}" href="?lang=en">English</a></span>
   {% if request.user.is_manager and order.status == "closed" %}
     <form method="post" action="{% url 'outlets:void_receipt' order.pk %}" class="inline" id="void-form">{% csrf_token %}<input type="hidden" name="reason"><button class="btn btn-ghost" style="color:var(--danger)">{% translate "Void receipt" %}</button></form>
   {% endif %}
@@ -41,7 +43,7 @@
   <hr>
   <table class="r-lines">
     {% for l in lines %}
-      <tr><td>{{ l.quantity }} × {{ l.name }}{% if l.quantity > 1 %}<br><small>@ {{ l.unit_price|money }}</small>{% endif %}</td><td class="num">{{ l.line_total|money }}</td></tr>
+      <tr><td>{{ l.quantity }} × {{ l.print_name }}{% if l.quantity > 1 %}<br><small>@ {{ l.unit_price|money }}</small>{% endif %}</td><td class="num">{{ l.line_total|money }}</td></tr>
     {% endfor %}
   </table>
   <hr>

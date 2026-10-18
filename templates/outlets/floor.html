@@ -95,15 +95,49 @@
   </table></div>
 </section>
 {% endif %}
+<div class="ready-toast hidden" id="ready-toast" role="status">{% icon "check" %} <strong>{% translate "Ready to serve" %}:</strong> <span></span></div>
 {% endblock %}
 {% block scripts %}
 <script>
 // Refresh the table plan when another waiter or the kitchen changes something.
 (function () {
-  var url = '{% url "outlets:floor_signature" outlet.pk %}', sig = null;
+  var url = '{% url "outlets:floor_signature" outlet.pk %}', sig = null, key = 'ready-{{ outlet.pk }}';
+  function chime() {
+    try {
+      var c = new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.15].forEach(function (t, i) {
+        var o = c.createOscillator(), g = c.createGain(); o.frequency.value = i ? 1320 : 988; o.connect(g); g.connect(c.destination);
+        g.gain.setValueAtTime(0.35, c.currentTime + t); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + t + 0.25);
+        o.start(c.currentTime + t); o.stop(c.currentTime + t + 0.26);
+      });
+    } catch (e) {}
+    try { navigator.vibrate && navigator.vibrate([120, 80, 120]); } catch (e) {}
+  }
+  function toast(names) {
+    var t = document.getElementById('ready-toast');
+    t.querySelector('span').textContent = names.join(', ');
+    t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(function () { t.classList.add('hidden'); }, 12000);
+  }
+  function seenReady(list) {
+    var before = null;
+    try { before = JSON.parse(sessionStorage.getItem(key) || 'null'); sessionStorage.setItem(key, JSON.stringify(list)); } catch (e) {}
+    if (before === null) return;
+    var fresh = list.filter(function (x) { return before.indexOf(x) === -1; });
+    if (fresh.length) {
+      var names = fresh.map(function (x) { return x.split(':').slice(1).join(':'); });
+      chime(); toast(names);
+      try { sessionStorage.setItem(key + '-toast', JSON.stringify({ n: names, at: Date.now() })); } catch (e) {}
+    }
+  }
+  try {  // shown again after the plan reloads itself
+    var p = JSON.parse(sessionStorage.getItem(key + '-toast') || 'null');
+    if (p && Date.now() - p.at < 10000) toast(p.n);
+    sessionStorage.removeItem(key + '-toast');
+  } catch (e) {}
   function check() {
     if (document.hidden) return;
     fetch(url).then(function (r) { return r.json(); }).then(function (d) {
+      seenReady(d.ready || []);
       if (sig !== null && d.sig !== sig) location.reload();
       sig = d.sig;
     }).catch(function () {});

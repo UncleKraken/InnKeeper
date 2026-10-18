@@ -1,0 +1,86 @@
+{% load static i18n innkeeper %}<!doctype html>
+{% get_current_language as LANG %}
+<html lang="{{ LANG }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% translate "Who is using the till?" %} · {{ hotel.name }}</title>
+  <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <link rel="manifest" href="{% static 'manifest.json' %}">
+  <meta name="theme-color" content="#16202f">
+</head>
+<body class="pinpad-body">
+{% include "includes/icons.svg" %}
+<main class="pinpad">
+  <header class="pinpad-head">
+    <div class="brand" style="padding:0"><span class="brand-mark">{{ hotel.name|slice:":1"|upper }}</span><span>{{ hotel.name }}<small>InnKeeper</small></span></div>
+    {% include "includes/lang_switch.html" %}
+  </header>
+  <h1>{% translate "Who is using the till?" %}</h1>
+  {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+  <form method="post" id="pinform" autocomplete="off">{% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <input type="hidden" name="by" value="{{ by }}">
+    <input type="hidden" name="user" id="pin-user" value="{{ chosen.pk|default:'' }}">
+    <input type="hidden" name="pin" id="pin-value">
+    {% if staff %}
+    <div class="pin-staff" role="radiogroup" aria-label="{% translate 'Staff' %}">
+      {% for u in staff %}
+        <button type="button" class="pin-person{% if chosen.pk == u.pk %} active{% endif %}" data-user="{{ u.pk }}" role="radio" aria-checked="{% if chosen.pk == u.pk %}true{% else %}false{% endif %}">
+          <span class="pin-avatar">{{ u.first_name|default:u.username|slice:":1"|upper }}{{ u.last_name|slice:":1"|upper }}</span>
+          <span class="pin-name">{{ u.first_name|default:u.username }}</span>
+        </button>
+      {% endfor %}
+    </div>
+    <div class="pin-entry{% if not chosen %} is-hidden{% endif %}" id="pin-entry">
+      <div class="pin-dots" id="pin-dots" aria-live="polite"><span></span><span></span><span></span><span></span></div>
+      <div class="pin-keys">
+        {% for d in "123456789" %}<button type="button" class="pin-key" data-digit="{{ d }}">{{ d }}</button>{% endfor %}
+        <button type="button" class="pin-key pin-key-muted" data-action="clear" aria-label="{% translate 'Clear' %}">{% icon "x" %}</button>
+        <button type="button" class="pin-key" data-digit="0">0</button>
+        <button type="submit" class="pin-key pin-key-ok" aria-label="{% translate 'Sign in' %}">{% icon "check" %}</button>
+      </div>
+    </div>
+    {% else %}
+      <div class="alert alert-warning">{% translate "Nobody has a PIN yet. A manager sets them under Staff → edit → PIN, or each person under their name → PIN." %}</div>
+    {% endif %}
+  </form>
+  <p class="pinpad-foot"><a href="{% url 'accounts:login' %}?password=1&amp;next={{ next|urlencode }}">{% translate "Sign in with username and password" %}</a></p>
+</main>
+<script>
+(function () {
+  var form = document.getElementById('pinform'), user = document.getElementById('pin-user'),
+      value = document.getElementById('pin-value'), entry = document.getElementById('pin-entry'),
+      dots = document.getElementById('pin-dots'), pin = '';
+  if (!entry) return;
+  function draw() {
+    var n = Math.max(4, pin.length), html = '';
+    for (var i = 0; i < n; i++) html += '<span class="' + (i < pin.length ? 'on' : '') + '"></span>';
+    dots.innerHTML = html; value.value = pin;
+  }
+  document.querySelectorAll('.pin-person').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.pin-person').forEach(function (x) { x.classList.remove('active'); x.setAttribute('aria-checked', 'false'); });
+      b.classList.add('active'); b.setAttribute('aria-checked', 'true');
+      user.value = b.dataset.user; pin = ''; draw(); entry.classList.remove('is-hidden');
+      entry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  });
+  entry.addEventListener('click', function (e) {
+    var k = e.target.closest('.pin-key'); if (!k || k.type === 'submit') return;
+    if (k.dataset.action === 'clear') pin = ''; else if (pin.length < 6) pin += k.dataset.digit;
+    draw();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (entry.classList.contains('is-hidden')) return;
+    if (/^\d$/.test(e.key) && pin.length < 6) { pin += e.key; draw(); }
+    else if (e.key === 'Backspace') { pin = pin.slice(0, -1); draw(); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (pin.length >= 4) form.submit(); }
+  });
+  form.addEventListener('submit', function (e) { if (pin.length < 4 || !user.value) e.preventDefault(); });
+  draw();
+})();
+</script>
+</body>
+</html>

@@ -77,12 +77,14 @@
       <a href="{% url 'core:help' %}" class="{% active '/help' %}" style="margin-top:.75rem">{% icon "help" %} {% translate "Help" %}</a>
     </nav>
     <div class="sidebar-foot">
+      {% if shared_till %}<form method="post" action="{% url 'accounts:lock' %}" id="lock-form" style="margin-bottom:.75rem">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button type="submit" class="btn btn-block sidebar-lock">{% icon "lock" %} {% translate "Lock / switch user" %}</button></form>{% endif %}
       <div class="who">{{ request.user }}</div>
       <div class="muted" style="color:#7d8899">{{ request.user.get_role_display }}</div>
       <div class="row" style="margin-top:.6rem; justify-content:space-between">
         {% include "includes/lang_switch.html" %}
         <span class="row" style="gap:.6rem">
           <a href="{% url 'accounts:password_change' %}" title="{% translate 'Change password' %}">{% icon "key" %}</a>
+          <a href="{% url 'accounts:my_pin' %}" title="{% translate 'Your PIN for shared tills' %}">{% icon "grid" %}</a>
           <form method="post" action="{% url 'accounts:logout' %}" class="inline">{% csrf_token %}
             <button type="submit" class="btn-ghost" style="background:none;border:0;color:inherit;cursor:pointer;padding:0" title="{% translate 'Sign out' %}">{% icon "logout" %}</button>
           </form>
@@ -95,7 +97,7 @@
     <header class="topbar">
       <button class="menu-toggle" type="button" aria-label="{% translate 'Menu' %}" onclick="document.getElementById('sidebar').classList.toggle('open')">{% icon "menu" %}</button>
       <a class="brand" href="{% url 'core:dashboard' %}"><span class="brand-mark">{{ hotel.name|slice:":1"|upper }}</span>{{ hotel.name }}</a>
-      <span style="width:28px"></span>
+      {% if shared_till %}<form method="post" action="{% url 'accounts:lock' %}" class="inline">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button type="submit" class="topbar-lock" title="{% translate 'Lock / switch user' %}">{% icon "lock" %}<span>{% translate "Switch" %}</span></button></form>{% else %}<span style="width:28px"></span>{% endif %}
     </header>
     <main class="content">
       {% if update_available %}<div class="alert alert-info no-print" style="margin-bottom:1rem">{% blocktranslate with v=update_available.version %}A new version of InnKeeper ({{ v }}) is available.{% endblocktranslate %} <a href="{% url 'core:update' %}">{% translate "See what's new and update" %}</a></div>{% endif %}
@@ -128,6 +130,15 @@
   window.addEventListener('pageshow', function () {
     document.querySelectorAll('form[data-busy]').forEach(function (f) { delete f.dataset.busy; f.querySelectorAll('button').forEach(function (b) { b.disabled = false; }); });
   });
+  {% if shared_till and hotel.pin_lock_minutes %}
+  // Shared till: go back to the PIN pad after a few minutes without a tap.
+  (function () {
+    var ms = {{ hotel.pin_lock_minutes }} * 60000, t;
+    function reset() { clearTimeout(t); t = setTimeout(function () { var f = document.getElementById('lock-form'); if (f) f.submit(); }, ms); }
+    ['pointerdown', 'keydown', 'touchstart', 'scroll'].forEach(function (e) { document.addEventListener(e, reset, { passive: true }); });
+    reset();
+  })();
+  {% endif %}
 </script>
 {% block scripts %}{% endblock %}
 </body>

@@ -12,6 +12,7 @@
     <a href="?tab=receipts" class="{% if tab == 'receipts' %}active{% endif %}">{% icon "receipt" %} {% translate "Receipts & invoices" %}</a>
     <a href="?tab=modules" class="{% if tab == 'modules' %}active{% endif %}">{% icon "grid" %} {% translate "Modules" %}</a>
     {% if hotel.module_rooms %}<a href="?tab=booking" class="{% if tab == 'booking' %}active{% endif %}">{% icon "calendar" %} {% translate "Online booking" %}</a>{% endif %}
+    <a href="?tab=tills" class="{% if tab == 'tills' %}active{% endif %}">{% icon "lock" %} {% translate "Shared tills & PINs" %}</a>
     <a href="?tab=email" class="{% if tab == 'email' %}active{% endif %}">{% icon "mail" %} {% translate "Email" %}</a>
     {% if hotel.registered %}<a href="?tab=fiscal" class="{% if tab == 'fiscal' %}active{% endif %}">{% icon "qr" %} {% translate "Fiscalization" %}</a>{% endif %}
     <a href="?tab=payments" class="{% if tab == 'payments' %}active{% endif %}">{% icon "wallet" %} {% translate "Card payments" %}</a>
@@ -114,6 +115,30 @@
         {% if not hotel.public_url %}<div class="alert alert-warning" style="margin-top:1rem">{% translate "Guests can only reach this page if InnKeeper is online. Set the public web address above once it is." %}</div>{% endif %}
         {% if not hotel.email_configured %}<div class="alert alert-info" style="margin-top:1rem">{% translate "Set up Email so guests receive confirmations automatically." %} <a href="?tab=email">{% translate "Email settings" %}</a></div>{% endif %}
       </div>
+    </section>
+
+  {% elif tab == "tills" %}
+    <section class="card">
+      <div class="card-header"><h2>{% translate "This device" %}</h2>{% if shared_till %}{% translate "Shared till" as l %}{% status_badge "success" l %}{% endif %}</div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0">{% translate "A shared till is a tablet, phone or computer that several people use, like the one on the bar. It opens on a screen with everyone's name: each person taps their name and types their PIN, and every sale is recorded under them. After a few minutes without a tap it locks itself." %}</p>
+        <form method="post" action="{% url 'accounts:shared_till' %}" class="row" style="flex-wrap:wrap; gap:.5rem">{% csrf_token %}
+          {% if shared_till %}<input type="hidden" name="on" value="0"><button class="btn btn-secondary">{% translate "Stop using this device as a shared till" %}</button>
+          {% else %}<input type="hidden" name="on" value="1"><button class="btn">{% icon "lock" %} {% translate "Use this device as a shared till" %}</button>{% endif %}
+        </form>
+        <p class="muted" style="font-size:.85rem; margin-bottom:0">{% translate "Do this on each shared device, signed in as a manager. Office computers and personal phones stay normal devices." %}</p>
+      </div>
+    </section>
+    <form method="post" class="card" style="margin-top:1.25rem" novalidate>{% csrf_token %}
+      <div class="card-header"><h2>{% translate "Locking" %}</h2></div>
+      <div class="card-body">{% include "includes/form_fields.html" %}</div>
+      <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
+    </form>
+    <section class="card card-flush" style="margin-top:1.25rem">
+      <div class="card-header"><h2>{% translate "Who has a PIN" %}</h2><a class="btn btn-secondary btn-sm" href="{% url 'accounts:staff_list' %}">{% icon "staff" %} {% translate "Staff" %}</a></div>
+      <div class="table-wrap"><table class="table table-sm">
+        <tbody>{% for u in pin_staff %}<tr><td>{{ u }}</td><td class="muted">{{ u.get_role_display }}</td><td>{% if u.has_pin %}{% translate "PIN set" as l %}{% status_badge "success" l %}{% else %}<span class="muted">{% translate "No PIN" %}</span>{% endif %}</td><td class="num"><a class="btn btn-ghost btn-sm" href="{% url 'accounts:staff_set_pin' u.pk %}">{% if u.has_pin %}{% translate "Change" %}{% else %}{% translate "Set a PIN" %}{% endif %}</a></td></tr>{% endfor %}</tbody>
+      </table></div>
     </section>
 
   {% elif tab == "email" %}

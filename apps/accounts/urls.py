@@ -1,7 +1,7 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path
 
-from . import views
+from . import pin, views
 
 app_name = "accounts"
 
@@ -15,4 +15,9 @@ urlpatterns = [
     path("staff/new/", views.StaffCreate.as_view(), name="staff_create"),
     path("staff/<int:pk>/", views.StaffEdit.as_view(), name="staff_edit"),
     path("staff/<int:pk>/password/", views.staff_set_password, name="staff_set_password"),
+    path("staff/<int:pk>/pin/", pin.staff_set_pin, name="staff_set_pin"),
+    path("my-pin/", pin.my_pin, name="my_pin"),
+    path("pin/", pin.pin_pad, name="pin_pad"),
+    path("lock/", pin.lock, name="lock"),
+    path("shared-till/", pin.shared_till, name="shared_till"),
 ]

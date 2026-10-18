@@ -447,8 +447,6 @@ def invoice(request, pk):
     folio, _created = Folio.objects.get_or_create(reservation=res)
     from apps.core.models import HotelSettings
 
-    from apps.fiscal.views import fiscal_block
-
     hs = HotelSettings.load()
     total = folio.total_charges
     vat = Decimal("0")
@@ -456,13 +454,31 @@ def invoice(request, pk):
         rate = hs.vat_rate_accommodation if c.kind == "accommodation" else hs.vat_rate
         vat += c.amount * rate / (Decimal("100") + rate) if hs.charges_vat else Decimal("0")
     vat = vat.quantize(Decimal("0.01"))
+    from django.utils import translation
+
+    lang = request.GET.get("lang") if request.GET.get("lang") in ("sq", "en") else translation.get_language()
+    with translation.override(lang):
+        return _render_invoice(request, res, folio, vat, total, lang)
+
+
+def _render_invoice(request, res, folio, vat, total, lang):
+    from django.utils.translation import gettext
+
+    from apps.fiscal.views import fiscal_block
+
+    charges = list(folio.charges.active().order_by("business_date", "id"))
+    for c in charges:  # room nights are written in the language of the bill
+        if c.kind == "accommodation" and c.description:
+            c.description = gettext("Accommodation – room %(room)s") % {"room": c.description.rsplit(" ", 1)[-1]}
+
     return render(
         request,
         "frontdesk/invoice.html",
         {
+            "bill_lang": lang,
             "r": res,
             "folio": folio,
-            "charges": folio.charges.active().order_by("business_date", "id"),
+            "charges": charges,
             "payments": folio.payments.active().order_by("business_date", "id"),
             "printed_at": timezone.localtime(),
             "vat": vat,

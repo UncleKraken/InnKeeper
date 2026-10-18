@@ -189,7 +189,26 @@ def run_job(job: PrintJob) -> PrintJob:
 # ---------- Documents ----------
 
 
-def receipt_document(order, printer: Printer, *, open_drawer: bool = False) -> bytes:
+BILL_LANGUAGES = ("sq", "en")
+
+
+def line_name(line, language: str | None = None) -> str:
+    """The line as printed: the English menu name when printing in English and the item has one."""
+    if language == "en" and line.item_id and line.item and line.item.name_en and line.name.startswith(line.item.name):
+        return line.item.name_en + line.name[len(line.item.name):]
+    return line.name
+
+
+def receipt_document(order, printer: Printer, *, open_drawer: bool = False, language: str | None = None) -> bytes:
+    from django.utils import translation
+
+    if language in BILL_LANGUAGES:
+        with translation.override(language):
+            return _receipt_document(order, printer, open_drawer=open_drawer, language=language)
+    return _receipt_document(order, printer, open_drawer=open_drawer, language=translation.get_language())
+
+
+def _receipt_document(order, printer: Printer, *, open_drawer: bool, language: str | None) -> bytes:
     from apps.core.models import HotelSettings
 
     hs = HotelSettings.load()
@@ -209,7 +228,7 @@ def receipt_document(order, printer: Printer, *, open_drawer: bool = False) -> b
         r.pair(_("Served by"), str(order.opened_by))
     r.rule()
     for line in order.active_lines:
-        r.pair(f"{line.quantity} x {line.name}", money(line.line_total, sym))
+        r.pair(f"{line.quantity} x {line_name(line, language)}", money(line.line_total, sym))
         if line.quantity > 1:
             r.text(f"   @ {money(line.unit_price, sym)}")
     r.rule()

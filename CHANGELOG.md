@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.12.0 — shared tills with PIN, profit per item, kitchen sound, bills in English
+
+**Shqip**
+
+- **Arkat e përbashkëta me PIN:** te Cilësimet → Arkat e përbashkëta & PIN, shënoni tabletën e barit si arkë të përbashkët. Ajo hapet me emrat e stafit: secili prek emrin dhe shkruan PIN-in (4–6 shifra). *Kyç / ndrysho përdoruesin* ia jep arkën tjetrit, dhe ajo kyçet vetë pas disa minutash. Çdo shitje mbetet në emrin e duhur. PIN-et ruhen të enkriptuara; pesë gabime e kyçin për 15 minuta. Pajisjet e tjera vazhdojnë me fjalëkalim.
+- **Fitimi për artikull:** Stoku → Fitimi për artikull tregon koston nga receta, çmimin pa TVSH, marzhin, sasinë e shitur dhe fitimin për çdo artikull; artikujt me marzh të ulët dalin me të kuqe. Shkarkohet në Excel.
+- **Zëri i kuzhinës:** ekrani i kuzhinës bie zile dhe ndriçon për çdo porosi të re (tani i ndezur si parazgjedhje), dhe kujton çdo minutë porositë që presin më shumë se 2 minuta. Kamarierët marrin zile dhe shirit të gjelbër kur porosia është gati.
+- **Fatura në anglisht:** butoni *EN* pranë *Printo llogarinë* printon llogarinë në anglisht me emrat anglisht të menusë. Kuponi dhe fatura e mysafirit kanë zgjedhjen Shqip / English.
+- Ikonat e butonave në faqen e kuponit shfaqen sërish.
+
+**English**
+
+- **Shared tills with a PIN:** in Settings → Shared tills & PINs, mark the bar tablet as a shared till. It opens on the staff names: each person taps their name and types their PIN (4–6 digits). *Lock / switch user* hands the till over, and it locks itself after a few minutes. Every sale stays under the right person. PINs are stored encrypted; five wrong tries lock it for 15 minutes. Other devices keep using passwords.
+- **Profit per item:** Stock → Profit per item shows the recipe cost, price without VAT, margin, quantity sold and profit for every item; low-margin items are red. Downloads to Excel.
+- **Kitchen sound:** the kitchen screen beeps and flashes on every new order (now on by default) and reminds every minute about orders waiting over 2 minutes. Waiters get a chime and a green banner when an order is ready.
+- **Bills in English:** the *EN* button next to *Print bill* prints the bill in English with the English menu names. The receipt and guest invoice pages have a Shqip / English choice.
+- The buttons on the receipt page show their icons again.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.12.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.11.1 — language check
 
 **Shqip**
