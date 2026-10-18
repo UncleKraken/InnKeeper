@@ -273,14 +273,30 @@ def fiscal_probe():
         check("Tax authority probe (receipt)", False, f"{type(e).__name__}: {e}", required=False)
 
 
+def _annotation(level: str, title: str, text: str) -> None:
+    """GitHub shows these on the run page and in its API (the full log isn't always reachable)."""
+    text = text.replace("%", "%25").replace("\r", "").replace("\n", "%0A")
+    print(f"::{level} title={title}::{text[:60000]}", flush=True)
+
+
 def summary() -> int:
     print("\n==== SUMMARY ====")
     failed = [n for n, ok, _d in RESULTS if not ok]
-    for n, ok, d in RESULTS:
-        print(f"{'PASS' if ok else 'FAIL'}  {n}{(' — ' + d) if d else ''}")
+    lines = [f"{'PASS' if ok else 'FAIL'}  {n}{(' — ' + d) if d else ''}" for n, ok, d in RESULTS]
+    print("\n".join(lines))
     print(f"{len(RESULTS) - len(failed)} passed, {len(failed)} failed")
+    _annotation("error" if failed else "notice", "e2e summary", "\n".join(lines))
     return 1 if failed else 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except SystemExit:
+        raise
+    except BaseException:
+        import traceback
+
+        _annotation("error", "e2e crashed", traceback.format_exc())
+        summary()
+        sys.exit(1)
