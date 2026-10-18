@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.11.1 — language check
+
+**Shqip**
+
+- Çdo ekran u kontrollua në shqip: asnjë tekst i ndërfaqes nuk mbetet në anglisht.
+- Biznesi shembull është tani në shqip: Restoranti, Bari, Shërbimi në dhomë, Lavanderia, pjatat (Levrek në skarë, Mëngjes shqiptar…) dhe zonat e tavolinave (Brenda, Tarracë). Emrat anglisht mbeten për menunë anglisht.
+- Porositë te furnitorët: kolona “Porosia” shfaqej gabim si “Renditja”; statusi “Pranuar”. Stoku që po mbaron shënohet “Po mbaron”, jo “E ulët”.
+- Regjistri i aktivitetit shkruan në shqip “u dërguan artikuj”, mënyrën e pagesës dhe të dhënat shembull. “Paraqitja” e kuponit u bë “Parapamja”.
+
+**English**
+
+- Every screen was checked in Albanian: no interface text is left in English.
+- The sample business is now Albanian: Restoranti, Bari, Shërbimi në dhomë, Lavanderia, the dishes and the table zones (Brenda, Tarracë). The English names stay for the English menu.
+- Orders to suppliers: the “Order” column showed the word for sort order; the received status and the low-stock badge now use the right words.
+- The activity log writes sent items, the payment method and sample data in the user's language. The receipt “Preview” button uses the right Albanian word.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.11.1.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.11.0 — Excel files, daily summary, orders to suppliers, sample data
 
 **Shqip**

@@ -4,6 +4,7 @@ in one minute. Only offered on an empty system, and removed with one button befo
 """
 
 from django.db import transaction
+from django.utils.translation import gettext as _
 
 from .models import HotelSettings, audit, clear_settings_cache
 
@@ -32,7 +33,7 @@ def load(user) -> None:
         demo_data=True, fiscal_enabled=False, default_language=language, business_type="hotel"
     )
     clear_settings_cache()
-    audit(user, "sample.load", "Sample data added")
+    audit(user, "sample.load", _("Sample data added"))
 
 
 @transaction.atomic
@@ -60,4 +61,4 @@ def remove(user) -> None:
     fresh.default_language = language
     fresh.save()
     clear_settings_cache()
-    audit(user, "sample.remove", "Sample data removed")
+    audit(user, "sample.remove", _("Sample data removed"))

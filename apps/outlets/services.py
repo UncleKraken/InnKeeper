@@ -164,7 +164,7 @@ def _fit_discount(order: Order, user) -> None:
         limit = HotelSettings.load().max_staff_discount
         allowed = min(allowed, (subtotal * limit / Decimal("100")).quantize(Decimal("0.01")))
     if order.discount > allowed:
-        audit(user, "order.discount", f"#{order.number}: {order.discount} → {allowed} (items removed)", order)
+        audit(user, "order.discount", _("#%(n)s: %(d)s → %(a)s (items removed)") % {"n": order.number, "d": order.discount, "a": allowed}, order)
         order.discount = allowed
         if not allowed:
             order.discount_reason = ""
@@ -187,7 +187,7 @@ def send_to_kitchen(order: Order, *, user) -> list[KitchenTicket]:
                 line.save(update_fields=["status", "ticket", "sent_quantity"])
             tickets.append(ticket)
         if tickets:
-            audit(user, "order.sent", f"#{order.number}: {sum(len(v) for v in by_station.values())} items", order)
+            audit(user, "order.sent", _("#%(n)s: %(c)s item(s) sent") % {"n": order.number, "c": sum(len(v) for v in by_station.values())}, order)
     for ticket in tickets:
         # Print only once the order is safely saved (and never while holding database locks).
         transaction.on_commit(lambda t=ticket: _print_ticket(t, user))
@@ -314,7 +314,7 @@ def pay_order(
     payment = Payment.objects.create(
         order=order, amount=amount, method=method, reference=reference, tendered=tendered, tip=tip, created_by=user
     )
-    audit(user, "order.payment", f"{order.outlet} #{order.number} {amount} ({method})", order)
+    audit(user, "order.payment", f"{order.outlet} #{order.number} {amount} ({Payment.Method(method).label if method in Payment.Method.values else method})", order)
     if order.remaining <= 0:
         Charge.objects.create(
             order=order,

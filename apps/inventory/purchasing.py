@@ -15,6 +15,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.accounts.permissions import module_required
@@ -174,7 +175,7 @@ def order_create(request):
     return render(
         request,
         "core/crud_form.html",
-        {"form": form, "title": _("Orders to suppliers"), "list_url": reverse("inventory:order_list"), "singular": _("order")},
+        {"form": form, "title": _("Orders to suppliers"), "list_url": reverse("inventory:order_list"), "singular": pgettext("purchase order", "order")},
     )
 
 

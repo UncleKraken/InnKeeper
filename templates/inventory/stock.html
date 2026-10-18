@@ -36,7 +36,7 @@
       <tr>
         <td><a href="{% url 'inventory:item_detail' i.pk %}"><strong>{{ i.name }}</strong></a></td>
         <td>{{ i.get_group_display }}</td>
-        <td class="num nowrap">{% if i.is_low %}{% translate "Low" as low %}{% status_badge "danger" low %} {% endif %}<strong>{{ i.on_hand|qty }}</strong> {{ i.get_unit_display }}</td>
+        <td class="num nowrap">{% if i.is_low %}{% translate "Low" context "stock" as low %}{% status_badge "danger" low %} {% endif %}<strong>{{ i.on_hand|qty }}</strong> {{ i.get_unit_display }}</td>
         <td class="num">{% if i.min_level %}{{ i.min_level|qty }}{% else %}—{% endif %}</td>
         <td class="num">{{ i.cost|money }}</td>
         <td class="num">{{ i.value|money }}</td>

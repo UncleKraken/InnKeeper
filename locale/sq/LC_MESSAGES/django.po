@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-18 04:06+0200\n"
+"POT-Creation-Date: 2026-10-18 06:56+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -120,7 +120,7 @@ msgid "role"
 msgstr "roli"
 
 #: apps/accounts/models.py:20 apps/core/models.py:38 apps/finance/models.py:76
-#: apps/frontdesk/models.py:85 apps/inventory/models.py:26
+#: apps/frontdesk/models.py:85 apps/inventory/models.py:27
 #: apps/outlets/models.py:370
 msgid "phone"
 msgstr "telefoni"
@@ -433,7 +433,7 @@ msgstr "emri i biznesit"
 msgid "legal name"
 msgstr "emri ligjor"
 
-#: apps/core/models.py:20 apps/inventory/models.py:28
+#: apps/core/models.py:20 apps/inventory/models.py:29
 msgid "tax ID (NIPT)"
 msgstr "NIPT"
 
@@ -469,7 +469,7 @@ msgid "address"
 msgstr "adresa"
 
 #: apps/core/models.py:39 apps/frontdesk/models.py:84
-#: apps/inventory/models.py:27
+#: apps/inventory/models.py:28
 msgid "email"
 msgstr "email"
 
@@ -708,7 +708,7 @@ msgstr "porta"
 
 #: apps/core/models.py:148
 msgid "username"
-msgstr "emër përdoruesi"
+msgstr "emri i përdoruesit"
 
 #: apps/core/models.py:150
 msgid "password"
@@ -994,6 +994,14 @@ msgstr "regjistrim aktiviteti"
 #: apps/core/models.py:421
 msgid "audit log"
 msgstr "regjistri i aktivitetit"
+
+#: apps/core/sample.py:36
+msgid "Sample data added"
+msgstr "U shtuan të dhënat shembull"
+
+#: apps/core/sample.py:64
+msgid "Sample data removed"
+msgstr "U hoqën të dhënat shembull"
 
 #: apps/core/settings_views.py:69 templates/core/settings_hub.html:52
 msgid "Logo"
@@ -1356,7 +1364,7 @@ msgstr "rezervimi"
 #: apps/finance/models.py:39 apps/fiscal/models.py:62
 #: apps/frontdesk/models.py:140 apps/frontdesk/models.py:383
 #: apps/housekeeping/models.py:24 apps/housekeeping/models.py:80
-#: apps/inventory/models.py:212 apps/outlets/models.py:379
+#: apps/inventory/models.py:213 apps/outlets/models.py:379
 #: apps/outlets/models.py:431 apps/outlets/models.py:515
 #: apps/payments/models.py:44
 msgid "status"
@@ -1375,8 +1383,8 @@ msgid "folios"
 msgstr "llogaritë"
 
 #: apps/finance/models.py:75 apps/frontdesk/models.py:16
-#: apps/frontdesk/models.py:267 apps/inventory/models.py:24
-#: apps/inventory/models.py:59 apps/outlets/models.py:21
+#: apps/frontdesk/models.py:267 apps/inventory/models.py:25
+#: apps/inventory/models.py:60 apps/outlets/models.py:21
 #: apps/outlets/models.py:64 apps/outlets/models.py:102
 #: apps/outlets/models.py:166 apps/outlets/models.py:192
 #: apps/outlets/models.py:219 apps/outlets/models.py:243
@@ -1385,8 +1393,8 @@ msgstr "llogaritë"
 msgid "name"
 msgstr "emri"
 
-#: apps/finance/models.py:77 apps/inventory/models.py:130
-#: apps/inventory/models.py:149 apps/inventory/models.py:177
+#: apps/finance/models.py:77 apps/inventory/models.py:131
+#: apps/inventory/models.py:150 apps/inventory/models.py:178
 #: apps/outlets/models.py:371 apps/outlets/models.py:430
 #: apps/outlets/models.py:541
 msgid "note"
@@ -1413,8 +1421,8 @@ msgstr ""
 
 #: apps/finance/models.py:91 apps/frontdesk/models.py:22
 #: apps/frontdesk/models.py:57 apps/frontdesk/models.py:289
-#: apps/frontdesk/models.py:323 apps/inventory/models.py:30
-#: apps/inventory/models.py:80 apps/outlets/models.py:44
+#: apps/frontdesk/models.py:323 apps/inventory/models.py:31
+#: apps/inventory/models.py:81 apps/outlets/models.py:44
 #: apps/outlets/models.py:75 apps/outlets/models.py:115
 #: apps/outlets/models.py:292 apps/outlets/models.py:334
 msgid "active"
@@ -1439,7 +1447,7 @@ msgstr "paratë e numëruara"
 #: apps/finance/models.py:119 apps/finance/models.py:329
 #: apps/frontdesk/models.py:56 apps/frontdesk/models.py:93
 #: apps/frontdesk/models.py:143 apps/frontdesk/models.py:359
-#: apps/housekeeping/models.py:34 apps/inventory/models.py:29
+#: apps/housekeeping/models.py:34 apps/inventory/models.py:30
 msgid "notes"
 msgstr "shënime"
 
@@ -1452,8 +1460,8 @@ msgid "shifts"
 msgstr "turnet"
 
 #: apps/finance/models.py:179 apps/finance/models.py:320
-#: apps/fiscal/models.py:104 apps/inventory/models.py:128
-#: apps/inventory/models.py:148 apps/inventory/models.py:176
+#: apps/fiscal/models.py:104 apps/inventory/models.py:129
+#: apps/inventory/models.py:149 apps/inventory/models.py:177
 #: apps/outlets/models.py:363
 msgid "date"
 msgstr "data"
@@ -1492,13 +1500,13 @@ msgid "outlet"
 msgstr "pika e shërbimit"
 
 #: apps/finance/models.py:219 apps/fiscal/models.py:40
-#: apps/housekeeping/models.py:23 apps/inventory/models.py:173
+#: apps/housekeeping/models.py:23 apps/inventory/models.py:174
 #: apps/outlets/models.py:103
 msgid "type"
 msgstr "lloji"
 
-#: apps/finance/models.py:221 apps/inventory/models.py:108
-#: apps/inventory/models.py:174 apps/inventory/models.py:251
+#: apps/finance/models.py:221 apps/inventory/models.py:109
+#: apps/inventory/models.py:175 apps/inventory/models.py:252
 #: apps/outlets/models.py:540
 msgid "quantity"
 msgstr "sasia"
@@ -1546,7 +1554,7 @@ msgstr "Pagesë online me kartë"
 
 #: apps/finance/models.py:252 apps/finance/models.py:297
 #: apps/frontdesk/models.py:80 apps/frontdesk/models.py:127
-#: apps/inventory/models.py:57 apps/payments/models.py:27
+#: apps/inventory/models.py:58 apps/payments/models.py:27
 msgid "Other"
 msgstr "Tjetër"
 
@@ -1612,9 +1620,9 @@ msgstr "Taksa & tarifa"
 msgid "category"
 msgstr "kategoria"
 
-#: apps/finance/models.py:301 apps/inventory/models.py:33
-#: apps/inventory/models.py:78 apps/inventory/models.py:126
-#: apps/inventory/models.py:210 apps/inventory/views.py:511
+#: apps/finance/models.py:301 apps/inventory/models.py:34
+#: apps/inventory/models.py:79 apps/inventory/models.py:127
+#: apps/inventory/models.py:211 apps/inventory/views.py:511
 #: apps/inventory/views.py:530
 msgid "supplier"
 msgstr "furnitori"
@@ -1623,11 +1631,11 @@ msgstr "furnitori"
 msgid "paid with"
 msgstr "paguar me"
 
-#: apps/finance/models.py:306 apps/inventory/models.py:129
+#: apps/finance/models.py:306 apps/inventory/models.py:130
 msgid "invoice / reference"
 msgstr "fatura / referenca"
 
-#: apps/finance/models.py:309 apps/inventory/models.py:133
+#: apps/finance/models.py:309 apps/inventory/models.py:134
 msgid "expense"
 msgstr "shpenzim"
 
@@ -1913,7 +1921,7 @@ msgstr "korrigjon"
 msgid "cash register"
 msgstr "arka"
 
-#: apps/fiscal/models.py:58 apps/inventory/models.py:131
+#: apps/fiscal/models.py:58 apps/inventory/models.py:132
 msgid "total"
 msgstr "totali"
 
@@ -2452,11 +2460,11 @@ msgstr "Lloji i dhomës në Channex"
 msgid "Channex rate plan"
 msgstr "Plani i çmimeve në Channex"
 
-#: apps/frontdesk/models.py:32 apps/inventory/purchasing.py:177
-#: apps/outlets/models.py:74 apps/outlets/models.py:114
-#: apps/outlets/models.py:177 apps/outlets/models.py:200
-#: apps/outlets/models.py:230 apps/outlets/models.py:248
-#: apps/outlets/models.py:333 apps/outlets/models.py:447
+#: apps/frontdesk/models.py:32 apps/outlets/models.py:74
+#: apps/outlets/models.py:114 apps/outlets/models.py:177
+#: apps/outlets/models.py:200 apps/outlets/models.py:230
+#: apps/outlets/models.py:248 apps/outlets/models.py:333
+#: apps/outlets/models.py:447
 msgid "order"
 msgstr "renditja"
 
@@ -2573,7 +2581,7 @@ msgstr "Në hotel"
 msgid "Checked out"
 msgstr "Larguar"
 
-#: apps/frontdesk/models.py:115 apps/inventory/models.py:207
+#: apps/frontdesk/models.py:115 apps/inventory/models.py:208
 #: apps/outlets/models.py:355 apps/outlets/models.py:415
 #: apps/outlets/models.py:509 apps/payments/models.py:22
 #: templates/frontdesk/channel_manager.html:75
@@ -2647,7 +2655,7 @@ msgid "deposit due"
 msgstr "parapagimi i kërkuar"
 
 #: apps/frontdesk/models.py:155 apps/frontdesk/models.py:366
-#: apps/inventory/models.py:60
+#: apps/inventory/models.py:61
 msgid "group"
 msgstr "grup"
 
@@ -2750,7 +2758,7 @@ msgstr "kalendarët e kanaleve"
 msgid "group name"
 msgstr "emri i grupit"
 
-#: apps/frontdesk/models.py:343 apps/inventory/models.py:25
+#: apps/frontdesk/models.py:343 apps/inventory/models.py:26
 msgid "contact person"
 msgstr "personi i kontaktit"
 
@@ -3178,7 +3186,7 @@ msgstr "detyrë pastrimi"
 msgid "housekeeping tasks"
 msgstr "detyra pastrimi"
 
-#: apps/housekeeping/models.py:56 templates/inventory/stock.html:39
+#: apps/housekeeping/models.py:56
 msgid "Low"
 msgstr "E ulët"
 
@@ -3288,234 +3296,234 @@ msgstr "Kërkesa u zgjidh."
 msgid "Stock"
 msgstr "Stoku"
 
-#: apps/inventory/models.py:34
+#: apps/inventory/models.py:35
 msgid "suppliers"
 msgstr "furnitorët"
 
-#: apps/inventory/models.py:43
+#: apps/inventory/models.py:44
 msgid "piece"
 msgstr "copë"
 
-#: apps/inventory/models.py:44
+#: apps/inventory/models.py:45
 msgid "bottle"
 msgstr "shishe"
 
-#: apps/inventory/models.py:45
+#: apps/inventory/models.py:46
 msgid "kg"
 msgstr "kg"
 
-#: apps/inventory/models.py:46
+#: apps/inventory/models.py:47
 msgid "litre"
 msgstr "litër"
 
-#: apps/inventory/models.py:47
+#: apps/inventory/models.py:48
 msgid "pack"
 msgstr "paketë"
 
-#: apps/inventory/models.py:48
+#: apps/inventory/models.py:49
 msgid "box"
 msgstr "kuti"
 
-#: apps/inventory/models.py:49
+#: apps/inventory/models.py:50
 msgid "portion"
 msgstr "porcion"
 
-#: apps/inventory/models.py:52
+#: apps/inventory/models.py:53
 msgid "Food"
 msgstr "Ushqim"
 
-#: apps/inventory/models.py:53
+#: apps/inventory/models.py:54
 msgid "Drinks"
 msgstr "Pije"
 
-#: apps/inventory/models.py:54
+#: apps/inventory/models.py:55
 msgid "Bar & spirits"
 msgstr "Bar & pije alkoolike"
 
-#: apps/inventory/models.py:55
+#: apps/inventory/models.py:56
 msgid "Cleaning"
 msgstr "Pastrim"
 
-#: apps/inventory/models.py:56
+#: apps/inventory/models.py:57
 msgid "Room amenities & minibar"
 msgstr "Pajisje dhome & minibar"
 
-#: apps/inventory/models.py:61
+#: apps/inventory/models.py:62
 msgid "unit"
 msgstr "njësia"
 
-#: apps/inventory/models.py:62
+#: apps/inventory/models.py:63
 msgid "in stock"
 msgstr "në stok"
 
-#: apps/inventory/models.py:64
+#: apps/inventory/models.py:65
 msgid "reorder level"
 msgstr "niveli i porosisë"
 
-#: apps/inventory/models.py:67
+#: apps/inventory/models.py:68
 msgid "You get a warning when stock falls to this level. 0 = no warning."
 msgstr "Merrni paralajmërim kur stoku bie në këtë nivel. 0 = pa paralajmërim."
 
-#: apps/inventory/models.py:71 apps/inventory/models.py:175
+#: apps/inventory/models.py:72 apps/inventory/models.py:176
 msgid "cost per unit"
 msgstr "kosto për njësi"
 
-#: apps/inventory/models.py:74
+#: apps/inventory/models.py:75
 msgid "Updated automatically from deliveries (average purchase price)."
 msgstr "Përditësohet automatikisht nga furnizimet (çmimi mesatar i blerjes)."
 
-#: apps/inventory/models.py:83 apps/inventory/models.py:106
+#: apps/inventory/models.py:84 apps/inventory/models.py:107
 #: apps/inventory/views.py:169 apps/inventory/views.py:185
 msgid "stock item"
 msgstr "artikull stoku"
 
-#: apps/inventory/models.py:84
+#: apps/inventory/models.py:85
 msgid "stock items"
 msgstr "artikujt e stokut"
 
-#: apps/inventory/models.py:103
+#: apps/inventory/models.py:104
 msgid "menu item"
 msgstr "artikulli i menusë"
 
-#: apps/inventory/models.py:111
+#: apps/inventory/models.py:112
 msgid "recipe line"
 msgstr "rresht recete"
 
-#: apps/inventory/models.py:112
+#: apps/inventory/models.py:113
 msgid "recipes"
 msgstr "recetat"
 
-#: apps/inventory/models.py:139 templates/inventory/item_detail.html:23
+#: apps/inventory/models.py:140 templates/inventory/item_detail.html:23
 msgid "delivery"
 msgstr "furnizim"
 
-#: apps/inventory/models.py:140
+#: apps/inventory/models.py:141
 msgid "deliveries"
 msgstr "furnizimet"
 
-#: apps/inventory/models.py:150 templates/finance/email_summary.html:34
+#: apps/inventory/models.py:151 templates/finance/email_summary.html:34
 msgid "difference"
 msgstr "diferenca"
 
-#: apps/inventory/models.py:155
+#: apps/inventory/models.py:156
 msgid "stock count"
 msgstr "numërim stoku"
 
-#: apps/inventory/models.py:156
+#: apps/inventory/models.py:157
 msgid "stock counts"
 msgstr "numërimet e stokut"
 
-#: apps/inventory/models.py:165 apps/inventory/services.py:153
+#: apps/inventory/models.py:166 apps/inventory/services.py:153
 #: templates/inventory/delivery_detail.html:3
 #: templates/inventory/delivery_detail.html:6
 #: templates/inventory/order_detail.html:14
 msgid "Delivery"
 msgstr "Furnizim"
 
-#: apps/inventory/models.py:166
+#: apps/inventory/models.py:167
 msgid "Sold"
 msgstr "Shitur"
 
-#: apps/inventory/models.py:167
+#: apps/inventory/models.py:168
 msgid "Sale voided"
 msgstr "Shitje e anuluar"
 
-#: apps/inventory/models.py:168
+#: apps/inventory/models.py:169
 msgid "Waste / breakage"
 msgstr "Humbje / thyerje"
 
-#: apps/inventory/models.py:169 templates/inventory/usage.html:25
+#: apps/inventory/models.py:170 templates/inventory/usage.html:25
 msgid "Count correction"
 msgstr "Korrigjim numërimi"
 
-#: apps/inventory/models.py:170
+#: apps/inventory/models.py:171
 msgid "Adjustment"
 msgstr "Rregullim"
 
-#: apps/inventory/models.py:174
+#: apps/inventory/models.py:175
 msgid "Positive in, negative out."
 msgstr "Pozitive hyrje, negative dalje."
 
-#: apps/inventory/models.py:183
+#: apps/inventory/models.py:184
 msgid "in stock after"
 msgstr "në stok pas"
 
-#: apps/inventory/models.py:188
+#: apps/inventory/models.py:189
 msgid "stock movement"
 msgstr "lëvizje stoku"
 
-#: apps/inventory/models.py:189
+#: apps/inventory/models.py:190
 msgid "stock movements"
 msgstr "lëvizjet e stokut"
 
-#: apps/inventory/models.py:204
+#: apps/inventory/models.py:205
 msgid "Draft"
 msgstr "Pa dërguar"
 
-#: apps/inventory/models.py:205
+#: apps/inventory/models.py:206
 msgid "Ordered"
 msgstr "Porositur"
 
-#: apps/inventory/models.py:206 templates/frontdesk/channel_manager.html:67
-#: templates/inventory/usage.html:25
+#: apps/inventory/models.py:207
+msgctxt "purchase order"
 msgid "Received"
-msgstr "Marrë"
+msgstr "Pranuar"
 
-#: apps/inventory/models.py:213
+#: apps/inventory/models.py:214
 msgid "needed by"
 msgstr "duhet deri më"
 
-#: apps/inventory/models.py:214
+#: apps/inventory/models.py:215
 msgid "note for the supplier"
 msgstr "shënim për furnitorin"
 
-#: apps/inventory/models.py:224
+#: apps/inventory/models.py:225
 msgid "purchase order"
 msgstr "porosi blerjeje"
 
-#: apps/inventory/models.py:225
+#: apps/inventory/models.py:226
 msgid "purchase orders"
 msgstr "porosi blerjeje"
 
-#: apps/inventory/models.py:250 apps/outlets/models.py:204
+#: apps/inventory/models.py:251 apps/outlets/models.py:204
 #: apps/outlets/views.py:741 apps/outlets/views.py:760
 msgid "item"
 msgstr "artikull"
 
-#: apps/inventory/models.py:252
+#: apps/inventory/models.py:253
 msgid "expected price per unit"
 msgstr "çmimi i pritur për njësi"
 
-#: apps/inventory/purchasing.py:75 apps/inventory/purchasing.py:265
+#: apps/inventory/purchasing.py:76 apps/inventory/purchasing.py:266
 #, python-format
 msgid "Order %(n)s from %(b)s"
 msgstr "Porosia %(n)s nga %(b)s"
 
-#: apps/inventory/purchasing.py:77
+#: apps/inventory/purchasing.py:78
 #, python-format
 msgid "Needed by %(d)s"
 msgstr "Duhet deri më %(d)s"
 
-#: apps/inventory/purchasing.py:84 templates/inventory/order_email.html:11
+#: apps/inventory/purchasing.py:85 templates/inventory/order_email.html:11
 msgid "Thank you!"
 msgstr "Faleminderit!"
 
-#: apps/inventory/purchasing.py:102 apps/inventory/purchasing.py:262
-#: apps/inventory/purchasing.py:284
+#: apps/inventory/purchasing.py:103 apps/inventory/purchasing.py:263
+#: apps/inventory/purchasing.py:285
 msgid "Add at least one item to the order."
 msgstr "Shtoni të paktën një artikull në porosi."
 
-#: apps/inventory/purchasing.py:156
+#: apps/inventory/purchasing.py:157
 msgid "Nothing to order: every item running low is already on an order."
 msgstr ""
 "Asgjë për të porositur: çdo artikull që po mbaron është tashmë në një "
 "porosi."
 
-#: apps/inventory/purchasing.py:159
+#: apps/inventory/purchasing.py:160
 msgid "Order prepared. Check the quantities, then send it."
 msgstr "Porosia u përgatit. Kontrolloni sasitë, pastaj dërgojeni."
 
-#: apps/inventory/purchasing.py:161
+#: apps/inventory/purchasing.py:162
 #, python-format
 msgid ""
 "%(n)s orders prepared, one per supplier. Check the quantities, then send "
@@ -3524,47 +3532,52 @@ msgstr ""
 "U përgatitën %(n)s porosi, një për çdo furnitor. Kontrolloni sasitë, pastaj "
 "dërgojini."
 
-#: apps/inventory/purchasing.py:177 templates/inventory/order_detail.html:7
+#: apps/inventory/purchasing.py:178 templates/inventory/order_detail.html:7
 #: templates/inventory/order_list.html:3 templates/inventory/order_list.html:6
 msgid "Orders to suppliers"
 msgstr "Porositë te furnitorët"
 
-#: apps/inventory/purchasing.py:190 apps/inventory/views.py:259
+#: apps/inventory/purchasing.py:178
+msgctxt "purchase order"
+msgid "order"
+msgstr "porosi"
+
+#: apps/inventory/purchasing.py:191 apps/inventory/views.py:259
 msgid "Choose an item from the list."
 msgstr "Zgjidhni një artikull nga lista."
 
-#: apps/inventory/purchasing.py:195 apps/inventory/purchasing.py:198
+#: apps/inventory/purchasing.py:196 apps/inventory/purchasing.py:199
 #: apps/inventory/services.py:120
 msgid "Quantities and prices can't be negative."
 msgstr "Sasitë dhe çmimet nuk mund të jenë negative."
 
-#: apps/inventory/purchasing.py:215
+#: apps/inventory/purchasing.py:216
 msgid "Order saved."
 msgstr "Porosia u ruajt."
 
-#: apps/inventory/purchasing.py:255
+#: apps/inventory/purchasing.py:256
 msgid "Marked as ordered."
 msgstr "U shënua si e porositur."
 
-#: apps/inventory/purchasing.py:260
+#: apps/inventory/purchasing.py:261
 msgid "Add the supplier's email address first (Suppliers)."
 msgstr "Shtoni fillimisht email-in e furnitorit (Furnitorët)."
 
-#: apps/inventory/purchasing.py:270
+#: apps/inventory/purchasing.py:271
 msgid "The email could not be sent. Check Settings → Email."
 msgstr "Email-i nuk u dërgua dot. Kontrolloni Cilësimet → Email."
 
-#: apps/inventory/purchasing.py:272
+#: apps/inventory/purchasing.py:273
 #, python-format
 msgid "Order emailed to %(to)s."
 msgstr "Porosia u dërgua me email te %(to)s."
 
-#: apps/inventory/purchasing.py:275 apps/inventory/purchasing.py:282
+#: apps/inventory/purchasing.py:276 apps/inventory/purchasing.py:283
 #: apps/outlets/services.py:20
 msgid "This order is already closed."
 msgstr "Kjo porosi është mbyllur tashmë."
 
-#: apps/inventory/purchasing.py:279 apps/outlets/views.py:533
+#: apps/inventory/purchasing.py:280 apps/outlets/views.py:533
 msgid "Order cancelled."
 msgstr "Porosia u anulua."
 
@@ -4565,6 +4578,16 @@ msgstr ""
 "Një pjesë e kësaj llogarie është paguar. Anuloni pagesën para se të hiqni "
 "artikuj."
 
+#: apps/outlets/services.py:167
+#, python-format
+msgid "#%(n)s: %(d)s → %(a)s (items removed)"
+msgstr "#%(n)s: %(d)s → %(a)s (u hoqën artikuj)"
+
+#: apps/outlets/services.py:190
+#, python-format
+msgid "#%(n)s: %(c)s item(s) sent"
+msgstr "#%(n)s: u dërguan %(c)s artikuj"
+
 #: apps/outlets/services.py:213
 msgid "Unknown status."
 msgstr "Status i panjohur."
@@ -4809,7 +4832,7 @@ msgstr "Menuja & QR"
 msgid "Prepared at"
 msgstr "Përgatitet në"
 
-#: apps/outlets/views.py:691 templates/inventory/order_list.html:18
+#: apps/outlets/views.py:691
 msgid "Order"
 msgstr "Renditja"
 
@@ -5953,7 +5976,7 @@ msgstr "Këto të dhëna shfaqen në kupona, fatura dhe menunë e mysafirëve."
 
 #: templates/core/settings_hub.html:50
 msgid "Preview"
-msgstr "Paraqitja"
+msgstr "Parapamja"
 
 #: templates/core/settings_hub.html:58
 msgid "Receipt preview"
@@ -7444,6 +7467,11 @@ msgid "Bookings from the channel manager"
 msgstr "Rezervimet nga menaxheri i kanaleve"
 
 #: templates/frontdesk/channel_manager.html:67
+#: templates/inventory/usage.html:25
+msgid "Received"
+msgstr "Marrë"
+
+#: templates/frontdesk/channel_manager.html:67
 #: templates/frontdesk/group_detail.html:31
 #: templates/frontdesk/invoice.html:26
 #: templates/frontdesk/reservation_form.html:36
@@ -8526,6 +8554,11 @@ msgstr "Porosit atë që po mbaron"
 msgid "Every item running low is already on an order."
 msgstr "Çdo artikull që po mbaron është tashmë në një porosi."
 
+#: templates/inventory/order_list.html:18
+msgctxt "purchase order"
+msgid "Order"
+msgstr "Porosia"
+
 #: templates/inventory/order_list.html:33
 msgid "No orders yet."
 msgstr "Ende pa porosi."
@@ -8648,6 +8681,11 @@ msgstr "Çfarë përdor çdo artikull i menusë"
 #: templates/inventory/stock.html:28
 msgid "Only running low"
 msgstr "Vetëm ato që po mbarojnë"
+
+#: templates/inventory/stock.html:39
+msgctxt "stock"
+msgid "Low"
+msgstr "Po mbaron"
 
 #: templates/inventory/stock.html:50
 msgid "Nothing matches."

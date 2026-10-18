@@ -11,6 +11,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.core.businessday import business_date
 
@@ -203,7 +204,7 @@ class PurchaseOrder(models.Model):
     class Status(models.TextChoices):
         DRAFT = "draft", _("Draft")
         SENT = "sent", _("Ordered")
-        RECEIVED = "received", _("Received")
+        RECEIVED = "received", pgettext_lazy("purchase order", "Received")
         CANCELLED = "cancelled", _("Cancelled")
 
     supplier = models.ForeignKey(
@@ -226,7 +227,7 @@ class PurchaseOrder(models.Model):
         ordering = ["-created_at", "-id"]
 
     def __str__(self) -> str:
-        return f"{_('Order')} {self.number} {self.supplier or ''}".strip()
+        return f"{pgettext('purchase order', 'Order')} {self.number} {self.supplier or ''}".strip()
 
     @property
     def number(self) -> str:

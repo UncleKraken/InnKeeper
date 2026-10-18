@@ -72,6 +72,58 @@ MENUS = {
     },
 }
 
+OUTLET_SQ = {"Restaurant": "Restoranti", "Lobby Bar": "Bari", "Room Service": "Shërbimi në dhomë", "Laundry": "Lavanderia"}
+
+# Menu names are Albanian on the till; the English name is kept for the English menu.
+ITEM_SQ = {
+    "Byrek me spinaq": "Spinach pie",
+    "Sallatë fshati": "Village salad",
+    "Djathë i bardhë me ullinj": "White cheese with olives",
+    "Tavë kosi": "Baked lamb with yogurt",
+    "Fërgesë Tirane": "Tirana fërgesë",
+    "Trilece": "Trileçe (milk cake)",
+    "Bakllava": "Baklava",
+    "Raki rrushi": "Grape raki",
+}
+ITEM_EN_TO_SQ = {
+    "Grilled sea bass": "Levrek në skarë",
+    "Pasta with seafood": "Pasta me fruta deti",
+    "Ice cream (2 scoops)": "Akullore (2 topa)",
+    "Water 0.75L": "Ujë 0.75L",
+    "Water 0.5L": "Ujë 0.5L",
+    "Red wine Kallmet (glass)": "Verë e kuqe Kallmet (gotë)",
+    "Homemade lemonade": "Limonadë shtëpie",
+    "Fresh orange juice": "Lëng portokalli i freskët",
+    "House wine (glass)": "Verë e shtëpisë (gotë)",
+    "Skanderbeg cognac": "Konjak Skënderbeu",
+    "Relax massage 50′": "Masazh relaksues 50′",
+    "Deep tissue 50′": "Masazh i thellë 50′",
+    "Couples massage 80′": "Masazh për çifte 80′",
+    "Sauna & hammam": "Saunë & hamam",
+    "Facial treatment": "Trajtim fytyre",
+    "Continental breakfast": "Mëngjes kontinental",
+    "Albanian breakfast": "Mëngjes shqiptar",
+    "Club sandwich": "Sanduiç klubi",
+    "Pizza Margherita": "Pica Margarita",
+    "Shirt": "Këmishë",
+    "Trousers": "Pantallona",
+    "Suit": "Kostum",
+}
+
+
+def _names(name: str) -> tuple[str, str]:
+    """(Albanian name, English name) for a demo menu item."""
+    if name in ITEM_EN_TO_SQ:
+        return ITEM_EN_TO_SQ[name], name
+    return name, ITEM_SQ.get(name, "")
+
+
+def _item(name: str, **kw) -> Item:
+    from django.db.models import Q
+
+    return Item.objects.get(Q(name=name) | Q(name_en=name), **kw)
+
+
 CATEGORY_SQ = {
     "Starters": "Antipasta",
     "Mains": "Pjata kryesore",
@@ -209,10 +261,12 @@ def create_demo(password: str | None, prefix: str = "") -> dict:
 
     outlets = {}
     for (name, kind, uses_tables, n_tables), cats in MENUS.items():
-        outlet = Outlet.objects.create(name=name, kind=kind, uses_tables=uses_tables, sort_order=len(outlets))
+        outlet = Outlet.objects.create(
+            name=OUTLET_SQ.get(name, name), kind=kind, uses_tables=uses_tables, sort_order=len(outlets)
+        )
         outlets[name] = outlet
         for t in range(1, n_tables + 1):
-            zone = "Terrace" if t > 8 else "Inside"
+            zone = "Tarracë" if t > 8 else "Brenda"
             i = (t - 9) if t > 8 else (t - 1)
             Table.objects.create(
                 outlet=outlet,
@@ -235,9 +289,11 @@ def create_demo(password: str | None, prefix: str = "") -> dict:
                 station=starter_station(kind, cat_name),
             )
             for i_order, item in enumerate(items):
+                sq_name, en_name = _names(item[0])
                 Item.objects.create(
                     category=cat,
-                    name=item[0],
+                    name=sq_name,
+                    name_en=en_name,
                     price=Decimal(item[1]),
                     duration_minutes=item[2] if len(item) > 2 else None,
                     sort_order=i_order,
@@ -399,7 +455,7 @@ def create_demo(password: str | None, prefix: str = "") -> dict:
         "Coca-Cola 0.33L": [("Coca-Cola 0.33L", "1")],
         "Raki rrushi": [("Raki rrushi", "0.05")],
     }.items():
-        for menu_item in Item.objects.filter(name=item_name):
+        for menu_item in Item.objects.filter(pk__in=[i.pk for i in Item.objects.all() if item_name in (i.name, i.name_en)]):
             for stock_name, qty in uses:
                 RecipeLine.objects.create(item=menu_item, stock_item=stock[stock_name], quantity=Decimal(qty))
 
@@ -408,33 +464,33 @@ def create_demo(password: str | None, prefix: str = "") -> dict:
     for table_no, picks in [(1, ["Tavë kosi", "Sallatë fshati", "Trilece"]), (4, ["Grilled sea bass", "Bakllava"])]:
         order = pos.open_order(rest, table=rest.tables.get(name=str(table_no)), user=users["waiter"], guests=2)
         for name in picks:
-            pos.add_item(order, Item.objects.get(name=name, category__outlet=rest), user=users["waiter"])
+            pos.add_item(order, _item(name, category__outlet=rest), user=users["waiter"])
         if table_no == 1:
             pos.pay_order(order, method="card", user=users["waiter"])
         else:
             pos.pay_order(order, method="cash", user=users["waiter"], tendered=Decimal("50"))
     order = pos.open_order(bar, table=bar.tables.get(name="2"), user=users["bar"])
     for name in ["Espresso", "Macchiato", "Fresh orange juice"]:
-        pos.add_item(order, Item.objects.get(name=name), user=users["bar"])
+        pos.add_item(order, _item(name), user=users["bar"])
     pos.charge_to_room(order, in_house[0], user=users["bar"])
-    order = pos.open_order(spa, user=users["spa"], label=f"Room {in_house[1].room.number}")
-    pos.add_item(order, Item.objects.get(name="Couples massage 80′"), user=users["spa"])
+    order = pos.open_order(spa, user=users["spa"], label=f"Dhoma {in_house[1].room.number}")
+    pos.add_item(order, _item("Couples massage 80′"), user=users["spa"])
     pos.charge_to_room(order, in_house[1], user=users["spa"])
     # still open
     order = pos.open_order(rest, table=rest.tables.get(name="7"), user=users["waiter"], guests=3)
     for name in ["Fërgesë Tirane", "Fërgesë Tirane", "Byrek me spinaq"]:
-        pos.add_item(order, Item.objects.get(name=name), user=users["waiter"])
-    pos.add_item(order, Item.objects.get(name="Tavë kosi"), user=users["waiter"], note="pa qepë / no onion")
+        pos.add_item(order, _item(name), user=users["waiter"])
+    pos.add_item(order, _item("Tavë kosi"), user=users["waiter"], note="pa qepë / no onion")
     pos.send_to_kitchen(order, user=users["waiter"])
     order = pos.open_order(rest, table=rest.tables.get(name="2"), user=users["waiter"], guests=2)
     for name in ["Grilled sea bass", "Sallatë fshati"]:
-        pos.add_item(order, Item.objects.get(name=name), user=users["waiter"])
+        pos.add_item(order, _item(name), user=users["waiter"])
     tickets = pos.send_to_kitchen(order, user=users["waiter"])
     pos.set_ticket_status(tickets[0], "ready", user=users["kitchen"])
     order = pos.open_order(rest, table=rest.tables.get(name="5"), user=users["waiter"], guests=4)
-    pos.add_item(order, Item.objects.get(name="Pasta with seafood"), user=users["waiter"], quantity=2)
+    pos.add_item(order, _item("Pasta with seafood"), user=users["waiter"], quantity=2)
     order = pos.open_order(bar, table=bar.tables.get(name="5"), user=users["bar"])
-    pos.add_item(order, Item.objects.get(name="Birra Korça 0.5L"), user=users["bar"], quantity=2)
+    pos.add_item(order, _item("Birra Korça 0.5L"), user=users["bar"], quantity=2)
 
     inv.record_waste(stock["Birra Korça 0.5L"], Decimal("1"), user=users["bar"], reason="Shishe e thyer")
     inv.apply_count(
