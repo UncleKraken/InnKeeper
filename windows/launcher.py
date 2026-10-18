@@ -301,6 +301,16 @@ def tunnel_jobs(log, stop: threading.Event) -> None:
         remote.write_status("off")
 
 
+# Cloudflare Tunnel runs on this computer and says the visitor came over https. Waitress drops that
+# header unless the sender is trusted: trust it only from this computer, or sign-in through the
+# tunnel fails Django's CSRF check (the page looks like plain http) and cookies aren't Secure.
+PROXY_OPTIONS = {
+    "trusted_proxy": "127.0.0.1",
+    "trusted_proxy_headers": {"x-forwarded-proto"},
+    "clear_untrusted_proxy_headers": True,
+}
+
+
 def serve(log, ready: threading.Event) -> None:
     from waitress import serve as waitress_serve
 
@@ -323,7 +333,15 @@ def serve(log, ready: threading.Event) -> None:
         return
     ready.set()
     try:
-        waitress_serve(application, host="0.0.0.0", port=PORT, threads=8, ident=APP_NAME, _quiet=True)
+        waitress_serve(
+            application,
+            host="0.0.0.0",
+            port=PORT,
+            threads=8,
+            ident=APP_NAME,
+            _quiet=True,
+            **PROXY_OPTIONS,
+        )
     except OSError as e:
         log(f"Could not start on port {PORT}: {e}. Close the program using it, or set INNKEEPER_PORT.")
         SERVE_ERROR.append(str(e))

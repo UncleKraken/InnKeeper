@@ -88,8 +88,14 @@ class Browser:
         req = urllib.request.Request(self.base + path, data=body, method="POST")
         req.add_header("Referer", self.base + referer)
         req.add_header("Origin", self.base)
-        with self.opener.open(req, timeout=30) as r:
-            return r.status, r.geturl(), r.read().decode("utf-8", "replace")
+        try:
+            with self.opener.open(req, timeout=30) as r:
+                return r.status, r.geturl(), r.read().decode("utf-8", "replace")
+        except urllib.error.HTTPError as e:
+            text = e.read().decode("utf-8", "replace")
+            server = e.headers.get("Server", "")
+            words = re.sub(r"<[^>]+>", " ", text)
+            return e.code, f"{e.code} from {server}: {' '.join(words.split())[:400]}", text
 
     def csrf(self) -> str:
         return next((c.value for c in self.jar if c.name == "csrftoken"), "")
@@ -114,7 +120,10 @@ def main() -> int:
 
     # 1. Start InnKeeper like the desktop shortcut does.
     env = {**os.environ, "INNKEEPER_DATA_DIR": str(DATA), "INNKEEPER_PORT": str(PORT)}
-    app = subprocess.Popen([sys.executable, str(ROOT / "windows" / "launcher.py")], env=env, cwd=str(ROOT))
+    app_log = (DATA / "app-output.txt").open("w")
+    app = subprocess.Popen(
+        [sys.executable, str(ROOT / "windows" / "launcher.py")], env=env, cwd=str(ROOT), stdout=app_log, stderr=subprocess.STDOUT
+    )
     started = wait_for(lambda: http_ok(LOCAL + "/health/"), 90)
     if not check("InnKeeper starts with the Windows launcher", bool(started)):
         app.kill()
@@ -169,6 +178,9 @@ def main() -> int:
             )
             signed_in = status == 200 and "/accounts/login" not in url
             check("Signing in over the tunnel works (CSRF, https)", signed_in, url)
+            if not signed_in:
+                tail = (DATA / "app-output.txt").read_text(errors="ignore")[-3000:]
+                _annotation("warning", "InnKeeper output", tail)
             secure = all(c.secure for c in b.jar if c.name in ("sessionid", "csrftoken"))
             check("Session cookies are Secure over https", secure)
             if signed_in:

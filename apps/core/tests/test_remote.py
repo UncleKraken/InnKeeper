@@ -100,3 +100,17 @@ class LauncherTunnelTests(HotelTestCase):
              mock.patch("django.db.close_old_connections"):
             launcher.tunnel_jobs(lambda m: None, stop)
         fake.terminate.assert_called_once()
+
+
+class LauncherProxyTests(HotelTestCase):
+    def test_https_from_the_local_tunnel_is_trusted_and_nothing_else(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "windows"))
+        import launcher
+
+        self.assertEqual(launcher.PROXY_OPTIONS["trusted_proxy"], "127.0.0.1")
+        self.assertEqual(launcher.PROXY_OPTIONS["trusted_proxy_headers"], {"x-forwarded-proto"})
+        try:
+            from waitress.adjustments import Adjustments
+        except ImportError:
+            return
+        Adjustments(**launcher.PROXY_OPTIONS)  # valid for this waitress version
