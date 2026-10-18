@@ -1,0 +1,30 @@
+name: e2e-windows
+
+# End-to-end test on a real Windows machine: launcher, Cloudflare Tunnel download/start/stop,
+# a real public tunnel with sign-in over https, and a probe of the tax authority's test system.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-windows.txt
+      - name: Collect static files
+        env:
+          DJANGO_DEBUG: "0"
+          DJANGO_SECRET_KEY: build-only
+        run: python manage.py collectstatic --noinput -v0
+      - name: End-to-end test
+        run: python windows/e2e_test.py
