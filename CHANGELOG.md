@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.14.1 — sign-in through Cloudflare Tunnel
+
+**Shqip**
+
+- **Rregullim:** hyrja përmes Cloudflare Tunnel (adresa publike) refuzohej me “403” në aplikacionin Windows, sepse serveri i brendshëm e hidhte poshtë shënimin “https” që dërgon tuneli. Tani pranohet vetëm kur vjen nga ky kompjuter. Edhe cookie-t e hyrjes tani janë “Secure” përmes tunelit.
+- Test i ri i plotë në një kompjuter të vërtetë Windows: nisja, shkarkimi dhe ndalimi i Cloudflare Tunnel, një tunel i vërtetë publik me hyrje dhe faqe përmes internetit, PIN-i i refuzuar nga jashtë, dhe dërgimi i një kuponi në sistemin provë të tatimeve.
+
+**English**
+
+- **Fix:** signing in through Cloudflare Tunnel (the public address) was refused with “403” in the Windows app, because the built-in server dropped the “https” note the tunnel sends. It is now trusted only when it comes from this computer. Sign-in cookies are now Secure through the tunnel too.
+- New full test on a real Windows computer: start-up, downloading and stopping Cloudflare Tunnel, a real public tunnel with sign-in and pages over the internet, the PIN refused from outside, and a receipt sent to the tax authority's test system.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.14.1.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.14.0 — access from outside, month report, minimum stay at reception, opening cash per register
 
 **Shqip**
