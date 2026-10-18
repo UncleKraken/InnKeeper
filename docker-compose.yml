@@ -51,7 +51,8 @@ services:
     volumes:
       - backups:/app/backups
 
-  # Every 15 minutes: read Booking.com / Airbnb / … calendars (Rooms & rates → Calendar links).
+  # Every 15 minutes: read Booking.com / Airbnb / … calendars (Rooms & rates → Calendar links),
+  # and email the owner's daily summary when it is due (Settings → Email).
   calendar-sync:
     build: .
     restart: unless-stopped
@@ -61,7 +62,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: sh -c 'while true; do python manage.py sync_calendars; sleep 900; done'
+    command: sh -c 'while true; do python manage.py sync_calendars; python manage.py daily_summary; sleep 900; done'
 
   # Every minute: bookings from the channel manager (Channex) in, availability and prices out.
   channel-manager:

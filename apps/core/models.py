@@ -160,6 +160,22 @@ class HotelSettings(models.Model):
     )
     email_from = models.EmailField(_("send emails from"), blank=True)
 
+    # Owner's daily summary by email
+    summary_to = models.CharField(
+        _("send the daily summary to"),
+        max_length=255,
+        blank=True,
+        help_text=_("One or more email addresses, separated by commas. Leave empty to send no summary."),
+    )
+    summary_hour = models.PositiveSmallIntegerField(
+        _("send it at"),
+        default=8,
+        choices=[(h, f"{h:02d}:00") for h in range(24)],
+        help_text=_("The summary of the day before is sent at this time. It is also sent right after the day close."),
+    )
+    summary_sent_for = models.DateField(null=True, blank=True, editable=False)
+    demo_data = models.BooleanField(default=False, editable=False)  # filled with the sample business
+
     # Online card payments
     payment_provider = models.CharField(
         _("payment provider"),
@@ -320,6 +336,10 @@ class HotelSettings(models.Model):
     def vat_fraction(self) -> Decimal:
         """Share of a VAT-inclusive price that is VAT, e.g. 20% → 1/6."""
         return self.vat_rate / (Decimal("100") + self.vat_rate) if self.charges_vat else Decimal("0")
+
+    @property
+    def summary_recipients(self) -> list[str]:
+        return [a.strip() for a in (self.summary_to or "").replace(";", ",").split(",") if a.strip()]
 
     @property
     def email_configured(self) -> bool:

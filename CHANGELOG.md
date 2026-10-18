@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.11.0 — Excel files, daily summary, orders to suppliers, sample data
+
+**Shqip**
+
+- **Skedarë të vërtetë Excel (.xlsx):** importi i menusë, stokut dhe mysafirëve pranon drejtpërdrejt skedarin .xlsx (s'ka më “Save as CSV”). Shablloni shkarkohet si Excel, me një fletë të dytë që shpjegon çdo kolonë me shembull. Libri i llogarive, raporti i shitjeve, lista e stokut dhe regjistri i mysafirëve shkarkohen në Excel me shumat si numra, datat si data dhe filtër në çdo kolonë. CSV mbetet për kush e do.
+- **Përmbledhja ditore për pronarin:** te Cilësimet → Email, shkruani adresat dhe orën. Çdo mëngjes vjen një email i shkurtër: shitjet krahasuar me një javë më parë, paratë sipas mënyrës, numërimi i arkës dhe diferenca, zbritjet, anulimet, turnet me diferencë, më të shiturat, dhomat dhe paralajmërimet (stok që mbaron, kupona pa fiskalizuar, kopje që nuk punojnë). Dërgohet edhe pas mbylljes së ditës. Për lokalet e natës, nata e së shtunës vjen të dielën në mëngjes.
+- **Porositë te furnitorët:** Stoku → Porositë → *Porosit atë që po mbaron* përgatit një porosi për çdo furnitor. Dërgojeni me WhatsApp (hapet me porosinë të shkruar), me email, printojeni ose kopjojeni. Kur vjen malli, *Erdhi: prano* hap furnizimin të plotësuar dhe stoku rritet.
+- **Provojeni me të dhëna shembull:** në ekranin e parë të konfigurimit, një hotel, restorant, bar dhe spa shembull për të parë gjithçka në punë. Një shirit i verdhë e tregon; *Fillo me biznesin tim* i heq të gjitha dhe nis konfigurimin. Fiskalizimi nuk aktivizohet dot me të dhëna shembull.
+- Në telefon, rreshtat e furnizimeve dhe porosive shfaqen si karta, pa u ngushtuar.
+
+**English**
+
+- **Real Excel files (.xlsx):** importing the menu, stock and guests takes the .xlsx file directly (no more “Save as CSV”). The template downloads as Excel, with a second sheet explaining each column with an example. The ledger, sales report, stock list and guest register download to Excel with money as numbers, dates as dates and a filter on every column. CSV is still there for anyone who wants it.
+- **Daily summary for the owner:** in Settings → Email, type the addresses and the hour. Every morning a short email arrives: sales compared with a week ago, money by method, the cash count and any difference, discounts, voids, shifts with a difference, best sellers, rooms, and warnings (stock running low, receipts not fiscalized, copies not working). It is also sent after the day close. For late-night venues, Saturday night arrives on Sunday morning.
+- **Orders to suppliers:** Stock → Orders → *Order what is running low* prepares one order per supplier. Send it by WhatsApp (opens with the order written), email, print or copy it. When the goods arrive, *It arrived: receive* opens the delivery already filled in and the stock goes up.
+- **Try it with sample data:** on the first setup screen, a sample hotel, restaurant, bar and spa to see everything working. A yellow banner shows it; *Start with my own business* removes it all and starts the setup. Fiscalization can't be switched on while sample data is loaded.
+- On phones, delivery and order lines show as cards instead of a squeezed table.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.11.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.10.0 — table bookings, club tables and entrance sales
 
 **Shqip**

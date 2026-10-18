@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ po.number }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="eyebrow"><a href="{% url 'inventory:order_list' %}">{% icon "back" %} {% translate "Orders to suppliers" %}</a></div>
+    <h1>{{ po.number }} {% status_badge po.badge po.get_status_display %}</h1>
+    <p>{{ po.supplier|default:_("No supplier yet") }}{% if po.sent_at %} · {% translate "ordered" %} {{ po.sent_at|date:"d.m.Y" }}{% endif %}{% if po.received_at %} · {% translate "received" %} {{ po.received_at|date:"d.m.Y" }}{% endif %}</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-secondary" href="{% url 'inventory:order_print' po.pk %}" target="_blank">{% icon "print" %} {% translate "Print" %}</a>
+    {% if editable and lines %}<form method="post" action="{% url 'inventory:order_action' po.pk 'receive' %}">{% csrf_token %}<button class="btn">{% icon "truck" %} {% translate "It arrived: receive" %}</button></form>{% endif %}
+    {% if po.delivery %}<a class="btn btn-secondary" href="{% url 'inventory:delivery_detail' po.delivery_id %}">{% icon "truck" %} {% translate "Delivery" %}</a>{% endif %}
+  </div>
+</div>
+{% include "inventory/_tabs.html" %}
+
+{% if editable %}
+{% if po.status == "draft" and lines %}
+<section class="card" style="margin-bottom:1.25rem">
+  <div class="card-header"><h2>{% translate "Send it to the supplier" %}</h2></div>
+  <div class="card-body">
+    <div class="row" style="flex-wrap:wrap; gap:.5rem">
+      {% if whatsapp %}<a class="btn" href="{{ whatsapp }}" target="_blank" rel="noopener">{% icon "send" %} WhatsApp</a>{% endif %}
+      {% if can_email %}<form method="post" action="{% url 'inventory:order_action' po.pk 'email' %}">{% csrf_token %}<button class="btn">{% icon "send" %} {% translate "Email" %} {{ po.supplier.email }}</button></form>{% endif %}
+      <button type="button" class="btn btn-secondary" id="copy-text">{% icon "copy" %} {% translate "Copy as text" %}</button>
+      <form method="post" action="{% url 'inventory:order_action' po.pk 'sent' %}" id="mark-sent">{% csrf_token %}<input type="hidden" name="how" value="manual"><button class="btn btn-secondary">{% icon "check" %} {% translate "Mark as ordered" %}</button></form>
+    </div>
+    <p class="muted send-help">{% if not po.supplier %}{% translate "Choose the supplier below to send it by WhatsApp or email." %}{% elif not whatsapp and not can_email %}{% translate "Add the supplier's phone or email (Suppliers) to send it from here. Or print it, or copy the text into Viber or SMS." %}{% else %}{% translate "After sending, mark it as ordered. WhatsApp opens with the order written; just press send." %}{% endif %}</p>
+    <textarea id="order-text" class="sr-only" readonly aria-hidden="true">{{ text }}</textarea>
+  </div>
+</section>
+{% endif %}
+<form method="post" class="stack" id="delivery">{% csrf_token %}
+  <section class="card card-flush">
+    <div class="table-wrap"><table class="table" id="lines">
+      <thead><tr><th style="width:45%">{% translate "Item" %}</th><th class="num">{% translate "Quantity" %}</th><th class="num">{% translate "Expected price" %}</th><th class="num">{% translate "Line total" %}</th><th></th></tr></thead>
+      <tbody>
+      {% for r in rows %}
+        <tr class="dl-row">
+          <td><select class="input" name="item"><option value="">—</option>{% for i in items %}<option value="{{ i.pk }}" data-cost="{{ i.cost|floatformat:'-4u' }}" {% if r.item == i.pk|stringformat:"s" %}selected{% endif %}>{{ i.name }} ({{ i.get_unit_display }}){% if i.is_low %} · {% translate "low" %}{% endif %}</option>{% endfor %}</select></td>
+          <td class="num" data-label="{% translate 'Quantity' %}"><input class="input num" name="qty" inputmode="decimal" value="{{ r.qty }}" style="max-width:8rem"></td>
+          <td class="num" data-label="{% translate 'Expected price' %}"><input class="input num" name="cost" inputmode="decimal" value="{{ r.cost }}" style="max-width:8rem"></td>
+          <td class="num line-total">—</td>
+          <td class="num"><button type="button" class="btn btn-ghost btn-sm rm" title="{% translate 'Remove' %}">{% icon "x" %}</button></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+      <tfoot><tr><td><button type="button" class="btn btn-secondary btn-sm" id="add">{% icon "plus" %} {% translate "Add line" %}</button></td><td></td><td class="num"><strong>{% translate "Total" %}</strong></td><td class="num"><strong id="total">—</strong></td><td></td></tr></tfoot>
+    </table></div>
+  </section>
+  <section class="card">
+    <div class="card-body">{% include "includes/form_fields.html" %}</div>
+    <div class="card-footer form-actions">
+      {% if po.status == "draft" or po.status == "sent" %}<button type="submit" form="cancel-order" class="btn btn-ghost" style="margin-right:auto; color:var(--danger)">{% translate "Cancel order" %}</button>{% endif %}
+      <button class="btn">{% icon "check" %} {% translate "Save" %}</button>
+    </div>
+  </section>
+</form>
+<form method="post" action="{% url 'inventory:order_action' po.pk 'cancel' %}" id="cancel-order">{% csrf_token %}</form>
+{% else %}
+<section class="card card-flush">
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Item" %}</th><th class="num">{% translate "Quantity" %}</th><th class="num">{% translate "Expected price" %}</th><th class="num">{% translate "Amount" %}</th></tr></thead>
+    <tbody>{% for ln in lines %}<tr><td>{{ ln.stock_item.name }}</td><td class="num">{{ ln.quantity|floatformat:"-3" }} {{ ln.stock_item.get_unit_display }}</td><td class="num">{{ ln.unit_cost|money }}</td><td class="num">{{ ln.total|money }}</td></tr>{% endfor %}</tbody>
+    <tfoot><tr><td colspan="3">{% translate "Expected total" %}</td><td class="num">{{ po.total|money }}</td></tr></tfoot>
+  </table></div>
+  {% if po.note %}<div class="card-footer">{{ po.note }}</div>{% endif %}
+</section>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var body = document.querySelector('#lines tbody'); if (!body) return;
+  function num(v) { v = (v || '').replace(',', '.'); var n = parseFloat(v); return isNaN(n) ? null : n; }
+  function fmt(n) { return n.toFixed(2); }
+  function recalc() {
+    var total = 0;
+    body.querySelectorAll('tr').forEach(function (tr) {
+      var q = num(tr.querySelector('[name=qty]').value), c = num(tr.querySelector('[name=cost]').value);
+      var cell = tr.querySelector('.line-total');
+      if (q !== null && c !== null) { cell.textContent = fmt(q * c); total += q * c; } else { cell.textContent = '—'; }
+    });
+    document.getElementById('total').textContent = fmt(total) + ' {{ hotel.currency_symbol }}';
+  }
+  body.addEventListener('input', recalc);
+  body.addEventListener('change', function (e) {
+    if (e.target.name === 'item') {
+      var opt = e.target.selectedOptions[0], cost = e.target.closest('tr').querySelector('[name=cost]');
+      if (opt && opt.dataset.cost && !cost.value && parseFloat(opt.dataset.cost) > 0) cost.value = opt.dataset.cost;
+      recalc();
+    }
+  });
+  body.addEventListener('click', function (e) {
+    var b = e.target.closest('.rm'); if (!b) return;
+    var tr = b.closest('tr');
+    if (body.rows.length > 1) tr.remove(); else tr.querySelectorAll('input,select').forEach(function (i) { i.value = ''; });
+    recalc();
+  });
+  document.getElementById('add').addEventListener('click', function () {
+    var tr = body.rows[0].cloneNode(true);
+    tr.querySelectorAll('input,select').forEach(function (i) { i.value = ''; });
+    body.appendChild(tr); tr.querySelector('select').focus(); recalc();
+  });
+  recalc();
+  var copy = document.getElementById('copy-text');
+  if (copy) copy.addEventListener('click', function () {
+    var t = document.getElementById('order-text').value;
+    function done() { copy.textContent = '{{ _("Copied")|escapejs }} ✓'; }
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(done);
+    else { var a = document.getElementById('order-text'); a.classList.remove('sr-only'); a.select(); document.execCommand('copy'); a.classList.add('sr-only'); done(); }
+  });
+})();
+</script>
+{% endblock %}

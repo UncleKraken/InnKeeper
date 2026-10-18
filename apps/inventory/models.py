@@ -195,3 +195,65 @@ class StockMove(models.Model):
     @property
     def value(self) -> Decimal:
         return (self.quantity * self.unit_cost).quantize(Decimal("0.01"))
+
+
+class PurchaseOrder(models.Model):
+    """What we ask a supplier to bring. Receiving it records a delivery and updates the stock."""
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        SENT = "sent", _("Ordered")
+        RECEIVED = "received", _("Received")
+        CANCELLED = "cancelled", _("Cancelled")
+
+    supplier = models.ForeignKey(
+        Supplier, null=True, blank=True, on_delete=models.SET_NULL, related_name="orders", verbose_name=_("supplier")
+    )
+    status = models.CharField(_("status"), max_length=10, choices=Status.choices, default=Status.DRAFT)
+    wanted_for = models.DateField(_("needed by"), null=True, blank=True)
+    note = models.CharField(_("note for the supplier"), max_length=255, blank=True)
+    delivery = models.ForeignKey(
+        Delivery, null=True, blank=True, on_delete=models.SET_NULL, related_name="purchase_orders"
+    )
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    received_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("purchase order")
+        verbose_name_plural = _("purchase orders")
+        ordering = ["-created_at", "-id"]
+
+    def __str__(self) -> str:
+        return f"{_('Order')} {self.number} {self.supplier or ''}".strip()
+
+    @property
+    def number(self) -> str:
+        return f"PO-{self.pk:04d}" if self.pk else "PO"
+
+    @property
+    def is_open(self) -> bool:
+        return self.status in (self.Status.DRAFT, self.Status.SENT)
+
+    @property
+    def badge(self) -> str:
+        return {"draft": "closed", "sent": "warning", "received": "success", "cancelled": "danger"}[self.status]
+
+    @property
+    def total(self) -> Decimal:
+        return sum((ln.total for ln in self.lines.all()), ZERO)
+
+
+class PurchaseOrderLine(models.Model):
+    order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name="lines")
+    stock_item = models.ForeignKey(StockItem, on_delete=models.PROTECT, related_name="+", verbose_name=_("item"))
+    quantity = models.DecimalField(_("quantity"), validators=[MinValueValidator(Decimal("0.001"))], **QTY)
+    unit_cost = models.DecimalField(_("expected price per unit"), default=ZERO, **COST)
+
+    class Meta:
+        ordering = ["id"]
+
+    @property
+    def total(self) -> Decimal:
+        return (self.quantity * self.unit_cost).quantize(Decimal("0.01"))

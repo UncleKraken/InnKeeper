@@ -209,6 +209,13 @@ def day_close(request):
                 },
             )
             audit(request.user, "day.close", f"{day}: expected {expected}, counted {d['counted_cash']}", obj)
+            from apps.core.models import HotelSettings
+
+            if HotelSettings.load().summary_recipients:
+                from . import summary
+
+                if summary.send(day, force=True):
+                    messages.info(request, _("The daily summary was emailed to %(to)s.") % {"to": HotelSettings.load().summary_to})
             diff = obj.difference
             if diff == 0:
                 messages.success(request, _("Day closed. The cash matches exactly."))
@@ -273,6 +280,8 @@ def sales(request):
     busy_hours = [(h, v) for h, v in hours.items() if v]
     hour_max = max([v for _h, v in busy_hours] + [Decimal("1")])
     revenue = sum((r["total"] for r in staff_rows), ZERO)
+    if request.GET.get("format") == "xlsx":
+        return _sales_xlsx(start, end, lines, orders, staff_rows, busy_hours, revenue)
     return render(
         request,
         "finance/sales.html",
@@ -288,4 +297,40 @@ def sales(request):
             "avg_bill": revenue / orders.count() if orders.count() else ZERO,
             "discounts": orders.aggregate(t=Sum("discount"))["t"] or ZERO,
         },
+    )
+
+
+def _sales_xlsx(start, end, lines, orders, staff_rows, busy_hours, revenue):
+    from apps.core import spreadsheet
+
+    count = orders.count()
+    items = (
+        lines.values("name", "order__outlet__name")
+        .annotate(qty=Sum("quantity"), revenue=Sum(F("quantity") * F("unit_price")))
+        .order_by("-revenue")
+    )
+    summary = [
+        [_("From"), start],
+        [_("To"), end],
+        [_("Outlet sales"), revenue],
+        [_("Bills"), count],
+        [_("Average bill"), (revenue / count).quantize(Decimal("0.01")) if count else ZERO],
+        [_("Discounts given"), orders.aggregate(t=Sum("discount"))["t"] or ZERO],
+    ]
+    return spreadsheet.response(
+        f"sales-{start}-{end}",
+        spreadsheet.Sheet(_("Summary"), [_("Sales"), ""], summary, money=(1,), widths={0: 22, 1: 16}),
+        spreadsheet.Sheet(
+            _("Items"),
+            [_("Item"), _("Outlet"), _("Qty"), _("Sales")],
+            ([i["name"], i["order__outlet__name"], i["qty"], i["revenue"]] for i in items),
+            money=(3,),
+        ),
+        spreadsheet.Sheet(
+            _("By staff"),
+            [_("Staff"), _("Bills"), _("Average"), _("Sales")],
+            ([r["name"], r["count"], r["avg"].quantize(Decimal("0.01")), r["total"]] for r in staff_rows),
+            money=(2, 3),
+        ),
+        spreadsheet.Sheet(_("By hour"), [_("Hour"), _("Sales")], ([f"{h:02d}:00", v] for h, v in busy_hours), money=(1,)),
     )

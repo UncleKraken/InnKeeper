@@ -6,7 +6,8 @@
   <div><div class="eyebrow"><a href="{% url 'finance:dashboard' %}?from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}">{% icon "back" %} {% translate "Reports" %}</a></div><h1>{% translate "Ledger" %}</h1></div>
   <div class="actions">
     {% include "finance/_range.html" %}
-    <a class="btn" href="?type={{ kind }}&from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}&format=csv">{% translate "Export CSV" %}</a>
+    <a class="btn" href="?type={{ kind }}&from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}&format=xlsx">{% icon "download" %} {% translate "Excel" %}</a>
+    <a class="btn btn-secondary" href="?type={{ kind }}&from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}&format=csv">CSV</a>
   </div>
 </div>
 {% include "finance/_tabs.html" %}

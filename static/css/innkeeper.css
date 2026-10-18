@@ -832,3 +832,24 @@ dialog.sheet::backdrop { background: rgba(22, 32, 47, .45); }
   .bookings-table .row-actions { grid-column: 1 / -1; justify-content: flex-start; margin-top: .5rem; }
 }
 .fp-table:has(.p-booked), .plan-table:has(.p-booked), .table-tile:has(.p-booked) { border-color: var(--info); box-shadow: 0 0 0 2px var(--info-soft); }
+.demo-banner { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; }
+.demo-banner .icon { vertical-align: -2px; }
+
+/* Line editors (deliveries, orders to suppliers): one card per line on a phone */
+@media (max-width: 640px) {
+  #lines thead { display: none; }
+  #lines, #lines tbody, #lines tfoot { display: block; }
+  #lines tr.dl-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: .5rem; padding: .75rem 1rem; border-bottom: 1px solid var(--border); }
+  #lines tr.dl-row td { display: block; padding: 0; border: 0; }
+  #lines tr.dl-row td:first-child { grid-column: 1 / -1; }
+  #lines tr.dl-row td:first-child select { width: 100%; }
+  #lines tr.dl-row input.num { max-width: none !important; width: 100%; }
+  #lines tr.dl-row td.line-total { grid-column: 1 / 3; text-align: right; color: var(--muted); }
+  #lines tr.dl-row td:last-child { grid-row: 2; grid-column: 3; }
+  #lines tr.dl-row td:nth-child(2)::before { content: attr(data-label); display: block; font-size: .75rem; color: var(--muted); }
+  #lines tr.dl-row td:nth-child(3)::before { content: attr(data-label); display: block; font-size: .75rem; color: var(--muted); }
+  #lines tfoot tr { display: flex; justify-content: space-between; align-items: center; padding: .75rem 1rem; }
+  #lines tfoot td { display: block; padding: 0; border: 0; }
+  #lines tfoot td:empty { display: none; }
+}
+.send-help { margin: .75rem 0 0; font-size: .85rem; }

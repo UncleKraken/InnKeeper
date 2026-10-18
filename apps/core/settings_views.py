@@ -3,6 +3,7 @@
 import base64
 import secrets
 from pathlib import Path
+from datetime import timedelta
 from decimal import Decimal
 
 from django import forms
@@ -157,6 +158,24 @@ class EmailSettingsForm(StyledFormMixin, forms.ModelForm):
         widgets = {"smtp_password": forms.PasswordInput(render_value=True)}
 
 
+class SummarySettingsForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = HotelSettings
+        fields = ["summary_to", "summary_hour"]
+        widgets = {"summary_to": forms.TextInput(attrs={"placeholder": "owner@example.com", "data-full": "1"})}
+
+    def clean_summary_to(self):
+        from django.core.validators import validate_email
+
+        addresses = [a.strip() for a in self.cleaned_data["summary_to"].replace(";", ",").split(",") if a.strip()]
+        for a in addresses:
+            try:
+                validate_email(a)
+            except forms.ValidationError:
+                raise forms.ValidationError(_("“%(a)s” is not an email address.") % {"a": a})
+        return ", ".join(addresses)
+
+
 class PaymentSettingsForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = HotelSettings
@@ -238,6 +257,8 @@ class FiscalSettingsForm(StyledFormMixin, forms.ModelForm):
         if cleaned.get("fiscal_enabled"):
             if not self.instance.registered:
                 raise forms.ValidationError(_("Fiscalization is for businesses registered with the tax authority (Business details)."))
+            if self.instance.demo_data:
+                raise forms.ValidationError(_("Remove the sample data first (the banner at the top), then set up your own business."))
             if not self.instance.tax_id:
                 raise forms.ValidationError(_("Enter the NIPT in Business details first."))
             for f in ("fiscal_business_unit", "fiscal_tcr_code", "fiscal_software_code", "fiscal_operator_code"):
@@ -311,6 +332,8 @@ def settings_hub(request):
                 ctx["certificate"] = Certificate.from_settings(hs)
             except CertificateError as e:
                 ctx["certificate_error"] = str(e)
+        if tab == "email":
+            ctx["summary_form"] = SummarySettingsForm(instance=hs)
         if tab == "booking":
             from django.urls import reverse
 
@@ -505,6 +528,43 @@ def restore_confirm(request):
 
 @require_POST
 @module_required("management")
+def summary_settings(request):
+    hs = HotelSettings.load()
+    form = SummarySettingsForm(request.POST, instance=hs)
+    if form.is_valid():
+        form.save()
+        audit(request.user, "settings.summary", hs.summary_to or "-", hs)
+        messages.success(request, _("Settings saved."))
+    else:
+        for errors in form.errors.values():
+            for e in errors:
+                messages.error(request, e)
+    return redirect("/settings/?tab=email")
+
+
+@require_POST
+@module_required("management")
+def summary_send_now(request):
+    """Send the summary of the last business day now, to check how it looks."""
+    from apps.core.businessday import business_date
+    from apps.finance import summary
+
+    hs = HotelSettings.load()
+    if not hs.email_configured:
+        messages.error(request, _("Fill in and save the email settings first."))
+    elif not hs.summary_recipients:
+        messages.error(request, _("Add the email address the summary goes to first."))
+    else:
+        day = business_date() - timedelta(days=1)
+        if summary.send(day, force=True):
+            messages.success(request, _("Summary of %(d)s sent to %(to)s.") % {"d": day.strftime("%d.%m.%Y"), "to": hs.summary_to})
+        else:
+            messages.error(request, _("The email could not be sent. Check the server, port, security, username and password."))
+    return redirect("/settings/?tab=email")
+
+
+@require_POST
+@module_required("management")
 def email_test(request):
     from . import email
 
@@ -523,17 +583,21 @@ def email_test(request):
     return redirect("/settings/?tab=email")
 
 
-# ---------- Import from Excel (CSV) ----------
+# ---------- Import from Excel (.xlsx) or CSV ----------
 
 
 @module_required("management")
 def import_template(request, kind):
-    from . import importer
+    from . import importer, spreadsheet
 
     if kind not in importer.KINDS:
         raise Http404
-    response = HttpResponse("\ufeff" + importer.template_csv(kind), content_type="text/csv; charset=utf-8")
-    response["Content-Disposition"] = f'attachment; filename="innkeeper-{kind}.csv"'
+    if request.GET.get("format") == "csv":
+        response = HttpResponse("\ufeff" + importer.template_csv(kind), content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = f'attachment; filename="innkeeper-{kind}.csv"'
+        return response
+    response = HttpResponse(importer.template_xlsx(kind), content_type=spreadsheet.XLSX_TYPE)
+    response["Content-Disposition"] = f'attachment; filename="innkeeper-{kind}.xlsx"'
     return response
 
 
@@ -568,13 +632,11 @@ def import_file(request):
     if len(raw) > 5 * 1024 * 1024:
         messages.error(request, _("The file is too large (5 MB at most)."))
         return redirect("/settings/?tab=import")
-    if raw[:2] == b"PK":
-        messages.error(
-            request, _("This is an Excel file. In Excel choose File → Save as → “CSV UTF-8”, then upload that.")
-        )
+    if raw[:8] == b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1":
+        messages.error(request, _("This is an old Excel file (.xls). In Excel choose File → Save as → “Excel Workbook (.xlsx)”, then upload that."))
         return redirect("/settings/?tab=import")
     parsed = importer.parse(kind, raw)
-    name = f"import-{secrets.token_hex(6)}.csv"
+    name = f"import-{secrets.token_hex(6)}.{'xlsx' if raw[:2] == b'PK' else 'csv'}"
     (backup.backup_dir() / name).write_bytes(raw)
     cols = importer.KINDS[kind]["columns"]
     return render(

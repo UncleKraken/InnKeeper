@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Start with my own business" %}{% endblock %}
+{% block content %}
+<div class="wizard">
+<div class="page-header"><div><div class="eyebrow"><a href="{% url 'core:dashboard' %}">{% icon "back" %} {% translate "Dashboard" %}</a></div>
+  <h1>{% translate "Start with my own business" %}</h1>
+  <p>{% translate "This removes the sample hotel: rooms, guests, menus, sales, stock and everything typed in while trying it. Your own staff accounts stay, so you can still sign in. Then the setup starts." %}</p></div></div>
+<form method="post" class="card">{% csrf_token %}
+  <div class="card-body">
+    <label class="check"><input type="checkbox" name="confirm" value="1" required> {% translate "Yes, remove all the sample data" %}</label>
+  </div>
+  <div class="card-footer form-actions" style="margin-top:0"><a class="btn btn-secondary" href="{% url 'core:dashboard' %}">{% translate "Not yet" %}</a><button class="btn btn-danger">{% translate "Remove and start" %}</button></div>
+</form>
+</div>
+{% endblock %}

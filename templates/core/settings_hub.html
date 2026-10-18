@@ -130,6 +130,22 @@
       <span class="spacer">{% translate "Send a test email to yourself to check the settings." %}</span>
       <button class="btn btn-secondary">{% translate "Send test email" %}</button>
     </form>
+    <section class="card" style="margin-top:1.25rem">
+      <div class="card-header"><h2>{% translate "Daily summary for the owner" %}</h2>{% if hotel.summary_recipients %}{% translate "On" as l %}{% status_badge "success" l %}{% endif %}</div>
+      <form method="post" action="{% url 'core:summary_settings' %}" novalidate>{% csrf_token %}
+        <div class="card-body">
+          <p class="muted" style="margin-top:0">{% translate "Every morning, one short email with how the day before went: sales, money received by method, the cash count and any difference, discounts, voids, best sellers, rooms, and anything that needs attention. Useful when you are not on site." %}</p>
+          {% include "includes/form_fields.html" with form=summary_form %}
+        </div>
+        <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
+      </form>
+      {% if hotel.summary_recipients and hotel.email_configured %}
+      <form method="post" action="{% url 'core:summary_send_now' %}" class="card-footer row" style="margin-top:0">{% csrf_token %}
+        <span class="spacer muted">{% translate "See how it looks: send yesterday's summary now." %}</span>
+        <button class="btn btn-secondary">{% translate "Send now" %}</button>
+      </form>
+      {% endif %}
+    </section>
 
   {% elif tab == "fiscal" %}
     <form method="post" enctype="multipart/form-data" class="card" novalidate>{% csrf_token %}
@@ -182,17 +198,17 @@
     <section class="card">
       <div class="card-header"><h2>{% translate "Import from Excel" %}</h2></div>
       <div class="card-body">
-        <p class="muted" style="margin-top:0">{% translate "Bring in your menu, stock list or guest list from a spreadsheet instead of typing it. Download the template, fill it in Excel (one row per item), save it as “CSV UTF-8” and upload it. You will see a preview before anything is saved. Existing entries with the same name are updated, nothing is deleted." %}</p>
+        <p class="muted" style="margin-top:0">{% translate "Bring in your menu, stock list or guest list from a spreadsheet instead of typing it. Download the Excel template, fill it in (one row per item), save it and upload it. CSV files work too. You will see a preview before anything is saved. Existing entries with the same name are updated, nothing is deleted." %}</p>
         <form method="post" action="{% url 'core:import_file' %}" enctype="multipart/form-data" class="form-grid">{% csrf_token %}
           <div class="field"><label for="kind">{% translate "What" %}</label><select class="input" id="kind" name="kind">{% for k, label, cols, req in import_kinds %}<option value="{{ k }}">{{ label }}</option>{% endfor %}</select></div>
-          <div class="field"><label for="file">{% translate "File (.csv)" %}</label><input class="input" id="file" type="file" name="file" accept=".csv,text/csv" required></div>
+          <div class="field"><label for="file">{% translate "File (Excel .xlsx or .csv)" %}</label><input class="input" id="file" type="file" name="file" accept=".xlsx,.xlsm,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required></div>
           <div class="full"><button class="btn">{% icon "upload" %} {% translate "Show preview" %}</button></div>
         </form>
       </div>
       <div class="table-wrap"><table class="table table-sm">
         <thead><tr><th>{% translate "What" %}</th><th>{% translate "Columns" %}</th><th></th></tr></thead>
         <tbody>{% for k, label, cols, req in import_kinds %}
-          <tr><td><strong>{{ label }}</strong></td><td class="mono" style="font-size:.8rem">{% for c in cols %}{% if c in req %}<strong>{{ c }}</strong>{% else %}{{ c }}{% endif %}{% if not forloop.last %}; {% endif %}{% endfor %}</td><td class="num"><a class="btn btn-ghost btn-sm" href="{% url 'core:import_template' k %}">{% icon "download" %} {% translate "Template" %}</a></td></tr>
+          <tr><td><strong>{{ label }}</strong></td><td class="mono" style="font-size:.8rem">{% for c in cols %}{% if c in req %}<strong>{{ c }}</strong>{% else %}{{ c }}{% endif %}{% if not forloop.last %}; {% endif %}{% endfor %}</td><td class="num" style="white-space:nowrap"><a class="btn btn-ghost btn-sm" href="{% url 'core:import_template' k %}">{% icon "download" %} {% translate "Excel template" %}</a> <a class="btn btn-ghost btn-sm" href="{% url 'core:import_template' k %}?format=csv">CSV</a></td></tr>
         {% endfor %}</tbody>
       </table></div>
       <div class="card-footer muted" style="font-size:.85rem">{% translate "Bold columns are required. Albanian column names (emri, çmimi, kategoria…) work too." %}</div>

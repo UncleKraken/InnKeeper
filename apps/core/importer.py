@@ -1,5 +1,5 @@
 """
-Import lists from Excel (saved as CSV): menu items, stock items and guests.
+Import lists from Excel (.xlsx) or CSV: menu items, stock items and guests.
 
 Column names are matched loosely in English or Albanian ("name"/"emri", "price"/"çmimi" …).
 Rows are added or updated by name, never deleted. Nothing is saved until the preview is confirmed.
@@ -93,6 +93,34 @@ def template_csv(kind: str) -> str:
     return ";".join(KINDS[kind]["columns"]) + "\n"
 
 
+EXAMPLES = {
+    "menu": ["Bar", "Coffee", "Espresso", "100", "Espresso", "Double shot", "1"],
+    "stock": ["Coca-Cola 0.33", "drinks", "pcs", "48", "24", "60", "Supplier name"],
+    "guests": ["Arben", "Hoxha", "arben@example.com", "+355691234567", "AL", "id_card", "AB1234567", "31.12.1990", ""],
+}
+
+
+def template_xlsx(kind: str) -> bytes:
+    """A workbook with the column names to fill in, and a second sheet explaining each column with an example."""
+    from . import spreadsheet
+
+    spec = KINDS[kind]
+    examples = EXAMPLES.get(kind, [])
+    help_rows = [
+        [
+            c,
+            _("required") if c in spec["required"] else _("optional"),
+            examples[i] if i < len(examples) else "",
+            ", ".join(a for a in spec["aliases"].get(c, [])[:4] if a != c),
+        ]
+        for i, c in enumerate(spec["columns"])
+    ]
+    return spreadsheet.workbook_bytes(
+        spreadsheet.Sheet(str(spec["label"]), spec["columns"], [], widths={i: 18 for i in range(len(spec["columns"]))}),
+        spreadsheet.Sheet(_("Help"), [_("Column"), _("Required"), _("Example"), _("Also accepted as")], help_rows),
+    )
+
+
 def _decode(raw: bytes) -> str:
     for enc in ("utf-8-sig", "cp1252", "latin-1"):
         try:
@@ -127,8 +155,12 @@ def _bool(value: str) -> bool:
     return _key(value) not in {"0", "no", "jo", "false", "f", "n"}
 
 
-def parse(kind: str, raw: bytes) -> Parsed:
-    spec = KINDS[kind]
+def _rows(raw: bytes):
+    """Rows of text from an Excel workbook or a CSV file (any of ; , tab)."""
+    from . import spreadsheet
+
+    if spreadsheet.is_xlsx(raw):
+        return iter(spreadsheet.read_rows(raw))
     text = _decode(raw)
     sample = text[:4096]
     try:
@@ -136,11 +168,22 @@ def parse(kind: str, raw: bytes) -> Parsed:
     except csv.Error:
         dialect = csv.excel
         dialect.delimiter = ";" if sample.count(";") > sample.count(",") else ","
-    reader = csv.reader(io.StringIO(text), dialect)
+    return csv.reader(io.StringIO(text), dialect)
+
+
+def parse(kind: str, raw: bytes) -> Parsed:
+    spec = KINDS[kind]
     result = Parsed(kind)
     try:
-        header = next(reader)
-    except StopIteration:
+        reader = _rows(raw)
+    except ValueError:
+        result.errors.append(_("This Excel file can't be read. Open it in Excel and save it again as .xlsx."))
+        return result
+    header = []
+    for header in reader:  # skip blank lines above the header
+        if any(str(c).strip() for c in header):
+            break
+    if not any(str(c).strip() for c in header):
         result.errors.append(_("The file is empty."))
         return result
     lookup = {}
@@ -159,9 +202,9 @@ def parse(kind: str, raw: bytes) -> Parsed:
         result.errors.append(_("Missing columns: %(c)s") % {"c": ", ".join(missing)})
         return result
     for n, row in enumerate(reader, start=2):
-        if not any(cell.strip() for cell in row):
+        if not any(str(cell).strip() for cell in row):
             continue
-        values = {col: (row[i].strip() if i < len(row) else "") for col, i in lookup.items()}
+        values = {col: (str(row[i]).strip() if i < len(row) else "") for col, i in lookup.items()}
         try:
             result.rows.append(_clean(kind, values))
         except (ValueError, InvalidOperation) as e:

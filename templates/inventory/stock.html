@@ -5,8 +5,10 @@
 <div class="page-header">
   <div><div class="eyebrow">{% translate "Stock" %}</div><h1>{% translate "Stock" %}</h1></div>
   <div class="actions">
+    <a class="btn btn-secondary" href="?q={{ q|urlencode }}&group={{ group }}{% if low_only %}&low=1{% endif %}&format=xlsx">{% icon "download" %} {% translate "Excel" %}</a>
     <a class="btn btn-secondary" href="{% url 'inventory:count_create' %}">{% icon "list" %} {% translate "Count stock" %}</a>
     <a class="btn btn-secondary" href="{% url 'inventory:item_create' %}">{% icon "plus" %} {% translate "Add stock item" %}</a>
+    {% if low_count %}<a class="btn btn-secondary" href="{% url 'inventory:order_list' %}">{% icon "send" %} {% translate "Order from suppliers" %}</a>{% endif %}
     <a class="btn" href="{% url 'inventory:delivery_create' %}">{% icon "truck" %} {% translate "Record delivery" %}</a>
   </div>
 </div>

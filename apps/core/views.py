@@ -1,6 +1,7 @@
 from datetime import timedelta
 from decimal import Decimal
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -272,8 +273,44 @@ def setup_wizard(request):
             "has_rooms": Room.objects.exists(),
             "existing_outlets": set(Outlet.objects.values_list("kind", flat=True)),
             "rerun": hs.setup_completed,
+            "can_sample": not hs.setup_completed and _sample_empty(),
         },
     )
+
+
+@require_POST
+@module_required("management")
+def sample_load(request):
+    from . import sample
+    from .exceptions import BusinessError
+
+    try:
+        sample.load(request.user)
+    except BusinessError:
+        messages.error(request, _("Sample data can only be added to an empty InnKeeper."))
+        return redirect("core:setup")
+    messages.success(request, _("Sample data added. Look around: nothing here is real. When you're ready, use the banner at the top to start with your own business."))
+    return redirect("core:dashboard")
+
+
+@module_required("management")
+def sample_remove(request):
+    from . import sample
+    from .exceptions import BusinessError
+
+    if not HotelSettings.load().demo_data:
+        return redirect("core:dashboard")
+    if request.method == "POST":
+        if request.POST.get("confirm") != "1":
+            messages.error(request, _("Tick the box to confirm."))
+        else:
+            try:
+                sample.remove(request.user)
+            except BusinessError:
+                return redirect("core:dashboard")
+            messages.success(request, _("The sample data is gone. Now set up your own business."))
+            return redirect("core:setup")
+    return render(request, "core/sample_remove.html")
 
 
 @module_required("management")
@@ -349,3 +386,9 @@ def dismiss_onboarding(request):
     hs.onboarding_dismissed = True
     hs.save()
     return redirect("core:dashboard")
+
+
+def _sample_empty() -> bool:
+    from . import sample
+
+    return sample.is_empty()

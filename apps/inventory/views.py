@@ -31,6 +31,7 @@ from .models import (
 
 TABS = [
     ("inventory:stock", _("Stock")),
+    ("inventory:order_list", _("Orders")),
     ("inventory:delivery_list", _("Deliveries")),
     ("inventory:recipes", _("Recipes")),
     ("inventory:count_list", _("Counts")),
@@ -70,6 +71,22 @@ def stock(request):
     if low_only:
         items = [i for i in items if i.is_low]
     all_active = StockItem.objects.filter(is_active=True)
+    if request.GET.get("format") == "xlsx":
+        from apps.core import spreadsheet
+
+        return spreadsheet.response(
+            f"stock-{businessday.business_date()}",
+            spreadsheet.Sheet(
+                _("Stock"),
+                [_("Name"), _("Group"), _("Unit"), _("In stock"), _("Reorder level"), _("Average cost"), _("Value"), _("Supplier"), _("Running low")],
+                (
+                    [i.name, i.get_group_display(), i.get_unit_display(), i.on_hand, i.min_level, i.cost, i.value,
+                     i.supplier.name if i.supplier_id else "", _("yes") if i.is_low else ""]
+                    for i in items
+                ),
+                money=(5, 6),
+            ),
+        )
     return render(
         request,
         "inventory/stock.html",
@@ -215,7 +232,16 @@ class DeliveryHeaderForm(StyledFormMixin, forms.Form):
 
 @module_required("inventory")
 def delivery_create(request):
-    form = DeliveryHeaderForm(request.POST or None)
+    from .models import PurchaseOrder
+
+    po = None
+    po_id = request.GET.get("po") or request.POST.get("po")
+    if po_id and str(po_id).isdigit():
+        po = PurchaseOrder.objects.filter(
+            pk=po_id, status__in=[PurchaseOrder.Status.DRAFT, PurchaseOrder.Status.SENT]
+        ).select_related("supplier").first()
+    initial = {"supplier": po.supplier_id, "reference": po.number} if po else None
+    form = DeliveryHeaderForm(request.POST or None, initial=initial)
     items = StockItem.objects.filter(is_active=True)
     rows = []
     if request.method == "POST":
@@ -247,17 +273,26 @@ def delivery_create(request):
                     record_expense=d["record_expense"],
                     paid_with=d["paid_with"],
                 )
+                if po:
+                    from .purchasing import received
+
+                    received(po, delivery, request.user)
                 messages.success(request, _("Delivery saved. Stock updated."))
                 return redirect("inventory:delivery_detail", pk=delivery.pk)
         except BusinessError as e:
             messages.error(request, str(e))
     preselect = request.GET.get("item", "")
+    if not rows and po:
+        rows = [
+            {"item": str(ln.stock_item_id), "qty": f"{ln.quantity.normalize():f}", "cost": f"{ln.unit_cost.normalize():f}"}
+            for ln in po.lines.all()
+        ] + [{"item": "", "qty": "", "cost": ""}]
     if not rows:
         rows = [{"item": preselect, "qty": "", "cost": ""}] + [{"item": "", "qty": "", "cost": ""} for _i in range(4)]
     return render(
         request,
         "inventory/delivery_form.html",
-        {"form": form, "items": items, "rows": rows, "tabs": TABS, "tab": "inventory:delivery_list"},
+        {"form": form, "items": items, "rows": rows, "po": po, "tabs": TABS, "tab": "inventory:delivery_list"},
     )
 
 

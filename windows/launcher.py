@@ -162,6 +162,13 @@ def daily_jobs(log, stop: threading.Event) -> None:
         except Exception as e:
             log(f"Daily job error: {e}")
         try:
+            from apps.finance.summary import run as send_summary_if_due
+
+            if send_summary_if_due():
+                log("Daily summary emailed.")
+        except Exception as e:
+            log(f"Daily summary error: {e}")
+        try:
             from apps.frontdesk.ical import sync_all
 
             for feed, r in sync_all().items():

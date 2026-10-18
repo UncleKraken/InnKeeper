@@ -4,7 +4,7 @@
 {% block content %}
 <div class="page-header">
   <div><div class="eyebrow">{% translate "Finance" %}</div><h1>{% translate "Sales" %}</h1><p>{{ start|date:"d.m.Y" }} – {{ end|date:"d.m.Y" }}</p></div>
-  <div class="actions">{% include "finance/_range.html" %}</div>
+  <div class="actions">{% include "finance/_range.html" %}<a class="btn btn-secondary" href="?from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}&format=xlsx">{% icon "download" %} {% translate "Excel" %}</a></div>
 </div>
 {% include "finance/_tabs.html" %}
 <div class="grid grid-4" style="margin-bottom:1.25rem">

@@ -1,0 +1,36 @@
+{% load static i18n innkeeper %}<!doctype html>
+{% get_current_language as LANG %}
+<html lang="{{ LANG }}">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ po.number }} · {{ hotel.name }}</title>
+  <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
+</head>
+<body style="background:#eceae6">
+<div class="no-print" style="text-align:center; padding:1rem"><button class="btn" onclick="window.print()">{% translate "Print" %}</button></div>
+<div class="doc card">
+  <div class="doc-head">
+    <div>
+      {% if hotel.logo %}<img src="{{ hotel.logo }}" alt="" style="max-height:70px; max-width:220px; margin-bottom:.6rem">{% endif %}
+      <div class="doc-title">{{ hotel.legal_name|default:hotel.name }}</div>
+      <div class="muted">{{ hotel.address }}<br>{% if hotel.phone %}{{ hotel.phone }} · {% endif %}{{ hotel.email }}{% if hotel.tax_id and hotel.registered %}<br>NIPT: {{ hotel.tax_id }}{% endif %}</div>
+    </div>
+    <div style="text-align:right">
+      <div class="doc-title">{% translate "Purchase order" %}</div>
+      <div class="mono">{{ po.number }}</div>
+      <div class="muted">{{ po.created_at|date:"d.m.Y" }}</div>
+    </div>
+  </div>
+  <div class="grid grid-2" style="margin-bottom:1.5rem">
+    <div><div class="muted">{% translate "Supplier" %}</div><strong>{{ po.supplier|default:"—" }}</strong>{% if po.supplier.tax_id %}<br>NIPT: {{ po.supplier.tax_id }}{% endif %}{% if po.supplier.phone %}<br>{{ po.supplier.phone }}{% endif %}</div>
+    {% if po.wanted_for %}<div><div class="muted">{% translate "Needed by" %}</div><strong>{{ po.wanted_for|date:"d.m.Y" }}</strong></div>{% endif %}
+  </div>
+  <table class="table">
+    <thead><tr><th>{% translate "Item" %}</th><th class="num">{% translate "Quantity" %}</th><th>{% translate "Unit" %}</th><th class="num">{% translate "Expected price" %}</th><th class="num">{% translate "Amount" %}</th></tr></thead>
+    <tbody>{% for ln in lines %}<tr><td>{{ ln.stock_item.name }}</td><td class="num">{{ ln.quantity|floatformat:"-3" }}</td><td>{{ ln.stock_item.get_unit_display }}</td><td class="num">{% if ln.unit_cost %}{{ ln.unit_cost|money }}{% endif %}</td><td class="num">{% if ln.unit_cost %}{{ ln.total|money }}{% endif %}</td></tr>{% endfor %}</tbody>
+    {% if po.total %}<tfoot><tr><td colspan="4">{% translate "Expected total" %}</td><td class="num">{{ po.total|money }}</td></tr></tfoot>{% endif %}
+  </table>
+  {% if po.note %}<p style="margin-top:1.5rem; white-space:pre-line">{{ po.note }}</p>{% endif %}
+</div>
+</body>
+</html>

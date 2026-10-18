@@ -99,6 +99,7 @@
     </header>
     <main class="content">
       {% if update_available %}<div class="alert alert-info no-print" style="margin-bottom:1rem">{% blocktranslate with v=update_available.version %}A new version of InnKeeper ({{ v }}) is available.{% endblocktranslate %} <a href="{% url 'core:update' %}">{% translate "See what's new and update" %}</a></div>{% endif %}
+      {% if hotel.demo_data %}<div class="alert alert-warning no-print demo-banner" style="margin-bottom:1rem"><span>{% icon "eye" %} <strong>{% translate "Sample data" %}</strong> · {% translate "Nothing here is real. Try anything you like." %}</span>{% if user.is_manager %} <a class="btn btn-sm" href="{% url 'core:sample_remove' %}">{% translate "Start with my own business" %}</a>{% endif %}</div>{% endif %}
       {% include "includes/messages.html" %}
       {% block content %}{% endblock %}
     </main>

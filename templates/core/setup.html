@@ -11,6 +11,12 @@
     </div>
   </div>
 
+  {% if can_sample %}
+  <form method="post" action="{% url 'core:sample_load' %}" class="card card-body row" style="margin-bottom:1.25rem; flex-wrap:wrap; gap:.75rem">{% csrf_token %}
+    <div class="spacer" style="min-width:16rem"><strong>{% translate "Just looking around?" %}</strong><div class="muted" style="font-size:.9rem">{% translate "Fill InnKeeper with a sample hotel, restaurant, bar and spa to see every screen working. You can remove it with one button and start for real." %}</div></div>
+    <button class="btn btn-secondary">{% icon "eye" %} {% translate "Try it with sample data" %}</button>
+  </form>
+  {% endif %}
   <ol class="steps" id="steps">
     <li class="active">{% translate "Business" %}</li>
     <li>{% translate "Details" %}</li>

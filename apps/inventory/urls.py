@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import purchasing, views
 
 app_name = "inventory"
 
@@ -19,6 +19,12 @@ urlpatterns = [
     path("recipes/<int:item_id>/", views.recipe_edit, name="recipe_edit"),
     path("recipes/<int:item_id>/track/", views.recipe_track, name="recipe_track"),
     path("usage/", views.usage, name="usage"),
+    path("orders/", purchasing.order_list, name="order_list"),
+    path("orders/new/", purchasing.order_create, name="order_create"),
+    path("orders/low-stock/", purchasing.order_from_low_stock, name="order_low_stock"),
+    path("orders/<int:pk>/", purchasing.order_detail, name="order_detail"),
+    path("orders/<int:pk>/print/", purchasing.order_print, name="order_print"),
+    path("orders/<int:pk>/<str:action>/", purchasing.order_action, name="order_action"),
     path("suppliers/", views.SupplierList.as_view(), name="supplier_list"),
     path("suppliers/new/", views.SupplierCreate.as_view(), name="supplier_create"),
     path("suppliers/<int:pk>/", views.SupplierEdit.as_view(), name="supplier_edit"),

@@ -1,0 +1,89 @@
+{% load i18n innkeeper %}<!doctype html>
+<html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#1d2430">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6"><tr><td align="center" style="padding:16px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:10px">
+  <tr><td style="padding:20px 20px 4px">
+    <div style="font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em">{{ hotel.name }} · {% translate "Daily summary" %}</div>
+    <div style="font-size:20px;font-weight:bold;margin-top:4px">{{ day|date:"l, d.m.Y" }}</div>
+  </td></tr>
+
+  <tr><td style="padding:12px 20px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="padding:12px;background:#f9fafb;border-radius:8px" width="50%">
+          <div style="font-size:12px;color:#6b7280">{% translate "Sales" %}</div>
+          <div style="font-size:22px;font-weight:bold">{{ s.revenue|money }}</div>
+          {% if change is not None %}<div style="font-size:12px;color:{% if change >= 0 %}#15803d{% else %}#b91c1c{% endif %}">{% if change >= 0 %}+{% endif %}{{ change }}% {% translate "vs. a week ago" %} ({{ week_ago|money }})</div>{% endif %}
+        </td>
+        <td width="12"></td>
+        <td style="padding:12px;background:#f9fafb;border-radius:8px" width="50%">
+          <div style="font-size:12px;color:#6b7280">{% translate "Money received" %}</div>
+          <div style="font-size:22px;font-weight:bold">{{ s.received|money }}</div>
+          <div style="font-size:12px;color:#6b7280">{% blocktranslate count n=s.receipt_count %}{{ n }} bill{% plural %}{{ n }} bills{% endblocktranslate %}</div>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+
+  <tr><td style="padding:4px 20px">
+    <table role="presentation" width="100%" cellpadding="6" cellspacing="0" style="font-size:14px;border-collapse:collapse">
+      {% for label, amount in s.method_rows %}<tr><td style="border-bottom:1px solid #eef0f3">{{ label }}</td><td align="right" style="border-bottom:1px solid #eef0f3">{{ amount|money }}</td></tr>{% endfor %}
+      {% if close %}
+      <tr><td style="border-bottom:1px solid #eef0f3"><strong>{% translate "Cash count" %}</strong> <span style="color:#6b7280">({{ close.closed_by|default:"" }})</span></td>
+          <td align="right" style="border-bottom:1px solid #eef0f3;{% if close.difference %}color:#b91c1c;font-weight:bold{% else %}color:#15803d{% endif %}">{% if close.difference %}{% translate "difference" %} {{ close.difference|money }}{% else %}{% translate "matches" %}{% endif %}</td></tr>
+      {% else %}
+      <tr><td colspan="2" style="border-bottom:1px solid #eef0f3;color:#b45309">{% translate "The day was not closed (no cash count)." %}</td></tr>
+      {% endif %}
+      {% if s.discounts %}<tr><td style="border-bottom:1px solid #eef0f3">{% translate "Discounts given" %}</td><td align="right" style="border-bottom:1px solid #eef0f3">{{ s.discounts|money }}</td></tr>{% endif %}
+      {% if voided_count %}<tr><td style="border-bottom:1px solid #eef0f3">{% translate "Voided" %} ({{ voided_count }})</td><td align="right" style="border-bottom:1px solid #eef0f3;color:#b91c1c">{{ voided_total|money }}</td></tr>{% endif %}
+      {% if s.voids %}<tr><td style="border-bottom:1px solid #eef0f3">{% translate "Cancelled bills" %}</td><td align="right" style="border-bottom:1px solid #eef0f3;color:#b91c1c">{{ s.voids }}</td></tr>{% endif %}
+      {% if s.on_account %}<tr><td style="border-bottom:1px solid #eef0f3">{% translate "Sold on account" %}</td><td align="right" style="border-bottom:1px solid #eef0f3">{{ s.on_account|money }}</td></tr>{% endif %}
+      {% if tips %}<tr><td style="border-bottom:1px solid #eef0f3">{% translate "Tips" %}</td><td align="right" style="border-bottom:1px solid #eef0f3">{{ tips|money }}</td></tr>{% endif %}
+      {% if s.cash_expenses %}<tr><td style="border-bottom:1px solid #eef0f3">{% translate "Cash paid out" %}</td><td align="right" style="border-bottom:1px solid #eef0f3">{{ s.cash_expenses|money }}</td></tr>{% endif %}
+    </table>
+  </td></tr>
+
+  {% for sh in shift_differences %}{% if forloop.first %}<tr><td style="padding:12px 20px 0"><div style="font-weight:bold;font-size:14px">{% translate "Shifts with a cash difference" %}</div><table role="presentation" width="100%" cellpadding="6" cellspacing="0" style="font-size:14px;border-collapse:collapse">{% endif %}
+    <tr><td style="border-bottom:1px solid #eef0f3">{{ sh.user.get_full_name|default:sh.user.username }}</td><td align="right" style="border-bottom:1px solid #eef0f3;color:#b91c1c">{{ sh.difference|money }}</td></tr>
+  {% if forloop.last %}</table></td></tr>{% endif %}{% endfor %}
+
+  {% if s.departments|length > 1 %}
+  <tr><td style="padding:12px 20px 0">
+    <div style="font-weight:bold;font-size:14px">{% translate "By department" %}</div>
+    <table role="presentation" width="100%" cellpadding="6" cellspacing="0" style="font-size:14px;border-collapse:collapse">
+      {% for name, amount in s.departments %}<tr><td style="border-bottom:1px solid #eef0f3">{{ name }}</td><td align="right" style="border-bottom:1px solid #eef0f3">{{ amount|money }}</td></tr>{% endfor %}
+    </table>
+  </td></tr>
+  {% endif %}
+
+  {% if top %}
+  <tr><td style="padding:12px 20px 0">
+    <div style="font-weight:bold;font-size:14px">{% translate "Best sellers" %}</div>
+    <table role="presentation" width="100%" cellpadding="6" cellspacing="0" style="font-size:14px;border-collapse:collapse">
+      {% for i in top %}<tr><td style="border-bottom:1px solid #eef0f3">{{ i.qty }} × {{ i.name }}</td><td align="right" style="border-bottom:1px solid #eef0f3">{{ i.total|money }}</td></tr>{% endfor %}
+    </table>
+  </td></tr>
+  {% endif %}
+
+  {% if rooms %}
+  <tr><td style="padding:12px 20px 0">
+    <div style="font-weight:bold;font-size:14px">{% translate "Rooms" %}</div>
+    <p style="font-size:14px;margin:6px 0">{% blocktranslate with o=occupied r=rooms p=occupancy %}{{ o }} of {{ r }} rooms occupied ({{ p }}%).{% endblocktranslate %}
+    {% blocktranslate with a=arrivals d=departures %}Next day: {{ a }} arrivals, {{ d }} departures.{% endblocktranslate %}</p>
+  </td></tr>
+  {% endif %}
+
+  {% if warnings %}
+  <tr><td style="padding:12px 20px 0">
+    {% for w in warnings %}<div style="font-size:14px;background:#fef3c7;color:#92400e;border-radius:6px;padding:8px 10px;margin-bottom:6px">⚠ {{ w }}</div>{% endfor %}
+  </td></tr>
+  {% endif %}
+
+  <tr><td style="padding:16px 20px 20px;font-size:12px;color:#6b7280">
+    {% if link %}<a href="{{ link }}" style="color:#2563eb">{% translate "Open the day in InnKeeper" %}</a><br>{% endif %}
+    {% translate "Sent by InnKeeper. Change or stop it in Settings → Email." %}
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>

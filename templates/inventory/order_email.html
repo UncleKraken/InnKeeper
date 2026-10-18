@@ -1,0 +1,12 @@
+{% load i18n innkeeper %}<!doctype html>
+<html><body style="font-family:Arial,Helvetica,sans-serif;color:#1d2430">
+<p>{% translate "Hello," %}</p>
+<p>{% blocktranslate with n=po.number %}Please send us the following (order {{ n }}):{% endblocktranslate %}</p>
+<table cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-size:14px">
+  <tr style="background:#f3f4f6"><th align="left">{% translate "Item" %}</th><th align="right">{% translate "Quantity" %}</th><th align="left">{% translate "Unit" %}</th></tr>
+  {% for ln in lines %}<tr><td style="border-bottom:1px solid #e5e7eb">{{ ln.stock_item.name }}</td><td align="right" style="border-bottom:1px solid #e5e7eb">{{ ln.quantity|floatformat:"-3" }}</td><td style="border-bottom:1px solid #e5e7eb">{{ ln.stock_item.get_unit_display }}</td></tr>{% endfor %}
+</table>
+{% if po.wanted_for %}<p><strong>{% translate "Needed by" %}: {{ po.wanted_for|date:"d.m.Y" }}</strong></p>{% endif %}
+{% if po.note %}<p style="white-space:pre-line">{{ po.note }}</p>{% endif %}
+<p>{% translate "Thank you!" %}<br>{{ hotel.name }}{% if hotel.phone %}<br>{{ hotel.phone }}{% endif %}{% if hotel.address %}<br>{{ hotel.address }}{% endif %}</p>
+</body></html>

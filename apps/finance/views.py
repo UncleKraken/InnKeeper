@@ -152,6 +152,8 @@ def ledger(request):
     rows = rows.order_by("-business_date", "-id")
     if request.GET.get("format") == "csv":
         return _csv(rows, kind, start, end)
+    if request.GET.get("format") == "xlsx":
+        return _xlsx(rows, kind, start, end)
     return render(
         request,
         "finance/ledger.html",
@@ -159,79 +161,66 @@ def ledger(request):
     )
 
 
+def _table(rows, kind):
+    if kind == "payments":
+        header = ["date", "id", "method", "amount", "reference", "folio", "guest", "order", "outlet", "staff", "voided", "void_reason"]
+        body = (
+            [
+                p.business_date,
+                p.pk,
+                p.method,
+                p.amount,
+                p.reference,
+                p.folio.number if p.folio_id else "",
+                p.folio.reservation.guest if p.folio_id else "",
+                p.order_id or "",
+                p.order.outlet if p.order_id else "",
+                p.created_by or "",
+                int(p.voided),
+                p.void_reason,
+            ]
+            for p in rows
+        )
+        return header, body, (3,)
+    header = [
+        "date", "id", "department", "description", "quantity", "unit_price", "amount",
+        "folio", "guest", "order", "staff", "voided", "void_reason",
+    ]
+    body = (
+        [
+            c.business_date,
+            c.pk,
+            c.department,
+            c.description,
+            c.quantity,
+            c.unit_price,
+            c.amount,
+            c.folio.number if c.folio_id else "",
+            c.folio.reservation.guest if c.folio_id else "",
+            c.order_id or "",
+            c.created_by or "",
+            int(c.voided),
+            c.void_reason,
+        ]
+        for c in rows
+    )
+    return header, body, (5, 6)
+
+
+def _xlsx(rows, kind, start, end) -> HttpResponse:
+    from apps.core import spreadsheet
+
+    header, body, money = _table(rows, kind)
+    return spreadsheet.response(f"innkeeper-{kind}-{start}-{end}", spreadsheet.Sheet(kind, header, body, money=money))
+
+
 def _csv(rows, kind, start, end) -> HttpResponse:
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = f'attachment; filename="innkeeper-{kind}-{start}-{end}.csv"'
-    response.write("﻿")  # so Excel opens UTF-8 (ë, ç) correctly
+    response.write("\ufeff")  # so Excel opens UTF-8 (ë, ç) correctly
     writer = SafeCSVWriter(response)
-    if kind == "payments":
-        writer.writerow(
-            [
-                "date",
-                "id",
-                "method",
-                "amount",
-                "reference",
-                "folio",
-                "guest",
-                "order",
-                "outlet",
-                "staff",
-                "voided",
-                "void_reason",
-            ]
-        )
-        for p in rows:
-            writer.writerow(
-                [
-                    p.business_date,
-                    p.pk,
-                    p.method,
-                    p.amount,
-                    p.reference,
-                    p.folio.number if p.folio_id else "",
-                    p.folio.reservation.guest if p.folio_id else "",
-                    p.order_id or "",
-                    p.order.outlet if p.order_id else "",
-                    p.created_by or "",
-                    int(p.voided),
-                    p.void_reason,
-                ]
-            )
-    else:
-        writer.writerow(
-            [
-                "date",
-                "id",
-                "department",
-                "description",
-                "quantity",
-                "unit_price",
-                "amount",
-                "folio",
-                "guest",
-                "order",
-                "staff",
-                "voided",
-                "void_reason",
-            ]
-        )
-        for c in rows:
-            writer.writerow(
-                [
-                    c.business_date,
-                    c.pk,
-                    c.department,
-                    c.description,
-                    c.quantity,
-                    c.unit_price,
-                    c.amount,
-                    c.folio.number if c.folio_id else "",
-                    c.folio.reservation.guest if c.folio_id else "",
-                    c.order_id or "",
-                    c.created_by or "",
-                    int(c.voided),
-                    c.void_reason,
-                ]
-            )
+    header, body, _money = _table(rows, kind)
+    writer.writerow(header)
+    for row in body:
+        writer.writerow(row)
     return response

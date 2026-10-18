@@ -70,6 +70,8 @@ FULL_MODELS = [
     "inventory.Delivery",
     "inventory.StockCount",
     "inventory.StockMove",
+    "inventory.PurchaseOrder",
+    "inventory.PurchaseOrderLine",
     "payments.PaymentLink",
     "fiscal.FiscalCounter",
     "fiscal.FiscalDocument",
@@ -92,6 +94,8 @@ SETTINGS_FIELDS_SKIP = {
     "fiscal_certificate",
     "fiscal_certificate_password",
     "fiscal_since",
+    "summary_sent_for",
+    "demo_data",
     # The copy target belongs to this computer; its password stays here too.
     "sync_enabled",
     "sync_folder",

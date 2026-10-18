@@ -1,6 +1,6 @@
 """
 Guest register: who stayed in the property on a given day, with their identity documents,
-in the form the police / tourism authorities ask for. Printable and exportable to Excel (CSV).
+in the form the police / tourism authorities ask for. Printable and exportable to Excel (.xlsx or CSV).
 """
 
 
@@ -73,48 +73,43 @@ def guest_register(request):
     start, end = _dates(request)
     foreign_only = request.GET.get("foreign") == "1"
     rows = [(r, missing(r.guest)) for r in stays(start, end, foreign_only=foreign_only)]
-    if request.GET.get("format") == "csv":
+    fmt = request.GET.get("format")
+    if fmt in ("csv", "xlsx"):
         audit(request.user, "register.export", f"{start}–{end} ({len(rows)})")
+        header = [
+            _("Room"), _("Last name"), _("First name"), _("Nationality"), _("Date of birth"), _("Document type"),
+            _("Document number"), _("Address"), _("Arrival"), _("Departure"), _("Adults"), _("Children"),
+            _("Reservation"),
+        ]
+        body = [
+            [
+                r.room.number,
+                r.guest.last_name,
+                r.guest.first_name,
+                r.guest.nationality,
+                r.guest.date_of_birth,
+                r.guest.get_document_type_display() if r.guest.document_type else "",
+                r.guest.document_number,
+                r.guest.address,
+                r.arrival,
+                r.departure,
+                r.adults,
+                r.children,
+                r.code,
+            ]
+            for r, _m in rows
+        ]
+        if fmt == "xlsx":
+            from apps.core import spreadsheet
+
+            return spreadsheet.response(f"guest-register-{start}-{end}", spreadsheet.Sheet(_("Guest register"), header, body))
         response = HttpResponse(content_type="text/csv; charset=utf-8")
         response["Content-Disposition"] = f'attachment; filename="guest-register-{start}-{end}.csv"'
-        response.write("﻿")  # so Excel opens accented names correctly
+        response.write("\ufeff")  # so Excel opens accented names correctly
         w = SafeCSVWriter(response, delimiter=";")
-        w.writerow(
-            [
-                _("Room"),
-                _("Last name"),
-                _("First name"),
-                _("Nationality"),
-                _("Date of birth"),
-                _("Document type"),
-                _("Document number"),
-                _("Address"),
-                _("Arrival"),
-                _("Departure"),
-                _("Adults"),
-                _("Children"),
-                _("Reservation"),
-            ]
-        )
-        for r, _m in rows:
-            g = r.guest
-            w.writerow(
-                [
-                    r.room.number,
-                    g.last_name,
-                    g.first_name,
-                    g.nationality,
-                    g.date_of_birth.strftime("%d.%m.%Y") if g.date_of_birth else "",
-                    g.get_document_type_display() if g.document_type else "",
-                    g.document_number,
-                    g.address,
-                    r.arrival.strftime("%d.%m.%Y"),
-                    r.departure.strftime("%d.%m.%Y"),
-                    r.adults,
-                    r.children,
-                    r.code,
-                ]
-            )
+        w.writerow(header)
+        for row in body:
+            w.writerow([v.strftime("%d.%m.%Y") if isinstance(v, date) else v for v in row])
         return response
     return render(
         request,

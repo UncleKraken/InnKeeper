@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Orders to suppliers" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Stock" %}</div><h1>{% translate "Orders to suppliers" %}</h1><p>{% translate "Ask suppliers for what is running low, then receive it as a delivery." %}</p></div>
+  <div class="actions">
+    <a class="btn btn-secondary" href="{% url 'inventory:order_create' %}">{% icon "plus" %} {% translate "New order" %}</a>
+    <form method="post" action="{% url 'inventory:order_low_stock' %}">{% csrf_token %}<button class="btn" {% if not low_not_ordered %}disabled{% endif %}>{% icon "list" %} {% translate "Order what is running low" %}{% if low_not_ordered %} ({{ low_not_ordered }}){% endif %}</button></form>
+  </div>
+</div>
+{% include "inventory/_tabs.html" %}
+{% if low_count and not low_not_ordered %}<div class="alert alert-info" style="margin-bottom:1rem">{% translate "Every item running low is already on an order." %}</div>{% endif %}
+<nav class="tabs" style="margin-bottom:1rem"><a href="?show=open" class="{% if show == 'open' %}active{% endif %}">{% translate "Open" %}</a><a href="?show=all" class="{% if show != 'open' %}active{% endif %}">{% translate "All" %}</a></nav>
+<div class="card card-flush">
+  {% if orders %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Order" %}</th><th>{% translate "Supplier" %}</th><th>{% translate "Status" %}</th><th class="num">{% translate "Items" %}</th><th>{% translate "Needed by" %}</th><th class="num">{% translate "Expected total" %}</th></tr></thead>
+    <tbody>
+    {% for po in orders %}
+      <tr>
+        <td class="nowrap"><a href="{% url 'inventory:order_detail' po.pk %}"><strong>{{ po.number }}</strong></a><div class="muted" style="font-size:.8rem">{{ po.created_at|date:"d.m.Y" }}</div></td>
+        <td>{{ po.supplier|default:_("No supplier yet") }}</td>
+        <td>{% status_badge po.badge po.get_status_display %}</td>
+        <td class="num">{{ po.lines.all|length }}</td>
+        <td>{{ po.wanted_for|date:"d.m.Y"|default:"—" }}</td>
+        <td class="num">{{ po.total|money }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+    <div class="empty"><strong>{% if show == 'open' %}{% translate "No open orders." %}{% else %}{% translate "No orders yet." %}{% endif %}</strong>{% if low_not_ordered %}<span>{% blocktranslate count n=low_not_ordered %}{{ n }} item is running low.{% plural %}{{ n }} items are running low.{% endblocktranslate %}</span>{% endif %}</div>
+  {% endif %}
+</div>
+{% endblock %}

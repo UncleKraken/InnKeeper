@@ -2,6 +2,7 @@
   <h2>Getting started</h2>
   <p>InnKeeper runs in a web browser. Reception, the restaurant, housekeeping and the office can all use it at the same time, on computers, tablets or phones connected to the same server.</p>
   <ol>
+    <li><strong>Just looking?</strong> On the first setup screen, <em>Try it with sample data</em> fills InnKeeper with a sample hotel, restaurant, bar and spa. Nothing in it is real; the yellow banner at the top has <em>Start with my own business</em>, which removes it all (your own staff accounts stay) and starts the setup.</li>
     <li><strong>Set up your business.</strong> The first time a manager signs in, the setup wizard asks what kind of business you run (hotel, guesthouse, or restaurant/bar) and creates rooms and outlets for you. Run it again any time from <em>Settings</em>.</li>
     <li><strong>Add your staff</strong> under <em>Staff</em>. Each person gets their own login and a role. They only see the parts of the app their role needs.</li>
     <li><strong>Fill in your menu</strong> under <em>Outlets &amp; menus → Menu &amp; services</em>, and <strong>arrange your tables</strong> with <em>Floor plan</em>.</li>
@@ -216,7 +217,8 @@
   </details>
   <details><summary>Expenses</summary><p>Record purchases, salaries, bills and other costs under <em>Expenses</em> so reports show real profit. Cash expenses are taken into account in the day close.</p></details>
   <details><summary>Sales report</summary><p>Best-selling items, sales by staff member, average bill and busiest hours for your restaurant, bar and services.</p></details>
-  <details><summary>Ledger and Excel</summary><p>The <em>Ledger</em> lists every charge and payment. <em>Export CSV</em> opens in Excel or Google Sheets for your accountant.</p></details>
+  <details><summary>Ledger and Excel</summary><p>The <em>Ledger</em> lists every charge and payment. <em>Excel</em> downloads a real Excel file (.xlsx) for your accountant, with money as numbers and a filter on every column; <em>CSV</em> is there too. The sales report, the stock list and the guest register download to Excel the same way.</p></details>
+  <details><summary>Daily summary by email</summary><p>In <em>Settings → Email</em>, under <em>Daily summary for the owner</em>, type one or more email addresses and the hour. Every morning InnKeeper emails how the day before went: sales compared with a week ago, money by payment method, the cash count and any difference, discounts, voids, cancelled bills, shifts with a cash difference, best sellers, rooms, and warnings (stock running low, receipts not yet fiscalized, copies not working). It is also sent right after the day close. Days with no sales send nothing. <em>Send now</em> shows you how it looks.</p></details>
 </section>
 
 <section id="stock">
@@ -230,6 +232,9 @@
   <details><summary>Deliveries, waste and counts</summary>
     <p><em>Record delivery</em> adds what arrived with the price per unit from the invoice; InnKeeper keeps an average purchase price and can add the total to Expenses. Record breakage or spoiled goods on the item's page. Count the shelves regularly with <em>Count stock</em> (print the count sheet first): differences are saved as count corrections, so losses show up.</p>
     <p>The <em>Usage report</em> shows what was used, the cost of goods sold against your sales (cost of sales %), waste and count losses for any period. Items at or below their reorder level appear on the dashboard.</p>
+  </details>
+  <details><summary>Orders to suppliers</summary>
+    <p><em>Stock → Orders → Order what is running low</em> prepares one order per supplier with every item at or below its reorder level, enough to get back to twice the level. Change the quantities, then send it: <em>WhatsApp</em> opens the chat with the order already written, <em>Email</em> sends it if the supplier has an email address, or <em>Print</em> / <em>Copy as text</em> for Viber or SMS. Mark it as ordered. When the goods arrive, <em>It arrived: receive</em> opens a delivery filled in from the order: correct what actually came and save, and the stock goes up.</p>
   </details>
 </section>
 
@@ -254,7 +259,7 @@
     <p>If the copy stops working (USB drive unplugged, cloud folder gone), the dashboard shows a red warning. To restore, the list under the settings shows the copies with a <em>Restore</em> button; on a new computer, install InnKeeper, choose the same folder and restore the newest copy.</p>
   </details>
   <details><summary>Activity log</summary><p><em>Settings → Activity log</em> records every check-in, payment, discount, void and setting change, with who did it and when.</p></details>
-  <details><summary>Import from Excel</summary><p><em>Settings → Import from Excel</em> brings in your menu, stock list or guest list. Download the template, fill it in Excel (one row per item), choose <em>File → Save as → CSV UTF-8</em> and upload it. A preview shows what will be added or updated and which rows have problems; nothing is saved until you confirm. Entries with the same name are updated, nothing is deleted. Albanian column names work too.</p></details>
+  <details><summary>Import from Excel</summary><p><em>Settings → Import from Excel</em> brings in your menu, stock list or guest list. Download the Excel template (the second sheet explains each column), fill it in with one row per item, save it and upload the .xlsx file. CSV files work too. A preview shows what will be added or updated and which rows have problems; nothing is saved until you confirm. Entries with the same name are updated, nothing is deleted. Albanian column names work too.</p></details>
 </section>
 
 <section id="golive">

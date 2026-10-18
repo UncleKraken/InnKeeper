@@ -8,7 +8,8 @@
 {% if not items %}
   <div class="alert alert-warning">{% translate "Add stock items first." %} <a href="{% url 'inventory:item_create' %}">{% translate "Add stock item" %}</a></div>
 {% else %}
-<form method="post" class="stack" id="delivery">{% csrf_token %}
+{% if po %}<div class="alert alert-info" style="margin-bottom:1rem">{% icon "truck" %} {% blocktranslate with n=po.number %}Receiving order {{ n }}. Change the quantities and prices to what actually arrived.{% endblocktranslate %}</div>{% endif %}
+<form method="post" class="stack" id="delivery">{% csrf_token %}{% if po %}<input type="hidden" name="po" value="{{ po.pk }}">{% endif %}
   <section class="card card-flush">
     <div class="table-wrap"><table class="table" id="lines">
       <thead><tr><th style="width:45%">{% translate "Item" %}</th><th class="num">{% translate "Quantity" %}</th><th class="num">{% translate "Price per unit" %}</th><th class="num">{% translate "Line total" %}</th><th></th></tr></thead>
@@ -16,8 +17,8 @@
       {% for r in rows %}
         <tr class="dl-row">
           <td><select class="input" name="item"><option value="">—</option>{% for i in items %}<option value="{{ i.pk }}" data-cost="{{ i.cost|floatformat:'-4u' }}" data-unit="{{ i.get_unit_display }}" {% if r.item == i.pk|stringformat:"s" %}selected{% endif %}>{{ i.name }} ({{ i.get_unit_display }})</option>{% endfor %}</select></td>
-          <td class="num"><input class="input num" name="qty" inputmode="decimal" value="{{ r.qty }}" style="max-width:8rem"></td>
-          <td class="num"><input class="input num" name="cost" inputmode="decimal" value="{{ r.cost }}" style="max-width:8rem"></td>
+          <td class="num" data-label="{% translate 'Quantity' %}"><input class="input num" name="qty" inputmode="decimal" value="{{ r.qty }}" style="max-width:8rem"></td>
+          <td class="num" data-label="{% translate 'Price per unit' %}"><input class="input num" name="cost" inputmode="decimal" value="{{ r.cost }}" style="max-width:8rem"></td>
           <td class="num line-total">—</td>
           <td class="num"><button type="button" class="btn btn-ghost btn-sm rm" title="{% translate 'Remove' %}">{% icon "x" %}</button></td>
         </tr>

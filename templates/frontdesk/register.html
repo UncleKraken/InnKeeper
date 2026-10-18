@@ -12,7 +12,8 @@
       <label class="check" style="align-self:end; margin-bottom:.6rem"><input type="checkbox" name="foreign" value="1" {% if foreign_only %}checked{% endif %}> {% translate "Foreign guests only" %}</label>
       <button class="btn btn-secondary">{% translate "Show" %}</button>
     </form>
-    <a class="btn btn-secondary" href="?{{ query }}&format=csv">{% icon "download" %} {% translate "Excel (CSV)" %}</a>
+    <a class="btn btn-secondary" href="?{{ query }}&format=xlsx">{% icon "download" %} {% translate "Excel" %}</a>
+    <a class="btn btn-secondary" href="?{{ query }}&format=csv">CSV</a>
     <button class="btn" onclick="window.print()">{% icon "print" %} {% translate "Print" %}</button>
   </div>
 </div>
