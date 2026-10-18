@@ -19,6 +19,7 @@ from apps.core.forms import DateInput, StyledFormMixin
 from apps.core.models import audit
 from apps.outlets.models import Order, OrderLine
 
+from .loyalty import voucher_totals
 from .models import ZERO, Charge, DayClose, Expense, Payment, net
 from .views import _range
 
@@ -28,6 +29,12 @@ class ExpenseForm(StyledFormMixin, forms.ModelForm):
         model = Expense
         fields = ["business_date", "category", "description", "supplier", "amount", "method", "reference"]
         widgets = {"business_date": DateInput()}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["method"].choices = [
+            c for c in self.fields["method"].choices if c[0] not in (Payment.Method.VOUCHER, Payment.Method.ONLINE)
+        ]
 
     def clean_amount(self):
         amount = self.cleaned_data["amount"]
@@ -140,11 +147,19 @@ def day_summary(day: date) -> dict:
         "on_account": on_account,
         "account_payments": account_payments,
         "by_method": by_method,
-        "method_rows": [(label, by_method[value]) for value, label in Payment.Method.choices if by_method[value]],
+        "method_rows": [
+            (label, by_method[value])
+            for value, label in Payment.Method.choices
+            if by_method[value] and value != Payment.Method.VOUCHER
+        ],
         "cash": by_method[Payment.Method.CASH],
         "card": by_method[Payment.Method.CARD],
-        "other": sum((v for k, v in by_method.items() if k not in (Payment.Method.CASH, Payment.Method.CARD)), ZERO),
-        "received": sum(by_method.values(), ZERO),
+        "other": sum(
+            (v for k, v in by_method.items() if k not in (Payment.Method.CASH, Payment.Method.CARD, Payment.Method.VOUCHER)),
+            ZERO,
+        ),
+        "received": sum((v for k, v in by_method.items() if k != Payment.Method.VOUCHER), ZERO),
+        **voucher_totals(day),
         "cash_expenses": cash_expenses,
         "departments": departments,
         "revenue": charges.aggregate(t=amount)["t"] or ZERO,

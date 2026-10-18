@@ -2,6 +2,7 @@ import threading
 from decimal import Decimal
 
 from django.conf import settings
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -175,6 +176,19 @@ class HotelSettings(models.Model):
     )
     summary_sent_for = models.DateField(null=True, blank=True, editable=False)
     demo_data = models.BooleanField(default=False, editable=False)  # filled with the sample business
+    loyalty_enabled = models.BooleanField(
+        _("loyalty cards"), default=False, help_text=_("Regulars collect a stamp for items marked “earns a loyalty stamp”.")
+    )
+    loyalty_stamps = models.PositiveSmallIntegerField(
+        _("stamps for a free item"),
+        default=9,
+        validators=[MinValueValidator(2)],
+        help_text=_("For example 9: after nine coffees the tenth is free."),
+    )
+    vouchers_enabled = models.BooleanField(_("gift vouchers"), default=False)
+    voucher_months = models.PositiveSmallIntegerField(
+        _("vouchers are valid for (months)"), default=12, help_text=_("0: they never expire.")
+    )
     pin_lock_minutes = models.PositiveSmallIntegerField(
         _("lock shared tills after"),
         default=3,

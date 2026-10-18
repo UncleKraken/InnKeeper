@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ c.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'outlets:cards' %}">{% icon "back" %} {% translate "Loyalty cards" %}</a></div><h1>{{ c.name }}</h1>
+    <p><span class="mono">{{ c.number }}</span> · {{ c.phone|default:"" }} · {% blocktranslate with n=c.stamps need=needed %}{{ n }} of {{ need }} stamps{% endblocktranslate %}</p>
+    <div class="stamps" style="margin-top:.5rem">{% for i in needed|stamp_range %}<span class="{% if i < c.stamps %}on{% endif %}"></span>{% endfor %}</div></div>
+</div>
+<div class="grid grid-2" style="align-items:start">
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "Visits" %}</h2></div>
+    <div class="table-wrap"><table class="table table-sm"><tbody>
+      {% for o in visits %}<tr><td>{{ o.closed_at|date:"d.m.Y H:i" }}</td><td><a href="{% url 'outlets:receipt' o.pk %}">{{ o.outlet }} #{{ o.number }}</a></td><td>{% if o.loyalty_stamps %}+{{ o.loyalty_stamps }}{% endif %}{% if o.loyalty_reward %} <span class="badge b-success">{% translate "Free item" %}</span>{% endif %}</td><td class="num">{{ o.total|money }}</td></tr>
+      {% empty %}<tr><td class="empty">{% translate "No visits yet." %}</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+  {% if request.user.is_manager %}
+  <form method="post" class="card" novalidate>{% csrf_token %}
+    <div class="card-header"><h2>{% translate "Edit" %}</h2></div>
+    <div class="card-body">{% include "includes/form_fields.html" %}</div>
+    <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

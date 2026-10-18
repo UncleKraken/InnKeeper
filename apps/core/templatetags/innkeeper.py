@@ -88,3 +88,11 @@ def qty(value):
     if d == d.to_integral():
         d = d.quantize(Decimal("1"))
     return number_format(d, use_l10n=True)
+
+
+@register.filter
+def stamp_range(n):
+    try:
+        return range(min(int(n), 30))
+    except (TypeError, ValueError):
+        return range(0)

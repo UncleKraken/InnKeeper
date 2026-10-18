@@ -291,6 +291,7 @@ def create_demo(password: str | None, prefix: str = "") -> dict:
             for i_order, item in enumerate(items):
                 sq_name, en_name = _names(item[0])
                 Item.objects.create(
+                    earns_stamp=item[0] in ("Espresso", "Macchiato", "Cappuccino"),
                     category=cat,
                     name=sq_name,
                     name_en=en_name,

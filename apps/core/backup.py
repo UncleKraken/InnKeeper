@@ -42,6 +42,8 @@ FULL_MODELS = [
     "frontdesk.Group",
     "frontdesk.ChannelBooking",
     "frontdesk.SeasonRate",
+    "finance.LoyaltyCard",
+    "finance.GiftVoucher",
     "outlets.Printer",
     "outlets.Station",
     "outlets.Outlet",

@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.13.0 — loyalty cards and gift vouchers
+
+**Shqip**
+
+- **Kartat e besnikërisë:** te Cilësimet → Besnikëria & kuponat dhuratë zgjidhni sa vula japin një artikull falas (p.sh. 9: kafeja e dhjetë falas) dhe shënoni artikujt që japin vulë. Në arkë shkruhet telefoni ose numri i kartës (ose krijohet një kartë e re me emrin dhe telefonin). Kur ka vula të mjaftueshme, *Jep artikullin falas* e bën falas artikullin më të lirë të shënuar. Llogaritë e anuluara i marrin vulat mbrapsht. Faqja *Kartat e besnikërisë* tregon vulat dhe vizitat e secilit.
+- **Kuponat dhuratë:** shiten me para në dorë, kartë ose transfertë dhe printohen me kod. Shpenzohen në çdo arkë me ikonën e dhuratës, në një ose disa vizita, deri sa të mbarojë vlera ose të skadojë. Mbyllja e ditës i tregon veçmas kuponat e shitur (para të marra përpara) dhe ato të shpenzuar (pa para atë ditë). Në kuponin fiskal mënyra e pagesës është “SVOUCHER” — konfirmojeni me kontabilistin.
+
+**English**
+
+- **Loyalty cards:** in Settings → Loyalty & gift vouchers, choose how many stamps give a free item (e.g. 9: the tenth coffee is free) and mark the items that earn a stamp. At the till, type the phone or card number (or create a new card with name and phone). With enough stamps, *Give the free item* makes the cheapest marked item free. Voided bills take their stamps back. The *Loyalty cards* page shows everyone's stamps and visits.
+- **Gift vouchers:** sold for cash, card or bank transfer and printed with a code. Spent at any till with the gift icon, in one or several visits, until the value is used up or it expires. The day close shows vouchers sold (money received in advance) and vouchers spent (no money that day) separately. On fiscal receipts the payment type is “SVOUCHER” — confirm this with your accountant.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.13.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.12.0 — shared tills with PIN, profit per item, kitchen sound, bills in English
 
 **Shqip**

@@ -14,6 +14,7 @@ so the history always adds up.
 from decimal import Decimal
 
 from django.conf import settings
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import (
     Sum,
@@ -105,6 +106,63 @@ class CustomerAccount(models.Model):
         owed = self.charges.filter(voided=False).aggregate(t=Sum("amount"))["t"] or ZERO
         paid = self.payments.filter(voided=False).aggregate(t=Sum("amount"))["t"] or ZERO
         return self.opening_balance + owed - paid
+
+
+class GiftVoucher(models.Model):
+    """A gift voucher sold for money now and spent later at any till, in one or several visits.
+
+    The sale is a payment received in advance (not revenue); the visit that spends it is the sale."""
+
+    code = models.CharField(_("code"), max_length=20, unique=True)
+    amount = models.DecimalField(_("value"), validators=[MinValueValidator(Decimal("0.01"))], **MONEY)
+    buyer = models.CharField(_("bought by"), max_length=120, blank=True)
+    note = models.CharField(_("note"), max_length=255, blank=True)
+    expires_on = models.DateField(_("valid until"), null=True, blank=True)
+    voided = models.BooleanField(_("voided"), default=False)
+    void_reason = models.CharField(_("void reason"), max_length=255, blank=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("gift voucher")
+        verbose_name_plural = _("gift vouchers")
+        ordering = ["-created_at", "-id"]
+
+    def __str__(self) -> str:
+        return self.code
+
+    @property
+    def used(self) -> Decimal:
+        return self.payments.filter(voided=False, method=Payment.Method.VOUCHER).aggregate(t=Sum("amount"))["t"] or ZERO
+
+    @property
+    def balance(self) -> Decimal:
+        return ZERO if self.voided else self.amount - self.used
+
+    @property
+    def expired(self) -> bool:
+        return bool(self.expires_on and self.expires_on < business_date())
+
+
+class LoyaltyCard(models.Model):
+    """A regular's stamp card: items marked "earns a stamp" add one stamp each; enough stamps give one free."""
+
+    number = models.CharField(_("card number"), max_length=20, unique=True)
+    name = models.CharField(_("name"), max_length=120)
+    phone = models.CharField(_("phone"), max_length=40, blank=True, db_index=True)
+    stamps = models.PositiveIntegerField(_("stamps"), default=0)
+    rewards = models.PositiveIntegerField(_("free items received"), default=0)
+    is_active = models.BooleanField(_("active"), default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_visit = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("loyalty card")
+        verbose_name_plural = _("loyalty cards")
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.number})"
 
 
 class Shift(models.Model):
@@ -249,6 +307,7 @@ class Payment(LedgerEntry):
         CARD = "card", _("Card")
         BANK_TRANSFER = "bank_transfer", _("Bank transfer")
         ONLINE = "online", _("Online card payment")
+        VOUCHER = "voucher", _("Gift voucher")
         OTHER = "other", _("Other")
 
     folio = models.ForeignKey(Folio, null=True, blank=True, on_delete=models.PROTECT, related_name="payments")
@@ -262,6 +321,9 @@ class Payment(LedgerEntry):
     )
     # A tip is not revenue: it belongs to the staff member (card tips are paid out from the cash).
     tip = models.DecimalField(_("tip"), default=ZERO, **MONEY)
+    voucher = models.ForeignKey(
+        "GiftVoucher", null=True, blank=True, on_delete=models.PROTECT, related_name="payments"
+    )  # method "voucher": spending it; any other method: the voucher was sold
     shift = models.ForeignKey(Shift, null=True, blank=True, on_delete=models.SET_NULL, related_name="payments")
 
     class Meta:

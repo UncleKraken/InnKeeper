@@ -22,7 +22,7 @@
       <tbody>
       {% for p in rows %}
         <tr class="{% if p.voided %}voided{% endif %}"><td>{{ p.business_date|date:"d.m.Y" }}</td><td>{{ p.get_method_display }}</td>
-          <td>{% if p.folio_id %}<a href="{% url 'frontdesk:reservation_detail' p.folio.reservation_id %}#folio">{{ p.folio.number }}</a> · {{ p.folio.reservation.guest }}{% elif p.order_id %}<a href="{% url 'outlets:receipt' p.order_id %}">{{ p.order.outlet }} #{{ p.order.number }}</a>{% endif %}</td>
+          <td>{% if p.folio_id %}<a href="{% url 'frontdesk:reservation_detail' p.folio.reservation_id %}#folio">{{ p.folio.number }}</a> · {{ p.folio.reservation.guest }}{% elif p.order_id %}<a href="{% url 'outlets:receipt' p.order_id %}">{{ p.order.outlet }} #{{ p.order.number }}</a>{% elif p.voucher_id %}<a href="{% url 'outlets:voucher' p.voucher_id %}">{% translate "Gift voucher" %} {{ p.reference }}</a>{% endif %}</td>
           <td>{{ p.created_by|default:"—" }}</td><td class="num">{{ p.amount|money }}</td></tr>
       {% empty %}<tr><td colspan="5" class="empty">{% translate "Nothing in this period." %}</td></tr>{% endfor %}
       </tbody>

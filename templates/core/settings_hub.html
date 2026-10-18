@@ -13,6 +13,7 @@
     <a href="?tab=modules" class="{% if tab == 'modules' %}active{% endif %}">{% icon "grid" %} {% translate "Modules" %}</a>
     {% if hotel.module_rooms %}<a href="?tab=booking" class="{% if tab == 'booking' %}active{% endif %}">{% icon "calendar" %} {% translate "Online booking" %}</a>{% endif %}
     <a href="?tab=tills" class="{% if tab == 'tills' %}active{% endif %}">{% icon "lock" %} {% translate "Shared tills & PINs" %}</a>
+    {% if hotel.module_outlets %}<a href="?tab=loyalty" class="{% if tab == 'loyalty' %}active{% endif %}">{% icon "gift" %} {% translate "Loyalty & gift vouchers" %}</a>{% endif %}
     <a href="?tab=email" class="{% if tab == 'email' %}active{% endif %}">{% icon "mail" %} {% translate "Email" %}</a>
     {% if hotel.registered %}<a href="?tab=fiscal" class="{% if tab == 'fiscal' %}active{% endif %}">{% icon "qr" %} {% translate "Fiscalization" %}</a>{% endif %}
     <a href="?tab=payments" class="{% if tab == 'payments' %}active{% endif %}">{% icon "wallet" %} {% translate "Card payments" %}</a>
@@ -116,6 +117,16 @@
         {% if not hotel.email_configured %}<div class="alert alert-info" style="margin-top:1rem">{% translate "Set up Email so guests receive confirmations automatically." %} <a href="?tab=email">{% translate "Email settings" %}</a></div>{% endif %}
       </div>
     </section>
+
+  {% elif tab == "loyalty" %}
+    <form method="post" class="card" novalidate>{% csrf_token %}
+      <div class="card-header"><h2>{% translate "Loyalty & gift vouchers" %}</h2></div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0">{% translate "Loyalty cards: regulars give their phone number at the till and collect a stamp for every item marked “earns a loyalty stamp” (Outlets & menus → item). With enough stamps one is free. Gift vouchers: sold for money now and spent later at any till, in one or several visits." %}</p>
+        {% include "includes/form_fields.html" %}
+      </div>
+      <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
+    </form>
 
   {% elif tab == "tills" %}
     <section class="card">

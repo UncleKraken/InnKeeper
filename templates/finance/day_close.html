@@ -37,10 +37,12 @@
             </tbody></table>
           </div>
         </div>
-        {% if s.on_account or s.account_payments or s.tips_paid_out or s.tips_cash %}
+        {% if s.on_account or s.account_payments or s.tips_paid_out or s.tips_cash or s.vouchers_sold or s.vouchers_spent %}
         <table class="table table-sm" style="margin-top:1rem"><tbody>
           {% if s.on_account %}<tr><td>{% translate "Sold on customer accounts (to be paid later)" %}</td><td class="num">{{ s.on_account|money }}</td></tr>{% endif %}
           {% if s.account_payments %}<tr><td>{% translate "Paid on customer accounts" %}</td><td class="num">{{ s.account_payments|money }}</td></tr>{% endif %}
+          {% if s.vouchers_sold %}<tr><td>{% translate "Gift vouchers sold (paid in advance, not yet sales)" %}</td><td class="num">{{ s.vouchers_sold|money }}</td></tr>{% endif %}
+          {% if s.vouchers_spent %}<tr><td>{% translate "Paid with gift vouchers (no money today)" %}</td><td class="num">{{ s.vouchers_spent|money }}</td></tr>{% endif %}
           {% if s.tips_paid_out %}<tr><td>{% translate "Card tips (paid out to staff from the cash)" %}</td><td class="num">{{ s.tips_paid_out|money }}</td></tr>{% endif %}
           {% if s.tips_cash %}<tr class="muted"><td>{% translate "Cash tips (kept by staff)" %}</td><td class="num">{{ s.tips_cash|money }}</td></tr>{% endif %}
         </tbody></table>

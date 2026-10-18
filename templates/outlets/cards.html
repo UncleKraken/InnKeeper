@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Loyalty cards" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Restaurant, bar & services" %}</div><h1>{% translate "Loyalty cards" %}</h1><p>{% blocktranslate with n=needed %}{{ n }} stamps give one free item.{% endblocktranslate %}</p></div>
+  <div class="actions"><form method="get" class="filters"><div class="search">{% icon "search" %}<input class="input" type="search" name="q" value="{{ q }}" placeholder="{% translate 'Name, phone or number…' %}"></div></form></div>
+</div>
+<form method="post" class="card card-body row" style="gap:.5rem; flex-wrap:wrap; margin-bottom:1.25rem">{% csrf_token %}
+  <strong style="margin-right:.5rem">{% translate "New card" %}</strong>
+  <input class="input" name="name" placeholder="{% translate 'Name' %}" required style="flex:1; min-width:10rem">
+  <input class="input" name="phone" placeholder="{% translate 'Phone' %}" inputmode="tel" style="flex:1; min-width:10rem">
+  <button class="btn">{% icon "plus" %} {% translate "Add" %}</button>
+</form>
+<div class="card card-flush">
+  {% if page_obj %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Phone" %}</th><th>{% translate "Stamps" %}</th><th class="num">{% translate "Free items received" %}</th><th>{% translate "Last visit" %}</th></tr></thead>
+    <tbody>{% for c in page_obj %}
+      <tr><td><a href="{% url 'outlets:card' c.pk %}"><strong>{{ c.name }}</strong></a> <span class="muted mono" style="font-size:.8rem">{{ c.number }}</span>{% if not c.is_active %} <span class="badge b-closed">{% translate "Inactive" %}</span>{% endif %}</td>
+        <td>{{ c.phone|default:"—" }}</td>
+        <td>{{ c.stamps }} / {{ needed }}{% if c.stamps >= needed %} <span class="badge b-success">{% translate "Free item ready" %}</span>{% endif %}</td>
+        <td class="num">{{ c.rewards }}</td><td>{{ c.last_visit|date:"d.m.Y"|default:"—" }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  {% include "includes/pagination.html" %}
+  {% else %}<div class="empty"><strong>{% translate "No loyalty cards yet." %}</strong><span>{% translate "Cards are also created at the till, on the bill." %}</span></div>{% endif %}
+</div>
+{% endblock %}

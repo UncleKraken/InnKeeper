@@ -269,6 +269,7 @@ def pay_order(
     tendered: Decimal | None = None,
     reference: str = "",
     tip: Decimal | None = None,
+    voucher_code: str = "",
 ) -> Payment:
     """Take a full or partial payment. The order closes when nothing is left to pay.
 
@@ -293,6 +294,15 @@ def pay_order(
     if order.total <= 0:
         raise BusinessError(_("The order is empty."))
     remaining = order.remaining
+    voucher = None
+    if method == Payment.Method.VOUCHER:
+        from apps.finance import loyalty
+
+        voucher = loyalty.find_voucher(voucher_code, lock=True)
+        if amount is None:
+            amount = min(remaining, max(voucher.balance, Decimal("0")))
+            if amount <= 0:
+                loyalty.check_spend(voucher, Decimal("0.01"))  # explains why (used up, expired, voided)
     if amount is None:
         amount = remaining
     amount = Decimal(amount).quantize(Decimal("0.01"))
@@ -311,8 +321,18 @@ def pay_order(
         raise BusinessError(_("The tip can't be negative."))
     if tendered is not None and tip > tendered - amount:
         raise BusinessError(_("The tip can't be more than the change."))
+    if voucher is not None:
+        loyalty.check_spend(voucher, amount)
+        reference, tip, tendered = voucher.code, Decimal("0"), None
     payment = Payment.objects.create(
-        order=order, amount=amount, method=method, reference=reference, tendered=tendered, tip=tip, created_by=user
+        order=order,
+        amount=amount,
+        method=method,
+        reference=reference,
+        tendered=tendered,
+        tip=tip,
+        voucher=voucher,
+        created_by=user,
     )
     audit(user, "order.payment", f"{order.outlet} #{order.number} {amount} ({Payment.Method(method).label if method in Payment.Method.values else method})", order)
     if order.remaining <= 0:
@@ -506,6 +526,9 @@ def void_receipt(order: Order, *, user, reason: str) -> Order:
     from apps.inventory.services import return_for_order
 
     return_for_order(order, user)
+    from apps.finance.loyalty import on_order_voided
+
+    on_order_voided(order)
     from apps.fiscal import services as fiscal
 
     transaction.on_commit(lambda: fiscal.safely(fiscal.correct_order, order, user))
@@ -524,6 +547,9 @@ def _close(order: Order, settlement: str, user) -> None:
     order.closed_by = user
     order.receipt_number = Sequence.next("receipt", timezone.localdate().year)
     order.save(update_fields=["status", "settlement", "closed_at", "closed_by", "receipt_number"])
+    from apps.finance.loyalty import on_order_closed
+
+    on_order_closed(order)
     from apps.inventory.services import consume_for_order
 
     consume_for_order(order, user)

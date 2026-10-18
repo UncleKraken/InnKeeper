@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Gift vouchers" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Restaurant, bar & services" %}</div><h1>{% translate "Gift vouchers" %}</h1><p>{% translate "Sold for money now, spent later at any till." %}</p></div>
+  <div class="actions">
+    <form method="get" class="filters"><div class="search">{% icon "search" %}<input class="input" type="search" name="q" value="{{ q }}" placeholder="{% translate 'Check a code…' %}" autocapitalize="characters"></div></form>
+  </div>
+</div>
+{% if not enabled %}<div class="alert alert-warning" style="margin-bottom:1rem">{% translate "Gift vouchers are switched off, so the till doesn't offer them. Switch them on in Settings → Loyalty & gift vouchers." %}</div>{% endif %}
+<div class="grid grid-2" style="align-items:start">
+  <form method="post" class="card" novalidate>{% csrf_token %}
+    <div class="card-header"><h2>{% translate "Sell a gift voucher" %}</h2></div>
+    <div class="card-body">{% include "includes/form_fields.html" %}
+      <p class="muted" style="font-size:.85rem; margin-bottom:0">{% if hotel.voucher_months %}{% blocktranslate with m=hotel.voucher_months %}Valid for {{ m }} months.{% endblocktranslate %}{% endif %} {% translate "The money goes into today's cash or card total, but it is not a sale yet: the sale is the visit that spends it." %}</p>
+    </div>
+    <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "gift" %} {% translate "Sell and print" %}</button></div>
+  </form>
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "Sold" %}</h2></div>
+    {% if page_obj %}
+    <div class="table-wrap"><table class="table table-sm">
+      <thead><tr><th>{% translate "Code" %}</th><th>{% translate "Bought by" %}</th><th class="num">{% translate "Value" %}</th><th class="num">{% translate "Left" %}</th></tr></thead>
+      <tbody>{% for v in page_obj %}
+        <tr><td class="nowrap"><a href="{% url 'outlets:voucher' v.pk %}" class="mono"><strong>{{ v.code }}</strong></a><div class="muted" style="font-size:.8rem">{{ v.created_at|date:"d.m.Y" }}</div></td>
+          <td>{{ v.buyer|default:"—" }}</td><td class="num">{{ v.amount|money }}</td>
+          <td class="num">{% if v.voided %}<span class="badge b-danger">{% translate "Voided" %}</span>{% elif v.expired %}<span class="badge b-closed">{% translate "Expired" %}</span>{% else %}{{ v.balance|money }}{% endif %}</td></tr>
+      {% endfor %}</tbody>
+    </table></div>
+    {% include "includes/pagination.html" %}
+    {% else %}<div class="empty"><strong>{% translate "No vouchers sold yet." %}</strong></div>{% endif %}
+  </section>
+</div>
+{% endblock %}

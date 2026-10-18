@@ -217,7 +217,18 @@ def _ticket_context(order) -> dict:
         "customer_accounts": CustomerAccount.objects.filter(is_active=True).only("name", "phone"),
         "booking": getattr(order, "booking", None),
         "minimum_left": minimum_spend_left(order),
+        "loyalty_units": _loyalty_units(order),
     }
+
+
+def _loyalty_units(order) -> int:
+    from apps.core.models import HotelSettings
+
+    if not HotelSettings.load().loyalty_enabled:
+        return 0
+    from apps.finance.loyalty import stamped_units
+
+    return stamped_units(order)
 
 
 def _changed(request, order, error: str = ""):
@@ -355,6 +366,7 @@ def settle(request, pk):
                 tendered=_decimal(request.POST.get("tendered", "")),
                 reference=request.POST.get("reference", "")[:80],
                 tip=_tip(request, order),
+                voucher_code=request.POST.get("voucher_code", ""),
             )
             order.refresh_from_db()
             cash = how == Payment.Method.CASH
@@ -738,6 +750,7 @@ class ItemForm(StyledFormMixin, forms.ModelForm):
             "duration_minutes",
             "sort_order",
             "is_active",
+            "earns_stamp",
         ]
 
     def __init__(self, *args, **kwargs):

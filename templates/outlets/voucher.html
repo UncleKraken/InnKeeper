@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ v.code }}{% endblock %}
+{% block content %}
+<div class="page-header no-print">
+  <div><div class="eyebrow"><a href="{% url 'outlets:vouchers' %}">{% icon "back" %} {% translate "Gift vouchers" %}</a></div><h1 class="mono">{{ v.code }}</h1>
+    <p>{% if v.voided %}<span class="badge b-danger">{% translate "Voided" %}</span> {{ v.void_reason }}{% elif v.expired %}<span class="badge b-closed">{% translate "Expired" %}</span>{% else %}{% blocktranslate with left=v.balance|money total=v.amount|money %}{{ left }} left of {{ total }}{% endblocktranslate %}{% endif %}</p></div>
+  <div class="actions"><button class="btn" onclick="window.print()">{% icon "print" %} {% translate "Print" %}</button></div>
+</div>
+<div class="voucher-card">
+  {% if hotel.logo %}<img src="{{ hotel.logo }}" alt="" style="max-height:60px; max-width:200px">{% endif %}
+  <div style="font-weight:700; font-size:1.1rem">{{ hotel.name }}</div>
+  <div class="muted" style="text-transform:uppercase; letter-spacing:.1em; font-size:.8rem; margin-top:.5rem">Kupon dhuratë · Gift voucher</div>
+  <div class="v-amount">{{ v.amount|money }}</div>
+  <div class="v-code">{{ v.code }}</div>
+  {% if v.note %}<div>{{ v.note }}</div>{% endif %}
+  <div class="muted" style="font-size:.85rem; margin-top:.75rem">{% if v.expires_on %}{% translate "Valid until" %} {{ v.expires_on|date:"d.m.Y" }} · {% endif %}{{ hotel.address }}{% if hotel.phone %} · {{ hotel.phone }}{% endif %}</div>
+</div>
+<div class="grid grid-2 no-print" style="margin-top:1.5rem; align-items:start">
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "History" %}</h2></div>
+    <div class="table-wrap"><table class="table table-sm"><tbody>
+      {% if sale %}<tr><td>{{ sale.created_at|date:"d.m.Y H:i" }}</td><td>{% translate "Sold" %} · {{ sale.get_method_display }}{% if v.buyer %} · {{ v.buyer }}{% endif %}</td><td class="num">{{ sale.amount|money }}</td></tr>{% endif %}
+      {% for p in uses %}<tr class="{% if p.voided %}muted{% endif %}"><td>{{ p.created_at|date:"d.m.Y H:i" }}</td><td>{% if p.order %}<a href="{% url 'outlets:receipt' p.order_id %}">{{ p.order.outlet }} #{{ p.order.number }}</a>{% endif %}{% if p.voided %} ({% translate "voided" %}){% endif %}</td><td class="num">−{{ p.amount|money }}</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+  {% if request.user.is_manager and not v.voided and not uses %}
+  <form method="post" class="card">{% csrf_token %}<input type="hidden" name="void" value="1">
+    <div class="card-header"><h2>{% translate "Void" %}</h2></div>
+    <div class="card-body"><div class="field"><label for="reason">{% translate "Reason" %}</label><input class="input" id="reason" name="reason" required placeholder="{% translate 'e.g. sold by mistake, money returned' %}"></div></div>
+    <div class="card-footer form-actions" style="margin-top:0"><button class="btn btn-danger">{% translate "Void the voucher" %}</button></div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

@@ -48,6 +48,8 @@
         <a href="{% url 'outlets:home' %}" class="{% if request.path|slice:':9' == '/outlets/' and '/outlets/setup' not in request.path and '/outlets/receipts' not in request.path and '/outlets/kitchen' not in request.path %}active{% endif %}">{% icon "utensils" %} {% translate "Restaurant, bar & services" %}</a>
         <a href="{% url 'outlets:receipts' %}" class="{% active '/outlets/receipts' %}">{% icon "receipt" %} {% translate "Receipts" %}</a>
         <a href="{% url 'finance:accounts' %}" class="{% active '/finance/accounts' %}">{% icon "users" %} {% translate "Customer accounts" %}</a>
+        {% if hotel.vouchers_enabled %}<a href="{% url 'outlets:vouchers' %}" class="{% active '/outlets/vouchers' %}">{% icon "gift" %} {% translate "Gift vouchers" %}</a>{% endif %}
+        {% if hotel.loyalty_enabled %}<a href="{% url 'outlets:cards' %}" class="{% active '/outlets/loyalty' %}">{% icon "star" %} {% translate "Loyalty cards" %}</a>{% endif %}
         <a href="{% url 'finance:my_shift' %}" class="{% active '/finance/shift/' %}">{% icon "wallet" %} {% translate "My shift" %}{% if my_shift %} <span class="nav-dot"></span>{% endif %}</a>
       {% endif %}
       {% if "kitchen" in modules %}

@@ -35,7 +35,14 @@ VERIFY = {
 CENT = Decimal("0.01")
 
 # InnKeeper payment method → fiscal payment type (cash-type invoices use the first group).
-PAY_TYPES = {"cash": "BANKNOTE", "card": "CARD", "online": "CARD", "bank_transfer": "ACCOUNT", "other": "OTHER"}
+PAY_TYPES = {
+    "cash": "BANKNOTE",
+    "card": "CARD",
+    "online": "CARD",
+    "bank_transfer": "ACCOUNT",
+    "voucher": "SVOUCHER",
+    "other": "OTHER",
+}
 CASH_TYPES = {"BANKNOTE", "CARD", "CHECK", "SVOUCHER", "COMPANY", "ORDER"}
 
 

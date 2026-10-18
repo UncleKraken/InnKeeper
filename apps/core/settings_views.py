@@ -158,6 +158,12 @@ class EmailSettingsForm(StyledFormMixin, forms.ModelForm):
         widgets = {"smtp_password": forms.PasswordInput(render_value=True)}
 
 
+class LoyaltySettingsForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = HotelSettings
+        fields = ["loyalty_enabled", "loyalty_stamps", "vouchers_enabled", "voucher_months"]
+
+
 class TillSettingsForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = HotelSettings
@@ -313,6 +319,7 @@ TABS = {
     "booking": BookingSettingsForm,
     "email": EmailSettingsForm,
     "tills": TillSettingsForm,
+    "loyalty": LoyaltySettingsForm,
 }
 
 

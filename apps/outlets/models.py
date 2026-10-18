@@ -199,6 +199,9 @@ class Item(models.Model):
     )
     sort_order = models.PositiveSmallIntegerField(_("order"), default=0)
     is_active = models.BooleanField(_("available"), default=True)
+    earns_stamp = models.BooleanField(
+        _("earns a loyalty stamp"), default=False, help_text=_("Each one sold adds a stamp to the customer's loyalty card.")
+    )
 
     class Meta:
         verbose_name = _("item")
@@ -442,6 +445,11 @@ class Order(models.Model):
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
     closed_at = models.DateTimeField(null=True, blank=True)
+    loyalty_card = models.ForeignKey(
+        "finance.LoyaltyCard", null=True, blank=True, on_delete=models.SET_NULL, related_name="orders"
+    )
+    loyalty_stamps = models.PositiveSmallIntegerField(default=0)  # stamps this bill added to the card
+    loyalty_reward = models.BooleanField(default=False)  # a free item from the card was given on this bill
 
     class Meta:
         verbose_name = _("order")
