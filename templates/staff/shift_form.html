@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Schedule" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="eyebrow"><a href="{% url 'staff:schedule' %}{% if shift %}?week={{ shift.date|date:'Y-m-d' }}{% endif %}">{% icon "back" %} {% translate "Schedule" %}</a></div><h1>{% if shift %}{% translate "Edit shift" %}{% else %}{% translate "New shift" %}{% endif %}</h1></div></div>
+<form method="post" class="card" style="max-width:760px" novalidate>{% csrf_token %}
+  <div class="card-body">{% include "includes/form_fields.html" %}</div>
+  <div class="card-footer form-actions" style="margin-top:0">
+    {% if shift %}<button type="submit" name="delete" value="1" class="btn btn-ghost" style="margin-right:auto; color:var(--danger)" formnovalidate>{% translate "Delete" %}</button>{% endif %}
+    <button class="btn">{% icon "check" %} {% translate "Save" %}</button>
+  </div>
+</form>
+{% endblock %}

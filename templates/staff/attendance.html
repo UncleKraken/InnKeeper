@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Attendance" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Staff" %}</div><h1>{% translate "Attendance" %}</h1><p>{{ start|date:"d.m.Y" }} – {{ end|date:"d.m.Y" }}</p></div>
+  <div class="actions">
+    <form method="get" class="filters">
+      <div class="field"><label for="from">{% translate "From" %}</label><input class="input" type="date" id="from" name="from" value="{{ start|date:'Y-m-d' }}"></div>
+      <div class="field"><label for="to">{% translate "To" %}</label><input class="input" type="date" id="to" name="to" value="{{ end|date:'Y-m-d' }}"></div>
+      <button class="btn btn-secondary">{% translate "Show" %}</button>
+    </form>
+    <a class="btn btn-secondary" href="?from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}&format=xlsx">{% icon "download" %} {% translate "Excel" %}</a>
+  </div>
+</div>
+{% include "inventory/_tabs.html" %}
+
+<section class="card card-flush" style="margin-bottom:1.25rem">
+  <div class="card-header"><h2>{% translate "Working now" %}</h2><span class="muted">{{ now|length }}</span></div>
+  {% if now %}
+  <div class="table-wrap"><table class="table table-sm"><tbody>
+    {% for e in now %}<tr>
+      <td><a href="{% url 'staff:person_hours' e.user_id %}"><strong>{{ e.user }}</strong></a>{% if e.position %} <span class="pos-chip pos-{{ e.position.color }}">{{ e.position }}</span>{% endif %}</td>
+      <td>{% translate "since" %} {{ e.clock_in|date:"H:i" }}{% if e.clock_in|date:"Y-m-d" != today|date:"Y-m-d" %} ({{ e.clock_in|date:"d.m" }}){% endif %}{% if e.forgotten %} <span class="badge b-danger">{% translate "forgot to clock out?" %}</span>{% endif %}</td>
+      <td class="num">{{ e.hours }} h</td>
+      <td class="num"><form method="post" action="{% url 'staff:clock_for' e.user_id %}" class="inline">{% csrf_token %}<button class="btn btn-ghost btn-sm">{% translate "Clock out" %}</button></form></td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="card-body muted">{% translate "Nobody is clocked in." %}</div>{% endif %}
+</section>
+
+<section class="card card-flush">
+  <div class="card-header"><h2>{% translate "Hours in this period" %}</h2></div>
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Name" %}</th><th class="num">{% translate "Days" %}</th><th class="num">{% translate "Worked" %}</th><th class="num">{% translate "Planned" %}</th><th class="num">{% translate "Difference" %}</th><th class="num">{% translate "Late" %}</th><th class="num">{% translate "Did not come" %}</th><th class="num">{% translate "Missing clock-out" %}</th></tr></thead>
+    <tbody>{% for r in rows %}<tr>
+      <td><a href="{% url 'staff:person_hours' r.user.pk %}?from={{ start|date:'Y-m-d' }}&to={{ end|date:'Y-m-d' }}"><strong>{{ r.user }}</strong></a></td>
+      <td class="num">{{ r.days }}</td><td class="num"><strong>{{ r.worked }}</strong> h</td>
+      <td class="num">{% if r.planned %}{{ r.planned }} h{% else %}—{% endif %}</td>
+      <td class="num">{% if r.difference is not None %}<span style="color:{% if r.difference < 0 %}var(--danger){% else %}var(--success){% endif %}">{% if r.difference > 0 %}+{% endif %}{{ r.difference }} h</span>{% else %}—{% endif %}</td>
+      <td class="num">{% if r.late %}<span class="badge b-warning">{{ r.late }}</span>{% else %}0{% endif %}</td>
+      <td class="num">{% if r.no_show %}<span class="badge b-danger">{{ r.no_show }}</span>{% else %}0{% endif %}</td>
+      <td class="num">{% if r.missing_out %}<span class="badge b-danger">{{ r.missing_out }}</span>{% else %}0{% endif %}</td>
+    </tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}<div class="empty"><strong>{% translate "No clock-ins in this period." %}</strong><span>{% translate "Staff clock in from the button under their name, or on a shared till with their PIN." %}</span></div>{% endif %}
+</section>
+<p class="muted" style="font-size:.85rem; margin-top:1rem">{% blocktranslate %}Late = clocked in more than 10 minutes after the planned start. Did not come = a planned shift with no clock-in.{% endblocktranslate %}</p>
+{% endblock %}

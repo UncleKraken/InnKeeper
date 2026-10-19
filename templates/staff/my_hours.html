@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "My hours" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{{ request.user }}</div><h1>{% translate "My hours" %}</h1><p>{% blocktranslate with h=month_hours %}{{ h }} hours this month{% endblocktranslate %}</p></div>
+  <div class="actions">
+    <form method="post" action="{% url 'staff:clock' %}" class="inline">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}">
+      <button class="btn btn-lg {% if open %}btn-secondary{% endif %}">{% icon "history" %} {% if open %}{% blocktranslate with t=open.clock_in|date:"H:i" %}Clock out (in since {{ t }}){% endblocktranslate %}{% else %}{% translate "Clock in" %}{% endif %}</button></form>
+  </div>
+</div>
+<div class="grid grid-2" style="align-items:start">
+  <section class="card card-flush"><div class="card-header"><h2>{% translate "My next shifts" %}</h2></div>
+    <div class="table-wrap"><table class="table table-sm"><tbody>{% for s in upcoming %}<tr><td class="nowrap"><strong>{{ s.date|date:"D d.m" }}</strong></td><td>{{ s.start|time:"H:i" }}–{{ s.end|time:"H:i" }}</td><td>{{ s.position|default:"" }}</td><td class="muted">{{ s.note }}</td></tr>{% empty %}<tr><td class="empty">{% translate "No shifts planned yet." %}</td></tr>{% endfor %}</tbody></table></div>
+  </section>
+  <section class="card card-flush"><div class="card-header"><h2>{% translate "This month" %}</h2></div>
+    <div class="table-wrap"><table class="table table-sm"><tbody>{% for e in entries %}<tr><td class="nowrap">{{ e.clock_in|date:"D d.m" }}</td><td>{{ e.clock_in|date:"H:i" }}–{% if e.clock_out %}{{ e.clock_out|date:"H:i" }}{% else %}…{% endif %}</td><td class="num">{% if e.clock_out %}{{ e.hours }} h{% endif %}</td></tr>{% empty %}<tr><td class="empty">{% translate "No clock-ins yet this month." %}</td></tr>{% endfor %}</tbody></table></div>
+  </section>
+</div>
+<p class="muted" style="font-size:.85rem; margin-top:1rem">{% translate "If a time is wrong, ask a manager to correct it." %}</p>
+{% endblock %}

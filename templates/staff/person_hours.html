@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ person }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'staff:attendance' %}">{% icon "back" %} {% translate "Attendance" %}</a></div><h1>{{ person }}</h1>
+    <p>{{ start|date:"d.m.Y" }} – {{ end|date:"d.m.Y" }} · <strong>{{ row.worked }} h</strong>{% if row.planned %} {% blocktranslate with p=row.planned %}of {{ p }} h planned{% endblocktranslate %}{% endif %}</p></div>
+  <div class="actions">
+    <form method="get" class="filters">
+      <div class="field"><label for="from">{% translate "From" %}</label><input class="input" type="date" id="from" name="from" value="{{ start|date:'Y-m-d' }}"></div>
+      <div class="field"><label for="to">{% translate "To" %}</label><input class="input" type="date" id="to" name="to" value="{{ end|date:'Y-m-d' }}"></div>
+      <button class="btn btn-secondary">{% translate "Show" %}</button>
+    </form>
+    <form method="post" action="{% url 'staff:clock_for' person.pk %}" class="inline">{% csrf_token %}<button class="btn btn-secondary">{% icon "history" %} {% if open %}{% translate "Clock out now" %}{% else %}{% translate "Clock in now" %}{% endif %}</button></form>
+    <a class="btn" href="{% url 'staff:entry_add' person.pk %}">{% icon "plus" %} {% translate "Add hours" %}</a>
+  </div>
+</div>
+{% include "inventory/_tabs.html" %}
+<section class="card card-flush">
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Date" %}</th><th>{% translate "Clock in" %}</th><th>{% translate "Clock out" %}</th><th class="num">{% translate "Break" %}</th><th class="num">{% translate "Hours" %}</th><th>{% translate "Note" %}</th><th></th></tr></thead>
+    <tbody>{% for e in row.entries %}<tr>
+      <td class="nowrap">{{ e.clock_in|date:"D d.m" }}</td><td>{{ e.clock_in|date:"H:i" }}</td>
+      <td>{% if e.clock_out %}{{ e.clock_out|date:"H:i" }}{% if e.clock_out|date:"Y-m-d" != e.clock_in|date:"Y-m-d" %} <small class="muted">+1</small>{% endif %}{% elif e.forgotten %}<span class="badge b-danger">{% translate "missing" %}</span>{% else %}<span class="badge b-success">{% translate "working" %}</span>{% endif %}</td>
+      <td class="num">{% if e.break_minutes %}{{ e.break_minutes }}′{% endif %}</td>
+      <td class="num">{% if e.clock_out %}{{ e.hours }}{% endif %}</td>
+      <td class="muted" style="font-size:.85rem">{{ e.note }}{% if e.edited_by %} <span title="{{ e.edit_reason }}">✎ {{ e.edited_by }}</span>{% endif %}</td>
+      <td class="num"><a class="btn btn-ghost btn-sm" href="{% url 'staff:entry_edit' e.pk %}">{% icon "edit" %}</a></td>
+    </tr>{% empty %}<tr><td colspan="7" class="empty">{% translate "No clock-ins in this period." %}</td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% if row.shifts %}
+<section class="card card-flush" style="margin-top:1.25rem">
+  <div class="card-header"><h2>{% translate "Planned shifts" %}</h2></div>
+  <div class="table-wrap"><table class="table table-sm"><tbody>{% for s in row.shifts %}<tr><td>{{ s.date|date:"D d.m" }}</td><td>{{ s.start|time:"H:i" }}–{{ s.end|time:"H:i" }}</td><td>{{ s.position|default:"" }}</td><td class="num">{{ s.hours }} h</td></tr>{% endfor %}</tbody></table></div>
+</section>
+{% endif %}
+{% endblock %}

@@ -20,7 +20,13 @@ def innkeeper(request):
         my_shift = open_shift_for(user)
     from apps.accounts.pin import is_shared_till
 
+    clocked_in = None
+    if user is not None and user.is_authenticated:
+        from apps.staff.services import open_entry
+
+        clocked_in = open_entry(user)
     return {
+        "clocked_in": clocked_in,
         "shared_till": is_shared_till(request),
         "my_shift": my_shift,
         "hotel": HotelSettings.load(),

@@ -32,6 +32,7 @@ urlpatterns = [
     path("menu/", include("apps.outlets.menu_urls")),
     path("book/", include("apps.frontdesk.booking_urls")),
     path("pay/", include("apps.payments.urls")),
+    path("team/", include("apps.staff.urls")),
     path("ical/<str:token>.ics", room_calendar, name="ical_room"),
     path("channex/webhook/<str:token>/", channex_webhook, name="channex_webhook"),
     path("", include("apps.core.urls")),

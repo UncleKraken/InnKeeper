@@ -19,17 +19,24 @@
   </header>
   <h1>{% translate "Who is using the till?" %}</h1>
   {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+  {% if done %}<div class="alert alert-success" role="status" id="pin-done">{{ done }}</div>{% endif %}
+  <div class="pin-mode" role="tablist">
+    <button type="button" class="{% if mode != 'clock' %}active{% endif %}" data-mode="signin">{% translate "Sign in" %}</button>
+    <button type="button" class="{% if mode == 'clock' %}active{% endif %}" data-mode="clock">{% icon "history" %} {% translate "Clock in / out" %}</button>
+  </div>
   <form method="post" id="pinform" autocomplete="off">{% csrf_token %}
     <input type="hidden" name="next" value="{{ next }}">
     <input type="hidden" name="by" value="{{ by }}">
     <input type="hidden" name="user" id="pin-user" value="{{ chosen.pk|default:'' }}">
     <input type="hidden" name="pin" id="pin-value">
+    <input type="hidden" name="action" id="pin-action" value="{% if mode == 'clock' %}clock{% else %}signin{% endif %}">
     {% if staff %}
     <div class="pin-staff" role="radiogroup" aria-label="{% translate 'Staff' %}">
       {% for u in staff %}
         <button type="button" class="pin-person{% if chosen.pk == u.pk %} active{% endif %}" data-user="{{ u.pk }}" role="radio" aria-checked="{% if chosen.pk == u.pk %}true{% else %}false{% endif %}">
           <span class="pin-avatar">{{ u.first_name|default:u.username|slice:":1"|upper }}{{ u.last_name|slice:":1"|upper }}</span>
           <span class="pin-name">{{ u.first_name|default:u.username }}</span>
+          {% if u.pk in clocked %}<span class="pin-at-work" title="{% translate 'Clocked in' %}"></span>{% endif %}
         </button>
       {% endfor %}
     </div>
@@ -79,6 +86,14 @@
     else if (e.key === 'Enter') { e.preventDefault(); if (pin.length >= 4) form.submit(); }
   });
   form.addEventListener('submit', function (e) { if (pin.length < 4 || !user.value) e.preventDefault(); });
+  document.querySelectorAll('.pin-mode button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.pin-mode button').forEach(function (x) { x.classList.toggle('active', x === b); });
+      document.getElementById('pin-action').value = b.dataset.mode;
+    });
+  });
+  var done = document.getElementById('pin-done');
+  if (done) setTimeout(function () { done.remove(); }, 6000);
   draw();
 })();
 </script>

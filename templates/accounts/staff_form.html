@@ -3,6 +3,19 @@
 {% block content %}
 {{ block.super }}
 <div class="card" style="max-width:860px; margin-top:1.25rem">
+  <div class="card-header"><h2>{% translate "Employee details" %}</h2><span class="row" style="gap:.4rem"><a class="btn btn-secondary btn-sm" href="{% url 'staff:person_hours' object.pk %}">{% icon "history" %} {% translate "Hours" %}</a><a class="btn btn-secondary btn-sm" href="{% url 'staff:profile' object.pk %}">{% icon "edit" %} {% translate "Edit details" %}</a></span></div>
+  <div class="card-body">
+    {% with e=object.employee %}{% if e %}
+    <dl class="dl">
+      <dt>{% translate "Position" %}</dt><dd>{{ e.position|default:"—" }}</dd>
+      <dt>{% translate "Employment" %}</dt><dd>{{ e.get_employment_display }}{% if e.weekly_hours %} · {{ e.weekly_hours|floatformat:"-1" }} h/{% translate "week" %}{% endif %}</dd>
+      <dt>{% translate "Started on" %}</dt><dd>{{ e.start_date|date:"d.m.Y"|default:"—" }}{% if e.end_date %} → {{ e.end_date|date:"d.m.Y" }}{% endif %}</dd>
+      <dt>{% translate "Emergency contact" %}</dt><dd>{{ e.emergency_contact|default:"—" }}</dd>
+    </dl>
+    {% else %}<p class="muted" style="margin:0">{% translate "Position, employment, contact and pay details. Only managers can see them." %}</p>{% endif %}{% endwith %}
+  </div>
+</div>
+<div class="card" style="max-width:860px; margin-top:1.25rem">
   <div class="card-header"><h2>{% translate "Password" %}</h2><a class="btn btn-secondary btn-sm" href="{% url 'accounts:staff_set_password' object.pk %}">{% icon "key" %} {% translate "Set a new password" %}</a></div>
   <div class="card-body muted">{% translate "Passwords are stored encrypted and can never be viewed — only replaced." %}</div>
 </div>

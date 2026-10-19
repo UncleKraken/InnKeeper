@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.15.0 — staff clock-in, schedule and employee details
+
+**Shqip**
+
+- **Hyrja dhe dalja e stafit:** butoni *Hyrje / Dalje* poshtë emrit në menu, dhe mënyra *Hyrje / dalje* në ekranin e PIN-it të arkës së përbashkët (shënon orën pa hyrë në aplikacion). Pika e gjelbër tregon kush është në punë.
+- **Orari javor:** një rresht për çdo person, turne me ngjyrën e pozicionit, turne që mbarojnë pas mesnate, *Kopjo javën e kaluar*, printim. Secili sheh turnet e veta te *Orët e mia*.
+- **Prezenca:** kush është në punë tani; për çdo periudhë ditët, orët e punuara dhe të planifikuara, diferenca, vonesat, mungesat dhe daljet e harruara; korrigjime nga menaxheri me arsye (në regjistrin e aktivitetit); shkarkim në Excel për pagat.
+- **Pozicionet dhe të dhënat e punonjësve:** pozicioni, lloji i punësimit, data e fillimit, orët e kontratës, kontakti për emergjenca, numri personal, paga dhe IBAN — vetëm për menaxherët.
+- Përmbledhja ditore paralajmëron për këdo që është ende në punë pas 16 orësh. Biznesi shembull ka pozicione dhe orarin e javës.
+
+**English**
+
+- **Staff clock-in and clock-out:** a *Clock in / Clock out* button under each name in the menu, and a *Clock in / out* mode on the shared till's PIN screen (records the time without signing in). A green dot shows who is at work.
+- **Weekly schedule:** one row per person, shifts in the position's colour, shifts past midnight, *Copy last week*, printing. Everyone sees their own shifts under *My hours*.
+- **Attendance:** who is working now; for any period each person's days, hours worked and planned, the difference, late arrivals, no-shows and forgotten clock-outs; manager corrections with a reason (in the activity log); Excel for payroll.
+- **Positions and employee details:** position, employment type, start date, contract hours, emergency contact, personal ID number, pay and IBAN — managers only.
+- The owner's daily summary warns about anyone still clocked in after 16 hours. The sample business has positions and this week's schedule.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.15.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.14.1 — sign-in through Cloudflare Tunnel
 
 **Shqip**

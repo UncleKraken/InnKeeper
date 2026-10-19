@@ -89,9 +89,18 @@ class StaffList(CrudListView):
     create_url_name = "accounts:staff_create"
     update_url_name = "accounts:staff_edit"
     search_fields = ["username", "first_name", "last_name", "email"]
+    queryset = User.objects.select_related("employee__position")
+
+    @property
+    def tabs(self):
+        from apps.staff.views import TABS
+
+        return TABS
+
     columns = [
         ("__str__", _("Name"), "text"),
         ("username", _("Username"), "text"),
+        ("employee.position", _("Position"), "text"),
         ("role", _("Role"), "choice"),
         ("phone", _("Phone"), "text"),
         ("last_login", _("Last sign-in"), "text"),

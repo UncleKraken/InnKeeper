@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ person }}{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="eyebrow"><a href="{% url 'staff:person_hours' person.pk %}">{% icon "back" %} {{ person }}</a></div><h1>{% if entry.pk %}{% translate "Correct hours" %}{% else %}{% translate "Add hours" %}{% endif %}</h1></div></div>
+<form method="post" class="card" style="max-width:760px" novalidate>{% csrf_token %}
+  <div class="card-body">{% include "includes/form_fields.html" %}
+    {% if entry.pk %}<p class="muted" style="font-size:.85rem; margin-bottom:0">{% blocktranslate with t=entry.created_at|date:"d.m.Y H:i" %}Originally recorded {{ t }}. Every change is kept in the activity log with its reason.{% endblocktranslate %}</p>{% endif %}
+  </div>
+  <div class="card-footer form-actions" style="margin-top:0">
+    {% if entry.pk %}<button type="submit" name="delete" value="1" class="btn btn-ghost" style="margin-right:auto; color:var(--danger)" formnovalidate>{% translate "Delete" %}</button>{% endif %}
+    <a class="btn btn-secondary" href="{% url 'staff:person_hours' person.pk %}">{% translate "Cancel" %}</a>
+    <button class="btn">{% icon "check" %} {% translate "Save" %}</button>
+  </div>
+</form>
+{% endblock %}

@@ -73,13 +73,20 @@
         <div class="nav-section">{% translate "Management" %}</div>
         {% if hotel.module_rooms %}<a href="{% url 'frontdesk:room_list' %}" class="{% active '/front-desk/setup' %}">{% icon "bed" %} {% translate "Rooms & rates" %}</a>{% endif %}
         {% if hotel.module_outlets %}<a href="{% url 'outlets:setup' %}" class="{% active '/outlets/setup' %}">{% icon "store" %} {% translate "Outlets & menus" %}</a>{% endif %}
-        <a href="{% url 'accounts:staff_list' %}" class="{% active '/accounts/staff' %}">{% icon "staff" %} {% translate "Staff" %}</a>
+        <a href="{% url 'accounts:staff_list' %}" class="{% active '/accounts/staff' '/team/positions' %}">{% icon "staff" %} {% translate "Staff" %}</a>
+        <a href="{% url 'staff:attendance' %}" class="{% active '/team/attendance' '/team/people' '/team/hours' %}">{% icon "history" %} {% translate "Attendance" %}</a>
+        <a href="{% url 'staff:schedule' %}" class="{% active '/team/schedule' %}">{% icon "calendar" %} {% translate "Schedule" %}</a>
         <a href="{% url 'core:settings' %}" class="{% active '/settings' '/setup' '/audit' %}">{% icon "settings" %} {% translate "Settings" %}</a>
       {% endif %}
-      <a href="{% url 'core:help' %}" class="{% active '/help' %}" style="margin-top:.75rem">{% icon "help" %} {% translate "Help" %}</a>
+      <a href="{% url 'staff:my_hours' %}" class="{% active '/team/me' %}" style="margin-top:.75rem">{% icon "history" %} {% translate "My hours" %}</a>
+      <a href="{% url 'core:help' %}" class="{% active '/help' %}">{% icon "help" %} {% translate "Help" %}</a>
     </nav>
     <div class="sidebar-foot">
       {% if shared_till %}<form method="post" action="{% url 'accounts:lock' %}" id="lock-form" style="margin-bottom:.75rem">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button type="submit" class="btn btn-block sidebar-lock">{% icon "lock" %} {% translate "Lock / switch user" %}</button></form>{% endif %}
+      <form method="post" action="{% url 'staff:clock' %}" class="sidebar-clock">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+        {% if clocked_in %}<button class="btn btn-secondary btn-sm btn-block" title="{% translate 'Clock out' %}">{% icon "history" %} {% blocktranslate with t=clocked_in.clock_in|date:"H:i" %}Clock out · in since {{ t }}{% endblocktranslate %}</button>
+        {% else %}<button class="btn btn-sm btn-block">{% icon "history" %} {% translate "Clock in" %}</button>{% endif %}
+      </form>
       <div class="who">{{ request.user }}</div>
       <div class="muted" style="color:#7d8899">{{ request.user.get_role_display }}</div>
       <div class="row" style="margin-top:.6rem; justify-content:space-between">

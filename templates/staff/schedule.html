@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Schedule" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Staff" %}</div><h1>{% translate "Schedule" %}</h1><p>{{ days.0|date:"d.m" }} – {{ days.6|date:"d.m.Y" }}</p></div>
+  <div class="actions no-print">
+    <a class="btn btn-secondary" href="?week={{ prev|date:'Y-m-d' }}">{% icon "back" %}</a>
+    <a class="btn btn-secondary" href="?">{% translate "This week" %}</a>
+    <a class="btn btn-secondary" href="?week={{ next|date:'Y-m-d' }}">{% icon "next" %}</a>
+    <form method="post" action="{% url 'staff:copy_week' %}" class="inline">{% csrf_token %}<input type="hidden" name="week" value="{{ week|date:'Y-m-d' }}"><button class="btn btn-secondary">{% icon "copy" %} {% translate "Copy last week" %}</button></form>
+    <button class="btn btn-secondary" onclick="window.print()">{% icon "print" %} {% translate "Print" %}</button>
+    <a class="btn" href="{% url 'staff:shift_create' %}?date={{ week|date:'Y-m-d' }}">{% icon "plus" %} {% translate "New shift" %}</a>
+  </div>
+</div>
+<div class="no-print">{% include "inventory/_tabs.html" %}</div>
+<div class="card card-flush">
+  <div class="table-wrap"><table class="table schedule">
+    <thead><tr><th>{% translate "Name" %}</th>{% for d in days %}<th class="{% if d == today %}is-today{% endif %}">{{ d|date:"D" }} <span class="muted">{{ d|date:"d.m" }}</span></th>{% endfor %}<th class="num">{% translate "Hours" %}</th></tr></thead>
+    <tbody>{% for r in rows %}<tr>
+      <td class="nowrap"><strong>{{ r.person }}</strong>{% if r.person.employee.position %}<div class="muted" style="font-size:.8rem">{{ r.person.employee.position }}</div>{% endif %}</td>
+      {% for d, shifts in r.cells %}<td class="sched-cell{% if d == today %} is-today{% endif %}">
+        {% for s in shifts %}<a class="sched-shift pos-{{ s.position.color|default:'slate' }}" href="{% url 'staff:shift_edit' s.pk %}">{{ s.start|time:"H:i" }}–{{ s.end|time:"H:i" }}{% if s.position %}<small>{{ s.position }}</small>{% endif %}</a>{% endfor %}
+        <a class="sched-add no-print" href="{% url 'staff:shift_create' %}?date={{ d|date:'Y-m-d' }}&user={{ r.person.pk }}" title="{% translate 'Add a shift' %}">+</a>
+      </td>{% endfor %}
+      <td class="num">{{ r.hours|floatformat:"-1" }}</td>
+    </tr>{% empty %}<tr><td colspan="9" class="empty">{% translate "Add staff first." %}</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+<p class="muted no-print" style="font-size:.85rem; margin-top:1rem">{% translate "Tap + to plan a shift. Everyone sees their own shifts under My hours." %}</p>
+{% endblock %}

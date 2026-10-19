@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ person }}{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="eyebrow"><a href="{% url 'accounts:staff_edit' person.pk %}">{% icon "back" %} {{ person }}</a></div><h1>{% translate "Employee details" %}</h1>
+  <p>{% translate "Only managers can see and change these details. They are personal data: record only what the business needs." %}</p></div></div>
+<form method="post" class="card" style="max-width:860px" novalidate>{% csrf_token %}
+  <div class="card-body">{% include "includes/form_fields.html" %}</div>
+  <div class="card-footer form-actions" style="margin-top:0"><a class="btn btn-secondary" href="{% url 'accounts:staff_edit' person.pk %}">{% translate "Cancel" %}</a><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
+</form>
+{% endblock %}

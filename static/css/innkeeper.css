@@ -913,3 +913,24 @@ body.kds-flash { animation: kds-flash 1.2s ease-out 2; }
   .month-doc .table-sm td, .month-doc .table-sm th { padding: .2rem .4rem; font-size: 9pt; }
 }
 .month-doc .doc-head { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+
+/* Staff schedule */
+.schedule th, .schedule td { vertical-align: top; }
+.schedule .is-today { background: var(--accent-soft, #f6efe2); }
+.sched-cell { min-width: 96px; }
+.sched-shift { display: block; padding: .3rem .45rem; border-radius: 6px; margin-bottom: .25rem; font-size: .82rem; font-weight: 600; text-decoration: none; color: #16202f; background: #e6eef5; }
+.sched-shift small { display: block; font-weight: 500; opacity: .8; }
+.sched-add { display: block; text-align: center; border: 1px dashed var(--border-strong); border-radius: 6px; color: var(--muted); text-decoration: none; line-height: 1.6; opacity: .5; }
+.sched-add:hover { opacity: 1; }
+.pos-teal { background: #d7efe9; } .pos-blue { background: #dbe8f8; } .pos-amber { background: #f7e7c8; }
+.pos-rose { background: #f7dde0; } .pos-violet { background: #e7def6; } .pos-slate { background: #e6e9ee; }
+.pos-chip { font-size: .75rem; padding: .1rem .4rem; border-radius: 6px; margin-left: .3rem; }
+.sidebar-clock { margin-bottom: .6rem; }
+.sidebar-clock .btn { justify-content: center; }
+@media print { .schedule { font-size: 9pt; } .sched-shift { border: 1px solid #999; } }
+.pin-mode { display: inline-flex; background: rgba(255,255,255,.08); border-radius: 10px; padding: 3px; gap: 3px; margin-bottom: 1rem; }
+.pin-mode button { border: 0; background: transparent; color: rgba(255,255,255,.75); padding: .55rem .9rem; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; display: inline-flex; gap: .35rem; align-items: center; }
+.pin-mode button.active { background: #fff; color: #16202f; }
+.pin-person { position: relative; }
+.pin-at-work { position: absolute; top: 10px; right: 10px; width: 10px; height: 10px; border-radius: 50%; background: #3ccf7a; box-shadow: 0 0 0 3px rgba(60,207,122,.25); }
+.sched-shift + .sched-add, .sched-shift ~ .sched-add { line-height: 1; font-size: .75rem; padding: 2px 0; opacity: .35; }

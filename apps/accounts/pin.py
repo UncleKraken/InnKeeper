@@ -160,6 +160,7 @@ def pin_pad(request):
         return redirect(f"/accounts/login/?password=1&next={quote(_safe_next(request))}")
     staff = list(User.objects.filter(is_active=True).exclude(pin="").order_by("first_name", "username"))
     error = ""
+    done = ""
     chosen = None
     if request.method == "POST":
         chosen = next((u for u in staff if str(u.pk) == request.POST.get("user")), None)
@@ -168,6 +169,26 @@ def pin_pad(request):
             error = _("Tap your name first.")
         elif cache.get(key, 0) >= MAX_FAILED_LOGINS:
             error = _("Too many wrong PINs. Try again in 15 minutes or ask a manager.")
+        elif chosen.check_pin(request.POST.get("pin", "")) and request.POST.get("action") == "clock":
+            # Clock in or out only: nobody is signed in, the pad stays for the next person.
+            cache.delete(key)
+            from apps.core.exceptions import BusinessError
+            from apps.staff import services as staff_services
+            from apps.staff.models import TimeEntry
+
+            try:
+                direction, entry = staff_services.toggle(chosen, source=TimeEntry.Source.PIN)
+            except BusinessError as e:
+                error = str(e)
+            else:
+                from django.utils import timezone
+
+                if direction == "in":
+                    done = _("%(name)s clocked in at %(t)s.") % {"name": chosen.first_name or chosen, "t": timezone.localtime(entry.clock_in).strftime("%H:%M")}
+                else:
+                    done = _("%(name)s clocked out at %(t)s: %(h)s hours.") % {
+                        "name": chosen.first_name or chosen, "t": timezone.localtime(entry.clock_out).strftime("%H:%M"), "h": entry.hours}
+            chosen = None
         elif chosen.check_pin(request.POST.get("pin", "")):
             cache.delete(key)
             if request.user.is_authenticated and request.user.pk != chosen.pk:
@@ -187,7 +208,16 @@ def pin_pad(request):
     return render(
         request,
         "accounts/pin_pad.html",
-        {"staff": staff, "error": error, "chosen": chosen, "next": _safe_next(request), "by": request.POST.get("by") or request.GET.get("by", "")},
+        {
+            "staff": staff,
+            "error": error,
+            "done": done,
+            "chosen": chosen,
+            "clocked": _clocked_ids(),
+            "mode": "clock" if request.POST.get("action") == "clock" or request.GET.get("mode") == "clock" else "signin",
+            "next": _safe_next(request),
+            "by": request.POST.get("by") or request.GET.get("by", ""),
+        },
     )
 
 
@@ -203,3 +233,9 @@ def lock(request):
     if is_shared_till(request):
         return redirect(f"/accounts/pin/?next={quote(nxt)}&by={by}")
     return redirect("accounts:login")
+
+
+def _clocked_ids() -> set[int]:
+    from apps.staff.models import TimeEntry
+
+    return set(TimeEntry.objects.filter(clock_out__isnull=True).values_list("user_id", flat=True))

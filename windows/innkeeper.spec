@@ -48,7 +48,7 @@ datas += collect_data_files("django")
 hiddenimports = (
     walk_modules(here("apps"), "apps", skip=("apps.accounts.tests", "apps.core.tests", "apps.frontdesk.tests",
                                             "apps.housekeeping.tests", "apps.outlets.tests", "apps.finance.tests",
-                                            "apps.inventory.tests", "apps.payments.tests", "apps.fiscal.tests"))
+                                            "apps.inventory.tests", "apps.payments.tests", "apps.fiscal.tests", "apps.staff.tests"))
     + walk_modules(here("config"), "config")
     + walk_modules(os.path.dirname(django.__file__), "django", skip=("django.contrib.gis", "django.test", "django.db.backends.oracle", "django.db.backends.mysql", "django.db.backends.postgresql"))
     + collect_submodules("whitenoise")

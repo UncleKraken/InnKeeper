@@ -536,6 +536,35 @@ def create_demo(password: str | None, prefix: str = "") -> dict:
             method=method,
             created_by=users["finance"],
         )
+    # Staff positions, details and this week's schedule
+    from datetime import time as t
+
+    from apps.staff.models import EmployeeProfile, Position, ScheduledShift, TimeEntry
+
+    positions = {
+        name: Position.objects.create(name=name, color=color, sort_order=i)
+        for i, (name, color) in enumerate(
+            [("Recepsionist", "blue"), ("Kamarier", "teal"), ("Banakier", "amber"), ("Kuzhinier", "rose"),
+             ("Pastruese", "violet"), ("Mirëmbajtës", "slate"), ("Menaxher", "slate")]
+        )
+    }
+    roles = {"manager": "Menaxher", "reception": "Recepsionist", "waiter": "Kamarier", "bar": "Banakier",
+             "kitchen": "Kuzhinier", "housekeeping": "Pastruese", "maintenance": "Mirëmbajtës", "spa": "Kamarier"}
+    hours = {"Recepsionist": (t(7), t(15)), "Kamarier": (t(12), t(20)), "Banakier": (t(17), t(1)),
+             "Kuzhinier": (t(11), t(19)), "Pastruese": (t(8), t(14)), "Mirëmbajtës": (t(8), t(16)), "Menaxher": (t(9), t(17))}
+    week = today - timedelta(days=today.weekday())
+    for key, position in roles.items():
+        u = users.get(key)
+        if not u:
+            continue
+        EmployeeProfile.objects.create(user=u, position=positions[position], start_date=today - timedelta(days=200))
+        a, b = hours[position]
+        for d in range(7):
+            if d != sum(map(ord, key)) % 7:  # one day off each
+                ScheduledShift.objects.create(user=u, date=week + timedelta(days=d), start=a, end=b, position=positions[position])
+    now = timezone.now()
+    for key in ("reception", "waiter", "housekeeping"):
+        TimeEntry.objects.create(user=users[key], clock_in=now - timedelta(hours=3, minutes=random.randint(0, 40)), source="pin")
     return users
 
 

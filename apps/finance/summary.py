@@ -110,6 +110,11 @@ def _warnings() -> list[str]:
                 )
                 % {"n": stuck}
             )
+    from apps.staff.models import TimeEntry
+
+    forgot = [e for e in TimeEntry.objects.filter(clock_out__isnull=True).select_related("user") if e.forgotten]
+    if forgot:
+        out.append(_("Still clocked in for more than 16 hours: %(names)s.") % {"names": ", ".join(str(e.user) for e in forgot)})
     if hs.sync_enabled and hs.sync_last_error:
         out.append(_("Automatic copies are not working: %(e)s") % {"e": hs.sync_last_error})
     return out
