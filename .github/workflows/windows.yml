@@ -21,6 +21,8 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v7
 
@@ -88,8 +90,25 @@ jobs:
           name: InnKeeper-Setup-${{ steps.version.outputs.version }}
           path: dist/installer/*.exe
 
+  # Every release first passes the end-to-end test on Windows (launcher, Cloudflare Tunnel,
+  # sign-in over a real public tunnel, tax authority test system probe).
+  e2e:
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
+    uses: ./.github/workflows/e2e-windows.yml
+
+  publish:
+    needs: [build, e2e]
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: InnKeeper-Setup-${{ needs.build.outputs.version }}
+          path: dist/installer
+
       - name: Release notes (latest changelog section)
-        if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
         shell: python
         run: |
           import re
@@ -98,11 +117,10 @@ jobs:
           open("release_notes.md", "w", encoding="utf-8").write("## " + sections[1].strip() + "\n")
 
       - name: Publish release
-        if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ inputs.release_tag || github.ref_name }}
           target_commitish: ${{ github.sha }}
           files: dist/installer/*.exe
-          name: InnKeeper ${{ steps.version.outputs.version }}
+          name: InnKeeper ${{ needs.build.outputs.version }}
           body_path: release_notes.md
