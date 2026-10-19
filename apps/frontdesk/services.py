@@ -6,9 +6,10 @@ from decimal import Decimal
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 
 from apps.core.exceptions import BusinessError
-from apps.core.models import audit
+from apps.core.models import HotelSettings, audit
 from apps.finance.models import Charge, Folio, Payment
 
 from .models import Reservation, Room
@@ -113,9 +114,49 @@ def post_accommodation(
             created_by=user,
         )
         audit(user, "folio.accommodation", f"{folio.number}: {end - start} × {price}", folio)
+        post_tourist_tax(folio, reservation, start, end, charge.business_date, user)
         first = first or charge
         start = end
     return first
+
+
+def tourist_tax_units(reservation: Reservation, hs=None) -> int:
+    """People (or 1 room) the tourist tax is charged for, per night."""
+    hs = hs or HotelSettings.load()
+    if hs.tourist_tax_basis == HotelSettings.TouristTaxBasis.ROOM:
+        return 1
+    return reservation.adults + (reservation.children or 0 if hs.tourist_tax_children else 0)
+
+
+def post_tourist_tax(folio, reservation: Reservation, start: int, end: int, on_date: date, user) -> Charge | None:
+    """The tourist tax for nights start…end-1 of the stay (counted from 0), posted with those nights."""
+    hs = HotelSettings.load()
+    if not hs.tourist_tax_enabled or hs.tourist_tax_amount <= 0:
+        return None
+    if hs.tourist_tax_max_nights:
+        end = min(end, hs.tourist_tax_max_nights)
+    nights = end - start
+    units = tourist_tax_units(reservation, hs)
+    if nights <= 0 or units <= 0:
+        return None
+    if hs.tourist_tax_basis == HotelSettings.TouristTaxBasis.ROOM:
+        what = ngettext("%(n)s night", "%(n)s nights", nights) % {"n": nights}
+    else:
+        what = ngettext("%(g)s guest", "%(g)s guests", units) % {"g": units} + " × " + (
+            ngettext("%(n)s night", "%(n)s nights", nights) % {"n": nights}
+        )
+    charge = Charge.objects.create(
+        folio=folio,
+        reservation=reservation,
+        kind=Charge.Kind.TOURIST_TAX,
+        description=_("Tourist tax – %(what)s") % {"what": what},
+        quantity=units * nights,
+        unit_price=hs.tourist_tax_amount,
+        business_date=on_date,
+        created_by=user,
+    )
+    audit(user, "folio.tourist_tax", f"{folio.number}: {units * nights} × {hs.tourist_tax_amount}", folio)
+    return charge
 
 
 def night_audit(on_date: date | None = None) -> int:

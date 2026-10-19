@@ -41,6 +41,12 @@
   <span class="btn btn-sm">{% translate "Review" %}</span>
 </a>
 {% endif %}
+{% if tourist_tax_due %}
+<a class="alert alert-warning row" style="margin-bottom:1.25rem; justify-content:space-between; color:inherit" href="{% url 'finance:tourist_tax' %}?month={{ tourist_tax_due.month }}">
+  <span>{% icon "percent" %} <strong>{% blocktranslate with amount=tourist_tax_due.total|money due=tourist_tax_due.due|date:"d.m" %}Tourist tax for last month: {{ amount }} to pay the municipality by {{ due }}.{% endblocktranslate %}</strong></span>
+  <span class="btn btn-sm">{% translate "See the list" %}</span>
+</a>
+{% endif %}
 {% if sync_status.state == "failing" or sync_status.state == "late" %}
 <a class="alert alert-error row" style="margin-bottom:1.25rem; justify-content:space-between; color:inherit" href="{% url 'core:settings' %}?tab=backup#sync">
   <span>{% icon "alert" %} <strong>{% translate "The automatic copy of your data is not working." %}</strong> {% if sync_status.last_at %}{% blocktranslate with t=sync_status.last_at|timesince %}Last copy {{ t }} ago.{% endblocktranslate %}{% endif %} {{ sync_status.error }}</span>

@@ -30,7 +30,8 @@
     <div class="stack">
       <section class="card card-flush"><div class="card-header"><h2>{% translate "Sales by department" %}</h2></div>
         <table class="table table-sm"><tbody>{% for name, amount in departments %}<tr><td>{{ name }}</td><td class="num">{{ amount|money }}</td></tr>{% empty %}<tr><td class="muted">{% translate "No sales." %}</td></tr>{% endfor %}</tbody>
-        <tfoot><tr><td>{% translate "Total" %}</td><td class="num">{{ revenue|money }}</td></tr></tfoot></table></section>
+        <tfoot><tr><td>{% translate "Total" %}</td><td class="num">{{ revenue|money }}</td></tr>
+        {% if tourist_tax %}<tr><td class="muted" style="font-weight:400">{% translate "Tourist tax collected for the municipality (not in sales)" %}</td><td class="num muted" style="font-weight:400">{{ tourist_tax|money }}</td></tr>{% endif %}</tfoot></table></section>
       {% if vat_rows %}
       <section class="card card-flush"><div class="card-header"><h2>{% translate "VAT" %}</h2></div>
         <table class="table table-sm"><thead><tr><th>{% translate "VAT rate" %}</th><th class="num">{% translate "With VAT" %}</th><th class="num">{% translate "Without VAT" %}</th><th class="num">{% translate "VAT" %}</th></tr></thead>

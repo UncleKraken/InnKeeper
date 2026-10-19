@@ -6,5 +6,6 @@
   {% if hotel.module_outlets %}<a href="{% url 'finance:sales' %}" class="{% if request.resolver_match.url_name == 'sales' %}active{% endif %}">{% translate "Sales" %}</a>{% endif %}
   {% if hotel.module_outlets %}<a href="{% url 'finance:shifts' %}" class="{% if request.resolver_match.url_name == 'shifts' %}active{% endif %}">{% translate "Shifts" %}</a>{% endif %}
   <a href="{% url 'finance:monthly' %}" class="{% if request.resolver_match.url_name == 'monthly' %}active{% endif %}">{% translate "Month report" %}</a>
+  {% if hotel.tourist_tax_enabled %}<a href="{% url 'finance:tourist_tax' %}" class="{% if request.resolver_match.url_name == 'tourist_tax' %}active{% endif %}">{% translate "Tourist tax" %}</a>{% endif %}
   <a href="{% url 'finance:ledger' %}" class="{% if request.resolver_match.url_name == 'ledger' %}active{% endif %}">{% translate "Ledger" %}</a>
 </nav>

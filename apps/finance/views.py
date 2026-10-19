@@ -47,7 +47,7 @@ def _nights_sold(start: date, end: date) -> int:
 def dashboard(request):
     start, end = _range(request)
     amount = net("amount", start, end)
-    charges = Charge.objects.period(start, end)
+    charges = Charge.objects.period(start, end).revenue()
     payments = Payment.objects.period(start, end)
 
     total = charges.aggregate(t=amount)["t"] or ZERO

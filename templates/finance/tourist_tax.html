@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Tourist tax" %} {{ start|date:"m.Y" }}{% endblock %}
+{% block content %}
+<div class="page-header no-print">
+  <div><div class="eyebrow">{% translate "Finance" %}</div><h1>{% translate "Tourist tax" %}</h1><p>{% translate "What you collected for the municipality this month, with the list of stays. Pay it with this list to your municipality's tax office." %}</p></div>
+  <div class="actions">
+    <form method="get" class="filters"><div class="field"><label for="month">{% translate "Month" %}</label><input class="input" type="month" id="month" name="month" value="{{ month_value }}" onchange="this.form.submit()"></div></form>
+    <a class="btn btn-secondary" href="?month={{ month_value }}&format=xlsx">{% icon "download" %} {% translate "Excel" %}</a>
+    <button class="btn" onclick="window.print()">{% icon "print" %} {% translate "Print / PDF" %}</button>
+  </div>
+</div>
+<div class="no-print">{% include "finance/_tabs.html" %}</div>
+
+<div class="month-doc">
+  <div class="doc-head">
+    <div><div class="doc-title">{{ hotel.legal_name|default:hotel.name }}</div><div class="muted">{{ hotel.address }}{% if hotel.tax_id and hotel.registered %}<br>NIPT: {{ hotel.tax_id }}{% endif %}</div></div>
+    <div style="text-align:right"><div class="doc-title">{% translate "Tourist tax" %}</div><div>{{ start|date:"d.m.Y" }} – {{ end|date:"d.m.Y" }}</div><div class="muted" style="font-size:.85rem">{% translate "Printed" %} {{ printed_at|date:"d.m.Y H:i" }}</div></div>
+  </div>
+
+  <div class="grid grid-3" style="margin:1rem 0">
+    <div class="card stat"><div class="stat-label">{% translate "To pay the municipality" %}</div><div class="stat-value">{{ total|money }}</div></div>
+    <div class="card stat"><div class="stat-label">{% if hotel.tourist_tax_basis == "room" %}{% translate "Room-nights" %}{% else %}{% translate "Guest-nights" %}{% endif %}</div><div class="stat-value">{{ units }}</div></div>
+    <div class="card stat"><div class="stat-label">{% translate "Usually due by" %}</div><div class="stat-value" {% if overdue and total %}style="color:var(--warning)"{% endif %}>{{ due|date:"d.m.Y" }}</div></div>
+  </div>
+
+  <section class="card card-flush">
+    <div class="table-wrap"><table class="table table-sm">
+      <thead><tr><th>{% translate "Guest" %}</th><th>{% translate "Nationality" %}</th><th>{% translate "Room" %}</th><th>{% translate "Stay" %}</th><th class="num">{% translate "Guests" %}</th><th class="num">{% if hotel.tourist_tax_basis == "room" %}{% translate "Room-nights" %}{% else %}{% translate "Guest-nights" %}{% endif %}</th><th class="num">{% translate "Amount" %}</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+          <tr><td><a href="{% url 'frontdesk:reservation_detail' r.reservation.pk %}">{{ r.guest.full_name }}</a></td><td>{{ r.guest.nationality|default:"—" }}</td><td>{{ r.reservation.room.number }}</td><td>{{ r.reservation.arrival|date:"d.m" }} – {{ r.reservation.departure|date:"d.m.Y" }}</td><td class="num">{{ r.persons }}</td><td class="num">{{ r.units }}</td><td class="num">{{ r.amount|money }}</td></tr>
+        {% empty %}
+          <tr><td colspan="7" class="muted">{% translate "No tourist tax was charged this month." %}</td></tr>
+        {% endfor %}
+      </tbody>
+      {% if rows %}<tfoot><tr><td colspan="5">{% translate "Total" %}</td><td class="num">{{ units }}</td><td class="num">{{ total|money }}</td></tr></tfoot>{% endif %}
+    </table></div>
+  </section>
+  <p class="muted no-print" style="font-size:.85rem">{% translate "The amount, who pays and the due date are set by your municipality's council; check them with its tax office. Change the amount in Settings → Tourist tax." %}</p>
+</div>
+{% endblock %}

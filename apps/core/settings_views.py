@@ -181,6 +181,19 @@ class LoyaltySettingsForm(StyledFormMixin, forms.ModelForm):
         fields = ["loyalty_enabled", "loyalty_stamps", "vouchers_enabled", "voucher_months"]
 
 
+class TouristTaxForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = HotelSettings
+        fields = ["tourist_tax_enabled", "tourist_tax_amount", "tourist_tax_basis", "tourist_tax_children", "tourist_tax_max_nights"]
+        widgets = {"tourist_tax_basis": forms.RadioSelect()}
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("tourist_tax_enabled") and not cleaned.get("tourist_tax_amount"):
+            self.add_error("tourist_tax_amount", _("Enter the amount your municipality charges."))
+        return cleaned
+
+
 class TillSettingsForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = HotelSettings
@@ -337,6 +350,7 @@ TABS = {
     "email": EmailSettingsForm,
     "tills": TillSettingsForm,
     "loyalty": LoyaltySettingsForm,
+    "tourist_tax": TouristTaxForm,
     "remote": RemoteSettingsForm,
 }
 

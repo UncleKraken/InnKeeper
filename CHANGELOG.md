@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.16.0 — tourist tax
+
+**Shqip**
+
+- **Taksa e turizmit:** ndizeni te *Cilësimet → Taksa e turizmit* me shumën që vendos bashkia juaj — për mysafir ose për dhomë për natë, me ose pa fëmijët, dhe me një kufi netësh nëse bashkia e ka. Shtohet automatikisht në faturë me çdo natë dhome.
+- Nuk është e ardhura juaj: mbetet jashtë shitjeve, TVSH-së dhe faturës fiskale, dhe shfaqet veçmas te mbyllja e ditës dhe raporti mujor.
+- **Financa → Taksa e turizmit:** totali i muajit dhe lista e qëndrimeve (mysafiri, kombësia, dhoma, datat, netët), për printim ose Excel. Nga data 1 deri më 5 faqja kryesore ju kujton ta paguani.
+
+**English**
+
+- **Tourist tax:** turn it on in *Settings → Tourist tax* with the amount your municipality sets — per guest or per room per night, with or without children, and with a nights limit if your municipality has one. It is added to the bill automatically with each room night.
+- It is not your income: it stays out of sales, VAT and the fiscal invoice, and is shown on its own in the day close and the month report.
+- **Finance → Tourist tax:** the month's total and the list of stays (guest, nationality, room, dates, nights), to print or download to Excel. From the 1st to the 5th the home page reminds you to pay it.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.16.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.15.0 — staff clock-in, schedule and employee details
 
 **Shqip**

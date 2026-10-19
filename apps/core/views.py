@@ -124,7 +124,16 @@ def dashboard(request):
         from apps.core.businessday import business_date
 
         day = business_date()  # a night bar at 01:30 still sees tonight's takings
-        ctx["revenue_today"] = Charge.objects.period(day).aggregate(t=net("amount", day))["t"] or 0
+        ctx["revenue_today"] = Charge.objects.period(day).revenue().aggregate(t=net("amount", day))["t"] or 0
+        if day.day <= 5 and HotelSettings.load().tourist_tax_enabled:
+            from datetime import timedelta as _td
+
+            from apps.finance import tourist_tax
+
+            last = (day.replace(day=1) - _td(days=1)).replace(day=1)
+            due = tourist_tax.report(last, day.replace(day=1) - _td(days=1))
+            if due["total"]:
+                ctx["tourist_tax_due"] = {**due, "month": last.strftime("%Y-%m")}
 
     if can_access(user, "frontdesk") and HotelSettings.load().channex_enabled:
         from datetime import timedelta as _td

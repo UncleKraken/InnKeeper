@@ -30,7 +30,7 @@ def build(day: date) -> dict:
     hs = HotelSettings.load()
     s = day_summary(day)
     since, until = day_range(day)
-    week_ago = Charge.objects.period(day - timedelta(days=7)).aggregate(t=net("amount", day - timedelta(days=7)))["t"]
+    week_ago = Charge.objects.period(day - timedelta(days=7)).revenue().aggregate(t=net("amount", day - timedelta(days=7)))["t"]
     week_ago = week_ago or ZERO
     change = None
     if week_ago:

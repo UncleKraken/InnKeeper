@@ -38,7 +38,8 @@ def report(start: date, end: date) -> dict:
 
     hs = HotelSettings.load()
     amount = net("amount", start, end)
-    charges = Charge.objects.period(start, end)
+    charges = Charge.objects.period(start, end).revenue()
+    tourist_tax = Charge.objects.period(start, end).filter(kind=Charge.Kind.TOURIST_TAX).aggregate(t=amount)["t"] or ZERO
     departments = []
     acc = charges.filter(kind=Charge.Kind.ACCOMMODATION).aggregate(t=amount)["t"] or ZERO
     if acc:
@@ -93,7 +94,7 @@ def report(start: date, end: date) -> dict:
         cash = p.filter(method=Payment.Method.CASH).aggregate(t=a)["t"] or ZERO
         card = p.filter(method__in=[Payment.Method.CARD, Payment.Method.ONLINE]).aggregate(t=a)["t"] or ZERO
         other = (p.aggregate(t=a)["t"] or ZERO) - cash - card
-        sales = Charge.objects.period(d).aggregate(t=a)["t"] or ZERO
+        sales = Charge.objects.period(d).revenue().aggregate(t=a)["t"] or ZERO
         exp = Expense.objects.period(d).aggregate(t=a)["t"] or ZERO
         close = closes.get(d)
         days.append(
@@ -117,6 +118,7 @@ def report(start: date, end: date) -> dict:
         "end": end,
         "departments": departments,
         "revenue": revenue,
+        "tourist_tax": tourist_tax,
         "vat_rows": vat_rows,
         "vat_total": sum((r["vat"] for r in vat_rows), ZERO),
         "methods": methods,

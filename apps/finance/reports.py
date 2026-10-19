@@ -117,7 +117,8 @@ def day_summary(day: date) -> dict:
     cash_expenses = (
         Expense.objects.period(day).filter(method=Payment.Method.CASH).aggregate(t=amount)["t"] or ZERO
     )
-    charges = Charge.objects.period(day)
+    all_charges = Charge.objects.period(day)
+    charges = all_charges.revenue()
     departments = []
     acc = charges.filter(kind=Charge.Kind.ACCOMMODATION).aggregate(t=amount)["t"]
     if acc:
@@ -163,6 +164,7 @@ def day_summary(day: date) -> dict:
         "cash_expenses": cash_expenses,
         "departments": departments,
         "revenue": charges.aggregate(t=amount)["t"] or ZERO,
+        "tourist_tax": all_charges.filter(kind=Charge.Kind.TOURIST_TAX).aggregate(t=amount)["t"] or ZERO,
         "staff": [
             {
                 "name": f"{r['created_by__first_name']} {r['created_by__last_name']}".strip()

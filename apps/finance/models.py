@@ -206,6 +206,10 @@ class VoidableQuerySet(models.QuerySet):
     def active(self):
         return self.filter(voided=False)
 
+    def revenue(self):
+        """Charges that are the business's own sales: the tourist tax is collected for the municipality."""
+        return self.exclude(kind="tourist_tax")
+
     def period(self, start, end=None):
         end = end or start
         return self.filter(models.Q(business_date__range=(start, end)) | _voided_in(start, end))
@@ -255,6 +259,7 @@ class Charge(LedgerEntry):
         ACCOMMODATION = "accommodation", _("Accommodation")
         OUTLET = "outlet", _("Outlet")
         EXTRA = "extra", _("Extra")
+        TOURIST_TAX = "tourist_tax", _("Tourist tax")
 
     folio = models.ForeignKey(Folio, null=True, blank=True, on_delete=models.PROTECT, related_name="charges")
     order = models.ForeignKey("outlets.Order", null=True, blank=True, on_delete=models.PROTECT, related_name="charges")
@@ -296,6 +301,8 @@ class Charge(LedgerEntry):
     def department(self) -> str:
         if self.kind == self.Kind.ACCOMMODATION:
             return str(_("Accommodation"))
+        if self.kind == self.Kind.TOURIST_TAX:
+            return str(_("Tourist tax"))
         if self.outlet_id:
             return self.outlet.name
         return str(_("Extras"))

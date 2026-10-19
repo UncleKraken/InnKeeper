@@ -172,6 +172,21 @@ class FiscalFlowTests(HotelTestCase):
         self.assertEqual(rates, ["20.00", "6.00"])
         self.assertEqual(inv.get("TotPrice"), "91.00")
 
+    def test_tourist_tax_stays_off_the_fiscal_invoice(self):
+        from apps.finance.models import Folio
+
+        hs = HotelSettings.load()
+        hs.tourist_tax_enabled, hs.tourist_tax_amount = True, D("1.50")
+        hs.save()
+        res = self.make_reservation(nights=1, status=Reservation.Status.CHECKED_IN)
+        folio, _new = Folio.objects.get_or_create(reservation=res)
+        fd.add_payment(folio, amount=D("83"), method="cash", user=self.reception)
+        with self.captureOnCommitCallbacks(execute=True):
+            fd.check_out(res, self.reception)
+        inv = self.cis.invoices()[-1].find(f"{{{cis.NS}}}Invoice")
+        self.assertEqual(inv.get("TotPrice"), "80.00")
+        self.assertEqual(inv.get("TypeOfInv"), "CASH")
+
     def test_offline_sale_gets_nslf_and_is_resent_as_subsequent_delivery(self):
         self.cis.fail = "offline"
         order = self.pay()

@@ -189,6 +189,32 @@ class HotelSettings(models.Model):
     voucher_months = models.PositiveSmallIntegerField(
         _("vouchers are valid for (months)"), default=12, help_text=_("0: they never expire.")
     )
+    class TouristTaxBasis(models.TextChoices):
+        GUEST = "guest", _("per guest, per night")
+        ROOM = "room", _("per room, per night")
+
+    tourist_tax_enabled = models.BooleanField(
+        _("add the tourist tax to guest bills"),
+        default=False,
+        help_text=_("The tax your municipality charges on overnight stays. It is not your income and has no VAT."),
+    )
+    tourist_tax_amount = models.DecimalField(
+        _("amount"),
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(0)],
+        max_digits=12,
+        decimal_places=2,
+        help_text=_("In your currency, as the municipality sets it for your category (e.g. Tirana: 140 lek, 4–5 stars 350 lek)."),
+    )
+    tourist_tax_basis = models.CharField(
+        _("charged"), max_length=8, choices=TouristTaxBasis.choices, default=TouristTaxBasis.GUEST
+    )
+    tourist_tax_children = models.BooleanField(
+        _("children pay too"), default=False, help_text=_("Leave off if your municipality exempts children.")
+    )
+    tourist_tax_max_nights = models.PositiveSmallIntegerField(
+        _("at most (nights per stay)"), default=0, help_text=_("0: every night is charged.")
+    )
     tunnel_enabled = models.BooleanField(_("public address through Cloudflare Tunnel"), default=False)
     tunnel_token = models.CharField(
         _("tunnel token"),

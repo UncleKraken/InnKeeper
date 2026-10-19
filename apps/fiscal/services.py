@@ -434,7 +434,9 @@ def fiscalize_folio(folio, user) -> FiscalDocument | None:
     hs = HotelSettings.load()
     from apps.finance.models import Charge
 
-    charges = list(folio.charges.filter(voided=False).order_by("business_date", "id"))
+    # The tourist tax is the municipality's, not a sale: it stays off the fiscal invoice (the payment
+    # lines are trimmed to the invoice total by _payments).
+    charges = list(folio.charges.filter(voided=False).revenue().order_by("business_date", "id"))
     if not charges or sum(c.amount for c in charges) <= 0:
         return None
     lines = []

@@ -34,6 +34,7 @@
             <table class="table table-sm"><tbody>
               {% for name, amount in s.departments %}<tr><td>{{ name }}</td><td class="num">{{ amount|money }}</td></tr>{% empty %}<tr><td class="muted">{% translate "No revenue." %}</td></tr>{% endfor %}
               {% if s.discounts %}<tr><td class="muted">{% translate "Discounts given" %}</td><td class="num muted">{{ s.discounts|money }}</td></tr>{% endif %}
+              {% if s.tourist_tax %}<tr><td class="muted">{% translate "Tourist tax (for the municipality)" %}</td><td class="num muted">{{ s.tourist_tax|money }}</td></tr>{% endif %}
             </tbody></table>
           </div>
         </div>

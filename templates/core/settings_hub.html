@@ -12,6 +12,7 @@
     <a href="?tab=receipts" class="{% if tab == 'receipts' %}active{% endif %}">{% icon "receipt" %} {% translate "Receipts & invoices" %}</a>
     <a href="?tab=modules" class="{% if tab == 'modules' %}active{% endif %}">{% icon "grid" %} {% translate "Modules" %}</a>
     {% if hotel.module_rooms %}<a href="?tab=booking" class="{% if tab == 'booking' %}active{% endif %}">{% icon "calendar" %} {% translate "Online booking" %}</a>{% endif %}
+    {% if hotel.module_rooms %}<a href="?tab=tourist_tax" class="{% if tab == 'tourist_tax' %}active{% endif %}">{% icon "percent" %} {% translate "Tourist tax" %}</a>{% endif %}
     <a href="?tab=remote" class="{% if tab == 'remote' %}active{% endif %}">{% icon "sync" %} {% translate "Access from outside" %}</a>
     <a href="?tab=tills" class="{% if tab == 'tills' %}active{% endif %}">{% icon "lock" %} {% translate "Shared tills & PINs" %}</a>
     {% if hotel.module_outlets %}<a href="?tab=loyalty" class="{% if tab == 'loyalty' %}active{% endif %}">{% icon "gift" %} {% translate "Loyalty & gift vouchers" %}</a>{% endif %}
@@ -183,6 +184,17 @@
         </ul>
       </div>
     </section>
+
+  {% elif tab == "tourist_tax" %}
+    <form method="post" class="card" novalidate>{% csrf_token %}
+      <div class="card-header"><h2>{% translate "Tourist tax" %}</h2></div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0">{% translate "In Albania the tourist tax is a local tax: each municipality's council decides how much it is (usually a fixed amount per guest per night, sometimes per room, and higher for 4–5 star hotels), who is exempt and when it is paid. The business adds it to the guest's bill and pays it to the municipality, usually by the 5th of the next month, with the list of guests. Ask your municipality's tax office (Drejtoria e Taksave Vendore) for your amount." %}</p>
+        <p class="muted">{% translate "When it is on, InnKeeper adds it to the bill together with each room night. It is kept out of sales, VAT and the fiscal invoice, because it is not your income. Finance → Tourist tax shows the month's total and the list of stays to hand in." %}</p>
+        {% include "includes/form_fields.html" %}
+      </div>
+      <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
+    </form>
 
   {% elif tab == "loyalty" %}
     <form method="post" class="card" novalidate>{% csrf_token %}
