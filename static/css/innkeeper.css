@@ -1014,3 +1014,10 @@ body.kds-flash { animation: kds-flash 1.2s ease-out 2; }
   .bf-row { grid-template-columns: 2.8rem minmax(0, 1fr); }
   .bf-act { grid-column: 1 / -1; justify-self: end; }
 }
+.signup-poster { max-width: 420px; margin: 1rem auto; background: #fff; border: 1px dashed var(--border-strong); border-radius: 16px; padding: 2rem 1.5rem; text-align: center; }
+.signup-poster .sp-name { font-size: 1.6rem; font-weight: 800; margin-top: .4rem; }
+.signup-poster .sp-title { font-size: 1.1rem; color: var(--primary); font-weight: 700; margin: .3rem 0 1rem; }
+.signup-poster .sp-qr svg { width: 220px; height: 220px; }
+.signup-poster .sp-sub { font-weight: 600; margin-top: .6rem; }
+.signup-poster .sp-url { font-size: .72rem; color: var(--muted); word-break: break-all; margin-top: .4rem; }
+@media print { .signup-poster { border: 0; margin-top: 2cm; } }

@@ -52,6 +52,9 @@ class GuestForm(StyledFormMixin, forms.Form):
         help_text=gettext_lazy("Arrival time, extra bed, airport transfer…"),
     )
     accept = forms.BooleanField(label=gettext_lazy("I accept the booking conditions"))
+    offers = forms.BooleanField(
+        label=gettext_lazy("Send me news and offers by email (optional, unsubscribe at any time)"), required=False
+    )
     website = forms.CharField(required=False, widget=forms.TextInput(attrs={"tabindex": "-1", "autocomplete": "off"}))
 
     def clean_website(self):
@@ -160,6 +163,12 @@ def details(request, type_id):
                     cache.incr(key)
                 except ValueError:
                     cache.set(key, 1, 3600)
+                if form.cleaned_data.get("offers"):
+                    from apps.marketing.services import upsert
+
+                    upsert(name=f"{res.guest.first_name} {res.guest.last_name}", email_=res.guest.email, phone=res.guest.phone,
+                           source="booking", language=lang, guest=res.guest, consent=True,
+                           consent_note=_("Online booking %(code)s") % {"code": res.code})
                 return redirect(f"{booking.booking_url(res)}?lang={lang}")
     return render(
         request,

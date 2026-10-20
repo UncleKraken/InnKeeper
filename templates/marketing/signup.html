@@ -1,0 +1,30 @@
+{% load static i18n %}<!doctype html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% translate "News and offers" %} · {{ hotel.name }}</title>
+  <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+</head>
+<body class="menu-page">
+  <header class="menu-hero">
+    <div class="menu-lang"><a href="?lang=sq" class="{% if lang == 'sq' %}active{% endif %}">SQ</a><a href="?lang=en" class="{% if lang == 'en' %}active{% endif %}">EN</a></div>
+    {% if hotel.logo %}<img src="{{ hotel.logo }}" alt="{{ hotel.name }}" class="menu-logo">{% endif %}
+    <p class="menu-eyebrow">{{ hotel.name }}</p>
+    <h1>{% translate "News and offers" %}</h1>
+    <p class="menu-intro">{% translate "Be the first to hear about our offers, events and new menus. A few emails a year, never shared with anyone." %}</p>
+  </header>
+  <main class="menu-body" style="max-width:520px">
+    {% if done %}
+      <div class="alert alert-success">{% translate "Thank you! You're on our list. Every email has a link to unsubscribe." %}</div>
+    {% else %}
+      <form method="post" class="stack" novalidate>{% csrf_token %}<input type="hidden" name="lang" value="{{ lang }}">
+        {% for e in form.non_field_errors %}<div class="alert alert-error">{{ e }}</div>{% endfor %}
+        {% include "includes/form_fields.html" %}
+        <button class="btn" style="width:100%; justify-content:center">{% translate "Sign me up" %}</button>
+        <p class="muted" style="font-size:.8rem">{% blocktranslate with b=hotel.legal_name|default:hotel.name %}{{ b }} keeps your name and contact only to send you news and offers, and deletes them when you unsubscribe and ask.{% endblocktranslate %}</p>
+      </form>
+    {% endif %}
+  </main>
+</body>
+</html>

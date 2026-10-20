@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Sign-up QR" %}{% endblock %}
+{% block content %}
+<div class="page-header no-print">
+  <div><div class="eyebrow">{% translate "Contacts & marketing" %}</div><h1>{% translate "Sign-up QR" %}</h1><p>{% translate "Put it at reception, on tables, in rooms or on the receipt: guests scan it and join your list themselves, with their consent recorded." %}</p></div>
+  <div class="actions"><button class="btn" onclick="window.print()">{% icon "print" %} {% translate "Print" %}</button></div>
+</div>
+<div class="no-print">{% include "inventory/_tabs.html" %}</div>
+<div class="signup-poster">
+  {% if hotel.logo %}<img src="{{ hotel.logo }}" alt="" style="max-height:70px">{% endif %}
+  <div class="sp-name">{{ hotel.name }}</div>
+  <div class="sp-title">Oferta & lajme · Offers & news</div>
+  <div class="sp-qr">{{ qr }}</div>
+  <div class="sp-sub">Skano për t'u regjistruar · Scan to sign up</div>
+  <div class="mono sp-url">{{ url }}</div>
+</div>
+{% endblock %}

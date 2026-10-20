@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 18:28+0200\n"
+"POT-Creation-Date: 2026-10-20 18:37+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -126,7 +126,8 @@ msgstr "roli"
 
 #: apps/accounts/models.py:20 apps/core/models.py:39 apps/finance/models.py:77
 #: apps/finance/models.py:152 apps/frontdesk/models.py:85
-#: apps/inventory/models.py:27 apps/outlets/models.py:399
+#: apps/inventory/models.py:27 apps/marketing/models.py:33
+#: apps/outlets/models.py:399
 msgid "phone"
 msgstr "telefoni"
 
@@ -141,15 +142,15 @@ msgid ""
 msgstr ""
 "Kodi i operatorit nga portali self-care i tatimeve (për kuponat fiskalë)."
 
-#: apps/accounts/models.py:28
+#: apps/accounts/models.py:28 apps/marketing/models.py:35
 msgid "language"
 msgstr "gjuha"
 
-#: apps/accounts/models.py:31 apps/core/models.py:91 config/settings.py:139
+#: apps/accounts/models.py:31 apps/core/models.py:91 config/settings.py:140
 msgid "Albanian"
 msgstr "Shqip"
 
-#: apps/accounts/models.py:31 apps/core/models.py:91 config/settings.py:140
+#: apps/accounts/models.py:31 apps/core/models.py:91 config/settings.py:141
 msgid "English"
 msgstr "Anglisht"
 
@@ -257,16 +258,17 @@ msgstr "Fjalëkalimi juaj u ndryshua."
 
 #: apps/accounts/views.py:101 apps/frontdesk/views.py:636
 #: apps/frontdesk/views.py:671 apps/inventory/views.py:83
-#: apps/inventory/views.py:520 apps/outlets/menu_setup.py:62
+#: apps/inventory/views.py:520 apps/marketing/views.py:77
+#: apps/marketing/views.py:256 apps/outlets/menu_setup.py:62
 #: apps/outlets/menu_setup.py:175 apps/outlets/views.py:687
 #: apps/outlets/views.py:721 apps/outlets/views.py:782
 #: apps/outlets/views.py:816 apps/outlets/views.py:859
 #: apps/staff/payroll_views.py:183 apps/staff/views.py:121
 #: apps/staff/views.py:130 apps/staff/views.py:378
 #: templates/finance/accounts.html:16 templates/frontdesk/guest_list.html:16
-#: templates/outlets/_ticket.html:91 templates/outlets/bookings.html:25
-#: templates/outlets/cards.html:11 templates/outlets/cards.html:18
-#: templates/outlets/option_group_form.html:23
+#: templates/marketing/contacts.html:24 templates/outlets/_ticket.html:91
+#: templates/outlets/bookings.html:25 templates/outlets/cards.html:11
+#: templates/outlets/cards.html:18 templates/outlets/option_group_form.html:23
 #: templates/outlets/printers.html:15 templates/staff/attendance.html:36
 #: templates/staff/payroll.html:36 templates/staff/schedule.html:19
 msgid "Name"
@@ -284,11 +286,12 @@ msgstr "Roli"
 #: apps/accounts/views.py:105 apps/core/forms.py:54 apps/frontdesk/forms.py:54
 #: apps/frontdesk/groups.py:138 apps/frontdesk/models.py:120
 #: apps/frontdesk/public.py:45 apps/inventory/views.py:522
-#: templates/finance/accounts.html:16 templates/frontdesk/guest_detail.html:28
+#: apps/marketing/views.py:77 templates/finance/accounts.html:16
+#: templates/frontdesk/guest_detail.html:28
 #: templates/frontdesk/guest_list.html:16
 #: templates/frontdesk/reservation_detail.html:142
-#: templates/outlets/_ticket.html:92 templates/outlets/cards.html:12
-#: templates/outlets/cards.html:18
+#: templates/marketing/contacts.html:24 templates/outlets/_ticket.html:92
+#: templates/outlets/cards.html:12 templates/outlets/cards.html:18
 msgid "Phone"
 msgstr "Telefoni"
 
@@ -362,13 +365,15 @@ msgstr "NIPT"
 
 #: apps/core/forms.py:55 apps/frontdesk/forms.py:55
 #: apps/frontdesk/groups.py:139 apps/frontdesk/models.py:121
-#: apps/frontdesk/public.py:44 templates/core/settings_hub.html:22
+#: apps/frontdesk/public.py:44 apps/marketing/views.py:77
+#: apps/marketing/views.py:257 templates/core/settings_hub.html:22
 #: templates/core/settings_hub.html:296
 #: templates/frontdesk/guest_detail.html:29
 #: templates/frontdesk/guest_list.html:16
 #: templates/frontdesk/reservation_detail.html:120
 #: templates/frontdesk/reservation_detail.html:143
 #: templates/inventory/order_detail.html:26
+#: templates/marketing/contacts.html:24
 msgid "Email"
 msgstr "Email"
 
@@ -561,7 +566,7 @@ msgid "Occupancy %"
 msgstr "Zënia %"
 
 #: apps/core/group.py:354 apps/finance/tourist_tax.py:78
-#: templates/booking/details.html:44 templates/booking/email_guest.html:15
+#: templates/booking/details.html:45 templates/booking/email_guest.html:15
 #: templates/booking/email_staff.html:6 templates/booking/status.html:28
 #: templates/core/group_month.html:17 templates/finance/monthly.html:33
 #: templates/finance/monthly.html:46 templates/finance/monthly.html:51
@@ -592,7 +597,7 @@ msgstr "Artikujt e stokut"
 
 #: apps/core/importer.py:55 apps/finance/tourist_tax.py:71
 #: apps/outlets/printing.py:292 templates/base.html:36
-#: templates/booking/details.html:38 templates/booking/email_guest.html:14
+#: templates/booking/details.html:39 templates/booking/email_guest.html:14
 #: templates/booking/status.html:27 templates/finance/tourist_tax.html:29
 #: templates/frontdesk/breakfast.html:34
 #: templates/frontdesk/guest_detail.html:6
@@ -611,7 +616,7 @@ msgstr "e detyrueshme"
 msgid "optional"
 msgstr "jo e detyrueshme"
 
-#: apps/core/importer.py:120 templates/base.html:87 templates/help/help.html:3
+#: apps/core/importer.py:120 templates/base.html:88 templates/help/help.html:3
 msgid "Help"
 msgstr "Ndihmë"
 
@@ -725,7 +730,7 @@ msgid "address"
 msgstr "adresa"
 
 #: apps/core/models.py:40 apps/frontdesk/models.py:84
-#: apps/inventory/models.py:28
+#: apps/inventory/models.py:28 apps/marketing/models.py:32
 msgid "email"
 msgstr "email"
 
@@ -1535,13 +1540,13 @@ msgstr "regjistri i aktivitetit"
 #: apps/core/models.py:580 apps/finance/models.py:76
 #: apps/finance/models.py:151 apps/frontdesk/models.py:16
 #: apps/frontdesk/models.py:279 apps/inventory/models.py:25
-#: apps/inventory/models.py:60 apps/outlets/models.py:21
-#: apps/outlets/models.py:64 apps/outlets/models.py:102
-#: apps/outlets/models.py:186 apps/outlets/models.py:212
-#: apps/outlets/models.py:242 apps/outlets/models.py:266
-#: apps/outlets/models.py:294 apps/outlets/models.py:347
-#: apps/outlets/models.py:398 apps/outlets/models.py:572
-#: apps/staff/models.py:27 apps/staff/models.py:184
+#: apps/inventory/models.py:60 apps/marketing/models.py:31
+#: apps/outlets/models.py:21 apps/outlets/models.py:64
+#: apps/outlets/models.py:102 apps/outlets/models.py:186
+#: apps/outlets/models.py:212 apps/outlets/models.py:242
+#: apps/outlets/models.py:266 apps/outlets/models.py:294
+#: apps/outlets/models.py:347 apps/outlets/models.py:398
+#: apps/outlets/models.py:572 apps/staff/models.py:27 apps/staff/models.py:184
 msgid "name"
 msgstr "emri"
 
@@ -1690,7 +1695,7 @@ msgstr "Çmimet tuaja janë në %(c)s: tatimet kërkojnë kursin në lekë."
 msgid "Settings saved."
 msgstr "Cilësimet u ruajtën."
 
-#: apps/core/settings_views.py:440
+#: apps/core/settings_views.py:440 apps/marketing/views.py:209
 msgid "Ana"
 msgstr "Ana"
 
@@ -2173,7 +2178,7 @@ msgstr "paratë e numëruara"
 #: apps/frontdesk/models.py:56 apps/frontdesk/models.py:93
 #: apps/frontdesk/models.py:143 apps/frontdesk/models.py:371
 #: apps/housekeeping/models.py:34 apps/inventory/models.py:30
-#: apps/staff/models.py:79
+#: apps/marketing/models.py:42 apps/staff/models.py:79
 msgid "notes"
 msgstr "shënime"
 
@@ -2426,8 +2431,9 @@ msgstr "Ditët"
 #: templates/frontdesk/reservation_detail.html:44
 #: templates/inventory/counts.html:13 templates/inventory/deliveries.html:20
 #: templates/inventory/item_detail.html:18
-#: templates/inventory/transfers.html:14 templates/outlets/receipt.html:40
-#: templates/outlets/receipts.html:8 templates/staff/person_hours.html:21
+#: templates/inventory/transfers.html:14 templates/marketing/campaigns.html:11
+#: templates/outlets/receipt.html:40 templates/outlets/receipts.html:8
+#: templates/staff/person_hours.html:21
 msgid "Date"
 msgstr "Data"
 
@@ -2495,9 +2501,11 @@ msgid "Day closed with a difference of %(d)s."
 msgstr "Dita u mbyll me diferencë %(d)s."
 
 #: apps/finance/reports.py:330 apps/frontdesk/views.py:673
-#: templates/finance/_range.html:4 templates/finance/expenses.html:9
-#: templates/frontdesk/register.html:10 templates/inventory/deliveries.html:9
+#: apps/marketing/views.py:77 templates/finance/_range.html:4
+#: templates/finance/expenses.html:9 templates/frontdesk/register.html:10
+#: templates/inventory/deliveries.html:9
 #: templates/inventory/menu_profit.html:10 templates/inventory/usage.html:9
+#: templates/marketing/contacts.html:19 templates/marketing/contacts.html:24
 #: templates/staff/attendance.html:9 templates/staff/person_hours.html:10
 msgid "From"
 msgstr "Nga"
@@ -2680,7 +2688,7 @@ msgstr "Dhoma"
 
 #: apps/finance/tourist_tax.py:71 apps/frontdesk/groups.py:141
 #: apps/frontdesk/public.py:26 apps/frontdesk/register.py:81
-#: templates/booking/details.html:36 templates/booking/email_guest.html:12
+#: templates/booking/details.html:37 templates/booking/email_guest.html:12
 #: templates/booking/email_message.html:10 templates/booking/search.html:9
 #: templates/booking/status.html:25 templates/frontdesk/groups.html:13
 #: templates/frontdesk/register.html:29
@@ -2689,7 +2697,7 @@ msgstr "Mbërritja"
 
 #: apps/finance/tourist_tax.py:71 apps/frontdesk/groups.py:142
 #: apps/frontdesk/public.py:27 apps/frontdesk/register.py:81
-#: templates/booking/details.html:37 templates/booking/email_guest.html:13
+#: templates/booking/details.html:38 templates/booking/email_guest.html:13
 #: templates/booking/email_message.html:11 templates/booking/search.html:10
 #: templates/booking/status.html:26 templates/frontdesk/register.html:29
 msgid "Departure"
@@ -3234,7 +3242,10 @@ msgid "Thank you for staying at %(hotel)s"
 msgstr "Faleminderit që qëndruat te %(hotel)s"
 
 #: apps/frontdesk/guest_messages.py:58 apps/frontdesk/guest_messages.py:70
-#: templates/booking/email_guest.html:6 templates/payments/email_guest.html:4
+#: templates/booking/email_guest.html:6
+#: templates/marketing/campaign_detail.html:11
+#: templates/marketing/email_campaign.html:6
+#: templates/payments/email_guest.html:4
 #, python-format
 msgid "Dear %(name)s,"
 msgstr "I/E nderuar %(name)s,"
@@ -3508,13 +3519,13 @@ msgstr "mbërritja"
 msgid "departure"
 msgstr "largimi"
 
-#: apps/frontdesk/models.py:135 templates/booking/details.html:38
+#: apps/frontdesk/models.py:135 templates/booking/details.html:39
 #: templates/booking/status.html:27
 #: templates/frontdesk/reservation_detail.html:165
 msgid "adults"
 msgstr "të rritur"
 
-#: apps/frontdesk/models.py:136 templates/booking/details.html:38
+#: apps/frontdesk/models.py:136 templates/booking/details.html:39
 #: templates/booking/status.html:27
 #: templates/frontdesk/reservation_detail.html:165
 msgid "children"
@@ -3569,10 +3580,10 @@ msgid "Leave empty to apply to all room types (percentage only)."
 msgstr ""
 "Lëreni bosh për ta zbatuar për të gjitha llojet e dhomave (vetëm përqindje)."
 
-#: apps/frontdesk/models.py:289 apps/outlets/models.py:303
-#: apps/staff/models.py:146 apps/staff/models.py:245
-#: templates/booking/details.html:36 templates/booking/status.html:25
-#: templates/inventory/transfer_detail.html:6
+#: apps/frontdesk/models.py:289 apps/marketing/models.py:36
+#: apps/outlets/models.py:303 apps/staff/models.py:146
+#: apps/staff/models.py:245 templates/booking/details.html:37
+#: templates/booking/status.html:25 templates/inventory/transfer_detail.html:6
 #: templates/inventory/transfer_receive.html:17
 msgid "from"
 msgstr "nga"
@@ -3701,7 +3712,7 @@ msgstr "Fëmijë"
 msgid "Country"
 msgstr "Shteti"
 
-#: apps/frontdesk/public.py:48 apps/staff/views.py:27 templates/base.html:82
+#: apps/frontdesk/public.py:48 apps/staff/views.py:27 templates/base.html:83
 #: templates/staff/requests.html:3 templates/staff/requests.html:5
 msgid "Requests"
 msgstr "Kërkesa"
@@ -3714,14 +3725,25 @@ msgstr "Ora e mbërritjes, shtrat shtesë, transfertë nga aeroporti…"
 msgid "I accept the booking conditions"
 msgstr "Pranoj kushtet e rezervimit"
 
-#: apps/frontdesk/public.py:139
+#: apps/frontdesk/public.py:56
+msgid "Send me news and offers by email (optional, unsubscribe at any time)"
+msgstr ""
+"Më dërgoni lajme dhe oferta me email (sipas dëshirës, mund të çregjistrohem "
+"kurdo)"
+
+#: apps/frontdesk/public.py:142
 msgid "This room is no longer available for these dates."
 msgstr "Kjo dhomë nuk është më e lirë për këto data."
 
-#: apps/frontdesk/public.py:143
+#: apps/frontdesk/public.py:146
 msgid "Too many bookings from this connection. Please call or email us."
 msgstr ""
 "Shumë rezervime nga kjo lidhje. Ju lutemi na telefononi ose na shkruani."
+
+#: apps/frontdesk/public.py:171
+#, python-format
+msgid "Online booking %(code)s"
+msgstr "Rezervim online %(code)s"
 
 #: apps/frontdesk/register.py:48
 msgid "document"
@@ -3878,7 +3900,8 @@ msgstr "Largime"
 #: templates/core/dashboard.html:119 templates/finance/expenses.html:11
 #: templates/fiscal/documents.html:18 templates/frontdesk/groups.html:9
 #: templates/housekeeping/ticket_list.html:12
-#: templates/inventory/order_list.html:14 templates/outlets/order.html:16
+#: templates/inventory/order_list.html:14 templates/marketing/contacts.html:17
+#: templates/marketing/contacts.html:19 templates/outlets/order.html:16
 #: templates/outlets/receipts.html:10
 msgid "All"
 msgstr "Të gjitha"
@@ -4006,7 +4029,8 @@ msgstr "Kati"
 #: templates/frontdesk/group_detail.html:31
 #: templates/frontdesk/reservation_list.html:17
 #: templates/housekeeping/ticket_list.html:17
-#: templates/inventory/order_list.html:18 templates/outlets/bookings.html:25
+#: templates/inventory/order_list.html:18
+#: templates/marketing/campaigns.html:11 templates/outlets/bookings.html:25
 #: templates/outlets/printers.html:15
 msgid "Status"
 msgstr "Statusi"
@@ -4402,7 +4426,7 @@ msgstr "lëvizje stoku"
 msgid "stock movements"
 msgstr "lëvizjet e stokut"
 
-#: apps/inventory/models.py:207
+#: apps/inventory/models.py:207 apps/marketing/models.py:75
 msgid "Draft"
 msgstr "Pa dërguar"
 
@@ -4440,8 +4464,11 @@ msgstr "artikull"
 msgid "expected price per unit"
 msgstr "çmimi i pritur për njësi"
 
-#: apps/inventory/models.py:270 apps/outlets/models.py:566
+#: apps/inventory/models.py:270 apps/marketing/models.py:77
+#: apps/marketing/models.py:105 apps/outlets/models.py:566
 #: templates/frontdesk/reservation_detail.html:151
+#: templates/marketing/campaign_detail.html:29
+#: templates/marketing/campaigns.html:11
 msgid "Sent"
 msgstr "Dërguar"
 
@@ -4826,6 +4853,275 @@ msgstr ""
 msgid "Contact person"
 msgstr "Personi i kontaktit"
 
+#: apps/marketing/apps.py:7 templates/base.html:81
+#: templates/marketing/campaigns.html:6 templates/marketing/contacts.html:6
+#: templates/marketing/poster.html:6
+msgid "Contacts & marketing"
+msgstr "Kontaktet & marketingu"
+
+#: apps/marketing/models.py:23
+msgid "Hotel guest"
+msgstr "Mysafir i hotelit"
+
+#: apps/marketing/models.py:24 templates/core/settings_hub.html:14
+#: templates/core/settings_hub.html:107
+msgid "Online booking"
+msgstr "Rezervimi online"
+
+#: apps/marketing/models.py:25
+msgid "Sign-up page"
+msgstr "Faqja e regjistrimit"
+
+#: apps/marketing/models.py:26
+msgid "Loyalty card"
+msgstr "Kartë besnikërie"
+
+#: apps/marketing/models.py:27 templates/finance/account_form.html:3
+msgid "Customer account"
+msgstr "Llogari klienti"
+
+#: apps/marketing/models.py:28
+msgid "Table booking"
+msgstr "Rezervim tavoline"
+
+#: apps/marketing/models.py:29
+msgid "Added by hand"
+msgstr "Shtuar me dorë"
+
+#: apps/marketing/models.py:37
+msgid "agreed to receive offers"
+msgstr "pranoi të marrë oferta"
+
+#: apps/marketing/models.py:39
+msgid "how they agreed"
+msgstr "si e dha pëlqimin"
+
+#: apps/marketing/models.py:41
+msgid "tags"
+msgstr "etiketat"
+
+#: apps/marketing/models.py:41
+msgid "Words to group contacts, e.g. wedding, company, VIP."
+msgstr "Fjalë për të grupuar kontaktet, p.sh. dasmë, kompani, VIP."
+
+#: apps/marketing/models.py:44
+msgid "last visit"
+msgstr "vizita e fundit"
+
+#: apps/marketing/models.py:50
+msgid "contact"
+msgstr "kontakt"
+
+#: apps/marketing/models.py:51
+msgid "contacts"
+msgstr "kontaktet"
+
+#: apps/marketing/models.py:76
+msgid "Sending"
+msgstr "Po dërgohet"
+
+#: apps/marketing/models.py:80
+msgid "Everyone who agreed"
+msgstr "Të gjithë që kanë pranuar"
+
+#: apps/marketing/models.py:81
+msgid "Albanian speakers"
+msgstr "Shqipfolësit"
+
+#: apps/marketing/models.py:82
+msgid "English speakers"
+msgstr "Anglishtfolësit"
+
+#: apps/marketing/models.py:83
+msgid "Visited in the last 12 months"
+msgstr "Kanë ardhur në 12 muajt e fundit"
+
+#: apps/marketing/models.py:84
+msgid "With a tag"
+msgstr "Me një etiketë"
+
+#: apps/marketing/models.py:86
+msgid "subject"
+msgstr "subjekti"
+
+#: apps/marketing/models.py:87
+msgid "message"
+msgstr "mesazhi"
+
+#: apps/marketing/models.py:87
+msgid ""
+"Plain text. Links are made clickable. “Dear …,” and the unsubscribe link are"
+" added."
+msgstr ""
+"Tekst i thjeshtë. Linket bëhen të klikueshme. Shtohen “I/E nderuar …,” dhe "
+"linku i çregjistrimit."
+
+#: apps/marketing/models.py:88
+msgid "send to"
+msgstr "dërgo te"
+
+#: apps/marketing/models.py:89
+msgid "tag"
+msgstr "etiketa"
+
+#: apps/marketing/models.py:104 apps/outlets/models.py:635
+#: apps/staff/models.py:238 templates/marketing/campaign_detail.html:30
+msgid "Waiting"
+msgstr "Në pritje"
+
+#: apps/marketing/models.py:106 apps/outlets/models.py:607
+#: apps/payments/models.py:21 templates/marketing/campaign_detail.html:31
+msgid "Failed"
+msgstr "Dështoi"
+
+#: apps/marketing/services.py:121
+msgid "Set up email first (Settings → Email)."
+msgstr "Konfiguroni email-in fillimisht (Cilësimet → Email)."
+
+#: apps/marketing/services.py:123
+msgid ""
+"Set the public web address first (Settings → Online booking): the "
+"unsubscribe link must work from the guests' phones."
+msgstr ""
+"Vendosni adresën publike të faqes fillimisht (Cilësimet → Rezervimi online):"
+" linku i çregjistrimit duhet të punojë nga telefonat e klientëve."
+
+#: apps/marketing/services.py:127
+msgid "This campaign has already been sent."
+msgstr "Kjo fushatë është dërguar tashmë."
+
+#: apps/marketing/services.py:130
+msgid "Nobody in this group has agreed to receive offers yet."
+msgstr "Askush në këtë grup nuk ka pranuar ende të marrë oferta."
+
+#: apps/marketing/views.py:26 apps/marketing/views.py:87
+#: templates/marketing/contact_form.html:5 templates/marketing/contacts.html:3
+#: templates/marketing/contacts.html:6
+msgid "Contacts"
+msgstr "Kontaktet"
+
+#: apps/marketing/views.py:27 templates/marketing/campaign_detail.html:5
+#: templates/marketing/campaign_form.html:5
+#: templates/marketing/campaigns.html:3 templates/marketing/campaigns.html:6
+msgid "Email campaigns"
+msgstr "Fushatat me email"
+
+#: apps/marketing/views.py:28 templates/marketing/poster.html:3
+#: templates/marketing/poster.html:6
+msgid "Sign-up QR"
+msgstr "QR për regjistrim"
+
+#: apps/marketing/views.py:77
+msgid "Language"
+msgstr "Gjuha"
+
+#: apps/marketing/views.py:77
+msgid "Agreed to offers"
+msgstr "Pranoi ofertat"
+
+#: apps/marketing/views.py:77
+msgid "Agreed on"
+msgstr "Pranoi më"
+
+#: apps/marketing/views.py:77
+msgid "How"
+msgstr "Si"
+
+#: apps/marketing/views.py:77
+msgid "Tags"
+msgstr "Etiketat"
+
+#: apps/marketing/views.py:77 templates/marketing/contacts.html:24
+#: templates/outlets/cards.html:18
+msgid "Last visit"
+msgstr "Vizita e fundit"
+
+#: apps/marketing/views.py:79 templates/core/crud_list.html:24
+msgid "Yes"
+msgstr "Po"
+
+#: apps/marketing/views.py:79 templates/core/crud_list.html:24
+#: templates/staff/my_hours.html:21
+msgid "No"
+msgstr "Jo"
+
+#: apps/marketing/views.py:104
+#, python-format
+msgid "Contacts updated: %(n)s new."
+msgstr "Kontaktet u përditësuan: %(n)s të rinj."
+
+#: apps/marketing/views.py:118
+msgid ""
+"When they agreed: e.g. “signed form at reception 12.05”, “asked by phone”."
+msgstr ""
+"Kur e dhanë pëlqimin: p.sh. “nënshkroi formularin në recepsion 12.05”, “u "
+"pyet në telefon”."
+
+#: apps/marketing/views.py:121
+#, python-format
+msgid ""
+"They unsubscribed on %(d)s. Only they can sign up again (sign-up page or "
+"booking form)."
+msgstr ""
+"U çregjistrua më %(d)s. Vetëm vetë mund të regjistrohet përsëri (faqja e "
+"regjistrimit ose formulari i rezervimit)."
+
+#: apps/marketing/views.py:127
+msgid "Enter an email or a phone number."
+msgstr "Shkruani një email ose një numër telefoni."
+
+#: apps/marketing/views.py:130
+msgid "Write how they agreed: the law asks you to be able to show it."
+msgstr "Shkruani si e dhanë pëlqimin: ligji kërkon që ta provoni."
+
+#: apps/marketing/views.py:143
+msgid "Contact deleted."
+msgstr "Kontakti u fshi."
+
+#: apps/marketing/views.py:153 apps/outlets/loyalty_views.py:153
+#: apps/staff/views.py:205 apps/staff/views.py:359
+msgid "Saved."
+msgstr "U ruajt."
+
+#: apps/marketing/views.py:173
+msgid "Write the tag."
+msgstr "Shkruani etiketën."
+
+#: apps/marketing/views.py:228
+msgid "Add your own email to your account first."
+msgstr "Shtoni fillimisht email-in tuaj në llogari."
+
+#: apps/marketing/views.py:234
+#, python-format
+msgid "Test sent to %(e)s."
+msgstr "Prova u dërgua te %(e)s."
+
+#: apps/marketing/views.py:234
+msgid "The test email could not be sent. Check Settings → Email."
+msgstr "Email-i provë nuk u dërgua. Kontrolloni Cilësimet → Email."
+
+#: apps/marketing/views.py:238
+#, python-format
+msgid "Sending to %(n)s people. You can leave this page."
+msgstr "Po dërgohet te %(n)s veta. Mund ta mbyllni këtë faqe."
+
+#: apps/marketing/views.py:258
+msgid "Phone (optional)"
+msgstr "Telefoni (sipas dëshirës)"
+
+#: apps/marketing/views.py:259
+msgid "Yes, send me news and offers. I can unsubscribe at any time."
+msgstr "Po, më dërgoni lajme dhe oferta. Mund të çregjistrohem kurdo."
+
+#: apps/marketing/views.py:282
+msgid "Too many sign-ups from this connection. Please try later."
+msgstr "Shumë regjistrime nga kjo lidhje. Provoni më vonë."
+
+#: apps/marketing/views.py:286
+#, python-format
+msgid "Sign-up page, %(ip)s"
+msgstr "Faqja e regjistrimit, %(ip)s"
+
 #: apps/outlets/apps.py:8 apps/outlets/menu_setup.py:134
 #: apps/outlets/views.py:634 templates/outlets/floor.html:6
 msgid "Outlets"
@@ -5021,11 +5317,6 @@ msgstr "Kuponi dhuratë u anulua. Kthejini paratë klientit."
 #: apps/outlets/loyalty_views.py:147
 msgid "Only a manager can change a loyalty card."
 msgstr "Vetëm menaxheri mund të ndryshojë një kartë besnikërie."
-
-#: apps/outlets/loyalty_views.py:153 apps/staff/views.py:205
-#: apps/staff/views.py:359
-msgid "Saved."
-msgstr "U ruajt."
 
 #: apps/outlets/menu.py:110
 #, python-format
@@ -5419,7 +5710,7 @@ msgstr ""
 msgid "days"
 msgstr "ditë"
 
-#: apps/outlets/models.py:304 templates/booking/details.html:37
+#: apps/outlets/models.py:304 templates/booking/details.html:38
 #: templates/booking/status.html:26
 msgid "until"
 msgstr "deri në"
@@ -5597,10 +5888,6 @@ msgstr "Shërbyer drejtpërdrejt"
 msgid "Printed"
 msgstr "Printuar"
 
-#: apps/outlets/models.py:607 apps/payments/models.py:21
-msgid "Failed"
-msgstr "Dështoi"
-
 #: apps/outlets/models.py:630 apps/outlets/views.py:724
 msgid "Order"
 msgstr "Renditja"
@@ -5612,10 +5899,6 @@ msgstr "Thirr kamarierin"
 #: apps/outlets/models.py:632 templates/outlets/table_order.html:57
 msgid "Bill, please"
 msgstr "Faturën, ju lutem"
-
-#: apps/outlets/models.py:635 apps/staff/models.py:238
-msgid "Waiting"
-msgstr "Në pritje"
 
 #: apps/outlets/models.py:636
 msgid "Accepted"
@@ -6586,7 +6869,7 @@ msgstr "Baza"
 msgid "Overtime"
 msgstr "Jashtë orarit"
 
-#: apps/staff/payroll_views.py:184 templates/booking/details.html:42
+#: apps/staff/payroll_views.py:184 templates/booking/details.html:43
 #: templates/staff/payroll.html:36
 msgid "Night"
 msgstr "Nata"
@@ -6699,13 +6982,13 @@ msgstr "%(name)s është tashmë në punë."
 msgid "%(name)s is not clocked in."
 msgstr "%(name)s nuk është në punë."
 
-#: apps/staff/views.py:25 templates/base.html:81
+#: apps/staff/views.py:25 templates/base.html:82
 #: templates/staff/attendance.html:3 templates/staff/attendance.html:6
 #: templates/staff/person_hours.html:6
 msgid "Attendance"
 msgstr "Prezenca"
 
-#: apps/staff/views.py:26 templates/base.html:83
+#: apps/staff/views.py:26 templates/base.html:84
 #: templates/staff/schedule.html:3 templates/staff/schedule.html:6
 #: templates/staff/shift_form.html:3 templates/staff/shift_form.html:5
 msgid "Schedule"
@@ -6763,12 +7046,12 @@ msgstr "Pa dalje të shënuar"
 msgid "Clock-ins"
 msgstr "Hyrjet"
 
-#: apps/staff/views.py:130 apps/staff/views.py:159 templates/base.html:93
+#: apps/staff/views.py:130 apps/staff/views.py:159 templates/base.html:94
 #: templates/staff/my_hours.html:9 templates/staff/person_hours.html:21
 msgid "Clock in"
 msgstr "Hyrje"
 
-#: apps/staff/views.py:130 apps/staff/views.py:161 templates/base.html:92
+#: apps/staff/views.py:130 apps/staff/views.py:161 templates/base.html:93
 #: templates/staff/attendance.html:26 templates/staff/person_hours.html:21
 msgid "Clock out"
 msgstr "Dalje"
@@ -6898,7 +7181,7 @@ msgstr "Harrove fjalëkalimin? Kërkoji menaxherit të vendosë një të ri."
 
 #: templates/accounts/password_change.html:3
 #: templates/accounts/password_change.html:5
-#: templates/accounts/password_change.html:8 templates/base.html:100
+#: templates/accounts/password_change.html:8 templates/base.html:101
 msgid "Change password"
 msgstr "Ndrysho fjalëkalimin"
 
@@ -6911,7 +7194,7 @@ msgstr ""
 msgid "Your account"
 msgstr "Llogaria juaj"
 
-#: templates/accounts/pin_form.html:8 templates/base.html:101
+#: templates/accounts/pin_form.html:8 templates/base.html:102
 msgid "Your PIN for shared tills"
 msgstr "PIN-i juaj për arkat e përbashkëta"
 
@@ -6968,6 +7251,7 @@ msgstr "Hiq PIN-in"
 #: templates/frontdesk/guest_form.html:8 templates/housekeeping/form.html:8
 #: templates/inventory/order_detail.html:57
 #: templates/inventory/recipe_form.html:32
+#: templates/marketing/contact_form.html:13
 #: templates/outlets/booking_form.html:14 templates/outlets/card.html:22
 #: templates/outlets/option_group_form.html:40
 #: templates/staff/entry_form.html:13 templates/staff/payroll.html:80
@@ -7151,66 +7435,66 @@ msgstr "Menaxhimi"
 msgid "Group overview"
 msgstr "Pamja e grupit"
 
-#: templates/base.html:84 templates/core/dashboard.html:64
+#: templates/base.html:85 templates/core/dashboard.html:64
 #: templates/core/settings_hub.html:3 templates/core/settings_hub.html:6
 #: templates/core/setup.html:8
 msgid "Settings"
 msgstr "Cilësimet"
 
-#: templates/base.html:86 templates/staff/my_hours.html:3
+#: templates/base.html:87 templates/staff/my_hours.html:3
 #: templates/staff/my_hours.html:6
 msgid "My hours"
 msgstr "Orët e mia"
 
-#: templates/base.html:90 templates/base.html:114
+#: templates/base.html:91 templates/base.html:115
 msgid "Lock / switch user"
 msgstr "Kyç / ndrysho përdoruesin"
 
-#: templates/base.html:92
+#: templates/base.html:93
 #, python-format
 msgid "Clock out · in since %(t)s"
 msgstr "Dalje · në punë që nga %(t)s"
 
-#: templates/base.html:103
+#: templates/base.html:104
 msgid "Sign out"
 msgstr "Dil"
 
-#: templates/base.html:112 templates/outlets/_ticket_bar.html:1
+#: templates/base.html:113 templates/outlets/_ticket_bar.html:1
 #: templates/outlets/menu_print.html:5
 msgid "Menu"
 msgstr "Menuja"
 
-#: templates/base.html:114
+#: templates/base.html:115
 msgid "Switch"
 msgstr "Ndrysho"
 
-#: templates/base.html:117
+#: templates/base.html:118
 #, python-format
 msgid "A new version of InnKeeper (%(v)s) is available."
 msgstr "Ka dalë një version i ri i InnKeeper-it (%(v)s)."
 
-#: templates/base.html:117
+#: templates/base.html:118
 msgid "See what's new and update"
 msgstr "Shihni çfarë ka të re dhe përditësoni"
 
-#: templates/base.html:118
+#: templates/base.html:119
 msgid "Sample data"
 msgstr "Të dhëna shembull"
 
-#: templates/base.html:118
+#: templates/base.html:119
 msgid "Nothing here is real. Try anything you like."
 msgstr "Asgjë këtu nuk është e vërtetë. Provoni çfarë të doni."
 
-#: templates/base.html:118 templates/core/sample_remove.html:3
+#: templates/base.html:119 templates/core/sample_remove.html:3
 #: templates/core/sample_remove.html:7
 msgid "Start with my own business"
 msgstr "Fillo me biznesin tim"
 
-#: templates/base.html:124
+#: templates/base.html:125
 msgid "No connection to InnKeeper."
 msgstr "Nuk ka lidhje me InnKeeper."
 
-#: templates/base.html:124
+#: templates/base.html:125
 msgid ""
 "Check the Wi-Fi and that the InnKeeper computer is on. Nothing is saved "
 "until it is back; this message goes away by itself."
@@ -7218,7 +7502,7 @@ msgstr ""
 "Kontrolloni Wi-Fi-n dhe që kompjuteri i InnKeeper të jetë i ndezur. Asgjë "
 "nuk ruhet derisa të kthehet lidhja; ky mesazh largohet vetë."
 
-#: templates/base.html:125
+#: templates/base.html:126
 msgid "Connected again."
 msgstr "U lidh përsëri."
 
@@ -7238,21 +7522,21 @@ msgstr "Të dhënat tuaja"
 msgid "Booking conditions"
 msgstr "Kushtet e rezervimit"
 
-#: templates/booking/details.html:28
+#: templates/booking/details.html:29
 msgid "Send booking request"
 msgstr "Dërgo kërkesën për rezervim"
 
-#: templates/booking/details.html:28
+#: templates/booking/details.html:29
 msgid "Confirm booking"
 msgstr "Konfirmo rezervimin"
 
-#: templates/booking/details.html:45 templates/outlets/menu_print.html:32
+#: templates/booking/details.html:46 templates/outlets/menu_print.html:32
 #: templates/outlets/menu_public.html:38 templates/outlets/table_order.html:80
 #, python-format
 msgid "Prices include VAT (%(rate)s%%)"
 msgstr "Çmimet përfshijnë TVSH (%(rate)s%%)"
 
-#: templates/booking/details.html:46
+#: templates/booking/details.html:47
 #, python-format
 msgid ""
 "A deposit of %(d)s is requested by bank transfer. You'll see the details "
@@ -7261,7 +7545,7 @@ msgstr ""
 "Kërkohet një parapagim prej %(d)s me transfertë bankare. Të dhënat do t'i "
 "shihni pas rezervimit."
 
-#: templates/booking/details.html:47
+#: templates/booking/details.html:48
 msgid "Nothing to pay now. You pay at the hotel."
 msgstr "Asgjë për të paguar tani. Paguani në hotel."
 
@@ -7496,18 +7780,11 @@ msgstr "Shto %(singular)s"
 msgid "Cancel"
 msgstr "Anulo"
 
-#: templates/core/crud_list.html:24
-msgid "Yes"
-msgstr "Po"
-
-#: templates/core/crud_list.html:24 templates/staff/my_hours.html:21
-msgid "No"
-msgstr "Jo"
-
 #: templates/core/crud_list.html:28 templates/finance/account_detail.html:12
 #: templates/frontdesk/guest_detail.html:8
 #: templates/frontdesk/reservation_detail.html:13
 #: templates/inventory/item_detail.html:8 templates/inventory/recipes.html:31
+#: templates/marketing/campaign_detail.html:7
 #: templates/outlets/bookings.html:48 templates/outlets/card.html:20
 #: templates/staff/payroll.html:83
 msgid "Edit"
@@ -8123,10 +8400,6 @@ msgstr "Kuponat & faturat"
 msgid "Modules"
 msgstr "Modulet"
 
-#: templates/core/settings_hub.html:14 templates/core/settings_hub.html:107
-msgid "Online booking"
-msgstr "Rezervimi online"
-
 #: templates/core/settings_hub.html:15 templates/core/settings_hub.html:223
 msgid "Guest messages"
 msgstr "Mesazhet për mysafirët"
@@ -8157,6 +8430,7 @@ msgid "These details appear on receipts, invoices and the guest menu."
 msgstr "Këto të dhëna shfaqen në kupona, fatura dhe menunë e mysafirëve."
 
 #: templates/core/settings_hub.html:57 templates/core/settings_hub.html:232
+#: templates/marketing/campaign_detail.html:10
 msgid "Preview"
 msgstr "Parapamja"
 
@@ -8670,6 +8944,7 @@ msgid "See how it looks: send yesterday's summary now."
 msgstr "Shikoni si duket: dërgoni tani përmbledhjen e djeshme."
 
 #: templates/core/settings_hub.html:320
+#: templates/marketing/campaign_detail.html:22
 msgid "Send now"
 msgstr "Dërgo tani"
 
@@ -9294,8 +9569,8 @@ msgstr "U përditësua"
 #: templates/finance/_range.html:6 templates/finance/expenses.html:12
 #: templates/frontdesk/register.html:13 templates/inventory/deliveries.html:11
 #: templates/inventory/menu_profit.html:12 templates/inventory/usage.html:11
-#: templates/outlets/receipts.html:13 templates/staff/attendance.html:11
-#: templates/staff/person_hours.html:12
+#: templates/marketing/contacts.html:20 templates/outlets/receipts.html:13
+#: templates/staff/attendance.html:11 templates/staff/person_hours.html:12
 msgid "Show"
 msgstr "Shfaq"
 
@@ -9355,10 +9630,6 @@ msgstr "Merr një pagesë"
 #: templates/frontdesk/reservation_detail.html:88
 msgid "Record payment"
 msgstr "Regjistro pagesën"
-
-#: templates/finance/account_form.html:3
-msgid "Customer account"
-msgstr "Llogari klienti"
 
 #: templates/finance/account_form.html:7 templates/finance/accounts.html:10
 #: templates/finance/accounts.html:29
@@ -9874,9 +10145,10 @@ msgstr "ende i hapur"
 #: templates/inventory/order_detail.html:12
 #: templates/inventory/order_print.html:10
 #: templates/inventory/transfer_detail.html:7
-#: templates/outlets/menu_print.html:13 templates/outlets/menu_qr_cards.html:8
-#: templates/outlets/receipt.html:19 templates/outlets/table_qr_cards.html:10
-#: templates/outlets/voucher.html:8 templates/staff/schedule.html:12
+#: templates/marketing/poster.html:7 templates/outlets/menu_print.html:13
+#: templates/outlets/menu_qr_cards.html:8 templates/outlets/receipt.html:19
+#: templates/outlets/table_qr_cards.html:10 templates/outlets/voucher.html:8
+#: templates/staff/schedule.html:12
 msgid "Print"
 msgstr "Printo"
 
@@ -10305,11 +10577,11 @@ msgstr "Sinkronizo tani"
 msgid "Remove this calendar? Bookings already copied stay."
 msgstr "Ta heq këtë kalendar? Rezervimet e kopjuara mbeten."
 
-#: templates/frontdesk/channels.html:48 templates/outlets/_ticket.html:87
-#: templates/outlets/cards.html:13 templates/outlets/order.html:50
-#: templates/outlets/order.html:128 templates/outlets/table_order.html:72
-#: templates/outlets/table_order.html:93 templates/staff/holidays.html:33
-#: templates/staff/payroll.html:65
+#: templates/frontdesk/channels.html:48 templates/marketing/contacts.html:10
+#: templates/outlets/_ticket.html:87 templates/outlets/cards.html:13
+#: templates/outlets/order.html:50 templates/outlets/order.html:128
+#: templates/outlets/table_order.html:72 templates/outlets/table_order.html:93
+#: templates/staff/holidays.html:33 templates/staff/payroll.html:65
 msgid "Add"
 msgstr "Shto"
 
@@ -11660,6 +11932,222 @@ msgstr "Humbur"
 msgid "No stock movements in this period."
 msgstr "Asnjë lëvizje stoku në këtë periudhë."
 
+#: templates/marketing/campaign_detail.html:13
+#: templates/marketing/email_campaign.html:9
+#: templates/marketing/unsubscribe.html:5
+#: templates/marketing/unsubscribe.html:9
+#: templates/marketing/unsubscribe.html:15
+msgid "Unsubscribe"
+msgstr "Çregjistrohu"
+
+#: templates/marketing/campaign_detail.html:18
+#, python-format
+msgid "It will go to %(n)s person who agreed to receive offers."
+msgid_plural "It will go to %(n)s people who agreed to receive offers."
+msgstr[0] "Do t'i shkojë %(n)s personi që ka pranuar të marrë oferta."
+msgstr[1] "Do t'u shkojë %(n)s vetave që kanë pranuar të marrin oferta."
+
+#: templates/marketing/campaign_detail.html:19
+msgid ""
+"To send campaigns, set up email (Settings → Email) and the public web "
+"address (Settings → Online booking), so the unsubscribe link works."
+msgstr ""
+"Për të dërguar fushata, konfiguroni email-in (Cilësimet → Email) dhe adresën"
+" publike (Cilësimet → Rezervimi online), që të punojë linku i çregjistrimit."
+
+#: templates/marketing/campaign_detail.html:21
+msgid "Send me a test"
+msgstr "Më dërgo një provë"
+
+#: templates/marketing/campaign_detail.html:22
+msgid "Send this email now? It cannot be undone."
+msgstr "Ta dërgojmë këtë email tani? Nuk kthehet pas."
+
+#: templates/marketing/campaign_detail.html:23
+msgid "Delete this draft?"
+msgstr "Ta fshijmë këtë draft?"
+
+#: templates/marketing/campaign_detail.html:33
+msgid ""
+"Sending one by one, to stay within your mail server's limits. This page "
+"updates itself."
+msgstr ""
+"Po dërgohen një nga një, për të qëndruar brenda kufijve të serverit të "
+"email-it. Kjo faqe rifreskohet vetë."
+
+#: templates/marketing/campaign_form.html:3
+msgid "Email campaign"
+msgstr "Fushatë me email"
+
+#: templates/marketing/campaign_form.html:5
+#: templates/marketing/campaigns.html:7
+msgid "New campaign"
+msgstr "Fushatë e re"
+
+#: templates/marketing/campaign_form.html:6
+msgid ""
+"Keep it short and useful: an offer, an event, a new menu. Write it in the "
+"language of the people you send it to (choose Albanian or English speakers "
+"below)."
+msgstr ""
+"Mbajeni të shkurtër dhe të dobishme: një ofertë, një event, një menu e re. "
+"Shkruajeni në gjuhën e atyre që ia dërgoni (zgjidhni shqipfolësit ose "
+"anglishtfolësit më poshtë)."
+
+#: templates/marketing/campaign_form.html:9
+msgid "Save and preview"
+msgstr "Ruaj dhe shiko"
+
+#: templates/marketing/campaigns.html:6
+msgid ""
+"Offers and news by email to the contacts who agreed. Every email has a one-"
+"click unsubscribe."
+msgstr ""
+"Oferta dhe lajme me email për kontaktet që kanë pranuar. Çdo email ka "
+"çregjistrim me një klik."
+
+#: templates/marketing/campaigns.html:11
+msgid "Subject"
+msgstr "Subjekti"
+
+#: templates/marketing/campaigns.html:17
+msgid "No campaigns yet."
+msgstr "Ende pa fushata."
+
+#: templates/marketing/contact_form.html:3
+#: templates/marketing/contact_form.html:6
+msgid "New contact"
+msgstr "Kontakt i ri"
+
+#: templates/marketing/contact_form.html:7
+#, python-format
+msgid "Agreed on %(d)s (%(n)s)"
+msgstr "Pranoi më %(d)s (%(n)s)"
+
+#: templates/marketing/contact_form.html:12
+msgid ""
+"Delete this contact? Use this when a person asks you to erase their data."
+msgstr ""
+"Ta fshijmë këtë kontakt? Përdoreni kur një person kërkon fshirjen e të "
+"dhënave."
+
+#: templates/marketing/contact_form.html:12 templates/staff/entry_form.html:11
+#: templates/staff/shift_form.html:9
+msgid "Delete"
+msgstr "Fshi"
+
+#: templates/marketing/contact_form.html:17
+msgid "Emails sent"
+msgstr "Email-et e dërguara"
+
+#: templates/marketing/contacts.html:7
+#, python-format
+msgid "%(t)s contacts, %(ok)s agreed to receive offers."
+msgstr "%(t)s kontakte, %(ok)s kanë pranuar të marrin oferta."
+
+#: templates/marketing/contacts.html:9
+msgid "Update from guests & bookings"
+msgstr "Përditëso nga mysafirët & rezervimet"
+
+#: templates/marketing/contacts.html:15
+msgid "Search"
+msgstr "Kërko"
+
+#: templates/marketing/contacts.html:15
+msgid "Name, email, phone, tag"
+msgstr "Emri, email, telefoni, etiketa"
+
+#: templates/marketing/contacts.html:16 templates/marketing/contacts.html:24
+msgid "Offers"
+msgstr "Ofertat"
+
+#: templates/marketing/contacts.html:17 templates/marketing/contacts.html:28
+msgid "Agreed"
+msgstr "Ka pranuar"
+
+#: templates/marketing/contacts.html:18
+msgid "Not asked yet"
+msgstr "Ende pa u pyetur"
+
+#: templates/marketing/contacts.html:18 templates/marketing/contacts.html:28
+msgid "Unsubscribed"
+msgstr "I çregjistruar"
+
+#: templates/marketing/contacts.html:28
+msgid "Not asked"
+msgstr "Pa u pyetur"
+
+#: templates/marketing/contacts.html:30
+msgid "No contacts yet. Tap “Update from guests & bookings”."
+msgstr "Ende pa kontakte. Prekni “Përditëso nga mysafirët & rezervimet”."
+
+#: templates/marketing/contacts.html:37
+msgid "Numbers for WhatsApp"
+msgstr "Numrat për WhatsApp"
+
+#: templates/marketing/contacts.html:39
+msgid ""
+"Send offers only to people who agreed. “Numbers for WhatsApp” lists only "
+"them: add them to a broadcast list in the WhatsApp Business app (free; they "
+"receive it if they saved your number)."
+msgstr ""
+"Dërgoni oferta vetëm atyre që kanë pranuar. “Numrat për WhatsApp” liston "
+"vetëm ata: shtojini në një listë transmetimi në aplikacionin WhatsApp "
+"Business (falas; e marrin nëse e kanë ruajtur numrin tuaj)."
+
+#: templates/marketing/email_campaign.html:9
+msgid "You receive this because you agreed to get news and offers from us."
+msgstr "E merrni këtë sepse pranuat të merrni lajme dhe oferta nga ne."
+
+#: templates/marketing/poster.html:6
+msgid ""
+"Put it at reception, on tables, in rooms or on the receipt: guests scan it "
+"and join your list themselves, with their consent recorded."
+msgstr ""
+"Vendoseni në recepsion, në tavolina, në dhoma ose në kupon: klientët e "
+"skanojnë dhe regjistrohen vetë, me pëlqimin të regjistruar."
+
+#: templates/marketing/signup.html:5 templates/marketing/signup.html:14
+msgid "News and offers"
+msgstr "Lajme dhe oferta"
+
+#: templates/marketing/signup.html:15
+msgid ""
+"Be the first to hear about our offers, events and new menus. A few emails a "
+"year, never shared with anyone."
+msgstr ""
+"Mësoni të parët për ofertat, eventet dhe menutë e reja. Pak email-e në vit, "
+"kurrë të ndara me të tjerë."
+
+#: templates/marketing/signup.html:19
+msgid "Thank you! You're on our list. Every email has a link to unsubscribe."
+msgstr ""
+"Faleminderit! Jeni në listën tonë. Çdo email ka një link për t'u "
+"çregjistruar."
+
+#: templates/marketing/signup.html:24
+msgid "Sign me up"
+msgstr "Më regjistro"
+
+#: templates/marketing/signup.html:25
+#, python-format
+msgid ""
+"%(b)s keeps your name and contact only to send you news and offers, and "
+"deletes them when you unsubscribe and ask."
+msgstr ""
+"%(b)s e ruan emrin dhe kontaktin tuaj vetëm për t'ju dërguar lajme dhe "
+"oferta, dhe i fshin kur çregjistroheni dhe e kërkoni."
+
+#: templates/marketing/unsubscribe.html:12
+#, python-format
+msgid "%(e)s will receive no more news or offers from us."
+msgstr "%(e)s nuk do të marrë më lajme ose oferta nga ne."
+
+#: templates/marketing/unsubscribe.html:14
+#, python-format
+msgid "Stop sending news and offers to %(e)s?"
+msgstr "Të ndalojmë lajmet dhe ofertat për %(e)s?"
+
 #: templates/outlets/_board_tickets.html:28
 msgid "Waiting for waiter"
 msgstr "Pret kamarierin"
@@ -12091,10 +12579,6 @@ msgstr "Vulat"
 #: templates/outlets/cards.html:18
 msgid "Free items received"
 msgstr "Artikuj falas të marrë"
-
-#: templates/outlets/cards.html:18
-msgid "Last visit"
-msgstr "Vizita e fundit"
 
 #: templates/outlets/cards.html:20
 msgid "Inactive"
@@ -12902,10 +13386,6 @@ msgid ""
 msgstr ""
 "Regjistruar fillimisht më %(t)s. Çdo ndryshim ruhet në regjistrin e "
 "aktivitetit me arsyen."
-
-#: templates/staff/entry_form.html:11 templates/staff/shift_form.html:9
-msgid "Delete"
-msgstr "Fshi"
 
 #: templates/staff/holidays.html:3 templates/staff/holidays.html:6
 msgid "Public holidays"

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Email campaigns" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Contacts & marketing" %}</div><h1>{% translate "Email campaigns" %}</h1><p>{% translate "Offers and news by email to the contacts who agreed. Every email has a one-click unsubscribe." %}</p></div>
+  <div class="actions"><a class="btn" href="{% url 'marketing:campaign_create' %}">{% icon "plus" %} {% translate "New campaign" %}</a></div>
+</div>
+{% include "inventory/_tabs.html" %}
+<section class="card card-flush"><div class="table-wrap"><table class="table">
+  <thead><tr><th>{% translate "Subject" %}</th><th>{% translate "Status" %}</th><th class="num">{% translate "Sent" %}</th><th>{% translate "Date" %}</th></tr></thead>
+  <tbody>{% for c in campaigns %}<tr>
+    <td><a href="{% url 'marketing:campaign_detail' c.pk %}"><strong>{{ c.subject }}</strong></a><br><small class="muted">{{ c.get_audience_display }}{% if c.tag %} · {{ c.tag }}{% endif %}</small></td>
+    <td>{% if c.status == "sent" %}<span class="badge b-success">{{ c.get_status_display }}</span>{% elif c.status == "sending" %}<span class="badge b-warning">{{ c.get_status_display }}</span>{% else %}<span class="badge">{{ c.get_status_display }}</span>{% endif %}</td>
+    <td class="num">{% if c.n %}{{ c.sent }} / {{ c.n }}{% if c.failed %} <small style="color:var(--danger)">({{ c.failed }} ✕)</small>{% endif %}{% else %}—{% endif %}</td>
+    <td>{{ c.sent_at|default:c.created_at|date:"d.m.Y" }}</td>
+  </tr>{% empty %}<tr><td colspan="4" class="empty">{% translate "No campaigns yet." %}</td></tr>{% endfor %}</tbody>
+</table></div></section>
+{% endblock %}

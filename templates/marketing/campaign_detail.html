@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{{ campaign.subject }}{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="eyebrow"><a href="{% url 'marketing:campaigns' %}">{% icon "back" %} {% translate "Email campaigns" %}</a></div><h1>{{ campaign.subject }}</h1>
+  <p>{{ campaign.get_audience_display }}{% if campaign.tag %} · {{ campaign.tag }}{% endif %} · {{ campaign.get_status_display }}</p></div>
+  {% if campaign.status == "draft" %}<div class="actions"><a class="btn btn-secondary" href="{% url 'marketing:campaign_edit' campaign.pk %}">{% icon "edit" %} {% translate "Edit" %}</a></div>{% endif %}
+</div>
+<div class="grid grid-2" style="align-items:start">
+  <section class="card"><div class="card-header"><h3>{% translate "Preview" %}</h3></div>
+    <div class="card-body"><div style="white-space:pre-line; line-height:1.5">{% blocktranslate with name=sample.name %}Dear {{ name }},{% endblocktranslate %}
+
+{{ campaign.body|urlize }}</div><p class="muted" style="font-size:.8rem">{{ hotel.name }} · <u>{% translate "Unsubscribe" %}</u></p></div>
+  </section>
+  <div class="stack">
+    {% if campaign.status == "draft" %}
+    <section class="card"><div class="card-body">
+      <p style="margin-top:0">{% blocktranslate count n=audience_count %}It will go to {{ n }} person who agreed to receive offers.{% plural %}It will go to {{ n }} people who agreed to receive offers.{% endblocktranslate %}</p>
+      {% if not ready %}<div class="alert alert-warning">{% translate "To send campaigns, set up email (Settings → Email) and the public web address (Settings → Online booking), so the unsubscribe link works." %}</div>{% endif %}
+      <div class="row" style="gap:.5rem; flex-wrap:wrap">
+        <form method="post" action="{% url 'marketing:campaign_send' campaign.pk %}">{% csrf_token %}<input type="hidden" name="test" value="1"><button class="btn btn-secondary">{% icon "mail" %} {% translate "Send me a test" %}</button></form>
+        <form method="post" action="{% url 'marketing:campaign_send' campaign.pk %}" data-confirm="{% translate 'Send this email now? It cannot be undone.' %}">{% csrf_token %}<button class="btn" {% if not ready or not audience_count %}disabled{% endif %}>{% icon "send" %} {% translate "Send now" %}</button></form>
+        <form method="post" action="{% url 'marketing:campaign_send' campaign.pk %}" data-confirm="{% translate 'Delete this draft?' %}">{% csrf_token %}<input type="hidden" name="delete" value="1"><button class="btn btn-ghost">{% icon "trash" %}</button></form>
+      </div>
+    </div></section>
+    {% else %}
+    <section class="card"><div class="card-body">
+      <div class="bf-stats" style="margin:0">
+        <div><span>{% translate "Sent" %}</span><strong>{{ counts.sent }}</strong></div>
+        <div><span>{% translate "Waiting" %}</span><strong>{{ counts.pending }}</strong></div>
+        <div><span>{% translate "Failed" %}</span><strong>{{ counts.failed }}</strong></div>
+      </div>
+      {% if counts.pending %}<p class="muted" style="font-size:.85rem; margin-bottom:0">{% translate "Sending one by one, to stay within your mail server's limits. This page updates itself." %}</p><script>setTimeout(function () { location.reload(); }, 8000);</script>{% endif %}
+    </div></section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

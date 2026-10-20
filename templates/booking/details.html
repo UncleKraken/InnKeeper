@@ -11,7 +11,7 @@
     <div class="card-body">
       {% if error %}<div class="alert alert-error" style="margin-bottom:1rem">{{ error }}</div>{% endif %}
       <div class="form-grid">
-        {% for f in form %}{% if f.name != "accept" and f.name != "website" %}
+        {% for f in form %}{% if f.name != "accept" and f.name != "website" and f.name != "offers" %}
           <div class="field{% if f.errors %} has-error{% endif %}{% if f.name == 'notes' %} full{% endif %}">
             <label for="{{ f.id_for_label }}">{{ f.label }}{% if f.field.required %} <span style="color:var(--danger)">*</span>{% endif %}</label>
             {{ f }}
@@ -24,6 +24,7 @@
       {% if hotel.booking_terms %}<div class="booking-terms"><strong>{% translate "Booking conditions" %}</strong><p>{{ hotel.booking_terms|linebreaksbr }}</p></div>{% endif %}
       <label class="check{% if form.accept.errors %} has-error{% endif %}" style="margin-top:1rem">{{ form.accept }} {{ form.accept.label }}</label>
       {% for e in form.accept.errors %}<div class="error">{{ e }}</div>{% endfor %}
+      <label class="check" style="margin-top:.5rem">{{ form.offers }} {{ form.offers.label }}</label>
     </div>
     <div class="card-footer"><button class="btn btn-lg btn-block" {% if not offer or not offer.bookable %}disabled{% endif %}>{% if hotel.booking_requires_confirmation %}{% translate "Send booking request" %}{% else %}{% translate "Confirm booking" %}{% endif %}</button></div>
   </form>

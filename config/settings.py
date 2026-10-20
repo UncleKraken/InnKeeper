@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     "apps.payments",
     "apps.fiscal",
     "apps.staff",
+    "apps.marketing",
 ]
 
 MIDDLEWARE = [

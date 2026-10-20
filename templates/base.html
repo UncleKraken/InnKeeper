@@ -78,6 +78,7 @@
         {% if hotel.module_rooms %}<a href="{% url 'frontdesk:room_list' %}" class="{% active '/front-desk/setup' %}">{% icon "bed" %} {% translate "Rooms & rates" %}</a>{% endif %}
         {% if hotel.module_outlets %}<a href="{% url 'outlets:setup' %}" class="{% active '/outlets/setup' %}">{% icon "store" %} {% translate "Outlets & menus" %}</a>{% endif %}
         <a href="{% url 'accounts:staff_list' %}" class="{% active '/accounts/staff' '/team/positions' %}">{% icon "staff" %} {% translate "Staff" %}</a>
+        <a href="{% url 'marketing:contacts' %}" class="{% active '/contacts' %}">{% icon "mail" %} {% translate "Contacts & marketing" %}</a>
         <a href="{% url 'staff:attendance' %}" class="{% active '/team/attendance' '/team/people' '/team/hours' %}">{% icon "history" %} {% translate "Attendance" %}</a>
         {% if staff_requests %}<a href="{% url 'staff:requests' %}" class="{% active '/team/requests' %}">{% icon "mail" %} {% translate "Requests" %} <span class="nav-badge">{{ staff_requests }}</span></a>{% endif %}
         <a href="{% url 'staff:schedule' %}" class="{% active '/team/schedule' %}">{% icon "calendar" %} {% translate "Schedule" %}</a>

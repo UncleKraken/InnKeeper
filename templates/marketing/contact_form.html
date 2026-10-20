@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% if contact.pk %}{{ contact.name }}{% else %}{% translate "New contact" %}{% endif %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="eyebrow"><a href="{% url 'marketing:contacts' %}">{% icon "back" %} {% translate "Contacts" %}</a></div>
+  <h1>{% if contact.pk %}{{ contact.name }}{% else %}{% translate "New contact" %}{% endif %}</h1>
+  {% if contact.pk %}<p>{{ contact.get_source_display }}{% if contact.consent_at %} · {% blocktranslate with d=contact.consent_at|date:"d.m.Y H:i" n=contact.consent_note %}Agreed on {{ d }} ({{ n }}){% endblocktranslate %}{% endif %}</p>{% endif %}</div></div>
+<div class="grid grid-2" style="align-items:start">
+  <form method="post" class="card" novalidate>{% csrf_token %}
+    <div class="card-body">{% include "includes/form_fields.html" %}</div>
+    <div class="card-footer form-actions" style="margin-top:0">
+      {% if contact.pk %}<button class="btn btn-ghost" name="delete" value="1" formnovalidate data-confirm="{% translate 'Delete this contact? Use this when a person asks you to erase their data.' %}">{% icon "trash" %} {% translate "Delete" %}</button>{% endif %}
+      <button class="btn">{% icon "check" %} {% translate "Save" %}</button>
+    </div>
+  </form>
+  {% if received %}
+  <section class="card card-flush"><div class="card-header"><h3>{% translate "Emails sent" %}</h3></div>
+    <div class="table-wrap"><table class="table table-sm"><tbody>{% for r in received %}<tr><td>{{ r.sent_at|date:"d.m.Y"|default:"—" }}</td><td><a href="{% url 'marketing:campaign_detail' r.campaign_id %}">{{ r.campaign.subject }}</a></td><td>{{ r.get_status_display }}</td></tr>{% endfor %}</tbody></table></div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

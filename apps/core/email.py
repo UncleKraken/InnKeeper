@@ -30,7 +30,9 @@ def connection(hs: HotelSettings | None = None):
     )
 
 
-def send(to: str | list[str], subject: str, template: str, context: dict, *, language: str = "", reply_to=None) -> bool:
+def send(
+    to: str | list[str], subject: str, template: str, context: dict, *, language: str = "", reply_to=None, headers=None, connection_=None
+) -> bool:
     """Render `template` (HTML) and send it. Returns False if email isn't set up or sending failed."""
     hs = HotelSettings.load()
     recipients = [to] if isinstance(to, str) else [r for r in to if r]
@@ -45,7 +47,8 @@ def send(to: str | list[str], subject: str, template: str, context: dict, *, lan
         from_email=f"{hs.name} <{hs.email_from or hs.smtp_username}>",
         to=recipients,
         reply_to=reply_to or ([hs.email] if hs.email else None),
-        connection=connection(hs),
+        connection=connection_ or connection(hs),
+        headers=headers or None,
     )
     msg.attach_alternative(html, "text/html")
     try:

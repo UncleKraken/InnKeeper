@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.26.0 — contacts and marketing
+
+**Shqip**
+
+- **Kontaktet** (*Menaxhimi → Kontaktet & marketingu*): të gjithë ata që mund t'i arrini — mysafirët, kartat e besnikërisë, llogaritë e klientëve, rezervimet e tavolinave — në një listë, pa dyfishime, me kërkim, etiketa dhe eksport në Excel/CSV.
+- **Pëlqimi sipas ligjit:** oferta vetëm për ata që kanë pranuar, me datën dhe mënyrën e pëlqimit të ruajtura. Mënyrat: kutia në rezervimin online, faqja e regjistrimit me poster QR, ose recepsioni me një shënim. Fshirja e të dhënave me kërkesë.
+- **Fushatat me email:** ofertë ose lajm për të gjithë, për shqipfolësit ose anglishtfolësit, për mysafirët e vitit të fundit ose sipas etiketës; provë te vetja; dërgim një nga një në sfond; çregjistrim me një klik në çdo email.
+- **Numrat për WhatsApp:** për listat e transmetimit në WhatsApp Business (falas).
+
+**English**
+
+- **Contacts** (*Management → Contacts & marketing*): everyone you can reach — guests, loyalty cards, customer accounts, table bookings — in one list without duplicates, with search, tags and Excel/CSV export.
+- **Consent as the law asks:** offers only to people who agreed, with the date and way they agreed kept. Ways to agree: the box on the online booking form, the sign-up page with its QR poster, or reception with a note. Erase someone's data on request.
+- **Email campaigns:** an offer or news to everyone, to Albanian or English speakers, to guests from the last year or by tag; a test to yourself; sent one by one in the background; one-click unsubscribe in every email.
+- **Numbers for WhatsApp:** for broadcast lists in WhatsApp Business (free).
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.26.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.25.0 — payroll: optional holiday pay, your own pay period
 
 **Shqip**

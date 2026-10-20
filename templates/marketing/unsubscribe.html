@@ -1,0 +1,19 @@
+{% load static i18n %}<!doctype html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+  <title>{% translate "Unsubscribe" %} · {{ hotel.name }}</title>
+  <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
+</head>
+<body class="menu-page">
+  <header class="menu-hero"><p class="menu-eyebrow">{{ hotel.name }}</p><h1>{% translate "Unsubscribe" %}</h1></header>
+  <main class="menu-body" style="max-width:520px; text-align:center">
+    {% if done %}
+      <div class="alert alert-success">{% blocktranslate with e=contact.email %}{{ e }} will receive no more news or offers from us.{% endblocktranslate %}</div>
+    {% else %}
+      <p>{% blocktranslate with e=contact.email %}Stop sending news and offers to {{ e }}?{% endblocktranslate %}</p>
+      <form method="post">{% csrf_token %}<button class="btn">{% translate "Unsubscribe" %}</button></form>
+    {% endif %}
+  </main>
+</body>
+</html>

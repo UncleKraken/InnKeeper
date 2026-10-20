@@ -31,6 +31,8 @@ urlpatterns = [
     path("fiscal/", include("apps.fiscal.urls")),
     path("menu/", include("apps.outlets.menu_urls")),
     path("book/", include("apps.frontdesk.booking_urls")),
+    path("contacts/", include("apps.marketing.urls")),
+    path("news/", include("apps.marketing.public_urls")),
     path("pay/", include("apps.payments.urls")),
     path("team/", include("apps.staff.urls")),
     path("ical/<str:token>.ics", room_calendar, name="ical_room"),

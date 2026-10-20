@@ -169,6 +169,14 @@ def daily_jobs(log, stop: threading.Event) -> None:
         except Exception as e:
             log(f"Daily summary error: {e}")
         try:
+            from apps.marketing.services import run_pending
+
+            n = run_pending(limit=300)
+            if n:
+                log(f"{n} campaign email(s) sent.")
+        except Exception as e:
+            log(f"Campaign emails error: {e}")
+        try:
             from apps.frontdesk.guest_messages import run as send_guest_messages
 
             n = send_guest_messages()
