@@ -86,6 +86,7 @@
       {% endif %}
       <a href="{% url 'staff:my_hours' %}" class="{% active '/team/me' %}" style="margin-top:.75rem">{% icon "history" %} {% translate "My hours" %}{% if swap_offers %} <span class="nav-badge">{{ swap_offers }}</span>{% endif %}</a>
       <a href="{% url 'core:help' %}" class="{% active '/help' %}">{% icon "help" %} {% translate "Help" %}</a>
+      <a href="{% url 'core:about' %}" class="{% active '/about' %}">{% icon "star" %} {% translate "About InnKeeper" %}</a>
     </nav>
     <div class="sidebar-foot">
       {% if shared_till %}<form method="post" action="{% url 'accounts:lock' %}" id="lock-form" style="margin-bottom:.75rem">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button type="submit" class="btn btn-block sidebar-lock">{% icon "lock" %} {% translate "Lock / switch user" %}</button></form>{% endif %}

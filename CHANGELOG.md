@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.27.0 — spread the word
+
+**Shqip**
+
+- **Rreth InnKeeper** (në menu): versioni, udhëzuesi, faqja e InnKeeper, shkarkimi, ku të njoftoni një problem, dhe **rekomandimi te një biznes tjetër** me WhatsApp, email ose një kod QR.
+- **“Bërë me InnKeeper”:** një link i vogël në fund të faqeve publike (rezervimi, menuja, porositë nga tavolina, regjistrimi). Mund ta fikni te *Cilësimet → Kuponat & faturat*.
+- **Faqja e InnKeeper:** https://unclekraken.github.io/InnKeeper/ — në shqip dhe anglisht, me pamje nga programi dhe butonin e shkarkimit.
+
+**English**
+
+- **About InnKeeper** (in the menu): the version, the guide, the InnKeeper website, the download, where to report a problem, and **recommending it to another business** by WhatsApp, email or a QR code.
+- **“Made with InnKeeper”:** a small link at the bottom of public pages (booking, menu, table orders, sign-up). Turn it off under *Settings → Receipts & invoices*.
+- **InnKeeper website:** https://unclekraken.github.io/InnKeeper/ — in Albanian and English, with screenshots and the download button.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.27.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.26.0 — contacts and marketing
 
 **Shqip**

@@ -280,6 +280,11 @@ class HotelSettings(models.Model):
         _("public holiday extra (%)"), default=25, validators=[MaxValueValidator(300)],
         help_text=_("For hours worked on a public holiday, as your contracts say."),
     )
+    show_made_with = models.BooleanField(
+        _("show “Made with InnKeeper” on public pages"),
+        default=True,
+        help_text=_("A small link at the bottom of your booking, menu and table pages. It helps other businesses find this free app."),
+    )
     group_token = models.CharField(max_length=64, blank=True, editable=False)  # read-only key for the owner's group overview
     tunnel_enabled = models.BooleanField(_("public address through Cloudflare Tunnel"), default=False)
     tunnel_token = models.CharField(

@@ -83,6 +83,7 @@ class ReceiptForm(StyledFormMixin, forms.ModelForm):
             "receipt_show_logo",
             "receipt_show_vat",
             "max_staff_discount",
+            "show_made_with",
         ]
 
     def clean_logo_file(self):

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "About InnKeeper" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="eyebrow">InnKeeper {{ version }}</div><h1>{% translate "About InnKeeper" %}</h1>
+  <p>{% translate "Free software for hotels, guest houses, restaurants, bars and clubs, made in Albania, in Albanian and English." %}</p></div></div>
+<div class="grid grid-2" style="align-items:start">
+  <div class="stack">
+    <section class="card">
+      <div class="card-header"><h2>{% translate "Recommend it to another business" %}</h2></div>
+      <div class="card-body">
+        <p style="margin-top:0">{% translate "Know a hotel, café or restaurant that still works with paper or expensive software? Send them InnKeeper: it is free, and every business that uses it helps it grow." %}</p>
+        <div class="row" style="gap:.5rem; flex-wrap:wrap">
+          <a class="btn" href="{{ whatsapp }}" target="_blank" rel="noopener">{% icon "send" %} WhatsApp</a>
+          <a class="btn btn-secondary" href="{{ email_link }}">{% icon "mail" %} Email</a>
+          <button type="button" class="btn btn-secondary" data-copy="{{ share_text }}" onclick="try { navigator.clipboard.writeText(this.dataset.copy); this.textContent = '✓'; } catch (e) {}">{% icon "copy" %} {% translate "Copy the message" %}</button>
+        </div>
+        <div class="about-qr"><div>{{ qr }}</div><p class="muted">{% translate "Or let them scan this with their phone." %}</p></div>
+      </div>
+    </section>
+  </div>
+  <div class="stack">
+    <section class="card">
+      <div class="card-header"><h2>{% translate "Help and contact" %}</h2></div>
+      <div class="card-body">
+        <ul class="about-links">
+          <li><a href="{% url 'core:help' %}">{% icon "help" %} {% translate "The user guide, in this app" %}</a></li>
+          <li><a href="{{ website }}" target="_blank" rel="noopener">{% icon "building" %} {% translate "InnKeeper website" %}</a></li>
+          <li><a href="{{ download }}" target="_blank" rel="noopener">{% icon "download" %} {% translate "Download the latest version" %}</a></li>
+          <li><a href="{{ support }}" target="_blank" rel="noopener">{% icon "alert" %} {% translate "Report a problem or ask for a feature" %}</a></li>
+          <li><a href="{{ source }}" target="_blank" rel="noopener">{% icon "grid" %} {% translate "Source code (open)" %}</a></li>
+        </ul>
+      </div>
+    </section>
+    {% if request.user.is_manager %}
+    <section class="card"><div class="card-body">
+      <p style="margin:0">{% if hotel.show_made_with %}{% translate "Your public pages (booking, menu, table orders) show a small “Made with InnKeeper” link." %}{% else %}{% translate "The “Made with InnKeeper” link on your public pages is turned off." %}{% endif %}
+        <a href="/settings/?tab=receipts">{% translate "Change" %}</a></p>
+    </div></section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

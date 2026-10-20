@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import group, settings_views, views
+from . import about, group, settings_views, views
 
 app_name = "core"
 
@@ -37,5 +37,6 @@ urlpatterns = [
     path("update/install/", views.update_install, name="update_install"),
     path("update/status/", views.update_status, name="update_status"),
     path("help/", views.help_center, name="help"),
+    path("about/", about.about, name="about"),
     path("welcome/dismiss/", views.dismiss_onboarding, name="dismiss_onboarding"),
 ]

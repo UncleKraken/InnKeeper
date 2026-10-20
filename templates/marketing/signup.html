@@ -25,6 +25,7 @@
         <p class="muted" style="font-size:.8rem">{% blocktranslate with b=hotel.legal_name|default:hotel.name %}{{ b }} keeps your name and contact only to send you news and offers, and deletes them when you unsubscribe and ask.{% endblocktranslate %}</p>
       </form>
     {% endif %}
+    {% include "includes/made_with.html" %}
   </main>
 </body>
 </html>

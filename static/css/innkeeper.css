@@ -1021,3 +1021,12 @@ body.kds-flash { animation: kds-flash 1.2s ease-out 2; }
 .signup-poster .sp-sub { font-weight: 600; margin-top: .6rem; }
 .signup-poster .sp-url { font-size: .72rem; color: var(--muted); word-break: break-all; margin-top: .4rem; }
 @media print { .signup-poster { border: 0; margin-top: 2cm; } }
+.made-with { text-align: center; font-size: .75rem; color: var(--muted); margin: 1.5rem 0 .5rem; }
+.made-with a { color: inherit; font-weight: 600; }
+@media print { .made-with { display: none; } }
+.about-qr { display: flex; gap: 1rem; align-items: center; margin-top: 1rem; }
+.about-qr svg { width: 120px; height: 120px; }
+.about-links { list-style: none; margin: 0; padding: 0; }
+.about-links li { padding: .45rem 0; border-bottom: 1px dotted var(--border); }
+.about-links li:last-child { border-bottom: 0; }
+.about-links a { display: inline-flex; gap: .5rem; align-items: center; }

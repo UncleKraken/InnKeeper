@@ -1,7 +1,9 @@
 # InnKeeper
 
 **Hotel, restaurant, bar and services management — in one web app.**
-Albanian and English. Runs on any device with a browser.
+Albanian and English. Runs on any device with a browser. Free.
+
+**Website:** https://unclekraken.github.io/InnKeeper/ · **Download:** [latest Windows installer](https://github.com/UncleKraken/InnKeeper/releases/latest)
 
 InnKeeper covers the whole property: the front desk, housekeeping, maintenance, and every place that sells something — restaurant, bar, café, spa, room service, minibar, laundry, transfers, events. Each sale is either paid on the spot or charged to the guest's room, and lands on one bill at check-out.
 

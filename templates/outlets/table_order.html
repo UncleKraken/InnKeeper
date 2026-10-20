@@ -78,6 +78,7 @@
       <p class="empty">{% translate "The menu is being updated. Please ask our staff." %}</p>
     {% endfor %}
     <p class="menu-foot">{% if hotel.charges_vat %}{% blocktranslate with rate=hotel.vat_rate|floatformat:"-2" %}Prices include VAT ({{ rate }}%){% endblocktranslate %}{% endif %}</p>
+    {% include "includes/made_with.html" %}
   </main>
 
   <div class="to-bar is-hidden" id="to-bar"><div class="to-bar-inner">
