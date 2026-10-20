@@ -161,6 +161,8 @@ class Reservation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     checked_in_at = models.DateTimeField(null=True, blank=True)
     checked_out_at = models.DateTimeField(null=True, blank=True)
+    pre_arrival_sent_at = models.DateTimeField(null=True, blank=True, editable=False)
+    review_sent_at = models.DateTimeField(null=True, blank=True, editable=False)
     cancelled_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:

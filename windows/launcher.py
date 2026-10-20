@@ -169,6 +169,14 @@ def daily_jobs(log, stop: threading.Event) -> None:
         except Exception as e:
             log(f"Daily summary error: {e}")
         try:
+            from apps.frontdesk.guest_messages import run as send_guest_messages
+
+            n = send_guest_messages()
+            if n:
+                log(f"{n} guest message(s) emailed.")
+        except Exception as e:
+            log(f"Guest messages error: {e}")
+        try:
             from apps.frontdesk.ical import sync_all
 
             for feed, r in sync_all().items():

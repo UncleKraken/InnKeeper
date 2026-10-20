@@ -11,6 +11,7 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_POST
@@ -179,6 +180,32 @@ class LoyaltySettingsForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = HotelSettings
         fields = ["loyalty_enabled", "loyalty_stamps", "vouchers_enabled", "voucher_months"]
+
+
+class GuestMessagesForm(StyledFormMixin, forms.ModelForm):
+    full_width_fields = ("message_pre_arrival_text", "message_review_text", "message_review_url")
+
+    class Meta:
+        model = HotelSettings
+        fields = [
+            "message_pre_arrival",
+            "message_pre_arrival_days",
+            "message_pre_arrival_text",
+            "message_review",
+            "message_review_url",
+            "message_review_text",
+            "message_hour",
+        ]
+        widgets = {
+            "message_pre_arrival_text": forms.Textarea(attrs={"rows": 5}),
+            "message_review_text": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("message_review") and not cleaned.get("message_review_url"):
+            self.add_error("message_review_url", _("Paste the link where guests can leave a review."))
+        return cleaned
 
 
 class TouristTaxForm(StyledFormMixin, forms.ModelForm):
@@ -351,6 +378,7 @@ TABS = {
     "tills": TillSettingsForm,
     "loyalty": LoyaltySettingsForm,
     "tourist_tax": TouristTaxForm,
+    "messages": GuestMessagesForm,
     "remote": RemoteSettingsForm,
 }
 
@@ -398,6 +426,13 @@ def settings_hub(request):
             from apps.accounts.models import User
 
             ctx["pin_staff"] = User.objects.filter(is_active=True).exclude(username__startswith="sample.")
+        if tab == "messages":
+            from apps.frontdesk import guest_messages as gm
+            from apps.frontdesk.models import Guest, Reservation
+
+            sample = Reservation(guest=Guest(first_name=_("Ana")), arrival=timezone.localdate() + timedelta(days=hs.message_pre_arrival_days), departure=timezone.localdate() + timedelta(days=hs.message_pre_arrival_days + 2))
+            ctx["preview_arrival"] = gm.text(gm.PRE_ARRIVAL, sample, hs)
+            ctx["preview_review"] = gm.text(gm.REVIEW, sample, hs)
         if tab == "email":
             ctx["summary_form"] = SummarySettingsForm(instance=hs)
         if tab == "booking":

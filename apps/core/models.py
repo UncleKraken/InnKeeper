@@ -2,7 +2,7 @@ import threading
 from decimal import Decimal
 
 from django.conf import settings
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -189,6 +189,34 @@ class HotelSettings(models.Model):
     voucher_months = models.PositiveSmallIntegerField(
         _("vouchers are valid for (months)"), default=12, help_text=_("0: they never expire.")
     )
+    message_pre_arrival = models.BooleanField(
+        _("email guests before they arrive"),
+        default=False,
+        help_text=_("Confirmed bookings with an email address get your arrival information a few days before."),
+    )
+    message_pre_arrival_days = models.PositiveSmallIntegerField(
+        _("days before arrival"), default=2, validators=[MinValueValidator(1), MaxValueValidator(14)]
+    )
+    message_pre_arrival_text = models.TextField(
+        _("arrival information"),
+        blank=True,
+        help_text=_("How to find you, parking, check-in, Wi-Fi… Write it in the language most of your guests read."),
+    )
+    message_review = models.BooleanField(
+        _("ask for a review after check-out"),
+        default=False,
+        help_text=_("The day after they leave, guests with an email address get a thank-you with your review link."),
+    )
+    message_review_url = models.URLField(
+        _("review link"),
+        blank=True,
+        help_text=_("Where guests leave a review: your Google Maps, TripAdvisor or Booking.com page."),
+    )
+    message_review_text = models.TextField(_("thank-you text"), blank=True)
+    message_hour = models.PositiveSmallIntegerField(
+        _("send at"), default=10, validators=[MaxValueValidator(23)], help_text=_("Hour of the day, 0–23.")
+    )
+
     class TouristTaxBasis(models.TextChoices):
         GUEST = "guest", _("per guest, per night")
         ROOM = "room", _("per room, per night")

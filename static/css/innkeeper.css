@@ -408,7 +408,7 @@ textarea.input { min-height: 90px; resize: vertical; }
   .sidebar.open { transform: none; }
   .topbar { display: flex; }
   .content { padding: 1.25rem 1rem 2.5rem; }
-  .grid-2, .grid-3, .form-grid { grid-template-columns: 1fr; }
+  .grid-2, .grid-3, .form-grid { grid-template-columns: minmax(0, 1fr); }
   .auth { grid-template-columns: 1fr; }
   .auth-art { display: none; }
   .search .input { min-width: 0; width: 100%; }

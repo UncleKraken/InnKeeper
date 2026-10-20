@@ -19,6 +19,7 @@ urlpatterns = [
     path("reservations/<int:pk>/invoice/", views.invoice, name="invoice"),
     path("reservations/<int:pk>/move-room/", views.move_room, name="move_room"),
     path("reservations/<int:pk>/confirm/", views.confirm_booking, name="confirm_booking"),
+    path("reservations/<int:pk>/message/", views.send_guest_message, name="send_guest_message"),
     path("reservations/<int:pk>/decline/", views.decline_booking, name="decline_booking"),
     path("guests/search/", views.guest_search, name="guest_search"),
     path("guests/", views.guest_list, name="guest_list"),

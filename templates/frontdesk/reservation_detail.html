@@ -55,7 +55,8 @@
           </tr>
         {% endfor %}
         {% if pending_nights %}
-          <tr><td></td><td class="muted">{% translate "Accommodation not yet posted" %} ({{ pending_nights }} × {{ r.rate|money }})</td><td class="num muted">{{ pending_nights }}</td><td class="num muted">{{ pending_amount|money }}</td><td></td></tr>
+          <tr><td></td><td class="muted">{% translate "Accommodation not yet posted" %} ({{ pending_nights }} × {{ r.rate|money }})</td><td class="num muted">{{ pending_nights }}</td><td class="num muted">{{ pending_rooms|money }}</td><td></td></tr>
+          {% if pending_tax %}<tr><td></td><td class="muted">{% translate "Tourist tax not yet posted" %}</td><td></td><td class="num muted">{{ pending_tax|money }}</td><td></td></tr>{% endif %}
         {% endif %}
         {% for p in payments %}
           <tr class="{% if p.voided %}voided{% endif %}">
@@ -144,6 +145,20 @@
         <dt>{% translate "Document" %}</dt><dd>{% if r.guest.document_number %}{{ r.guest.get_document_type_display }} {{ r.guest.document_number }}{% else %}<span style="color:var(--warning)">{% translate "Missing" %}</span>{% endif %}</dd>
       </dl></div>
     </section>
+    {% if guest_message %}
+    <section class="card">
+      <div class="card-header"><h3>{% if guest_message.kind == "pre_arrival" %}{% translate "Arrival information" %}{% else %}{% translate "Thank-you and review" %}{% endif %}</h3>
+        {% if guest_message.sent_at %}{% translate "Sent" as l %}{% status_badge "success" l %}{% endif %}</div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0; font-size:.9rem">{% if guest_message.sent_at %}{% blocktranslate with when=guest_message.sent_at|date:"d.m.Y H:i" %}Emailed on {{ when }}.{% endblocktranslate %}{% elif guest_message.kind == "pre_arrival" %}{% translate "Directions, check-in time and your arrival information (Settings → Guest messages)." %}{% else %}{% translate "A thank-you with your review link (Settings → Guest messages)." %}{% endif %}</p>
+        <div class="row" style="flex-wrap:wrap; gap:.5rem">
+          {% if guest_message.can_email %}<form method="post" action="{% url 'frontdesk:send_guest_message' r.pk %}">{% csrf_token %}<input type="hidden" name="kind" value="{{ guest_message.kind }}"><button class="btn btn-secondary btn-sm">{% icon "mail" %} {% if guest_message.sent_at %}{% translate "Email again" %}{% else %}{% translate "Email now" %}{% endif %}</button></form>{% endif %}
+          {% if guest_message.whatsapp %}<a class="btn btn-secondary btn-sm" href="{{ guest_message.whatsapp }}" target="_blank" rel="noopener">{% icon "send" %} WhatsApp</a>{% endif %}
+          {% if not guest_message.can_email and not guest_message.whatsapp %}<span class="muted" style="font-size:.85rem">{% translate "Add the guest's email or mobile number to send it." %}</span>{% endif %}
+        </div>
+      </div>
+    </section>
+    {% endif %}
     <section class="card">
       <div class="card-header"><h3>{% translate "Stay details" %}</h3></div>
       <div class="card-body"><dl class="dl">

@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -229,7 +229,11 @@ def reservation_detail(request, pk):
         pending_nights = max(0, max(res.nights, res.nights_to_charge()) - posted)
     elif res.status == Reservation.Status.BOOKED:
         pending_nights = max(0, res.nights - posted)
-    pending_amount = res.amount_for_nights(posted, posted + pending_nights)
+    pending_rooms = res.amount_for_nights(posted, posted + pending_nights)
+    from .services import tourist_tax_amount
+
+    pending_tax = tourist_tax_amount(res, posted, posted + pending_nights) if pending_nights else Decimal("0")
+    pending_amount = pending_rooms + pending_tax
     from apps.payments.services import link_url
 
     base = request.build_absolute_uri("/")
@@ -246,6 +250,8 @@ def reservation_detail(request, pk):
             "payments": payments,
             "pending_nights": pending_nights,
             "pending_amount": pending_amount,
+            "pending_rooms": pending_rooms,
+            "pending_tax": pending_tax,
             "expected_balance": folio.balance + pending_amount,
             "charge_form": ChargeForm(),
             "free_rooms": _free_rooms(res) if res.is_active else [],
@@ -257,6 +263,7 @@ def reservation_detail(request, pk):
             "payments_on": HotelSettings.load().payments_configured,
             "link_amount": link_amount or max(folio.balance + pending_amount, Decimal("0")).quantize(Decimal("0.01")),
             "link_purpose": "deposit" if link_amount else "balance",
+            "guest_message": _guest_message_ctx(res),
         },
     )
 
@@ -410,6 +417,41 @@ def guest_search(request):
             for g in qs
         ]
     return JsonResponse({"results": results})
+
+
+def _guest_message_ctx(res):
+    """Which message suits this stay now (arrival info before, thank-you after), by email or WhatsApp."""
+    from . import guest_messages as gm
+
+    if res.status == Reservation.Status.BOOKED:
+        kind = gm.PRE_ARRIVAL
+    elif res.status == Reservation.Status.CHECKED_OUT:
+        kind = gm.REVIEW
+    else:
+        return None
+    hs = HotelSettings.load()
+    return {
+        "kind": kind,
+        "sent_at": getattr(res, gm.FIELDS[kind]),
+        "can_email": bool(res.guest.email and hs.email_configured),
+        "whatsapp": gm.whatsapp_link(kind, res),
+    }
+
+
+@require_POST
+@module_required("frontdesk")
+def send_guest_message(request, pk):
+    from . import guest_messages as gm
+
+    res = get_object_or_404(Reservation.objects.select_related("guest"), pk=pk)
+    kind = request.POST.get("kind")
+    if kind not in gm.FIELDS:
+        raise Http404
+    if gm.send(kind, res, request.user, force=True):
+        messages.success(request, _("Email sent to %(email)s.") % {"email": res.guest.email})
+    else:
+        messages.error(request, _("The email could not be sent. Check the guest's address and Settings → Email."))
+    return redirect("frontdesk:reservation_detail", pk=pk)
 
 
 @require_POST

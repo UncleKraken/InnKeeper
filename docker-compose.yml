@@ -62,7 +62,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: sh -c 'while true; do python manage.py sync_calendars; python manage.py daily_summary; sleep 900; done'
+    command: sh -c 'while true; do python manage.py sync_calendars; python manage.py daily_summary; python manage.py guest_messages; sleep 900; done'
 
   # Every minute: bookings from the channel manager (Channex) in, availability and prices out.
   channel-manager:

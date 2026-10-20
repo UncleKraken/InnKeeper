@@ -128,6 +128,21 @@ def tourist_tax_units(reservation: Reservation, hs=None) -> int:
     return reservation.adults + (reservation.children or 0 if hs.tourist_tax_children else 0)
 
 
+def tourist_tax_units_for_nights(reservation: Reservation, start: int, end: int, hs=None) -> int:
+    """How many units (guest-nights or room-nights) of tourist tax nights start…end-1 carry; 0 if it is off."""
+    hs = hs or HotelSettings.load()
+    if not hs.tourist_tax_enabled or hs.tourist_tax_amount <= 0:
+        return 0
+    if hs.tourist_tax_max_nights:
+        end = min(end, hs.tourist_tax_max_nights)
+    return max(0, end - start) * tourist_tax_units(reservation, hs)
+
+
+def tourist_tax_amount(reservation: Reservation, start: int, end: int) -> Decimal:
+    hs = HotelSettings.load()
+    return (tourist_tax_units_for_nights(reservation, start, end, hs) * hs.tourist_tax_amount).quantize(Decimal("0.01"))
+
+
 def post_tourist_tax(folio, reservation: Reservation, start: int, end: int, on_date: date, user) -> Charge | None:
     """The tourist tax for nights start…end-1 of the stay (counted from 0), posted with those nights."""
     hs = HotelSettings.load()

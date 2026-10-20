@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.18.0 — messages to guests
+
+**Shqip**
+
+- **Mesazhet për mysafirët** (*Cilësimet → Mesazhet për mysafirët*): disa ditë para mbërritjes, çdo mysafir i konfirmuar merr me email informacionin tuaj (si t'ju gjejnë, parkimi, Wi-Fi), orën e hyrjes, adresën dhe butonin e hartës; një ditë pas largimit, një falënderim me linkun tuaj të vlerësimeve (Google Maps, TripAdvisor, Booking.com). Secili dërgohet një herë, në orën që zgjidhni, në shqip ose anglisht sipas mysafirit, me parapamje.
+- **WhatsApp me një prekje:** te rezervimi, butoni *WhatsApp* hap bisedën me mesazhin gati — për mysafirët pa email (numrat 069… kthehen automatikisht në +355). Mund ta dërgoni edhe me email me dorë.
+- **Rregullim:** *I pritshëm në largim* tani përfshin taksën e turizmit që do të shtohet, që pagesa e plotë të mos ndalojë largimin.
+- Në telefon, faqet me dy kolona nuk dalin më jashtë ekranit kur kanë linke të gjata.
+
+**English**
+
+- **Guest messages** (*Settings → Guest messages*): a few days before arrival, every confirmed guest is emailed your arrival information (how to find you, parking, Wi-Fi), the check-in time, your address and a map button; the day after check-out, a thank-you with your review link (Google Maps, TripAdvisor, Booking.com). Each is sent once, at the hour you choose, in Albanian or English to suit the guest, with a preview.
+- **One-tap WhatsApp:** on a reservation, the *WhatsApp* button opens the chat with the message ready — for guests without email (069… numbers become +355 automatically). You can also email it by hand.
+- **Fix:** *Expected at check-out* now includes the tourist tax that will be added, so paying it in full no longer blocks check-out.
+- On phones, two-column pages no longer run off the screen when they contain long links.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.18.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.17.0 — ordering from the table (QR)
 
 **Shqip**

@@ -135,3 +135,15 @@ class TouristTaxTests(HotelTestCase):
         with mock.patch("apps.core.businessday.business_date", return_value=date(2026, 10, 3)):
             r = self.client.get("/")
         self.assertContains(r, "month=2026-09")
+
+    def test_expected_at_check_out_includes_the_tax_so_check_out_works(self):
+        res = self.stay(nights=2)
+        self.client.login(username="desk", password=PASSWORD)
+        r = self.client.get(reverse("frontdesk:reservation_detail", args=[res.pk]))
+        self.assertEqual(r.context["pending_tax"], D("5.60"))
+        expected = r.context["expected_balance"]
+        self.assertEqual(expected, D("165.60"))
+        services.add_payment(res.folio, amount=expected, method="cash", user=self.reception)
+        services.check_out(res, self.reception)  # no "still owes" error
+        res.refresh_from_db()
+        self.assertEqual(res.status, Reservation.Status.CHECKED_OUT)
