@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Payroll" %} {{ month|date:"m.Y" }}{% endblock %}
+{% block content %}
+<div class="page-header no-print">
+  <div><div class="eyebrow">{% translate "Staff" %}</div><h1>{% translate "Payroll" %}</h1><p>{% translate "Gross pay from the clock-ins, with overtime, night and public holiday extras. Contributions and income tax are calculated by your accountant." %}</p></div>
+  <div class="actions">
+    <form method="get" class="filters"><div class="field"><label for="month">{% translate "Month" %}</label><input class="input" type="month" id="month" name="month" value="{{ month_value }}" onchange="this.form.submit()"></div></form>
+    <a class="btn btn-secondary" href="?month={{ month_value }}&format=xlsx">{% icon "download" %} {% translate "Excel" %}</a>
+    <button class="btn btn-secondary" onclick="window.print()">{% icon "print" %} {% translate "Print / PDF" %}</button>
+  </div>
+</div>
+<div class="no-print">{% include "inventory/_tabs.html" %}</div>
+
+{% if approved %}
+  <div class="alert alert-success row no-print" style="justify-content:space-between; flex-wrap:wrap; gap:.5rem; margin-bottom:1rem">
+    <span>{% icon "check" %} {% blocktranslate with who=approved.approved_by when=approved.approved_at|date:"d.m.Y H:i" %}Approved by {{ who }} on {{ when }}. These numbers no longer change with the clock-ins.{% endblocktranslate %}</span>
+    <form method="post" action="{% url 'staff:payroll_approve' %}" data-confirm="{% translate 'Reopen this month? The numbers will follow the clock-ins again.' %}">{% csrf_token %}<input type="hidden" name="month" value="{{ month_value }}"><input type="hidden" name="reopen" value="1"><button class="btn btn-ghost btn-sm">{% translate "Reopen" %}</button></form>
+  </div>
+{% elif not year_has_holidays %}
+  <div class="alert alert-warning no-print" style="margin-bottom:1rem">{% blocktranslate with y=month.year %}No public holidays are set for {{ y }}, so no holiday extra is paid.{% endblocktranslate %} <a href="{% url 'staff:holidays' %}?year={{ month.year }}">{% translate "Set them up" %}</a></div>
+{% endif %}
+
+<div class="month-doc">
+  <div class="doc-head">
+    <div><div class="doc-title">{{ hotel.legal_name|default:hotel.name }}</div><div class="muted">{% if hotel.tax_id and hotel.registered %}NIPT: {{ hotel.tax_id }}{% endif %}</div></div>
+    <div style="text-align:right"><div class="doc-title">{% translate "Payroll" %}</div><div>{{ month|date:"F Y" }}</div></div>
+  </div>
+  <div class="grid grid-3" style="margin:1rem 0">
+    <div class="card stat"><div class="stat-label">{% translate "Gross pay" %}</div><div class="stat-value">{{ totals.gross|money }}</div></div>
+    <div class="card stat"><div class="stat-label">{% translate "Hours worked" %}</div><div class="stat-value">{{ totals.hours }}</div></div>
+    <div class="card stat"><div class="stat-label">{% translate "Of which overtime" %}</div><div class="stat-value">{{ totals.overtime_hours }}</div></div>
+  </div>
+  <section class="card card-flush">
+    <div class="table-wrap"><table class="table table-sm">
+      <thead><tr><th>{% translate "Name" %}</th><th class="num">{% translate "Hours" %}</th><th class="num">{% translate "Overtime" %}</th><th class="num">{% translate "Night" %}</th><th class="num">{% translate "Holiday" %}</th><th class="num">{% translate "Base" %}</th><th class="num">{% translate "Extras" %}</th><th class="num">{% translate "Bonuses / advances" %}</th><th class="num">{% translate "Gross" %}</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td><a href="{% url 'staff:person_hours' r.user_id %}"><strong>{{ r.name }}</strong></a>{% if r.position %}<br><small class="muted">{{ r.position }}</small>{% endif %}
+            {% if r.missing_pay %}<br><a class="no-print" href="{% url 'staff:profile' r.user_id %}" style="font-size:.8rem; color:var(--warning)">{% translate "No pay recorded: add it" %}</a>
+            {% else %}<br><small class="muted">{% if r.pay_type == "monthly" %}{{ r.rate|money }} / {% translate "month" %}{% else %}{{ r.rate|money }} / {% translate "hour" %}{% endif %}</small>{% endif %}</td>
+          <td class="num">{{ r.hours }}<br><small class="muted">{% blocktranslate count n=r.days %}{{ n }} day{% plural %}{{ n }} days{% endblocktranslate %}</small></td>
+          <td class="num">{% if r.overtime_hours %}{{ r.overtime_hours }}{% else %}—{% endif %}</td>
+          <td class="num">{% if r.night_hours %}{{ r.night_hours }}{% else %}—{% endif %}</td>
+          <td class="num">{% if r.holiday_hours %}{{ r.holiday_hours }}{% else %}—{% endif %}</td>
+          <td class="num">{{ r.base|money }}</td>
+          <td class="num">{% with e=r.extras %}{% if e.overtime or e.night or e.holiday %}{% if e.overtime %}<div>{{ e.overtime|money }} <small class="muted">{% translate "overtime" %}</small></div>{% endif %}{% if e.night %}<div>{{ e.night|money }} <small class="muted">{% translate "night" %}</small></div>{% endif %}{% if e.holiday %}<div>{{ e.holiday|money }} <small class="muted">{% translate "holiday" %}</small></div>{% endif %}{% else %}—{% endif %}{% endwith %}</td>
+          <td class="num">{% for a in r.adjustments %}<div>{{ a.amount|money }} <small class="muted">{{ a.note }}</small>{% if not approved and a.pk %}<form method="post" action="{% url 'staff:payroll_adjustment' %}" class="inline no-print">{% csrf_token %}<input type="hidden" name="month" value="{{ month_value }}"><button class="btn-link" name="delete" value="{{ a.pk }}" title="{% translate 'Remove' %}">×</button></form>{% endif %}</div>{% empty %}—{% endfor %}</td>
+          <td class="num"><strong>{{ r.gross|money }}</strong>{% if r.iban %}<br><small class="muted mono">{{ r.iban }}</small>{% endif %}</td>
+        </tr>
+        {% empty %}<tr><td colspan="9" class="muted">{% translate "No clock-ins or salaries for this month." %}</td></tr>{% endfor %}
+      </tbody>
+      {% if rows %}<tfoot><tr><td>{% translate "Total" %}</td><td class="num">{{ totals.hours }}</td><td class="num">{{ totals.overtime_hours }}</td><td></td><td></td><td class="num">{{ totals.base|money }}</td><td class="num">{{ totals.extras|money }}</td><td class="num">{{ totals.adjustments|money }}</td><td class="num">{{ totals.gross|money }}</td></tr></tfoot>{% endif %}
+    </table></div>
+  </section>
+</div>
+
+<div class="grid grid-2 no-print" style="align-items:start; margin-top:1.25rem">
+  <div class="stack">
+    {% if not approved %}
+    <form method="post" action="{% url 'staff:payroll_adjustment' %}" class="card">{% csrf_token %}<input type="hidden" name="month" value="{{ month_value }}">
+      <div class="card-header"><h3>{% translate "Bonus or advance" %}</h3></div>
+      <div class="card-body">{% with form=adjustment_form %}{% include "includes/form_fields.html" %}{% endwith %}</div>
+      <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "plus" %} {% translate "Add" %}</button></div>
+    </form>
+    <section class="card"><div class="card-body">
+      <p style="margin-top:0">{% translate "When the month is checked, approve it: the numbers are kept as they are, for the accountant and for later questions." %}</p>
+      <form method="post" action="{% url 'staff:payroll_approve' %}" data-confirm="{% translate 'Approve this payroll?' %}">{% csrf_token %}<input type="hidden" name="month" value="{{ month_value }}"><button class="btn">{% icon "check" %} {% translate "Approve the month" %}</button></form>
+    </div></section>
+    {% endif %}
+  </div>
+  <div class="stack">
+    <form method="post" action="{% url 'staff:payroll_rates' %}" class="card">{% csrf_token %}<input type="hidden" name="month" value="{{ month_value }}">
+      <div class="card-header"><h3>{% translate "Extras" %}</h3></div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0; font-size:.88rem">{% translate "Overtime: hours over each person's contract hours in a week (40 if not set). Night: 22:00–06:00. Set the percentages your contracts or collective agreement give; the Labour Code sets minimums." %}</p>
+        {% with form=rates_form %}{% include "includes/form_fields.html" %}{% endwith %}
+      </div>
+      <div class="card-footer form-actions" style="margin-top:0"><button class="btn btn-secondary">{% translate "Save" %}</button></div>
+    </form>
+    <section class="card">
+      <div class="card-header"><h3>{% translate "Public holidays this month" %}</h3><a href="{% url 'staff:holidays' %}?year={{ month.year }}">{% translate "Edit" %}</a></div>
+      <div class="card-body">{% for h in holidays %}<div>{{ h.date|date:"D d.m" }} · {{ h.name }}</div>{% empty %}<span class="muted">{% translate "None." %}</span>{% endfor %}</div>
+    </section>
+  </div>
+</div>
+{% endblock %}

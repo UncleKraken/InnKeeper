@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.20.0 — payroll from the clock-ins
+
+**Shqip**
+
+- **Listëpagesa** (*Stafi → Listëpagesa*): paga bruto e çdo personi nga hyrjet dhe daljet e muajit — me orë, ose pagë mujore për ditët e punësimit — me shtesat për orët jashtë orarit (mbi orët e kontratës në javë), punën e natës (22:00–06:00) dhe festat zyrtare. Përqindjet i vendosni vetë sipas kontratave.
+- **Festat zyrtare:** një prekje plotëson festat me datë fikse dhe të dyja Pashkët për vitin; ditët e Bajramit i shtoni kur shpallen.
+- **Shpërblime dhe paradhënie** për muajin, **miratimi i muajit** (shifrat ruhen edhe nëse ndryshon një hyrje më vonë), printim dhe Excel me IBAN-in për bankën dhe kontabilistin.
+- Kontributet dhe tatimi mbi të ardhurat mbeten te kontabilisti: ndryshojnë çdo vit dhe një shifër e gabuar në pagë është më keq se asnjë.
+
+**English**
+
+- **Payroll** (*Staff → Payroll*): each person's gross pay from the month's clock-ins — hourly, or a monthly salary for the days employed — with extras for overtime (over the contract hours in a week), night work (22:00–06:00) and public holidays. You set the percentages your contracts give.
+- **Public holidays:** one tap fills in the fixed-date holidays and both Easters for the year; add the Bajram days when they are announced.
+- **Bonuses and advances** for the month, **approving the month** (the numbers stay even if a clock-in changes later), printing and Excel with IBANs for the bank and the accountant.
+- Contributions and income tax stay with the accountant: they change every year, and a wrong figure on a payslip is worse than none.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.20.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.19.0 — several businesses, one owner; tills that warn when offline
 
 **Shqip**

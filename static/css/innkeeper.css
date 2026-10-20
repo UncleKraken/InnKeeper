@@ -981,3 +981,4 @@ body.kds-flash { animation: kds-flash 1.2s ease-out 2; }
 .conn-banner.shake { animation: conn-shake .5s; }
 @keyframes conn-shake { 0%, 100% { transform: translateX(-50%); } 25% { transform: translateX(calc(-50% - 8px)); } 75% { transform: translateX(calc(-50% + 8px)); } }
 @media print { .conn-banner { display: none !important; } }
+.btn-link { background: none; border: 0; padding: 0 .25rem; color: var(--danger); cursor: pointer; font-size: 1rem; line-height: 1; }

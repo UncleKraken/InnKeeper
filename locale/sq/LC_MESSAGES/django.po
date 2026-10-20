@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 02:21+0200\n"
+"POT-Creation-Date: 2026-10-20 06:34+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,13 +20,14 @@ msgstr ""
 
 #: apps/accounts/apps.py:8 apps/accounts/views.py:86
 #: apps/accounts/views.py:114 apps/accounts/views.py:122
-#: apps/finance/reports.py:348 apps/staff/views.py:27
+#: apps/finance/reports.py:348 apps/staff/views.py:28
 #: templates/accounts/pin_pad.html:34 templates/base.html:78
 #: templates/core/audit_log.html:11 templates/core/settings_hub.html:29
 #: templates/core/settings_hub.html:277 templates/finance/ledger.html:21
 #: templates/finance/ledger.html:30 templates/finance/sales.html:31
 #: templates/finance/shifts.html:11 templates/outlets/receipts.html:19
-#: templates/staff/attendance.html:6 templates/staff/schedule.html:6
+#: templates/staff/attendance.html:6 templates/staff/payroll.html:6
+#: templates/staff/schedule.html:6
 msgid "Staff"
 msgstr "Stafi"
 
@@ -259,19 +260,20 @@ msgstr "Fjalëkalimi juaj u ndryshua."
 #: apps/inventory/views.py:519 apps/outlets/menu_setup.py:62
 #: apps/outlets/menu_setup.py:175 apps/outlets/views.py:686
 #: apps/outlets/views.py:720 apps/outlets/views.py:781
-#: apps/outlets/views.py:815 apps/outlets/views.py:858 apps/staff/views.py:112
-#: apps/staff/views.py:121 apps/staff/views.py:361
+#: apps/outlets/views.py:815 apps/outlets/views.py:858
+#: apps/staff/payroll_views.py:175 apps/staff/views.py:113
+#: apps/staff/views.py:122 apps/staff/views.py:362
 #: templates/finance/accounts.html:16 templates/frontdesk/guest_list.html:16
 #: templates/outlets/_ticket.html:91 templates/outlets/bookings.html:25
 #: templates/outlets/cards.html:11 templates/outlets/cards.html:18
 #: templates/outlets/option_group_form.html:23
 #: templates/outlets/printers.html:15 templates/staff/attendance.html:36
-#: templates/staff/schedule.html:19
+#: templates/staff/payroll.html:36 templates/staff/schedule.html:19
 msgid "Name"
 msgstr "Emri"
 
-#: apps/accounts/views.py:103 apps/staff/views.py:112
-#: templates/accounts/staff_form.html:10
+#: apps/accounts/views.py:103 apps/staff/payroll_views.py:175
+#: apps/staff/views.py:113 templates/accounts/staff_form.html:10
 msgid "Position"
 msgstr "Pozicioni"
 
@@ -298,7 +300,7 @@ msgstr "Hyrja e fundit"
 #: apps/frontdesk/views.py:641 apps/frontdesk/views.py:678
 #: apps/inventory/views.py:523 apps/outlets/menu_setup.py:177
 #: apps/outlets/views.py:689 apps/outlets/views.py:818
-#: apps/outlets/views.py:860 apps/staff/views.py:361
+#: apps/outlets/views.py:860 apps/staff/views.py:362
 msgid "Active"
 msgstr "Aktiv"
 
@@ -622,7 +624,7 @@ msgstr ""
 "TVSH apo fiskalizim, dhe kuponat shënohen si kupona të brendshëm. Pyesni "
 "kontabilistin nëse nuk jeni të sigurt."
 
-#: apps/core/models.py:38 apps/core/models.py:545 apps/frontdesk/models.py:90
+#: apps/core/models.py:38 apps/core/models.py:557 apps/frontdesk/models.py:90
 #: apps/staff/models.py:69
 msgid "address"
 msgstr "adresa"
@@ -882,7 +884,7 @@ msgstr ""
 msgid "security"
 msgstr "siguria"
 
-#: apps/core/models.py:159 apps/core/models.py:265
+#: apps/core/models.py:159 apps/core/models.py:277
 msgid "None"
 msgstr "Asnjë"
 
@@ -1031,7 +1033,7 @@ msgstr ""
 #: apps/core/models.py:230 apps/finance/models.py:286
 #: apps/finance/models.py:323 apps/finance/models.py:371
 #: apps/fiscal/models.py:107 apps/frontdesk/models.py:391
-#: apps/payments/models.py:40 apps/staff/models.py:74
+#: apps/payments/models.py:40 apps/staff/models.py:74 apps/staff/models.py:197
 msgid "amount"
 msgstr "shuma"
 
@@ -1064,14 +1066,46 @@ msgid "0: every night is charged."
 msgstr "0: llogaritet çdo natë."
 
 #: apps/core/models.py:247
+msgid "overtime extra (%)"
+msgstr "shtesa për orët jashtë orarit (%)"
+
+#: apps/core/models.py:248
+msgid ""
+"For hours over the contract hours in a week. The Labour Code asks for at "
+"least 25%."
+msgstr ""
+"Për orët mbi orët e kontratës në një javë. Kodi i Punës kërkon të paktën "
+"25%."
+
+#: apps/core/models.py:251
+msgid "night work extra (%)"
+msgstr "shtesa për punën e natës (%)"
+
+#: apps/core/models.py:252
+msgid ""
+"For hours between 22:00 and 06:00, as your contracts or collective agreement"
+" say."
+msgstr ""
+"Për orët nga 22:00 deri në 06:00, siç thonë kontratat ose marrëveshja "
+"kolektive."
+
+#: apps/core/models.py:255
+msgid "public holiday extra (%)"
+msgstr "shtesa për festat zyrtare (%)"
+
+#: apps/core/models.py:256
+msgid "For hours worked on a public holiday, as your contracts say."
+msgstr "Për orët e punuara në një festë zyrtare, siç thonë kontratat."
+
+#: apps/core/models.py:259
 msgid "public address through Cloudflare Tunnel"
 msgstr "adresë publike përmes Cloudflare Tunnel"
 
-#: apps/core/models.py:249
+#: apps/core/models.py:261
 msgid "tunnel token"
 msgstr "tokeni i tunelit"
 
-#: apps/core/models.py:252
+#: apps/core/models.py:264
 msgid ""
 "From Cloudflare Zero Trust → Networks → Tunnels → your tunnel → Install "
 "connector (the long text after --token)."
@@ -1079,35 +1113,35 @@ msgstr ""
 "Nga Cloudflare Zero Trust → Networks → Tunnels → tuneli juaj → Install "
 "connector (teksti i gjatë pas --token)."
 
-#: apps/core/models.py:255
+#: apps/core/models.py:267
 msgid "lock shared tills after"
 msgstr "kyç arkat e përbashkëta pas"
 
-#: apps/core/models.py:257
+#: apps/core/models.py:269
 msgid "Never"
 msgstr "Kurrë"
 
-#: apps/core/models.py:257
+#: apps/core/models.py:269
 msgid "1 minute"
 msgstr "1 minute"
 
-#: apps/core/models.py:257
+#: apps/core/models.py:269
 msgid "2 minutes"
 msgstr "2 minutash"
 
-#: apps/core/models.py:257
+#: apps/core/models.py:269
 msgid "3 minutes"
 msgstr "3 minutash"
 
-#: apps/core/models.py:257
+#: apps/core/models.py:269
 msgid "5 minutes"
 msgstr "5 minutash"
 
-#: apps/core/models.py:257
+#: apps/core/models.py:269
 msgid "10 minutes"
 msgstr "10 minutash"
 
-#: apps/core/models.py:258
+#: apps/core/models.py:270
 msgid ""
 "On a shared till, the screen goes back to the PIN pad after this long "
 "without a tap."
@@ -1115,43 +1149,43 @@ msgstr ""
 "Në një arkë të përbashkët, ekrani kthehet te tastiera e PIN-it pas kaq kohe "
 "pa u prekur."
 
-#: apps/core/models.py:263
+#: apps/core/models.py:275
 msgid "payment provider"
 msgstr "ofruesi i pagesave"
 
-#: apps/core/models.py:269
+#: apps/core/models.py:281
 msgid "test mode"
 msgstr "mënyra provë"
 
-#: apps/core/models.py:269
+#: apps/core/models.py:281
 msgid "Use the provider's test system. No real money is charged."
 msgstr "Përdor sistemin provë të ofruesit. Nuk tërhiqen para të vërteta."
 
-#: apps/core/models.py:271
+#: apps/core/models.py:283
 msgid "POK key ID"
 msgstr "POK key ID"
 
-#: apps/core/models.py:272
+#: apps/core/models.py:284
 msgid "POK key secret"
 msgstr "POK key secret"
 
-#: apps/core/models.py:273
+#: apps/core/models.py:285
 msgid "POK merchant ID"
 msgstr "ID e tregtarit në POK"
 
-#: apps/core/models.py:274
+#: apps/core/models.py:286
 msgid "Paysera project ID"
 msgstr "ID e projektit në Paysera"
 
-#: apps/core/models.py:275
+#: apps/core/models.py:287
 msgid "Paysera project password"
 msgstr "Fjalëkalimi i projektit në Paysera"
 
-#: apps/core/models.py:277
+#: apps/core/models.py:289
 msgid "let guests pay the deposit by card"
 msgstr "lejo mysafirët të paguajnë parapagimin me kartë"
 
-#: apps/core/models.py:279
+#: apps/core/models.py:291
 msgid ""
 "Shows a “Pay now” button on the online booking page when a payment provider "
 "is set up."
@@ -1159,84 +1193,84 @@ msgstr ""
 "Shfaq butonin “Paguaj tani” në faqen e rezervimeve online kur është "
 "konfiguruar një ofrues pagesash."
 
-#: apps/core/models.py:284
+#: apps/core/models.py:296
 msgid "fiscalize receipts and invoices"
 msgstr "fiskalizo kuponat dhe faturat"
 
-#: apps/core/models.py:286
+#: apps/core/models.py:298
 msgid ""
 "Every sale is sent to the tax authority and gets an NSLF and NIVF code with "
 "a QR code."
 msgstr ""
 "Çdo shitje dërgohet te tatimet dhe merr kodet NSLF dhe NIVF me kod QR."
 
-#: apps/core/models.py:289
+#: apps/core/models.py:301
 msgid "use the tax authority's test system"
 msgstr "përdor sistemin provë të tatimeve"
 
-#: apps/core/models.py:289
+#: apps/core/models.py:301
 msgid "Turn off only when going live."
 msgstr "Çaktivizojeni vetëm kur kaloni në punë reale."
 
-#: apps/core/models.py:292
+#: apps/core/models.py:304
 msgid "business unit code"
 msgstr "kodi i njësisë së biznesit"
 
-#: apps/core/models.py:292
+#: apps/core/models.py:304
 msgid "From the self-care portal, e.g. ab123cd456."
 msgstr "Nga portali self-care, p.sh. ab123cd456."
 
-#: apps/core/models.py:295 apps/outlets/models.py:139
+#: apps/core/models.py:307 apps/outlets/models.py:139
 msgid "cash register (TCR) code"
 msgstr "kodi i arkës (TCR)"
 
-#: apps/core/models.py:298
+#: apps/core/models.py:310
 msgid "Used by reception and by outlets without their own cash register code."
 msgstr "Përdoret nga recepsioni dhe nga pikat pa kod arke të vetin."
 
-#: apps/core/models.py:300
+#: apps/core/models.py:312
 msgid "software code"
 msgstr "kodi i softuerit"
 
-#: apps/core/models.py:301
+#: apps/core/models.py:313
 msgid "maintainer code"
 msgstr "kodi i mirëmbajtësit"
 
-#: apps/core/models.py:303
+#: apps/core/models.py:315
 msgid "default operator code"
 msgstr "kodi i operatorit i paracaktuar"
 
-#: apps/core/models.py:306
+#: apps/core/models.py:318
 msgid "Used for staff members who don't have their own operator code."
 msgstr "Përdoret për stafin që nuk ka kodin e vet të operatorit."
 
-#: apps/core/models.py:308
+#: apps/core/models.py:320
 msgid "town"
 msgstr "qyteti"
 
-#: apps/core/models.py:309
+#: apps/core/models.py:321
 msgid "digital certificate"
 msgstr "certifikata dixhitale"
 
-#: apps/core/models.py:310
+#: apps/core/models.py:322
 msgid "certificate password"
 msgstr "fjalëkalimi i certifikatës"
 
-#: apps/core/models.py:312
+#: apps/core/models.py:324
 msgid "VAT rate for accommodation (%)"
 msgstr "Norma e TVSH-së për akomodimin (%)"
 
-#: apps/core/models.py:316
+#: apps/core/models.py:328
 msgid "Room nights. Food, drinks and other services use the main VAT rate."
 msgstr ""
 "Netët e qëndrimit. Ushqimi, pijet dhe shërbimet e tjera përdorin normën "
 "kryesore të TVSH-së."
 
-#: apps/core/models.py:319
+#: apps/core/models.py:331
 msgid "exchange rate (lekë for 1 unit of your currency)"
 msgstr "kursi i këmbimit (lekë për 1 njësi të monedhës suaj)"
 
-#: apps/core/models.py:324
+#: apps/core/models.py:336
 msgid ""
 "Only if prices are not in lekë (ALL), e.g. 100.50 for EUR. Use the Bank of "
 "Albania rate."
@@ -1244,31 +1278,31 @@ msgstr ""
 "Vetëm nëse çmimet nuk janë në lekë (ALL), p.sh. 100.50 për EUR. Përdorni "
 "kursin e Bankës së Shqipërisë."
 
-#: apps/core/models.py:330
+#: apps/core/models.py:342
 msgid "Every 15 minutes"
 msgstr "Çdo 15 minuta"
 
-#: apps/core/models.py:331
+#: apps/core/models.py:343
 msgid "Every 30 minutes"
 msgstr "Çdo 30 minuta"
 
-#: apps/core/models.py:332
+#: apps/core/models.py:344
 msgid "Every hour"
 msgstr "Çdo orë"
 
-#: apps/core/models.py:333
+#: apps/core/models.py:345
 msgid "Every 4 hours"
 msgstr "Çdo 4 orë"
 
-#: apps/core/models.py:334
+#: apps/core/models.py:346
 msgid "Once a day"
 msgstr "Një herë në ditë"
 
-#: apps/core/models.py:337
+#: apps/core/models.py:349
 msgid "copy the data to another place automatically"
 msgstr "kopjo të dhënat automatikisht në një vend tjetër"
 
-#: apps/core/models.py:339
+#: apps/core/models.py:351
 msgid ""
 "A full copy is written there regularly, so a broken or stolen computer never"
 " loses your data."
@@ -1276,11 +1310,11 @@ msgstr ""
 "Aty shkruhet rregullisht një kopje e plotë, që një kompjuter i prishur ose i"
 " vjedhur të mos humbasë kurrë të dhënat tuaja."
 
-#: apps/core/models.py:342
+#: apps/core/models.py:354
 msgid "folder"
 msgstr "dosja"
 
-#: apps/core/models.py:346
+#: apps/core/models.py:358
 msgid ""
 "A USB drive (e.g. E:\\InnKeeper) or a folder that OneDrive, Google Drive or "
 "Dropbox keeps in the cloud."
@@ -1288,15 +1322,15 @@ msgstr ""
 "Një USB (p.sh. E:\\InnKeeper) ose një dosje që OneDrive, Google Drive ose "
 "Dropbox e mban në cloud."
 
-#: apps/core/models.py:349
+#: apps/core/models.py:361
 msgid "how often"
 msgstr "sa shpesh"
 
-#: apps/core/models.py:351
+#: apps/core/models.py:363
 msgid "password for the copies"
 msgstr "fjalëkalimi i kopjeve"
 
-#: apps/core/models.py:355
+#: apps/core/models.py:367
 msgid ""
 "Recommended for cloud folders: the copies are encrypted and can only be "
 "restored with this password. Write it down — without it the copies can't be "
@@ -1305,57 +1339,57 @@ msgstr ""
 "Rekomandohet për dosjet në cloud: kopjet enkriptohen dhe rikthehen vetëm me "
 "këtë fjalëkalim. Shkruajeni diku — pa të kopjet nuk hapen dot."
 
-#: apps/core/models.py:366
+#: apps/core/models.py:378
 msgid "connect to the channel manager"
 msgstr "lidhu me menaxherin e kanaleve"
 
-#: apps/core/models.py:367
+#: apps/core/models.py:379
 msgid "Channex API key"
 msgstr "Çelësi API i Channex"
 
-#: apps/core/models.py:368
+#: apps/core/models.py:380
 msgid "Channex property ID"
 msgstr "ID e pronës në Channex"
 
-#: apps/core/models.py:370
+#: apps/core/models.py:382
 msgid "use the Channex test system (staging)"
 msgstr "përdor sistemin provë të Channex (staging)"
 
-#: apps/core/models.py:370
+#: apps/core/models.py:382
 msgid "For trying it out before going live."
 msgstr "Për ta provuar para se ta përdorni realisht."
 
-#: apps/core/models.py:372
+#: apps/core/models.py:384
 msgid "send availability for (days)"
 msgstr "dërgo disponueshmërinë për (ditë)"
 
-#: apps/core/models.py:377 apps/core/models.py:378
+#: apps/core/models.py:389 apps/core/models.py:390
 msgid "hotel settings"
 msgstr "cilësimet e hotelit"
 
-#: apps/core/models.py:495
+#: apps/core/models.py:507
 msgid "action"
 msgstr "veprimi"
 
-#: apps/core/models.py:496 apps/finance/models.py:283
+#: apps/core/models.py:508 apps/finance/models.py:283
 #: apps/finance/models.py:369 apps/frontdesk/models.py:18
 #: apps/outlets/models.py:209 apps/payments/models.py:39
 msgid "description"
 msgstr "përshkrimi"
 
-#: apps/core/models.py:499 apps/outlets/models.py:388
+#: apps/core/models.py:511 apps/outlets/models.py:388
 msgid "time"
 msgstr "koha"
 
-#: apps/core/models.py:502
+#: apps/core/models.py:514
 msgid "audit entry"
 msgstr "regjistrim aktiviteti"
 
-#: apps/core/models.py:503
+#: apps/core/models.py:515
 msgid "audit log"
 msgstr "regjistri i aktivitetit"
 
-#: apps/core/models.py:543 apps/finance/models.py:76
+#: apps/core/models.py:555 apps/finance/models.py:76
 #: apps/finance/models.py:151 apps/frontdesk/models.py:16
 #: apps/frontdesk/models.py:269 apps/inventory/models.py:25
 #: apps/inventory/models.py:60 apps/outlets/models.py:21
@@ -1364,11 +1398,11 @@ msgstr "regjistri i aktivitetit"
 #: apps/outlets/models.py:237 apps/outlets/models.py:261
 #: apps/outlets/models.py:289 apps/outlets/models.py:342
 #: apps/outlets/models.py:393 apps/outlets/models.py:567
-#: apps/staff/models.py:27
+#: apps/staff/models.py:27 apps/staff/models.py:181
 msgid "name"
 msgstr "emri"
 
-#: apps/core/models.py:546
+#: apps/core/models.py:558
 msgid ""
 "How this computer reaches the other InnKeeper, e.g. http://100.64.1.7:8765 "
 "(Tailscale) or https://hotel.example.com"
@@ -1376,15 +1410,15 @@ msgstr ""
 "Si e arrin ky kompjuter InnKeeper-in tjetër, p.sh. http://100.64.1.7:8765 "
 "(Tailscale) ose https://hotel.example.com"
 
-#: apps/core/models.py:548
+#: apps/core/models.py:560
 msgid "sharing key"
 msgstr "çelësi i ndarjes"
 
-#: apps/core/models.py:548
+#: apps/core/models.py:560
 msgid "From the other business: Settings → Group overview."
 msgstr "Nga biznesi tjetër: Cilësimet → Pamja e grupit."
 
-#: apps/core/models.py:549 apps/frontdesk/models.py:32
+#: apps/core/models.py:561 apps/frontdesk/models.py:32
 #: apps/outlets/models.py:74 apps/outlets/models.py:114
 #: apps/outlets/models.py:192 apps/outlets/models.py:215
 #: apps/outlets/models.py:248 apps/outlets/models.py:266
@@ -1393,7 +1427,7 @@ msgstr "Nga biznesi tjetër: Cilësimet → Pamja e grupit."
 msgid "order"
 msgstr "renditja"
 
-#: apps/core/models.py:554
+#: apps/core/models.py:566
 msgid "business in the group"
 msgstr "biznes në grup"
 
@@ -1509,6 +1543,7 @@ msgstr "Çmimet tuaja janë në %(c)s: tatimet kërkojnë kursin në lekë."
 
 #: apps/core/settings_views.py:399 apps/core/settings_views.py:499
 #: apps/core/settings_views.py:647 apps/frontdesk/channel_manager.py:66
+#: apps/staff/payroll_views.py:93
 msgid "Settings saved."
 msgstr "Cilësimet u ruajtën."
 
@@ -1891,7 +1926,7 @@ msgstr "llogaritë"
 #: apps/inventory/models.py:178 apps/outlets/models.py:395
 #: apps/outlets/models.py:454 apps/outlets/models.py:570
 #: apps/outlets/models.py:640 apps/staff/models.py:101
-#: apps/staff/models.py:146
+#: apps/staff/models.py:146 apps/staff/models.py:198
 msgid "note"
 msgstr "shënim"
 
@@ -2007,6 +2042,7 @@ msgstr "turnet"
 #: apps/fiscal/models.py:104 apps/inventory/models.py:129
 #: apps/inventory/models.py:149 apps/inventory/models.py:177
 #: apps/outlets/models.py:387 apps/staff/models.py:142
+#: apps/staff/models.py:180
 msgid "date"
 msgstr "data"
 
@@ -2069,6 +2105,7 @@ msgstr "detyrime"
 
 #: apps/finance/models.py:308 apps/finance/monthly.py:52
 #: apps/finance/reports.py:131 apps/finance/views.py:65
+#: templates/staff/payroll.html:36 templates/staff/payroll.html:75
 msgid "Extras"
 msgstr "Shtesa"
 
@@ -2260,17 +2297,17 @@ msgid "Profit"
 msgstr "Fitimi"
 
 #: apps/finance/monthly.py:165 apps/finance/reports.py:339
-#: apps/staff/views.py:111
+#: apps/staff/views.py:112
 msgid "Summary"
 msgstr "Përmbledhje"
 
 #: apps/finance/monthly.py:167 apps/outlets/menu_setup.py:126
-#: templates/staff/attendance.html:36
+#: apps/staff/payroll_views.py:175 templates/staff/attendance.html:36
 msgid "Days"
 msgstr "Ditët"
 
 #: apps/finance/monthly.py:168 apps/inventory/views.py:218
-#: apps/staff/views.py:121 templates/finance/account_detail.html:19
+#: apps/staff/views.py:122 templates/finance/account_detail.html:19
 #: templates/finance/expenses.html:21 templates/finance/ledger.html:21
 #: templates/finance/ledger.html:30 templates/finance/monthly.html:66
 #: templates/frontdesk/invoice.html:29
@@ -2583,6 +2620,7 @@ msgstr "Shuma"
 #: templates/inventory/delivery_form.html:27
 #: templates/inventory/order_detail.html:50 templates/outlets/_ticket.html:48
 #: templates/outlets/receipts.html:19 templates/outlets/table_order.html:86
+#: templates/staff/payroll.html:54
 msgid "Total"
 msgstr "Totali"
 
@@ -2675,6 +2713,7 @@ msgstr "Nuk ka lidhje me tatimet (%(e)s). Do të dërgohet automatikisht."
 
 #: apps/fiscal/services.py:449 templates/booking/search.html:31
 #: templates/frontdesk/reservation_detail.html:166
+#: templates/staff/payroll.html:48
 msgid "night"
 msgstr "natë"
 
@@ -4484,7 +4523,7 @@ msgid "Invoice / reference"
 msgstr "Fatura / referenca"
 
 #: apps/inventory/views.py:220 apps/outlets/loyalty_views.py:74
-#: apps/outlets/printing.py:299 apps/staff/views.py:121
+#: apps/outlets/printing.py:299 apps/staff/views.py:122
 #: templates/inventory/count_form.html:34 templates/inventory/counts.html:13
 #: templates/staff/person_hours.html:21
 msgid "Note"
@@ -4727,8 +4766,8 @@ msgstr "Kuponi dhuratë u anulua. Kthejini paratë klientit."
 msgid "Only a manager can change a loyalty card."
 msgstr "Vetëm menaxheri mund të ndryshojë një kartë besnikërie."
 
-#: apps/outlets/loyalty_views.py:153 apps/staff/views.py:196
-#: apps/staff/views.py:342
+#: apps/outlets/loyalty_views.py:153 apps/staff/views.py:197
+#: apps/staff/views.py:343
 msgid "Saved."
 msgstr "U ruajt."
 
@@ -5946,7 +5985,7 @@ msgid "colour"
 msgstr "ngjyra"
 
 #: apps/staff/models.py:33 apps/staff/models.py:58 apps/staff/models.py:145
-#: apps/staff/views.py:356 apps/staff/views.py:368 apps/staff/views.py:376
+#: apps/staff/views.py:357 apps/staff/views.py:369 apps/staff/views.py:377
 msgid "position"
 msgstr "pozicion"
 
@@ -6074,6 +6113,171 @@ msgstr "turn i planifikuar"
 msgid "schedule"
 msgstr "orari"
 
+#: apps/staff/models.py:185
+msgid "public holiday"
+msgstr "festë zyrtare"
+
+#: apps/staff/models.py:186
+msgid "public holidays"
+msgstr "festat zyrtare"
+
+#: apps/staff/models.py:196 templates/staff/payroll.html:42
+msgid "month"
+msgstr "muaj"
+
+#: apps/staff/models.py:197
+msgid "Plus for a bonus, minus for an advance already paid."
+msgstr "Plus për shpërblim, minus për një paradhënie të paguar."
+
+#: apps/staff/payroll.py:71 apps/staff/payroll.py:72
+msgid "New Year"
+msgstr "Viti i Ri"
+
+#: apps/staff/payroll.py:73
+msgid "Summer Day"
+msgstr "Dita e Verës"
+
+#: apps/staff/payroll.py:74
+msgid "Nevruz"
+msgstr "Nevruzi"
+
+#: apps/staff/payroll.py:75
+msgid "Catholic Easter"
+msgstr "Pashkët Katolike"
+
+#: apps/staff/payroll.py:76
+msgid "Orthodox Easter"
+msgstr "Pashkët Ortodokse"
+
+#: apps/staff/payroll.py:77
+msgid "Workers' Day"
+msgstr "Dita e Punëtorëve"
+
+#: apps/staff/payroll.py:78
+msgid "Mother Teresa Day"
+msgstr "Dita e Nënë Terezës"
+
+#: apps/staff/payroll.py:79
+msgid "Independence Day"
+msgstr "Dita e Pavarësisë"
+
+#: apps/staff/payroll.py:80
+msgid "Liberation Day"
+msgstr "Dita e Çlirimit"
+
+#: apps/staff/payroll.py:81
+msgid "Youth Day"
+msgstr "Dita e Rinisë"
+
+#: apps/staff/payroll.py:82
+msgid "Christmas"
+msgstr "Krishtlindjet"
+
+#: apps/staff/payroll_views.py:48
+msgid "Person"
+msgstr "Personi"
+
+#: apps/staff/payroll_views.py:95
+msgid "Check the numbers: from 0 to 300."
+msgstr "Kontrolloni numrat: nga 0 deri në 300."
+
+#: apps/staff/payroll_views.py:104
+msgid "This month is approved. Reopen it first."
+msgstr "Ky muaj është miratuar. Rihapeni fillimisht."
+
+#: apps/staff/payroll_views.py:117
+#, python-format
+msgid "Added to %(name)s's pay."
+msgstr "U shtua në pagën e %(name)s."
+
+#: apps/staff/payroll_views.py:130
+msgid "The month is open again: the numbers follow the clock-ins."
+msgstr "Muaji u rihap: shifrat ndjekin hyrjet dhe daljet."
+
+#: apps/staff/payroll_views.py:135
+msgid ""
+"Payroll approved. These numbers stay as they are, even if clock-ins change "
+"later."
+msgstr ""
+"Listëpagesa u miratua. Këto shifra mbeten siç janë, edhe nëse hyrjet "
+"ndryshojnë më vonë."
+
+#: apps/staff/payroll_views.py:153
+#, python-format
+msgid ""
+"%(n)s holidays added for %(y)s. Add the Bajram days when the government "
+"announces them."
+msgstr ""
+"U shtuan %(n)s festa për %(y)s. Shtoni ditët e Bajramit kur t'i shpallë "
+"qeveria."
+
+#: apps/staff/payroll_views.py:172
+msgid "Monthly"
+msgstr "Mujore"
+
+#: apps/staff/payroll_views.py:172
+msgid "Hourly"
+msgstr "Me orë"
+
+#: apps/staff/payroll_views.py:174 apps/staff/views.py:27
+#: templates/staff/holidays.html:6 templates/staff/payroll.html:3
+#: templates/staff/payroll.html:6 templates/staff/payroll.html:27
+msgid "Payroll"
+msgstr "Listëpagesa"
+
+#: apps/staff/payroll_views.py:175
+msgid "Pay"
+msgstr "Paga"
+
+#: apps/staff/payroll_views.py:175 templates/frontdesk/group_detail.html:31
+#: templates/frontdesk/reservation_detail.html:166
+#: templates/frontdesk/reservation_list.html:17
+msgid "Rate"
+msgstr "Çmimi"
+
+#: apps/staff/payroll_views.py:175 apps/staff/views.py:122
+#: templates/accounts/staff_form.html:6 templates/staff/payroll.html:36
+#: templates/staff/person_hours.html:21 templates/staff/schedule.html:19
+msgid "Hours"
+msgstr "Orë"
+
+#: apps/staff/payroll_views.py:175
+msgid "Overtime hours"
+msgstr "Orë jashtë orarit"
+
+#: apps/staff/payroll_views.py:175
+msgid "Night hours"
+msgstr "Orë nate"
+
+#: apps/staff/payroll_views.py:176
+msgid "Holiday hours"
+msgstr "Orë feste"
+
+#: apps/staff/payroll_views.py:176 templates/staff/payroll.html:36
+msgid "Base"
+msgstr "Baza"
+
+#: apps/staff/payroll_views.py:176 templates/staff/payroll.html:36
+msgid "Overtime"
+msgstr "Jashtë orarit"
+
+#: apps/staff/payroll_views.py:176 templates/booking/details.html:42
+#: templates/staff/payroll.html:36
+msgid "Night"
+msgstr "Nata"
+
+#: apps/staff/payroll_views.py:176 templates/staff/payroll.html:36
+msgid "Holiday"
+msgstr "Festë"
+
+#: apps/staff/payroll_views.py:176 templates/staff/payroll.html:36
+msgid "Bonuses / advances"
+msgstr "Shpërblime / paradhënie"
+
+#: apps/staff/payroll_views.py:176 templates/staff/payroll.html:36
+msgid "Gross"
+msgstr "Bruto"
+
 #: apps/staff/services.py:31
 msgid "This account is not active."
 msgstr "Kjo llogari nuk është aktive."
@@ -6100,34 +6304,34 @@ msgstr "Prezenca"
 msgid "Schedule"
 msgstr "Orari"
 
-#: apps/staff/views.py:28 apps/staff/views.py:355 apps/staff/views.py:367
-#: apps/staff/views.py:375
+#: apps/staff/views.py:29 apps/staff/views.py:356 apps/staff/views.py:368
+#: apps/staff/views.py:376
 msgid "Positions"
 msgstr "Pozicionet"
 
-#: apps/staff/views.py:53
+#: apps/staff/views.py:54
 #, python-format
 msgid "Clocked in at %(t)s. Have a good shift!"
 msgstr "Hyrja në %(t)s. Punë të mbarë!"
 
-#: apps/staff/views.py:57
+#: apps/staff/views.py:58
 #, python-format
 msgid "Clocked out at %(t)s: %(h)s hours."
 msgstr "Dalja në %(t)s: %(h)s orë."
 
-#: apps/staff/views.py:112
+#: apps/staff/views.py:113
 msgid "Days worked"
 msgstr "Ditë pune"
 
-#: apps/staff/views.py:112
+#: apps/staff/views.py:113 templates/staff/payroll.html:31
 msgid "Hours worked"
 msgstr "Orë pune"
 
-#: apps/staff/views.py:112
+#: apps/staff/views.py:113
 msgid "Hours planned"
 msgstr "Orë të planifikuara"
 
-#: apps/staff/views.py:112 templates/finance/day_close.html:66
+#: apps/staff/views.py:113 templates/finance/day_close.html:66
 #: templates/finance/shift_report.html:23 templates/finance/shifts.html:11
 #: templates/inventory/count_detail.html:13
 #: templates/inventory/count_form.html:19 templates/inventory/counts.html:13
@@ -6135,105 +6339,100 @@ msgstr "Orë të planifikuara"
 msgid "Difference"
 msgstr "Diferenca"
 
-#: apps/staff/views.py:112 templates/core/settings_hub.html:384
+#: apps/staff/views.py:113 templates/core/settings_hub.html:384
 #: templates/staff/attendance.html:36
 msgid "Late"
 msgstr "Me vonesë"
 
-#: apps/staff/views.py:112 templates/staff/attendance.html:36
+#: apps/staff/views.py:113 templates/staff/attendance.html:36
 msgid "Did not come"
 msgstr "Nuk erdhi"
 
-#: apps/staff/views.py:112 templates/staff/attendance.html:36
+#: apps/staff/views.py:113 templates/staff/attendance.html:36
 msgid "Missing clock-out"
 msgstr "Pa dalje të shënuar"
 
-#: apps/staff/views.py:120
+#: apps/staff/views.py:121
 msgid "Clock-ins"
 msgstr "Hyrjet"
 
-#: apps/staff/views.py:121 apps/staff/views.py:150 templates/base.html:90
+#: apps/staff/views.py:122 apps/staff/views.py:151 templates/base.html:90
 #: templates/staff/my_hours.html:9 templates/staff/person_hours.html:21
 msgid "Clock in"
 msgstr "Hyrje"
 
-#: apps/staff/views.py:121 apps/staff/views.py:152 templates/base.html:89
+#: apps/staff/views.py:122 apps/staff/views.py:153 templates/base.html:89
 #: templates/staff/attendance.html:26 templates/staff/person_hours.html:21
 msgid "Clock out"
 msgstr "Dalje"
 
-#: apps/staff/views.py:121
+#: apps/staff/views.py:122
 msgid "Break (minutes)"
 msgstr "Pushimi (minuta)"
 
-#: apps/staff/views.py:121 templates/accounts/staff_form.html:6
-#: templates/staff/person_hours.html:21 templates/staff/schedule.html:19
-msgid "Hours"
-msgstr "Orë"
-
-#: apps/staff/views.py:154
+#: apps/staff/views.py:155
 msgid "Reason for the change"
 msgstr "Arsyeja e ndryshimit"
 
-#: apps/staff/views.py:154
+#: apps/staff/views.py:155
 msgid "Kept in the activity log, e.g. “forgot to clock out”."
 msgstr "Ruhet në regjistrin e aktivitetit, p.sh. “harroi të shënojë daljen”."
 
-#: apps/staff/views.py:164
+#: apps/staff/views.py:165
 msgid "Clock out must be after clock in."
 msgstr "Dalja duhet të jetë pas hyrjes."
 
-#: apps/staff/views.py:166
+#: apps/staff/views.py:167
 msgid "A shift can't be longer than 24 hours."
 msgstr "Një turn nuk mund të jetë më i gjatë se 24 orë."
 
-#: apps/staff/views.py:178
+#: apps/staff/views.py:179
 msgid "Give a reason."
 msgstr "Jepni një arsye."
 
-#: apps/staff/views.py:183
+#: apps/staff/views.py:184
 msgid "Deleted."
 msgstr "U fshi."
 
-#: apps/staff/views.py:193
+#: apps/staff/views.py:194
 msgid "This person is already clocked in: add the clock-out time."
 msgstr "Ky person është tashmë në punë: shtoni orën e daljes."
 
-#: apps/staff/views.py:209
+#: apps/staff/views.py:210
 #, python-format
 msgid "%(name)s clocked in."
 msgstr "%(name)s hyri në punë."
 
-#: apps/staff/views.py:209
+#: apps/staff/views.py:210
 #, python-format
 msgid "%(name)s clocked out."
 msgstr "%(name)s doli nga puna."
 
-#: apps/staff/views.py:266
+#: apps/staff/views.py:267
 msgid "Who"
 msgstr "Kush"
 
-#: apps/staff/views.py:267
+#: apps/staff/views.py:268
 msgid "Earlier than the start means it ends the next day (e.g. 18:00–02:00)."
 msgstr ""
 "Më herët se fillimi do të thotë që mbaron ditën tjetër (p.sh. 18:00–02:00)."
 
-#: apps/staff/views.py:277
+#: apps/staff/views.py:278
 msgid "Start and end can't be the same."
 msgstr "Fillimi dhe mbarimi nuk mund të jenë njësoj."
 
-#: apps/staff/views.py:311
+#: apps/staff/views.py:312
 #, python-format
 msgid "%(n)s shifts copied from last week."
 msgstr "U kopjuan %(n)s turne nga java e kaluar."
 
-#: apps/staff/views.py:311
+#: apps/staff/views.py:312
 msgid "Nothing to copy: last week is empty or this week is already planned."
 msgstr ""
 "Asgjë për të kopjuar: java e kaluar është bosh ose kjo javë është "
 "planifikuar."
 
-#: apps/staff/views.py:361
+#: apps/staff/views.py:362
 msgid "Colour"
 msgstr "Ngjyra"
 
@@ -6364,8 +6563,8 @@ msgstr "Hiq PIN-in"
 #: templates/inventory/recipe_form.html:32
 #: templates/outlets/booking_form.html:14 templates/outlets/card.html:22
 #: templates/outlets/option_group_form.html:40
-#: templates/staff/entry_form.html:13 templates/staff/profile_form.html:9
-#: templates/staff/shift_form.html:10
+#: templates/staff/entry_form.html:13 templates/staff/payroll.html:80
+#: templates/staff/profile_form.html:9 templates/staff/shift_form.html:10
 msgid "Save"
 msgstr "Ruaj"
 
@@ -6645,10 +6844,6 @@ msgstr "Dërgo kërkesën për rezervim"
 msgid "Confirm booking"
 msgstr "Konfirmo rezervimin"
 
-#: templates/booking/details.html:42
-msgid "Night"
-msgstr "Nata"
-
 #: templates/booking/details.html:45 templates/outlets/menu_print.html:32
 #: templates/outlets/menu_public.html:38 templates/outlets/table_order.html:62
 #, python-format
@@ -6909,6 +7104,7 @@ msgstr "Jo"
 #: templates/frontdesk/reservation_detail.html:13
 #: templates/inventory/item_detail.html:8 templates/inventory/recipes.html:31
 #: templates/outlets/bookings.html:48 templates/outlets/card.html:20
+#: templates/staff/payroll.html:83
 msgid "Edit"
 msgstr "Ndrysho"
 
@@ -7312,7 +7508,7 @@ msgstr "Ta heqim këtë biznes nga pamja e grupit?"
 #: templates/inventory/order_detail.html:46
 #: templates/inventory/recipe_form.html:22 templates/outlets/_ticket.html:190
 #: templates/outlets/floor_plan.html:50
-#: templates/outlets/option_group_form.html:23
+#: templates/outlets/option_group_form.html:23 templates/staff/payroll.html:49
 msgid "Remove"
 msgstr "Hiq"
 
@@ -9047,7 +9243,7 @@ msgstr "Pse po anulohet ky regjistrim?"
 #: templates/finance/sales.html:7 templates/finance/tourist_tax.html:9
 #: templates/frontdesk/register.html:15
 #: templates/inventory/menu_profit.html:14 templates/inventory/stock.html:8
-#: templates/staff/attendance.html:13
+#: templates/staff/attendance.html:13 templates/staff/payroll.html:9
 msgid "Excel"
 msgstr "Excel"
 
@@ -9080,10 +9276,12 @@ msgstr ""
 "Për kontabilistin: printojeni ose ruajeni si PDF, ose shkarkojeni në Excel."
 
 #: templates/finance/monthly.html:8 templates/finance/tourist_tax.html:8
+#: templates/staff/payroll.html:8
 msgid "Month"
 msgstr "Muaji"
 
 #: templates/finance/monthly.html:10 templates/finance/tourist_tax.html:10
+#: templates/staff/payroll.html:10
 msgid "Print / PDF"
 msgstr "Printo / PDF"
 
@@ -9616,7 +9814,8 @@ msgstr "Ta heq këtë kalendar? Rezervimet e kopjuara mbeten."
 #: templates/frontdesk/channels.html:48 templates/outlets/_ticket.html:87
 #: templates/outlets/cards.html:13 templates/outlets/order.html:50
 #: templates/outlets/order.html:128 templates/outlets/table_order.html:54
-#: templates/outlets/table_order.html:75
+#: templates/outlets/table_order.html:75 templates/staff/holidays.html:30
+#: templates/staff/payroll.html:65
 msgid "Add"
 msgstr "Shto"
 
@@ -9698,12 +9897,6 @@ msgstr "Çdo dhomë paguan vetë"
 #: templates/frontdesk/group_detail.html:27
 msgid "Use one bill"
 msgstr "Përdor një faturë"
-
-#: templates/frontdesk/group_detail.html:31
-#: templates/frontdesk/reservation_detail.html:166
-#: templates/frontdesk/reservation_list.html:17
-msgid "Rate"
-msgstr "Çmimi"
 
 #: templates/frontdesk/group_detail.html:35
 msgid "pays"
@@ -12076,6 +12269,42 @@ msgstr ""
 msgid "Delete"
 msgstr "Fshi"
 
+#: templates/staff/holidays.html:3 templates/staff/holidays.html:6
+msgid "Public holidays"
+msgstr "Festat zyrtare"
+
+#: templates/staff/holidays.html:6
+msgid "Hours worked on these days get the holiday extra."
+msgstr "Orët e punuara në këto ditë marrin shtesën e festës."
+
+#: templates/staff/holidays.html:16
+msgid "Remove this holiday?"
+msgstr "Ta heqim këtë festë?"
+
+#: templates/staff/holidays.html:17
+msgid "None yet."
+msgstr "Asnjë ende."
+
+#: templates/staff/holidays.html:23
+#, python-format
+msgid ""
+"Fill in Albania's holidays with a fixed date and both Easters for %(year)s. "
+"Add the Bajram days (and any day off the government moves) yourself, when "
+"they are announced."
+msgstr ""
+"Plotëso festat e Shqipërisë me datë fikse dhe të dyja Pashkët për %(year)s. "
+"Ditët e Bajramit (dhe çdo ditë pushimi që zhvendos qeveria) shtojini vetë, "
+"kur të shpallen."
+
+#: templates/staff/holidays.html:24
+#, python-format
+msgid "Add the %(year)s holidays"
+msgstr "Shto festat e %(year)s"
+
+#: templates/staff/holidays.html:28
+msgid "Add a day"
+msgstr "Shto një ditë"
+
 #: templates/staff/my_hours.html:6
 #, python-format
 msgid "%(h)s hours this month"
@@ -12105,6 +12334,117 @@ msgstr "Ende pa hyrje këtë muaj."
 #: templates/staff/my_hours.html:20
 msgid "If a time is wrong, ask a manager to correct it."
 msgstr "Nëse një orë është gabim, kërkojini menaxherit ta korrigjojë."
+
+#: templates/staff/payroll.html:6
+msgid ""
+"Gross pay from the clock-ins, with overtime, night and public holiday "
+"extras. Contributions and income tax are calculated by your accountant."
+msgstr ""
+"Paga bruto nga hyrjet dhe daljet, me shtesat për orët jashtë orarit, natën "
+"dhe festat. Kontributet dhe tatimin mbi të ardhurat i llogarit kontabilisti "
+"juaj."
+
+#: templates/staff/payroll.html:17
+#, python-format
+msgid ""
+"Approved by %(who)s on %(when)s. These numbers no longer change with the "
+"clock-ins."
+msgstr ""
+"Miratuar nga %(who)s më %(when)s. Këto shifra nuk ndryshojnë më me hyrjet "
+"dhe daljet."
+
+#: templates/staff/payroll.html:18
+msgid "Reopen this month? The numbers will follow the clock-ins again."
+msgstr ""
+"Ta rihapim këtë muaj? Shifrat do të ndjekin përsëri hyrjet dhe daljet."
+
+#: templates/staff/payroll.html:18
+msgid "Reopen"
+msgstr "Rihap"
+
+#: templates/staff/payroll.html:21
+#, python-format
+msgid "No public holidays are set for %(y)s, so no holiday extra is paid."
+msgstr ""
+"Nuk ka festa zyrtare të vendosura për %(y)s, prandaj nuk paguhet shtesë "
+"feste."
+
+#: templates/staff/payroll.html:21
+msgid "Set them up"
+msgstr "Vendosini"
+
+#: templates/staff/payroll.html:30
+msgid "Gross pay"
+msgstr "Paga bruto"
+
+#: templates/staff/payroll.html:32
+msgid "Of which overtime"
+msgstr "Prej tyre jashtë orarit"
+
+#: templates/staff/payroll.html:41
+msgid "No pay recorded: add it"
+msgstr "Pa pagë të shënuar: shtojeni"
+
+#: templates/staff/payroll.html:42
+msgid "hour"
+msgstr "orë"
+
+#: templates/staff/payroll.html:43
+#, python-format
+msgid "%(n)s day"
+msgid_plural "%(n)s days"
+msgstr[0] "%(n)s ditë"
+msgstr[1] "%(n)s ditë"
+
+#: templates/staff/payroll.html:48
+msgid "overtime"
+msgstr "jashtë orarit"
+
+#: templates/staff/payroll.html:48
+msgid "holiday"
+msgstr "festë"
+
+#: templates/staff/payroll.html:52
+msgid "No clock-ins or salaries for this month."
+msgstr "Nuk ka hyrje ose paga për këtë muaj."
+
+#: templates/staff/payroll.html:63
+msgid "Bonus or advance"
+msgstr "Shpërblim ose paradhënie"
+
+#: templates/staff/payroll.html:68
+msgid ""
+"When the month is checked, approve it: the numbers are kept as they are, for"
+" the accountant and for later questions."
+msgstr ""
+"Kur muaji të jetë kontrolluar, miratojeni: shifrat ruhen siç janë, për "
+"kontabilistin dhe për pyetje të mëvonshme."
+
+#: templates/staff/payroll.html:69
+msgid "Approve this payroll?"
+msgstr "Ta miratojmë këtë listëpagesë?"
+
+#: templates/staff/payroll.html:69
+msgid "Approve the month"
+msgstr "Mirato muajin"
+
+#: templates/staff/payroll.html:77
+msgid ""
+"Overtime: hours over each person's contract hours in a week (40 if not set)."
+" Night: 22:00–06:00. Set the percentages your contracts or collective "
+"agreement give; the Labour Code sets minimums."
+msgstr ""
+"Jashtë orarit: orët mbi orët e kontratës së secilit në një javë (40 nëse nuk"
+" janë vendosur). Nata: 22:00–06:00. Vendosni përqindjet që japin kontratat "
+"ose marrëveshja kolektive; Kodi i Punës vendos minimumet."
+
+#: templates/staff/payroll.html:83
+msgid "Public holidays this month"
+msgstr "Festat zyrtare këtë muaj"
+
+#: templates/staff/payroll.html:84
+msgid "None."
+msgstr "Asnjë."
 
 #: templates/staff/person_hours.html:7
 #, python-format

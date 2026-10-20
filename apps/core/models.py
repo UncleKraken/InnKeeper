@@ -243,6 +243,18 @@ class HotelSettings(models.Model):
     tourist_tax_max_nights = models.PositiveSmallIntegerField(
         _("at most (nights per stay)"), default=0, help_text=_("0: every night is charged.")
     )
+    payroll_overtime_percent = models.PositiveSmallIntegerField(
+        _("overtime extra (%)"), default=25, validators=[MaxValueValidator(300)],
+        help_text=_("For hours over the contract hours in a week. The Labour Code asks for at least 25%."),
+    )
+    payroll_night_percent = models.PositiveSmallIntegerField(
+        _("night work extra (%)"), default=20, validators=[MaxValueValidator(300)],
+        help_text=_("For hours between 22:00 and 06:00, as your contracts or collective agreement say."),
+    )
+    payroll_holiday_percent = models.PositiveSmallIntegerField(
+        _("public holiday extra (%)"), default=25, validators=[MaxValueValidator(300)],
+        help_text=_("For hours worked on a public holiday, as your contracts say."),
+    )
     group_token = models.CharField(max_length=64, blank=True, editable=False)  # read-only key for the owner's group overview
     tunnel_enabled = models.BooleanField(_("public address through Cloudflare Tunnel"), default=False)
     tunnel_token = models.CharField(

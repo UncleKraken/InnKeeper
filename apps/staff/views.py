@@ -24,6 +24,7 @@ from .models import EmployeeProfile, Position, ScheduledShift, TimeEntry
 TABS = [
     ("staff:attendance", gettext_lazy("Attendance")),
     ("staff:schedule", gettext_lazy("Schedule")),
+    ("staff:payroll", gettext_lazy("Payroll")),
     ("accounts:staff_list", gettext_lazy("Staff")),
     ("staff:position_list", gettext_lazy("Positions")),
 ]

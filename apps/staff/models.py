@@ -171,3 +171,51 @@ class ScheduledShift(models.Model):
     @property
     def hours(self) -> Decimal:
         return (Decimal(self.minutes) / 60).quantize(Decimal("0.01"))
+
+
+class PublicHoliday(models.Model):
+    """Days that pay the holiday rate. Fixed dates and both Easters are filled in by InnKeeper; Bajram days
+    and substitute days off follow the government's decision each year."""
+
+    date = models.DateField(_("date"), unique=True)
+    name = models.CharField(_("name"), max_length=80)
+
+    class Meta:
+        ordering = ["date"]
+        verbose_name = _("public holiday")
+        verbose_name_plural = _("public holidays")
+
+    def __str__(self) -> str:
+        return f"{self.date:%d.%m.%Y} {self.name}"
+
+
+class PayAdjustment(models.Model):
+    """A one-off amount in a month's pay: a bonus (+) or an advance already paid (−)."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="pay_adjustments")
+    month = models.DateField(_("month"), db_index=True)  # always the 1st
+    amount = models.DecimalField(_("amount"), help_text=_("Plus for a bonus, minus for an advance already paid."), **MONEY)
+    note = models.CharField(_("note"), max_length=120)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["month", "user", "id"]
+
+    def __str__(self) -> str:
+        return f"{self.user} {self.month:%m.%Y} {self.amount}"
+
+
+class PayrollMonth(models.Model):
+    """A month's payroll once a manager approves it: the numbers are kept as they were that day."""
+
+    month = models.DateField(unique=True)
+    rows = models.JSONField(default=list)
+    approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    approved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-month"]
+
+    def __str__(self) -> str:
+        return f"{self.month:%m.%Y}"

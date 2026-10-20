@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import payroll_views, views
 
 app_name = "staff"
 
@@ -17,6 +17,11 @@ urlpatterns = [
     path("schedule/new/", views.shift_form, name="shift_create"),
     path("schedule/<int:pk>/", views.shift_form, name="shift_edit"),
     path("schedule/copy/", views.copy_week, name="copy_week"),
+    path("payroll/", payroll_views.payroll_page, name="payroll"),
+    path("payroll/rates/", payroll_views.rates, name="payroll_rates"),
+    path("payroll/adjustment/", payroll_views.adjustment, name="payroll_adjustment"),
+    path("payroll/approve/", payroll_views.approve, name="payroll_approve"),
+    path("payroll/holidays/", payroll_views.holidays, name="holidays"),
     path("positions/", views.PositionList.as_view(), name="position_list"),
     path("positions/new/", views.PositionCreate.as_view(), name="position_create"),
     path("positions/<int:pk>/", views.PositionEdit.as_view(), name="position_edit"),
