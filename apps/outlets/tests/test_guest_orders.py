@@ -139,3 +139,16 @@ class TableOrderingTests(HotelTestCase):
         self.client.login(username="waiter", password=PASSWORD)
         self.assertContains(self.client.get(reverse("outlets:floor", args=[self.restaurant.pk])), "p-asking")
         self.assertContains(self.client.get("/"), "guest-req-badge")
+
+
+class OutletOrderTests(HotelTestCase):
+    def test_outlets_follow_their_sort_order_on_the_till_home(self):
+        from apps.outlets.models import Outlet
+
+        Outlet.objects.create(name="A Bar", sort_order=9)
+        Outlet.objects.create(name="Z Pool", sort_order=1)
+        self.restaurant.sort_order = 5
+        self.restaurant.save()
+        self.client.login(username="boss", password=PASSWORD)
+        names = [o.name for o in self.client.get(reverse("outlets:home")).context["outlets"]]
+        self.assertEqual(names, ["Z Pool", "Restaurant", "A Bar"])

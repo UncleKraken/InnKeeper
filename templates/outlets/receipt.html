@@ -14,8 +14,10 @@
 <body style="background:#eceae6">
 {% include "includes/icons.svg" %}
 <div class="no-print receipt-actions">
+  {% if "outlets" in modules %}
   <a class="btn btn-secondary" href="{% url 'outlets:floor' order.outlet_id %}">{% icon "back" %} {{ order.outlet }}</a>
   <a class="btn btn-secondary" href="{% url 'outlets:receipts' %}">{% icon "receipt" %} {% translate "All receipts" %}</a>
+  {% else %}<a class="btn btn-secondary" href="{% url 'finance:ledger' %}">{% icon "back" %} {% translate "Ledger" %}</a>{% endif %}
   <button class="btn" onclick="window.print()">{% icon "print" %} {% translate "Print" %}</button>
   <span class="inline row" style="gap:.25rem" role="group" aria-label="{% translate 'Language of the bill' %}"><a class="btn btn-sm {% if bill_lang == 'sq' %}btn-secondary{% else %}btn-ghost{% endif %}" href="?lang=sq">Shqip</a><a class="btn btn-sm {% if bill_lang == 'en' %}btn-secondary{% else %}btn-ghost{% endif %}" href="?lang=en">English</a></span>
   {% if request.user.is_manager and order.status == "closed" %}

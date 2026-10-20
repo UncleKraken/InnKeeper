@@ -61,7 +61,7 @@ def home(request):
         o
         for o in Outlet.objects.filter(is_active=True).annotate(
             open_count=Count("orders", filter=Q(orders__status=Order.Status.OPEN))
-        )
+        ).order_by("sort_order", "name")
         if o.user_can_use(request.user)
     ]
     if len(outlets) == 1:
@@ -557,7 +557,7 @@ def cancel(request, pk):
     return redirect("outlets:floor", pk=order.outlet_id)
 
 
-@module_required("outlets")
+@module_required("outlets", "finance")  # the accountant opens receipts from the ledger (view and print only)
 def receipt(request, pk):
     from django.utils import translation
 
@@ -902,7 +902,7 @@ class PrinterForm(StyledFormMixin, forms.ModelForm):
 def printer_list(request):
     from django.db.models import Count, Q
 
-    printers = Printer.objects.annotate(failed=Count("jobs", filter=Q(jobs__status=PrintJob.Status.FAILED)))
+    printers = Printer.objects.annotate(failed=Count("jobs", filter=Q(jobs__status=PrintJob.Status.FAILED))).order_by("name")
     jobs = PrintJob.objects.select_related("printer", "created_by")[:30]
     return render(
         request,

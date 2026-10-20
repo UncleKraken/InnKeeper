@@ -179,7 +179,7 @@ def campaigns(request):
     rows = Campaign.objects.annotate(
         n=Count("recipients"), sent=Count("recipients", filter=Q(recipients__status="sent")),
         failed=Count("recipients", filter=Q(recipients__status="failed")),
-    )
+    ).order_by("-created_at")
     return render(request, "marketing/campaigns.html", {"campaigns": rows, "tabs": TABS, "tab": "marketing:campaigns"})
 
 

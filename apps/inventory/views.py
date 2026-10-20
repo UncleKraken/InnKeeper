@@ -198,7 +198,7 @@ class StockItemEdit(CrudUpdateView):
 def delivery_list(request):
     start, end = _range(request)
     qs = Delivery.objects.filter(business_date__range=(start, end)).select_related("supplier", "created_by")
-    qs = qs.annotate(lines=Count("moves"))
+    qs = qs.annotate(lines=Count("moves")).order_by("-business_date", "-id")  # counts drop the model's ordering
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
     return render(
         request,
@@ -318,7 +318,7 @@ def delivery_detail(request, pk):
 
 @module_required("inventory")
 def count_list(request):
-    page = Paginator(StockCount.objects.select_related("created_by").annotate(lines=Count("moves")), 50).get_page(
+    page = Paginator(StockCount.objects.select_related("created_by").annotate(lines=Count("moves")).order_by("-business_date", "-id"), 50).get_page(
         request.GET.get("page")
     )
     return render(request, "inventory/counts.html", {"page_obj": page, "tabs": TABS, "tab": "inventory:count_list"})
@@ -508,7 +508,7 @@ def usage(request):
 class SupplierList(CrudListView):
     module = "inventory"
     model = Supplier
-    queryset = Supplier.objects.annotate(n=Count("items"))
+    queryset = Supplier.objects.annotate(n=Count("items")).order_by("name")
     title = _("Stock")
     singular = _("supplier")
     tabs = TABS

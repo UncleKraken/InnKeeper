@@ -147,3 +147,20 @@ class TouristTaxTests(HotelTestCase):
         services.check_out(res, self.reception)  # no "still owes" error
         res.refresh_from_db()
         self.assertEqual(res.status, Reservation.Status.CHECKED_OUT)
+
+
+class FinanceRoleLinksTests(HotelTestCase):
+    def test_accountant_sees_receipts_but_no_dead_links(self):
+        from apps.finance.models import Payment
+        from apps.outlets import services as pos
+
+        order = pos.open_order(self.restaurant, user=self.waiter, table=self.table)
+        pos.add_item(order, self.dish, user=self.waiter)
+        pos.pay_order(order, method=Payment.Method.CASH, user=self.waiter)
+        res = self.make_reservation(start=-1, nights=1, status=Reservation.Status.CHECKED_IN)
+        services.post_accommodation(res, self.reception, self.today)
+        self.client.login(username="money", password=PASSWORD)
+        self.assertEqual(self.client.get(reverse("outlets:receipt", args=[order.pk])).status_code, 200)
+        ledger = self.client.get(reverse("finance:ledger")).content.decode()
+        self.assertNotIn(reverse("frontdesk:reservation_detail", args=[res.pk]), ledger)
+        self.assertNotIn("void_receipt", self.client.get(reverse("outlets:receipt", args=[order.pk])).content.decode())

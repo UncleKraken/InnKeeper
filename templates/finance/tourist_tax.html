@@ -29,7 +29,7 @@
       <thead><tr><th>{% translate "Guest" %}</th><th>{% translate "Nationality" %}</th><th>{% translate "Room" %}</th><th>{% translate "Stay" %}</th><th class="num">{% translate "Guests" %}</th><th class="num">{% if hotel.tourist_tax_basis == "room" %}{% translate "Room-nights" %}{% else %}{% translate "Guest-nights" %}{% endif %}</th><th class="num">{% translate "Amount" %}</th></tr></thead>
       <tbody>
         {% for r in rows %}
-          <tr><td><a href="{% url 'frontdesk:reservation_detail' r.reservation.pk %}">{{ r.guest.full_name }}</a></td><td>{{ r.guest.nationality|default:"—" }}</td><td>{{ r.reservation.room.number }}</td><td>{{ r.reservation.arrival|date:"d.m" }} – {{ r.reservation.departure|date:"d.m.Y" }}</td><td class="num">{{ r.persons }}</td><td class="num">{{ r.units }}</td><td class="num">{{ r.amount|money }}</td></tr>
+          <tr><td>{% if "frontdesk" in modules %}<a href="{% url 'frontdesk:reservation_detail' r.reservation.pk %}">{{ r.guest.full_name }}</a>{% else %}{{ r.guest.full_name }}{% endif %}</td><td>{{ r.guest.nationality|default:"—" }}</td><td>{{ r.reservation.room.number }}</td><td>{{ r.reservation.arrival|date:"d.m" }} – {{ r.reservation.departure|date:"d.m.Y" }}</td><td class="num">{{ r.persons }}</td><td class="num">{{ r.units }}</td><td class="num">{{ r.amount|money }}</td></tr>
         {% empty %}
           <tr><td colspan="7" class="muted">{% translate "No tourist tax was charged this month." %}</td></tr>
         {% endfor %}

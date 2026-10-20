@@ -25,7 +25,7 @@
     <div><div class="muted">{% translate "Guest" %}</div><strong>{{ r.guest }}</strong>{% if r.guest.company %}<br>{{ r.guest.company }}{% endif %}{% if r.guest.address %}<br>{{ r.guest.address }}{% endif %}</div>
     <div><div class="muted">{% translate "Stay" %}</div>{% translate "Room" %} {{ r.room.number }} · {{ r.arrival|date:"d.m.Y" }} → {{ r.departure|date:"d.m.Y" }}<br><span class="mono">{{ r.code }}</span></div>
   </div>
-  <table class="table">
+  <div class="table-wrap"><table class="table">
     <thead><tr><th>{% translate "Date" %}</th><th>{% translate "Description" %}</th><th class="num">{% translate "Qty" %}</th><th class="num">{% translate "Price" %}</th><th class="num">{% translate "Amount" %}</th></tr></thead>
     <tbody>
       {% for c in charges %}<tr><td>{{ c.business_date|date:"d.m.Y" }}</td><td>{{ c.description }}</td><td class="num">{{ c.quantity }}</td><td class="num">{{ c.unit_price|money }}</td><td class="num">{{ c.amount|money }}</td></tr>{% endfor %}
@@ -37,7 +37,7 @@
       {% endif %}
       <tr><td colspan="4">{% translate "Total" %}</td><td class="num">{{ folio.total_charges|money }}</td></tr>
     </tfoot>
-  </table>
+  </table></div>
   {% if payments %}
   <table class="table table-sm" style="margin-top:1.5rem">
     <tbody>

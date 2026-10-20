@@ -209,11 +209,8 @@ def usage(start: date, end: date):
     )
     out: dict[int, dict] = {}
     for r in rows:
-        d = out.setdefault(
-            r["stock_item"],
-            {"sale": ZERO, "return": ZERO, "waste": ZERO, "delivery": ZERO, "count": ZERO, "adjust": ZERO},
-        )
-        d[r["kind"]] += r["q"]
+        d = out.setdefault(r["stock_item"], {k: ZERO for k in StockMove.Kind.values})
+        d[r["kind"]] = d.get(r["kind"], ZERO) + r["q"]  # unknown kinds (from a newer version) never break the report
     items = {i.pk: i for i in StockItem.objects.filter(pk__in=out)}
     result = []
     for pk, d in out.items():
@@ -227,6 +224,7 @@ def usage(start: date, end: date):
                 "wasted": -d["waste"],
                 "wasted_value": (-d["waste"] * item.cost).quantize(CENT),
                 "received": d["delivery"],
+                "sent": -d.get("transfer", ZERO),
                 "counted": d["count"],
                 "counted_value": (d["count"] * item.cost).quantize(CENT),
             }

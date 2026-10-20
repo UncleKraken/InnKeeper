@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
 <style>@page { size: A4; margin: 10mm; } .qr-sheet { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6mm; max-width:190mm; margin:0 auto; }
 .qr-card { border:1px dashed #bbb; border-radius:8px; padding:5mm; text-align:center; background:#fff; break-inside:avoid; }
-.qr-card svg { width:42mm; height:42mm; } .qr-card h3 { margin:0; font-size:1.6rem; } .qr-card .o { font-size:.8rem; color:#555; } .qr-card p { margin:2mm 0 0; font-size:.8rem; color:#333; }</style>
+.qr-card svg { width:42mm; height:42mm; } .qr-card h3 { margin:0; font-size:1.6rem; } .qr-card .o { font-size:.8rem; color:#555; } .qr-card p { margin:2mm 0 0; font-size:.8rem; color:#333; }@media screen and (max-width: 600px) { .qr-sheet { grid-template-columns: 1fr; } }</style>
 </head><body style="background:#eceae6">
 <div class="no-print receipt-actions" style="flex-wrap:wrap">
   <a class="btn btn-secondary" href="{% url 'outlets:menu_admin' outlet.pk %}">{% translate "Back" %}</a>

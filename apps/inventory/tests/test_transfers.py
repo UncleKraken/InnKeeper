@@ -68,3 +68,12 @@ class TransferTests(HotelTestCase):
         self.client.post(reverse("inventory:transfer_receive"), {"code": code, "confirm": "1", "m0": str(self.beer.pk)})
         self.assertTrue(StockTransfer.objects.filter(direction="in", code=t.code).exists())
         self.assertContains(self.client.get(reverse("inventory:transfers")), t.code)
+
+    def test_usage_report_counts_transfers(self):
+        from apps.inventory import services
+
+        transfers.send({self.beer.pk: D("6")}, to="Bar", user=self.manager)
+        row = next(r for r in services.usage(self.today, self.today) if r["item"] == self.beer)
+        self.assertEqual(row["sent"], D("6"))
+        self.client.login(username="boss", password=PASSWORD)
+        self.assertEqual(self.client.get(reverse("inventory:usage")).status_code, 200)

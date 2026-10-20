@@ -87,7 +87,7 @@
     <thead><tr><th>{% translate "Bill" %}</th><th>{% translate "Guest" %}</th><th>{% translate "Room" %}</th><th>{% translate "Status" %}</th><th class="num">{% translate "Balance" %}</th></tr></thead>
     <tbody>
     {% for o in outstanding %}{% with r=o.folio.reservation %}
-      <tr><td class="mono"><a href="{% url 'frontdesk:reservation_detail' r.pk %}#folio">{{ o.folio.number }}</a></td><td>{{ r.guest }}</td><td>{{ r.room.number }}</td><td>{% status_badge r.status r.get_status_display %}</td><td class="num"><strong>{{ o.balance|money }}</strong></td></tr>
+      <tr><td class="mono">{% if "frontdesk" in modules %}<a href="{% url 'frontdesk:reservation_detail' r.pk %}#folio">{{ o.folio.number }}</a>{% else %}{{ o.folio.number }}{% endif %}</td><td>{{ r.guest }}</td><td>{{ r.room.number }}</td><td>{% status_badge r.status r.get_status_display %}</td><td class="num"><strong>{{ o.balance|money }}</strong></td></tr>
     {% endwith %}{% empty %}
       <tr><td colspan="5" class="empty">{% translate "Every bill is settled." %}</td></tr>
     {% endfor %}

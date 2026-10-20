@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 18:45+0200\n"
+"POT-Creation-Date: 2026-10-20 19:26+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2453,7 +2453,7 @@ msgstr "Ditët"
 #: templates/inventory/counts.html:13 templates/inventory/deliveries.html:20
 #: templates/inventory/item_detail.html:18
 #: templates/inventory/transfers.html:14 templates/marketing/campaigns.html:11
-#: templates/outlets/receipt.html:40 templates/outlets/receipts.html:8
+#: templates/outlets/receipt.html:42 templates/outlets/receipts.html:8
 #: templates/staff/person_hours.html:21
 msgid "Date"
 msgstr "Data"
@@ -2472,7 +2472,7 @@ msgstr "Me TVSH"
 
 #: apps/finance/monthly.py:177 apps/outlets/printing.py:242
 #: templates/finance/monthly.html:37 templates/frontdesk/invoice.html:35
-#: templates/outlets/receipt.html:57
+#: templates/outlets/receipt.html:59
 msgid "Without VAT"
 msgstr "Pa TVSH"
 
@@ -2761,7 +2761,7 @@ msgstr "I refuzuar"
 
 #: apps/fiscal/models.py:36 apps/outlets/printing.py:225
 #: templates/frontdesk/invoice.html:6 templates/frontdesk/invoice.html:19
-#: templates/outlets/receipt.html:6 templates/outlets/receipt.html:38
+#: templates/outlets/receipt.html:6 templates/outlets/receipt.html:40
 #: templates/outlets/receipts.html:19
 msgid "Receipt"
 msgstr "Kuponi"
@@ -5830,7 +5830,7 @@ msgid "Paid"
 msgstr "Paguar"
 
 #: apps/outlets/models.py:448 apps/outlets/printing.py:259
-#: templates/outlets/receipt.html:73
+#: templates/outlets/receipt.html:75
 msgid "Charged to room"
 msgstr "Kaluar në dhomë"
 
@@ -5970,55 +5970,55 @@ msgstr "Ky printer është çaktivizuar në InnKeeper."
 #: templates/frontdesk/groups.html:13
 #: templates/frontdesk/reservation_detail.html:14
 #: templates/frontdesk/reservation_detail.html:40
-#: templates/outlets/receipt.html:38
+#: templates/outlets/receipt.html:40
 msgid "Bill"
 msgstr "Llogaria"
 
-#: apps/outlets/printing.py:228 templates/outlets/receipt.html:41
+#: apps/outlets/printing.py:228 templates/outlets/receipt.html:43
 msgid "Served by"
 msgstr "Shërbeu"
 
 #: apps/outlets/printing.py:236 templates/outlets/_ticket.html:43
-#: templates/outlets/receipt.html:52
+#: templates/outlets/receipt.html:54
 msgid "Subtotal"
 msgstr "Nëntotali"
 
 #: apps/outlets/printing.py:237 templates/outlets/_ticket.html:46
 #: templates/outlets/_ticket.html:108 templates/outlets/_ticket.html:184
-#: templates/outlets/receipt.html:53 templates/outlets/table_order.html:42
+#: templates/outlets/receipt.html:55 templates/outlets/table_order.html:42
 msgid "Discount"
 msgstr "Zbritja"
 
 #: apps/outlets/printing.py:239 templates/core/settings_hub.html:78
-#: templates/outlets/receipt.html:55
+#: templates/outlets/receipt.html:57
 msgid "TOTAL"
 msgstr "TOTALI"
 
-#: apps/outlets/printing.py:243 templates/outlets/receipt.html:58
+#: apps/outlets/printing.py:243 templates/outlets/receipt.html:60
 #, python-format
 msgid "VAT %(r)s%%"
 msgstr "TVSH %(r)s%%"
 
-#: apps/outlets/printing.py:246 templates/outlets/receipt.html:63
+#: apps/outlets/printing.py:246 templates/outlets/receipt.html:65
 msgid "Bill — not yet paid"
 msgstr "Llogari — ende e papaguar"
 
-#: apps/outlets/printing.py:248 templates/outlets/receipt.html:65
+#: apps/outlets/printing.py:248 templates/outlets/receipt.html:67
 msgid "VOID"
 msgstr "ANULUAR"
 
 #: apps/outlets/printing.py:253 templates/outlets/_ticket.html:116
-#: templates/outlets/receipt.html:70
+#: templates/outlets/receipt.html:72
 msgid "Cash given"
 msgstr "Para të dhëna"
 
 #: apps/outlets/printing.py:254 templates/core/about.html:38
 #: templates/core/settings_hub.html:290 templates/outlets/_ticket.html:119
-#: templates/outlets/receipt.html:70 templates/staff/holidays.html:18
+#: templates/outlets/receipt.html:72 templates/staff/holidays.html:18
 msgid "Change"
 msgstr "Kusuri"
 
-#: apps/outlets/printing.py:260 templates/outlets/receipt.html:76
+#: apps/outlets/printing.py:260 templates/outlets/receipt.html:78
 msgid "Signature"
 msgstr "Nënshkrimi"
 
@@ -6039,12 +6039,12 @@ msgstr "Operatori"
 msgid "TEST – not valid for tax"
 msgstr "PROVË – jo e vlefshme për tatimet"
 
-#: apps/outlets/printing.py:274 templates/outlets/receipt.html:79
+#: apps/outlets/printing.py:274 templates/outlets/receipt.html:81
 msgid "This is not a fiscal receipt."
 msgstr "Ky nuk është kupon fiskal."
 
 #: apps/outlets/printing.py:276 templates/frontdesk/invoice.html:49
-#: templates/outlets/receipt.html:79
+#: templates/outlets/receipt.html:81
 msgid "Internal receipt"
 msgstr "Kupon i brendshëm"
 
@@ -9676,7 +9676,7 @@ msgid "Shifts"
 msgstr "Turnet"
 
 #: templates/finance/_tabs.html:10 templates/finance/ledger.html:3
-#: templates/finance/ledger.html:6
+#: templates/finance/ledger.html:6 templates/outlets/receipt.html:20
 msgid "Ledger"
 msgstr "Libri i llogarive"
 
@@ -10238,7 +10238,7 @@ msgstr "ende i hapur"
 #: templates/inventory/order_print.html:10
 #: templates/inventory/transfer_detail.html:7
 #: templates/marketing/poster.html:7 templates/outlets/menu_print.html:13
-#: templates/outlets/menu_qr_cards.html:8 templates/outlets/receipt.html:19
+#: templates/outlets/menu_qr_cards.html:8 templates/outlets/receipt.html:21
 #: templates/outlets/table_qr_cards.html:10 templates/outlets/voucher.html:8
 #: templates/staff/schedule.html:12
 msgid "Print"
@@ -12028,7 +12028,11 @@ msgstr "Vlera e përdorur"
 msgid "Wasted"
 msgstr "Humbur"
 
-#: templates/inventory/usage.html:41
+#: templates/inventory/usage.html:25
+msgid "Sent to other businesses"
+msgstr "Dërguar biznese të tjera"
+
+#: templates/inventory/usage.html:42
 msgid "No stock movements in this period."
 msgstr "Asnjë lëvizje stoku në këtë periudhë."
 
@@ -13140,19 +13144,19 @@ msgstr "Riprovo"
 msgid "Nothing printed yet."
 msgstr "Ende asgjë e printuar."
 
-#: templates/outlets/receipt.html:18
+#: templates/outlets/receipt.html:19
 msgid "All receipts"
 msgstr "Të gjithë kuponat"
 
-#: templates/outlets/receipt.html:20
+#: templates/outlets/receipt.html:22
 msgid "Language of the bill"
 msgstr "Gjuha e faturës"
 
-#: templates/outlets/receipt.html:22
+#: templates/outlets/receipt.html:24
 msgid "Void receipt"
 msgstr "Anulo kuponin"
 
-#: templates/outlets/receipt.html:85
+#: templates/outlets/receipt.html:87
 msgid "Why is this receipt being voided?"
 msgstr "Pse po anulohet ky kupon?"
 

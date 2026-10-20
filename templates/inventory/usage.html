@@ -22,7 +22,7 @@
 <div class="card card-flush">
   {% if rows %}
   <div class="table-wrap"><table class="table">
-    <thead><tr><th>{% translate "Item" %}</th><th class="num">{% translate "Received" %}</th><th class="num">{% translate "Used by sales" %}</th><th class="num">{% translate "Value used" %}</th><th class="num">{% translate "Wasted" %}</th><th class="num">{% translate "Count correction" %}</th><th class="num">{% translate "In stock now" %}</th></tr></thead>
+    <thead><tr><th>{% translate "Item" %}</th><th class="num">{% translate "Received" %}</th><th class="num">{% translate "Used by sales" %}</th><th class="num">{% translate "Value used" %}</th><th class="num">{% translate "Wasted" %}</th><th class="num">{% translate "Sent to other businesses" %}</th><th class="num">{% translate "Count correction" %}</th><th class="num">{% translate "In stock now" %}</th></tr></thead>
     <tbody>
     {% for r in rows %}
       <tr>
@@ -31,6 +31,7 @@
         <td class="num">{{ r.used|qty }}</td>
         <td class="num">{{ r.used_value|money }}</td>
         <td class="num">{% if r.wasted %}{{ r.wasted|qty }}{% else %}—{% endif %}</td>
+        <td class="num">{% if r.sent %}{{ r.sent|qty }}{% else %}—{% endif %}</td>
         <td class="num" style="{% if r.counted < 0 %}color:var(--danger){% endif %}">{% if r.counted %}{% if r.counted > 0 %}+{% endif %}{{ r.counted|qty }}{% else %}—{% endif %}</td>
         <td class="num">{{ r.item.on_hand|qty }}</td>
       </tr>

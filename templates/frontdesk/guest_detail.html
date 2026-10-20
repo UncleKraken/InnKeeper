@@ -15,7 +15,7 @@
     <div class="table-wrap"><table class="table">
       <tbody>
       {% for r in stays %}
-        <tr><td class="mono"><a href="{% url 'frontdesk:reservation_detail' r.pk %}">{{ r.code }}</a></td><td>{% translate "Room" %} {{ r.room.number }}</td><td>{{ r.arrival|date:"d.m.Y" }} → {{ r.departure|date:"d.m.Y" }}</td><td>{% status_badge r.status r.get_status_display %}</td></tr>
+        <tr><td class="mono">{% if "frontdesk" in modules %}<a href="{% url 'frontdesk:reservation_detail' r.pk %}">{{ r.code }}</a>{% else %}{{ r.code }}{% endif %}</td><td>{% translate "Room" %} {{ r.room.number }}</td><td>{{ r.arrival|date:"d.m.Y" }} → {{ r.departure|date:"d.m.Y" }}</td><td>{% status_badge r.status r.get_status_display %}</td></tr>
       {% empty %}
         <tr><td class="empty">{% translate "No stays yet." %}</td></tr>
       {% endfor %}

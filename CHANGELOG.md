@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.27.1 — fixes from a full check
+
+**Shqip**
+
+- **Raporti i përdorimit të stokut** nuk hapej pasi ishte bërë një transferim malli mes bizneseve. U rregullua, dhe raporti tani tregon edhe sasinë e dërguar.
+- **Roli i financës (kontabilisti)** nuk sheh më linke drejt faqeve të recepsionit që nuk i hap; mund të shohë dhe printojë kuponat e restorantit nga libri i llogarive.
+- Listat e pikave të shitjes, printerëve, fushatave, furnizimeve, numërimeve dhe furnitorëve mbajnë gjithmonë të njëjtën renditje.
+- Fatura dhe kartat QR për printim nuk dalin më jashtë ekranit në telefon.
+
+**English**
+
+- **The stock usage report** wouldn't open once goods had been transferred between businesses. Fixed, and the report now shows the quantity sent too.
+- **The finance role (accountant)** no longer sees links to front-desk pages it can't open; it can view and print restaurant receipts from the ledger.
+- The lists of outlets, printers, campaigns, deliveries, counts and suppliers always keep the same order.
+- The printable invoice and QR card sheets no longer run off the screen on phones.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.27.1.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.27.0 — spread the word
 
 **Shqip**
