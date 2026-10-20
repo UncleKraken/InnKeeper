@@ -73,6 +73,9 @@ class EmployeeProfile(models.Model):
     pay_type = models.CharField(_("pay"), max_length=10, choices=Pay.choices, blank=True, default="")
     pay_rate = models.DecimalField(_("amount"), null=True, blank=True, validators=[MinValueValidator(Decimal("0"))], **MONEY)
     bank_account = models.CharField(_("bank account (IBAN)"), max_length=40, blank=True)
+    leave_days = models.PositiveSmallIntegerField(
+        _("paid leave days a year"), default=20, help_text=_("Working days. The Labour Code gives at least 4 weeks.")
+    )
     notes = models.TextField(_("notes"), blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -219,3 +222,73 @@ class PayrollMonth(models.Model):
 
     def __str__(self) -> str:
         return f"{self.month:%m.%Y}"
+
+
+class LeaveRequest(models.Model):
+    """Time off asked for by a member of staff and decided by a manager."""
+
+    class Kind(models.TextChoices):
+        ANNUAL = "annual", _("Annual leave")
+        SICK = "sick", _("Sick leave")
+        UNPAID = "unpaid", _("Unpaid leave")
+        OTHER = "other", _("Other")
+
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Waiting")
+        APPROVED = "approved", _("Approved")
+        DECLINED = "declined", _("Declined")
+        CANCELLED = "cancelled", _("Cancelled")
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="leave_requests")
+    kind = models.CharField(_("type"), max_length=10, choices=Kind.choices, default=Kind.ANNUAL)
+    start = models.DateField(_("from"))
+    end = models.DateField(_("to (last day)"))
+    note = models.CharField(_("note"), max_length=200, blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING, db_index=True)
+    decided_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    decided_at = models.DateTimeField(null=True, blank=True)
+    reason = models.CharField(_("reason"), max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-start"]
+
+    def __str__(self) -> str:
+        return f"{self.user} {self.get_kind_display()} {self.start:%d.%m}–{self.end:%d.%m}"
+
+    def working_days(self, holidays: set | None = None) -> int:
+        """Monday–Friday, without public holidays."""
+        if holidays is None:
+            holidays = set(PublicHoliday.objects.filter(date__range=(self.start, self.end)).values_list("date", flat=True))
+        n, d = 0, self.start
+        while d <= self.end:
+            if d.weekday() < 5 and d not in holidays:
+                n += 1
+            d += timedelta(days=1)
+        return n
+
+
+class SwapRequest(models.Model):
+    """"Can you take my shift?": the colleague agrees first, then a manager approves and the shift changes hands."""
+
+    class Status(models.TextChoices):
+        ASKED = "asked", _("Waiting for the colleague")
+        AGREED = "agreed", _("Waiting for a manager")
+        APPROVED = "approved", _("Approved")
+        DECLINED = "declined", _("Declined")
+        CANCELLED = "cancelled", _("Cancelled")
+
+    shift = models.ForeignKey(ScheduledShift, on_delete=models.CASCADE, related_name="swap_requests")
+    from_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="swaps_asked")
+    to_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="swaps_offered", verbose_name=_("colleague"))
+    note = models.CharField(_("note"), max_length=200, blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ASKED, db_index=True)
+    decided_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    decided_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.shift} {self.from_user} → {self.to_user}"

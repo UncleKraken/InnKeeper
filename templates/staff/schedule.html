@@ -19,7 +19,8 @@
     <thead><tr><th>{% translate "Name" %}</th>{% for d in days %}<th class="{% if d == today %}is-today{% endif %}">{{ d|date:"D" }} <span class="muted">{{ d|date:"d.m" }}</span></th>{% endfor %}<th class="num">{% translate "Hours" %}</th></tr></thead>
     <tbody>{% for r in rows %}<tr>
       <td class="nowrap"><strong>{{ r.person }}</strong>{% if r.person.employee.position %}<div class="muted" style="font-size:.8rem">{{ r.person.employee.position }}</div>{% endif %}</td>
-      {% for d, shifts in r.cells %}<td class="sched-cell{% if d == today %} is-today{% endif %}">
+      {% for d, shifts, away in r.cells %}<td class="sched-cell{% if d == today %} is-today{% endif %}">
+        {% if away %}<span class="sched-leave" title="{{ away.get_kind_display }}">{{ away.get_kind_display }}</span>{% endif %}
         {% for s in shifts %}<a class="sched-shift pos-{{ s.position.color|default:'slate' }}" href="{% url 'staff:shift_edit' s.pk %}">{{ s.start|time:"H:i" }}–{{ s.end|time:"H:i" }}{% if s.position %}<small>{{ s.position }}</small>{% endif %}</a>{% endfor %}
         <a class="sched-add no-print" href="{% url 'staff:shift_create' %}?date={{ d|date:'Y-m-d' }}&user={{ r.person.pk }}" title="{% translate 'Add a shift' %}">+</a>
       </td>{% endfor %}

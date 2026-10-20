@@ -81,6 +81,9 @@ def attendance(start: date, end: date, users=None) -> list[dict]:
     if users is not None:
         entries = entries.filter(user__in=users)
         shifts = shifts.filter(user__in=users)
+    from .requests import on_leave
+
+    away = on_leave(start, end)
     by_user: dict = defaultdict(lambda: {"entries": [], "shifts": []})
     for e in entries:
         by_user[e.user]["entries"].append(e)
@@ -93,6 +96,8 @@ def attendance(start: date, end: date, users=None) -> list[dict]:
         late = 0
         no_show = 0
         for s in shifts_:
+            if (user.pk, s.date) in away:
+                continue  # approved leave: not a no-show
             first = next((e for e in entries_ if s.starts_at - timedelta(hours=3) <= e.clock_in < s.ends_at), None)
             if first is None:
                 if s.ends_at < timezone.now():

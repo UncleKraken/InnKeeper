@@ -33,6 +33,15 @@ def innkeeper(request):
             from apps.outlets.guest_orders import pending_for
 
             guest_requests = len(pending_for(user))
+    staff_requests = swap_offers = 0
+    if user is not None and user.is_authenticated:
+        from apps.staff.models import SwapRequest
+
+        swap_offers = SwapRequest.objects.filter(to_user=user, status=SwapRequest.Status.ASKED).count()
+        if "management" in modules:
+            from apps.staff.requests import waiting_for_managers
+
+            staff_requests = waiting_for_managers()
     has_group = False
     if "management" in modules:
         from .models import GroupMember
@@ -40,6 +49,8 @@ def innkeeper(request):
         has_group = GroupMember.objects.exists()
     return {
         "has_group": has_group,
+        "staff_requests": staff_requests,
+        "swap_offers": swap_offers,
         "guest_requests": guest_requests,
         "clocked_in": clocked_in,
         "shared_till": is_shared_till(request),

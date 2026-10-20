@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Requests" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="eyebrow">{% translate "Staff" %}</div><h1>{% translate "Requests" %}</h1><p>{% translate "Leave and shift swaps asked for by your staff from “My hours”." %}</p></div></div>
+{% include "inventory/_tabs.html" %}
+<div class="grid grid-2" style="align-items:start">
+  <div class="stack">
+    <section class="card">
+      <div class="card-header"><h2>{% translate "Leave" %}</h2><span class="muted">{{ leave|length }}</span></div>
+      <div class="card-body stack">
+        {% for r in leave %}
+          <div class="greq" style="padding-left:.75rem">
+            <div class="row" style="justify-content:space-between; flex-wrap:wrap"><strong>{{ r.user }}</strong><span class="muted">{{ r.created_at|date:"d.m H:i" }}</span></div>
+            <div>{{ r.get_kind_display }} · {{ r.start|date:"D d.m" }}{% if r.end != r.start %} – {{ r.end|date:"D d.m.Y" }}{% endif %} · {% blocktranslate count n=r.days %}{{ n }} working day{% plural %}{{ n }} working days{% endblocktranslate %}</div>
+            {% if r.balance %}<div class="muted" style="font-size:.85rem">{% blocktranslate with left=r.balance.left total=r.balance.allowance %}{{ left }} of {{ total }} days left this year{% endblocktranslate %}</div>{% endif %}
+            {% if r.clashes %}<div style="font-size:.85rem; color:var(--warning)">{% blocktranslate count n=r.clashes %}{{ n }} planned shift on these days.{% plural %}{{ n }} planned shifts on these days.{% endblocktranslate %}</div>{% endif %}
+            {% if r.note %}<div class="muted">“{{ r.note }}”</div>{% endif %}
+            <div class="greq-actions" style="margin-top:.5rem">
+              <form method="post" action="{% url 'staff:leave_decide' r.pk %}">{% csrf_token %}<input type="hidden" name="approve" value="1"><button class="btn btn-sm">{% icon "check" %} {% translate "Approve" %}</button></form>
+              <form method="post" action="{% url 'staff:leave_decide' r.pk %}" class="greq-actions">{% csrf_token %}<input type="hidden" name="approve" value="0"><input class="input" name="reason" maxlength="200" placeholder="{% translate 'Reason (optional)' %}"><button class="btn btn-secondary btn-sm">{% translate "Decline" %}</button></form>
+            </div>
+          </div>
+        {% empty %}<p class="muted" style="margin:0">{% translate "No leave requests waiting." %}</p>{% endfor %}
+      </div>
+    </section>
+    <section class="card">
+      <div class="card-header"><h2>{% translate "Shift swaps" %}</h2><span class="muted">{{ swaps|length }}</span></div>
+      <div class="card-body stack">
+        {% for w in swaps %}
+          <div class="greq" style="padding-left:.75rem">
+            <div><strong>{{ w.from_user }}</strong> → <strong>{{ w.to_user }}</strong> <span class="muted">({% translate "agreed" %})</span></div>
+            <div>{{ w.shift.date|date:"D d.m" }} · {{ w.shift.start|time:"H:i" }}–{{ w.shift.end|time:"H:i" }}{% if w.shift.position %} · {{ w.shift.position }}{% endif %}</div>
+            {% if w.note %}<div class="muted">“{{ w.note }}”</div>{% endif %}
+            <div class="greq-actions" style="margin-top:.5rem">
+              <form method="post" action="{% url 'staff:swap_decide' w.pk %}">{% csrf_token %}<input type="hidden" name="approve" value="1"><button class="btn btn-sm">{% icon "check" %} {% translate "Approve" %}</button></form>
+              <form method="post" action="{% url 'staff:swap_decide' w.pk %}">{% csrf_token %}<input type="hidden" name="approve" value="0"><button class="btn btn-secondary btn-sm">{% translate "Decline" %}</button></form>
+            </div>
+          </div>
+        {% empty %}<p class="muted" style="margin:0">{% translate "No swaps waiting." %}</p>{% endfor %}
+      </div>
+    </section>
+  </div>
+  <div class="stack">
+    <section class="card card-flush">
+      <div class="card-header"><h2>{% translate "Coming leave" %}</h2></div>
+      <div class="table-wrap"><table class="table table-sm"><tbody>
+        {% for r in upcoming %}<tr><td><strong>{{ r.user }}</strong></td><td>{{ r.get_kind_display }}</td><td class="nowrap">{{ r.start|date:"d.m" }}{% if r.end != r.start %}–{{ r.end|date:"d.m" }}{% endif %}</td></tr>
+        {% empty %}<tr><td class="muted">{% translate "Nobody." %}</td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+    {% if decided %}
+    <section class="card card-flush">
+      <div class="card-header"><h2>{% translate "Answered recently" %}</h2></div>
+      <div class="table-wrap"><table class="table table-sm"><tbody>
+        {% for d in decided %}<tr><td class="nowrap">{{ d.decided_at|date:"d.m H:i" }}</td><td>{% if d.from_user %}{{ d.from_user }} → {{ d.to_user }} · {{ d.shift.date|date:"d.m" }}{% else %}{{ d.user }} · {{ d.get_kind_display }} {{ d.start|date:"d.m" }}{% endif %}</td><td>{{ d.get_status_display }}</td><td class="muted">{{ d.decided_by|default:"" }}</td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

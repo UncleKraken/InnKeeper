@@ -77,10 +77,11 @@
         {% if hotel.module_outlets %}<a href="{% url 'outlets:setup' %}" class="{% active '/outlets/setup' %}">{% icon "store" %} {% translate "Outlets & menus" %}</a>{% endif %}
         <a href="{% url 'accounts:staff_list' %}" class="{% active '/accounts/staff' '/team/positions' %}">{% icon "staff" %} {% translate "Staff" %}</a>
         <a href="{% url 'staff:attendance' %}" class="{% active '/team/attendance' '/team/people' '/team/hours' %}">{% icon "history" %} {% translate "Attendance" %}</a>
+        {% if staff_requests %}<a href="{% url 'staff:requests' %}" class="{% active '/team/requests' %}">{% icon "mail" %} {% translate "Requests" %} <span class="nav-badge">{{ staff_requests }}</span></a>{% endif %}
         <a href="{% url 'staff:schedule' %}" class="{% active '/team/schedule' %}">{% icon "calendar" %} {% translate "Schedule" %}</a>
         <a href="{% url 'core:settings' %}" class="{% active '/settings' '/setup' '/audit' %}">{% icon "settings" %} {% translate "Settings" %}</a>
       {% endif %}
-      <a href="{% url 'staff:my_hours' %}" class="{% active '/team/me' %}" style="margin-top:.75rem">{% icon "history" %} {% translate "My hours" %}</a>
+      <a href="{% url 'staff:my_hours' %}" class="{% active '/team/me' %}" style="margin-top:.75rem">{% icon "history" %} {% translate "My hours" %}{% if swap_offers %} <span class="nav-badge">{{ swap_offers }}</span>{% endif %}</a>
       <a href="{% url 'core:help' %}" class="{% active '/help' %}">{% icon "help" %} {% translate "Help" %}</a>
     </nav>
     <div class="sidebar-foot">

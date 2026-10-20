@@ -83,6 +83,8 @@ FULL_MODELS = [
     "staff.PublicHoliday",
     "staff.PayAdjustment",
     "staff.PayrollMonth",
+    "staff.LeaveRequest",
+    "staff.SwapRequest",
     "payments.PaymentLink",
     "fiscal.FiscalCounter",
     "fiscal.FiscalDocument",

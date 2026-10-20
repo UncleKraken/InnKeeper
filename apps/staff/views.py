@@ -24,6 +24,7 @@ from .models import EmployeeProfile, Position, ScheduledShift, TimeEntry
 TABS = [
     ("staff:attendance", gettext_lazy("Attendance")),
     ("staff:schedule", gettext_lazy("Schedule")),
+    ("staff:requests", gettext_lazy("Requests")),
     ("staff:payroll", gettext_lazy("Payroll")),
     ("accounts:staff_list", gettext_lazy("Staff")),
     ("staff:position_list", gettext_lazy("Positions")),
@@ -68,10 +69,17 @@ def my_hours(request):
     first = today.replace(day=1)
     entries = TimeEntry.objects.filter(user=request.user, clock_in__date__gte=first).order_by("-clock_in")
     upcoming = ScheduledShift.objects.filter(user=request.user, date__gte=today).select_related("position")[:14]
+    from .request_views import my_requests_context
+
+    extra = my_requests_context(request.user)
+    for s in upcoming:
+        s.swap = extra["open_swaps"].get(s.pk)
     return render(
         request,
         "staff/my_hours.html",
         {
+            **extra,
+            "today": today,
             "entries": entries,
             "upcoming": upcoming,
             "open": services.open_entry(request.user),
@@ -233,11 +241,14 @@ def schedule(request):
     grid = {(s.user_id, s.date): [] for s in shifts}
     for s in shifts:
         grid[(s.user_id, s.date)].append(s)
+    from .requests import on_leave
+
+    leave = on_leave(days[0], days[-1])
     rows = []
     for p in people:
         cells = [grid.get((p.pk, d), []) for d in days]
         hours = sum((s.hours for c in cells for s in c), 0)
-        rows.append({"person": p, "cells": list(zip(days, cells, strict=True)), "hours": hours})
+        rows.append({"person": p, "cells": [(d, c, leave.get((p.pk, d))) for d, c in zip(days, cells, strict=True)], "hours": hours})
     return render(
         request,
         "staff/schedule.html",
@@ -330,6 +341,11 @@ class ProfileForm(StyledFormMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["position"].queryset = Position.objects.filter(is_active=True)
+        self.fields["leave_days"].required = False
+
+    def clean_leave_days(self):
+        value = self.cleaned_data.get("leave_days")
+        return 20 if value is None else value
 
 
 @module_required("management")

@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.21.0 — leave and shift swaps
+
+**Shqip**
+
+- **Lejet:** stafi kërkon leje nga telefoni te *Orët e mia* (vjetore, mjekësore, pa pagesë, tjetër) dhe sheh ditët e mbetura të vitit. Menaxherët miratojnë ose refuzojnë te *Stafi → Kërkesa*, duke parë ditët e mbetura dhe turnet e planifikuara. Leja e miratuar del në orar dhe nuk llogaritet si mungesë.
+- **Ndërrimi i turneve:** "Mund ta marrësh këtë turn?" — kolegu pranon, menaxheri miraton, dhe turni kalon në orar.
+- Numra të kuq në menu për kërkesat në pritje. Ditët e lejes vjetore për çdo person te të dhënat e punonjësit (20 si parazgjedhje).
+
+**English**
+
+- **Leave:** staff ask for leave from their phone under *My hours* (annual, sick, unpaid, other) and see the days they have left this year. Managers approve or decline under *Staff → Requests*, seeing the days left and any planned shifts. Approved leave shows on the schedule and isn't counted as a no-show.
+- **Shift swaps:** "Can you take this shift?" — the colleague agrees, a manager approves, and the shift moves on the schedule.
+- Red counts in the menu for waiting requests. Annual leave days per person in the employee details (20 by default).
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.21.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.20.0 — payroll from the clock-ins
 
 **Shqip**

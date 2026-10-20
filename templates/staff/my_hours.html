@@ -9,13 +9,60 @@
       <button class="btn btn-lg {% if open %}btn-secondary{% endif %}">{% icon "history" %} {% if open %}{% blocktranslate with t=open.clock_in|date:"H:i" %}Clock out (in since {{ t }}){% endblocktranslate %}{% else %}{% translate "Clock in" %}{% endif %}</button></form>
   </div>
 </div>
+{% if incoming_swaps %}
+<section class="card" style="margin-bottom:1.25rem; border-left:4px solid var(--accent)">
+  <div class="card-header"><h2>{% translate "Can you take this shift?" %}</h2></div>
+  <div class="card-body stack">
+    {% for w in incoming_swaps %}
+      <div class="row" style="justify-content:space-between; flex-wrap:wrap; gap:.5rem">
+        <span><strong>{{ w.from_user }}</strong> · {{ w.shift.date|date:"D d.m" }} {{ w.shift.start|time:"H:i" }}–{{ w.shift.end|time:"H:i" }}{% if w.note %} · <span class="muted">“{{ w.note }}”</span>{% endif %}</span>
+        <span class="row" style="gap:.4rem">
+          <form method="post" action="{% url 'staff:swap_answer' w.pk %}">{% csrf_token %}<input type="hidden" name="agree" value="1"><button class="btn btn-sm">{% icon "check" %} {% translate "Yes, I'll take it" %}</button></form>
+          <form method="post" action="{% url 'staff:swap_answer' w.pk %}">{% csrf_token %}<input type="hidden" name="agree" value="0"><button class="btn btn-secondary btn-sm">{% translate "No" %}</button></form>
+        </span>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 <div class="grid grid-2" style="align-items:start">
+  <div class="stack">
   <section class="card card-flush"><div class="card-header"><h2>{% translate "My next shifts" %}</h2></div>
-    <div class="table-wrap"><table class="table table-sm"><tbody>{% for s in upcoming %}<tr><td class="nowrap"><strong>{{ s.date|date:"D d.m" }}</strong></td><td>{{ s.start|time:"H:i" }}–{{ s.end|time:"H:i" }}</td><td>{{ s.position|default:"" }}</td><td class="muted">{{ s.note }}</td></tr>{% empty %}<tr><td class="empty">{% translate "No shifts planned yet." %}</td></tr>{% endfor %}</tbody></table></div>
+    <div class="table-wrap"><table class="table table-sm"><tbody>{% for s in upcoming %}<tr>
+      <td class="nowrap"><strong>{{ s.date|date:"D d.m" }}</strong></td><td>{{ s.start|time:"H:i" }}–{{ s.end|time:"H:i" }}</td><td>{{ s.position|default:"" }}</td>
+      <td class="num">{% if s.swap %}<span class="muted" style="font-size:.85rem">{% if s.swap.status == "asked" %}{% blocktranslate with name=s.swap.to_user %}Asked {{ name }}{% endblocktranslate %}{% else %}{% translate "Waiting for a manager" %}{% endif %}</span>
+        <form method="post" action="{% url 'staff:swap_cancel' s.swap.pk %}" class="inline">{% csrf_token %}<button class="btn-link" title="{% translate 'Cancel' %}">×</button></form>
+        {% elif colleagues %}<details class="swap-ask"><summary class="btn btn-ghost btn-sm">{% translate "Swap" %}</summary>
+          <form method="post" action="{% url 'staff:swap_ask' %}" class="stack" style="margin-top:.4rem; text-align:left">{% csrf_token %}<input type="hidden" name="shift" value="{{ s.pk }}">
+            <select class="input" name="to_user" required><option value="">{% translate "Who can take it?" %}</option>{% for c in colleagues %}<option value="{{ c.pk }}">{{ c }}</option>{% endfor %}</select>
+            <input class="input" name="note" maxlength="200" placeholder="{% translate 'Note (optional)' %}">
+            <button class="btn btn-sm">{% icon "send" %} {% translate "Ask" %}</button>
+          </form></details>{% endif %}</td>
+    </tr>{% empty %}<tr><td class="empty">{% translate "No shifts planned yet." %}</td></tr>{% endfor %}</tbody></table></div>
   </section>
   <section class="card card-flush"><div class="card-header"><h2>{% translate "This month" %}</h2></div>
     <div class="table-wrap"><table class="table table-sm"><tbody>{% for e in entries %}<tr><td class="nowrap">{{ e.clock_in|date:"D d.m" }}</td><td>{{ e.clock_in|date:"H:i" }}–{% if e.clock_out %}{{ e.clock_out|date:"H:i" }}{% else %}…{% endif %}</td><td class="num">{% if e.clock_out %}{{ e.hours }} h{% endif %}</td></tr>{% empty %}<tr><td class="empty">{% translate "No clock-ins yet this month." %}</td></tr>{% endfor %}</tbody></table></div>
   </section>
+  </div>
+  <div class="stack">
+  <section class="card">
+    <div class="card-header"><h2>{% translate "Leave" %}</h2><span class="muted">{% blocktranslate with left=leave_balance.left total=leave_balance.allowance y=leave_balance.year %}{{ left }} of {{ total }} days left in {{ y }}{% endblocktranslate %}</span></div>
+    <form method="post" action="{% url 'staff:leave_ask' %}" class="card-body" style="padding-bottom:0">{% csrf_token %}
+      {% with form=leave_form %}{% include "includes/form_fields.html" %}{% endwith %}
+      <div class="form-actions" style="margin:0 0 1rem"><button class="btn">{% icon "send" %} {% translate "Ask for leave" %}</button></div>
+    </form>
+    {% if my_leave %}
+    <div class="table-wrap"><table class="table table-sm"><tbody>
+      {% for r in my_leave %}<tr>
+        <td class="nowrap">{{ r.start|date:"d.m" }}{% if r.end != r.start %}–{{ r.end|date:"d.m" }}{% endif %}</td>
+        <td>{{ r.get_kind_display }}</td>
+        <td>{% if r.status == "approved" %}<span class="badge b-success">{{ r.get_status_display }}</span>{% elif r.status == "pending" %}<span class="badge b-warning">{{ r.get_status_display }}</span>{% else %}<span class="badge">{{ r.get_status_display }}</span>{% endif %}{% if r.reason %} <small class="muted">{{ r.reason }}</small>{% endif %}</td>
+        <td class="num">{% if r.status == "pending" or r.status == "approved" and r.start > today %}<form method="post" action="{% url 'staff:leave_cancel' r.pk %}" class="inline" data-confirm="{% translate 'Cancel this request?' %}">{% csrf_token %}<button class="btn-link" title="{% translate 'Cancel' %}">×</button></form>{% endif %}</td>
+      </tr>{% endfor %}
+    </tbody></table></div>
+    {% endif %}
+  </section>
+  </div>
 </div>
 <p class="muted" style="font-size:.85rem; margin-top:1rem">{% translate "If a time is wrong, ask a manager to correct it." %}</p>
 {% endblock %}
