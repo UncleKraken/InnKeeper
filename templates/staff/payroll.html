@@ -17,14 +17,14 @@
     <span>{% icon "check" %} {% blocktranslate with who=approved.approved_by when=approved.approved_at|date:"d.m.Y H:i" %}Approved by {{ who }} on {{ when }}. These numbers no longer change with the clock-ins.{% endblocktranslate %}</span>
     <form method="post" action="{% url 'staff:payroll_approve' %}" data-confirm="{% translate 'Reopen this month? The numbers will follow the clock-ins again.' %}">{% csrf_token %}<input type="hidden" name="month" value="{{ month_value }}"><input type="hidden" name="reopen" value="1"><button class="btn btn-ghost btn-sm">{% translate "Reopen" %}</button></form>
   </div>
-{% elif not year_has_holidays %}
+{% elif hotel.payroll_holiday_pay and not year_has_holidays %}
   <div class="alert alert-warning no-print" style="margin-bottom:1rem">{% blocktranslate with y=month.year %}No public holidays are set for {{ y }}, so no holiday extra is paid.{% endblocktranslate %} <a href="{% url 'staff:holidays' %}?year={{ month.year }}">{% translate "Set them up" %}</a></div>
 {% endif %}
 
 <div class="month-doc">
   <div class="doc-head">
     <div><div class="doc-title">{{ hotel.legal_name|default:hotel.name }}</div><div class="muted">{% if hotel.tax_id and hotel.registered %}NIPT: {{ hotel.tax_id }}{% endif %}</div></div>
-    <div style="text-align:right"><div class="doc-title">{% translate "Payroll" %}</div><div>{{ month|date:"F Y" }}</div></div>
+    <div style="text-align:right"><div class="doc-title">{% translate "Payroll" %}</div><div>{{ month|date:"F Y" }}</div><div class="muted" style="font-size:.85rem">{{ period.0|date:"d.m.Y" }} – {{ period.1|date:"d.m.Y" }}</div></div>
   </div>
   <div class="grid grid-3" style="margin:1rem 0">
     <div class="card stat"><div class="stat-label">{% translate "Gross pay" %}</div><div class="stat-value">{{ totals.gross|money }}</div></div>
@@ -74,14 +74,17 @@
     <form method="post" action="{% url 'staff:payroll_rates' %}" class="card">{% csrf_token %}<input type="hidden" name="month" value="{{ month_value }}">
       <div class="card-header"><h3>{% translate "Extras" %}</h3></div>
       <div class="card-body">
-        <p class="muted" style="margin-top:0; font-size:.88rem">{% translate "Overtime: hours over each person's contract hours in a week (40 if not set). Night: 22:00–06:00. Set the percentages your contracts or collective agreement give; the Labour Code sets minimums." %}</p>
+        <p class="muted" style="margin-top:0; font-size:.88rem">{% translate "Overtime: hours over each person's contract hours in a week (40 if not set). Night: 22:00–06:00. Set the percentages your contracts or collective agreement give; the Labour Code sets minimums. Holiday extra is optional: many hotels and bars open every day don't pay it separately." %}</p>
         {% with form=rates_form %}{% include "includes/form_fields.html" %}{% endwith %}
       </div>
       <div class="card-footer form-actions" style="margin-top:0"><button class="btn btn-secondary">{% translate "Save" %}</button></div>
     </form>
     <section class="card">
       <div class="card-header"><h3>{% translate "Public holidays this month" %}</h3><a href="{% url 'staff:holidays' %}?year={{ month.year }}">{% translate "Edit" %}</a></div>
-      <div class="card-body">{% for h in holidays %}<div>{{ h.date|date:"D d.m" }} · {{ h.name }}</div>{% empty %}<span class="muted">{% translate "None." %}</span>{% endfor %}</div>
+      <div class="card-body">
+        {% if not hotel.payroll_holiday_pay %}<p class="muted" style="margin:0 0 .4rem; font-size:.88rem">{% translate "No holiday extra is paid (turned off above)." %}</p>{% endif %}
+        {% for h in holidays %}<div{% if not h.paid or not hotel.payroll_holiday_pay %} class="muted"{% endif %}>{{ h.date|date:"D d.m" }} · {{ h.name }}{% if not h.paid %} · {% translate "normal day" %}{% endif %}</div>{% empty %}<span class="muted">{% translate "None." %}</span>{% endfor %}
+      </div>
     </section>
   </div>
 </div>

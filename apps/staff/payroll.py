@@ -135,8 +135,14 @@ def _overtime(entries: list[TimeEntry], weekly_limit_minutes: int) -> dict[int, 
 
 
 def month_bounds(month: date) -> tuple[date, date]:
+    """The pay period named after `month`: the calendar month, or (when it starts on another day) from that
+    day of the month before to the day before it in this month."""
     first = month.replace(day=1)
-    return first, first.replace(day=calendar.monthrange(first.year, first.month)[1])
+    start_day = HotelSettings.load().payroll_period_start or 1
+    if start_day <= 1:
+        return first, first.replace(day=calendar.monthrange(first.year, first.month)[1])
+    prev = (first - timedelta(days=1)).replace(day=1)
+    return prev.replace(day=start_day), first.replace(day=start_day - 1)
 
 
 def calculate(month: date, users=None) -> list[dict]:
@@ -150,7 +156,11 @@ def calculate(month: date, users=None) -> list[dict]:
     entries = TimeEntry.objects.filter(clock_in__gte=since, clock_in__lt=until, clock_out__isnull=False).select_related("user")
     if users is not None:
         entries = entries.filter(user__in=users)
-    holidays = set(PublicHoliday.objects.filter(date__range=(week_from, week_to)).values_list("date", flat=True))
+    holidays = (
+        set(PublicHoliday.objects.filter(date__range=(week_from, week_to), paid=True).values_list("date", flat=True))
+        if hs.payroll_holiday_pay
+        else set()
+    )
     by_user = defaultdict(list)
     for e in entries:
         by_user[e.user].append(e)
@@ -192,7 +202,7 @@ def calculate(month: date, users=None) -> list[dict]:
         elif pay_type == EmployeeProfile.Pay.MONTHLY and rate is not None:
             employed = _employed_days(p, first, last)
             month_days = (last - first).days + 1
-            base = money(rate * employed / month_days)
+            base = money(rate * employed / month_days) if employed < month_days else money(rate)
             hourly = (rate / (weekly * WEEKS_PER_MONTH)).quantize(Decimal("0.0001"))
         extras = {
             "overtime": money(hours(ot) * hourly * hs.payroll_overtime_percent / 100) if hourly else ZERO,

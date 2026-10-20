@@ -182,6 +182,7 @@ class PublicHoliday(models.Model):
 
     date = models.DateField(_("date"), unique=True)
     name = models.CharField(_("name"), max_length=80)
+    paid = models.BooleanField(_("pays the holiday extra"), default=True)
 
     class Meta:
         ordering = ["date"]

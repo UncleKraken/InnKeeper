@@ -34,7 +34,7 @@ def _month(request) -> date:
 class RatesForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = HotelSettings
-        fields = ["payroll_overtime_percent", "payroll_night_percent", "payroll_holiday_percent"]
+        fields = ["payroll_period_start", "payroll_overtime_percent", "payroll_night_percent", "payroll_holiday_pay", "payroll_holiday_percent"]
 
 
 class AdjustmentForm(StyledFormMixin, forms.ModelForm):
@@ -72,6 +72,7 @@ def payroll_page(request):
             "rates_form": RatesForm(instance=hs),
             "adjustment_form": AdjustmentForm(),
             "holidays": PublicHoliday.objects.filter(date__range=(first, last)),
+            "period": (first, last),
             "year_has_holidays": PublicHoliday.objects.filter(date__year=month.year).exists(),
             "tabs": TABS,
             "tab": "staff:payroll",
@@ -155,6 +156,12 @@ def holidays(request):
         if request.POST.get("delete"):
             get_object_or_404(PublicHoliday, pk=request.POST["delete"]).delete()
             return redirect(f"{reverse('staff:holidays')}?year={year}")
+        if request.POST.get("toggle"):
+            h = get_object_or_404(PublicHoliday, pk=request.POST["toggle"])
+            h.paid = not h.paid
+            h.save(update_fields=["paid"])
+            audit(request.user, "payroll.holiday_paid" if h.paid else "payroll.holiday_unpaid", str(h))
+            return redirect(f"{reverse('staff:holidays')}?year={year}")
         if form.is_valid():
             h = form.save()
             audit(request.user, "payroll.holiday", str(h))
@@ -162,7 +169,8 @@ def holidays(request):
     return render(
         request,
         "staff/holidays.html",
-        {"form": form, "year": year, "days": PublicHoliday.objects.filter(date__year=year), "tabs": TABS, "tab": "staff:payroll"},
+        {"form": form, "year": year, "days": PublicHoliday.objects.filter(date__year=year), "tabs": TABS, "tab": "staff:payroll",
+         "holiday_pay": HotelSettings.load().payroll_holiday_pay},
     )
 
 

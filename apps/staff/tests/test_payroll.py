@@ -57,6 +57,7 @@ class PayrollTests(HotelTestCase):
         self.profile(self.waiter, pay_type="hourly", pay_rate=D("100"))
         self.work(self.waiter, date(2026, 9, 5), 10, 16)
         hs = HotelSettings.load()
+        hs.payroll_holiday_pay = True
         hs.payroll_holiday_percent = 50
         hs.save()
         r = self.row(self.waiter)
@@ -123,3 +124,41 @@ class PayrollTests(HotelTestCase):
         self.assertEqual(PublicHoliday.objects.filter(date__year=2027).count(), 12)
         self.client.post(reverse("staff:holidays"), {"date": "2027-03-10", "name": "Bajram"})
         self.assertTrue(PublicHoliday.objects.filter(name="Bajram").exists())
+
+
+class PayrollOptionsTests(HotelTestCase):
+    def setUp(self):
+        EmployeeProfile.objects.create(user=self.waiter, pay_type="hourly", pay_rate=D("100"))
+        PublicHoliday.objects.create(date=date(2026, 9, 5), name="Mother Teresa Day")
+        TimeEntry.objects.create(user=self.waiter, clock_in=at(date(2026, 9, 5), 10), clock_out=at(date(2026, 9, 5), 16))
+
+    def test_holiday_pay_is_off_until_turned_on_and_per_date(self):
+        r = next(r for r in payroll.calculate(MONTH) if r["user"] == self.waiter)
+        self.assertEqual(r["holiday_hours"], D("0.00"))  # off by default (open every day)
+        hs = HotelSettings.load()
+        hs.payroll_holiday_pay = True
+        hs.save()
+        r = next(r for r in payroll.calculate(MONTH) if r["user"] == self.waiter)
+        self.assertEqual(r["extras"]["holiday"], D("150.00"))
+        PublicHoliday.objects.update(paid=False)  # the manager unticks this date
+        r = next(r for r in payroll.calculate(MONTH) if r["user"] == self.waiter)
+        self.assertEqual(r["holiday_hours"], D("0.00"))
+
+    def test_toggle_on_the_holidays_page(self):
+        self.client.login(username="boss", password=PASSWORD)
+        h = PublicHoliday.objects.get()
+        self.client.post(reverse("staff:holidays") + "?year=2026", {"toggle": h.pk})
+        h.refresh_from_db()
+        self.assertFalse(h.paid)
+
+    def test_pay_period_from_the_26th(self):
+        hs = HotelSettings.load()
+        hs.payroll_period_start = 26
+        hs.save()
+        self.assertEqual(payroll.month_bounds(date(2026, 10, 1)), (date(2026, 9, 26), date(2026, 10, 25)))
+        self.assertEqual(payroll.month_bounds(date(2026, 1, 1)), (date(2025, 12, 26), date(2026, 1, 25)))
+        TimeEntry.objects.create(user=self.waiter, clock_in=at(date(2026, 9, 28), 9), clock_out=at(date(2026, 9, 28), 17))
+        r = next(r for r in payroll.calculate(date(2026, 10, 1)) if r["user"] == self.waiter)
+        self.assertEqual(r["hours"], D("8.00"))  # 28 September belongs to the October pay
+        self.client.login(username="boss", password=PASSWORD)
+        self.assertContains(self.client.get(reverse("staff:payroll") + "?month=2026-10"), "26.09.2026")

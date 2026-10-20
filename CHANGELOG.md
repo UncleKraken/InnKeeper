@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.25.0 — payroll: optional holiday pay, your own pay period
+
+**Shqip**
+
+- **Shtesa për festat zyrtare është tani sipas dëshirës** dhe e fikur fillimisht: shumë hotele dhe bare të hapura çdo ditë nuk e paguajnë veçmas. Ndizeni te *Listëpagesa → Shtesat*, dhe te *Festat zyrtare* shënoni vetëm ditët që paguani me shtesë.
+- **Periudha e pagës:** nëse paguani p.sh. nga 26 deri më 25, vendosni *Periudha e pagës fillon më 26*. Listëpagesa, paga mujore dhe orët jashtë orarit ndjekin këtë periudhë.
+- Kujdes: nëse përdorët shtesën e festave në 2.20–2.24, ndizeni përsëri te *Shtesat*.
+
+**English**
+
+- **Public holiday extra pay is now optional** and off to start with: many hotels and bars open every day don't pay it separately. Turn it on under *Payroll → Extras*, and under *Public holidays* tick only the days you pay extra for.
+- **Pay period:** if you pay from, say, the 26th to the 25th, set *Pay period starts on day* to 26. The payroll, monthly salaries and overtime follow that period.
+- Note: if you used holiday extra pay in 2.20–2.24, turn it on again under *Extras*.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.25.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.24.0 — group month report and stock transfers
 
 **Shqip**

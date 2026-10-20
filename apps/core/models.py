@@ -265,6 +265,17 @@ class HotelSettings(models.Model):
         _("night work extra (%)"), default=20, validators=[MaxValueValidator(300)],
         help_text=_("For hours between 22:00 and 06:00, as your contracts or collective agreement say."),
     )
+    payroll_holiday_pay = models.BooleanField(
+        _("pay extra for public holidays"),
+        default=False,
+        help_text=_("Off for places open every day (hotels, bars) that don't pay holidays separately. Choose the dates under Public holidays."),
+    )
+    payroll_period_start = models.PositiveSmallIntegerField(
+        _("pay period starts on day"),
+        default=1,
+        validators=[MinValueValidator(1), MaxValueValidator(28)],
+        help_text=_("1: calendar months. 26: the October pay runs from 26 September to 25 October."),
+    )
     payroll_holiday_percent = models.PositiveSmallIntegerField(
         _("public holiday extra (%)"), default=25, validators=[MaxValueValidator(300)],
         help_text=_("For hours worked on a public holiday, as your contracts say."),
