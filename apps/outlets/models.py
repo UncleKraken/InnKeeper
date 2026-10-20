@@ -117,6 +117,11 @@ class Outlet(models.Model):
         _("public menu"), default=True, help_text=_("Guests can open this menu on their phone by scanning a QR code.")
     )
     menu_intro = models.CharField(_("menu introduction"), max_length=255, blank=True)
+    qr_payments = models.BooleanField(
+        _("guests can pay the bill by card from the table"),
+        default=False,
+        help_text=_("Needs ordering from the table and a card payment provider (Settings → Card payments)."),
+    )
     qr_ordering = models.BooleanField(
         _("guests can order from the table"),
         default=False,

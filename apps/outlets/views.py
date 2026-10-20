@@ -657,6 +657,7 @@ class OutletForm(StyledFormMixin, forms.ModelForm):
             "menu_public",
             "menu_intro",
             "qr_ordering",
+            "qr_payments",
             "sort_order",
             "is_active",
             "staff",

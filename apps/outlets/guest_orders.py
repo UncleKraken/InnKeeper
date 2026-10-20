@@ -161,6 +161,7 @@ def table_page(request, token):
             return response
     mine = list(GuestRequest.objects.filter(pk__in=_my_ids(request), table=table).order_by("-created_at")[:5])
     sections = _menu(outlet, lang)
+    bill = _bill(table)
     return render(
         request,
         "outlets/table_order.html",
@@ -174,6 +175,9 @@ def table_page(request, token):
             "sent": request.GET.get("sent", ""),
             "mine": mine,
             "stale_before": timezone.now() - STALE_AFTER,
+            "bill": bill,
+            "bill_lines": bill.lines.filter(quantity__gt=0) if bill else [],
+            "tips": [(p, tip_for(bill.remaining, p) if bill else 0) for p in TIP_CHOICES],
         },
     )
 
@@ -203,6 +207,78 @@ def _create(request, table: Table) -> GuestRequest:
     return req
 
 
+TIP_CHOICES = (0, 5, 10, 15)
+
+
+def tip_for(remaining: Decimal, percent: int) -> Decimal:
+    from decimal import ROUND_HALF_UP
+
+    return (remaining * percent / 100).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+def _bill(table: Table):
+    """The table's open bill, when guests may pay it by card from their phone."""
+    from apps.core.models import HotelSettings
+
+    if not table.outlet.qr_payments or not HotelSettings.load().payments_configured:
+        return None
+    order = table.open_order()
+    if order is None or order.remaining <= 0:
+        return None
+    return order
+
+
+@require_POST
+def table_pay(request, token):
+    """Pay the table's bill by card: a payment link for what is left (plus a tip), then the provider's page."""
+    from apps.payments import services as payments
+    from apps.payments.models import PaymentLink
+
+    table = _table_or_404(token)
+    lang = "en" if (request.POST.get("lang") or "").startswith("en") else "sq"
+    back = f"{reverse('menu:table', args=[token])}?lang={lang}"
+    order = _bill(table)
+    if order is None:
+        return redirect(back)
+    key = f"innkeeper:table-pay:{_client_ip(request)}"
+    if cache.get(key, 0) >= 10:
+        messages.error(request, _("Too many requests from this phone. Please ask our staff."))
+        return redirect(back)
+    try:
+        percent = int(request.POST.get("tip", "0"))
+    except ValueError:
+        percent = 0
+    percent = percent if percent in TIP_CHOICES else 0
+    remaining = order.remaining
+    tip = tip_for(remaining, percent)
+    amount = remaining + tip
+    link = PaymentLink.objects.filter(order=order, status=PaymentLink.Status.PENDING, amount=amount, tip=tip).first()
+    with transaction.atomic():
+        PaymentLink.objects.filter(order=order, status=PaymentLink.Status.PENDING).exclude(pk=getattr(link, "pk", None)).update(
+            status=PaymentLink.Status.CANCELLED
+        )
+        if link is None:
+            from apps.core.models import HotelSettings
+
+            link = payments.create_link(
+                order=order,
+                tip=tip,
+                amount=amount,
+                purpose=PaymentLink.Purpose.BALANCE,
+                description=f"{HotelSettings.load().name} – {table.outlet} {_('Table')} {table.name}",
+            )
+    try:
+        cache.incr(key)
+    except ValueError:
+        cache.set(key, 1, 600)
+    try:
+        url = payments.start_checkout(link, request.build_absolute_uri("/"), lang=lang)
+    except BusinessError as e:
+        messages.error(request, str(e))
+        return redirect(back)
+    return redirect(url)
+
+
 def table_status(request, token):
     table = _table_or_404(token)
     mine = GuestRequest.objects.filter(pk__in=_my_ids(request), table=table)
@@ -226,7 +302,15 @@ def requests_page(request):
         .select_related("table", "outlet", "handled_by")
         .order_by("-handled_at")[:15]
     )
-    return render(request, "outlets/guest_requests.html", {"pending": pending, "recent": recent})
+    from apps.payments.models import PaymentLink
+
+    card = (
+        PaymentLink.objects.filter(order__isnull=False, created_at__gte=timezone.now() - timedelta(hours=12))
+        .exclude(status=PaymentLink.Status.CANCELLED)
+        .select_related("order", "order__table", "order__outlet")
+        .order_by("-created_at")[:20]
+    )
+    return render(request, "outlets/guest_requests.html", {"pending": pending, "recent": recent, "card": card})
 
 
 @module_required("outlets")

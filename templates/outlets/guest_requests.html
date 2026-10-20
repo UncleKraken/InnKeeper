@@ -33,6 +33,20 @@
     <div class="card"><div class="card-body empty"><p>{% translate "No table orders waiting. This page updates itself and chimes when one arrives." %}</p></div></div>
   {% endfor %}
 
+  {% if card %}
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "Paid by card from the table" %}</h2></div>
+    <div class="table-wrap"><table class="table table-sm"><tbody>
+      {% for k in card %}<tr>
+        <td>{{ k.created_at|time:"H:i" }}</td><td>{{ k.order.outlet }} · {{ k.order.display_name }}</td>
+        <td class="num">{{ k.amount|money }}{% if k.tip %} <small class="muted">({% translate "tip" %} {{ k.tip|money }})</small>{% endif %}</td>
+        <td>{% if k.status == "paid" %}<span class="badge b-success">{{ k.get_status_display }}</span>{% else %}<span class="badge">{{ k.get_status_display }}</span>{% endif %}</td>
+        <td class="num"><a href="{% url 'outlets:order' k.order_id %}">#{{ k.order.number }}</a></td>
+      </tr>{% if k.error %}<tr><td colspan="5"><div class="alert alert-warning" style="margin:0">{{ k.error }}</div></td></tr>{% endif %}{% endfor %}
+    </tbody></table></div>
+  </section>
+  {% endif %}
+
   {% if recent %}
   <section class="card card-flush">
     <div class="card-header"><h2>{% translate "Answered in the last 3 hours" %}</h2></div>

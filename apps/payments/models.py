@@ -35,6 +35,10 @@ class PaymentLink(models.Model):
         related_name="payment_links",
         verbose_name=_("reservation"),
     )
+    order = models.ForeignKey(
+        "outlets.Order", null=True, blank=True, on_delete=models.PROTECT, related_name="payment_links", verbose_name=_("bill")
+    )
+    tip = models.DecimalField(_("tip"), default=0, **MONEY)  # part of the amount, for the staff
     purpose = models.CharField(_("for"), max_length=10, choices=Purpose.choices, default=Purpose.DEPOSIT)
     description = models.CharField(_("description"), max_length=200)
     amount = models.DecimalField(_("amount"), **MONEY)

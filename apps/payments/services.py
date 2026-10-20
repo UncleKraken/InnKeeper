@@ -29,7 +29,8 @@ def link_url(link: PaymentLink, base_url: str = "") -> str:
 
 
 def create_link(
-    *, reservation=None, amount: Decimal, purpose: str, user=None, description: str = "", email_to: str = ""
+    *, reservation=None, order=None, tip: Decimal = Decimal("0"), amount: Decimal, purpose: str, user=None,
+    description: str = "", email_to: str = "",
 ) -> PaymentLink:
     hs = HotelSettings.load()
     if not hs.payments_configured:
@@ -42,6 +43,8 @@ def create_link(
         description = f"{hs.name} – {label}" + (f" {reservation.code}" if reservation else "")
     link = PaymentLink.objects.create(
         reservation=reservation,
+        order=order,
+        tip=Decimal(tip).quantize(Decimal("0.01")),
         purpose=purpose,
         description=description[:200],
         amount=amount,
@@ -155,7 +158,10 @@ def _mark_paid(link: PaymentLink, *, reference: str, user) -> None:
     from apps.frontdesk import services as fd
 
     payment = None
-    if link.reservation_id:
+    link.error = ""
+    if link.order_id:
+        payment = _pay_order(link, reference=reference, user=user)
+    elif link.reservation_id:
         folio = link.reservation.folio
         if folio.status == folio.Status.OPEN:
             payment = fd.add_payment(
@@ -168,8 +174,35 @@ def _mark_paid(link: PaymentLink, *, reference: str, user) -> None:
     link.status = PaymentLink.Status.PAID
     link.paid_at = timezone.now()
     link.payment = payment
-    link.error = ""
     link.save(update_fields=["status", "paid_at", "payment", "error"])
+
+
+def _pay_order(link: PaymentLink, *, reference: str, user):
+    """A bill paid by the guest from the table. If the bill changed after they pressed Pay (more was
+    added, or someone else paid part of it), the card payment still counts: what fits goes on the bill,
+    and anything over is recorded on its own and flagged for staff to refund."""
+    from apps.outlets import services as pos
+    from apps.outlets.models import Order
+
+    order = Order.objects.select_for_update().get(pk=link.order_id)
+    tip = min(link.tip, link.amount)
+    for_bill = link.amount - tip
+    payment = None
+    if order.status == Order.Status.OPEN and order.remaining > 0:
+        on_bill = min(for_bill, order.remaining)
+        payment = pos.pay_order(order, method=Payment.Method.ONLINE, user=user, amount=on_bill, reference=reference, tip=tip)
+        for_bill -= on_bill
+        tip = Decimal("0")
+    if for_bill > 0 or tip > 0:
+        extra = Payment.objects.create(
+            amount=for_bill, tip=tip, method=Payment.Method.ONLINE, reference=reference, created_by=user
+        )
+        payment = payment or extra
+        link.error = _("%(amount)s more than the bill was paid by card (table %(t)s). Refund it or keep it for the guest.") % {
+            "amount": f"{for_bill:.2f}", "t": order.table or order.display_name
+        }
+        audit(None, "payment_link.overpaid", f"{link.token}: {link.error}", order)
+    return payment
 
 
 def _notify_staff(link: PaymentLink) -> None:

@@ -986,3 +986,15 @@ body.kds-flash { animation: kds-flash 1.2s ease-out 2; }
 .swap-ask > summary::-webkit-details-marker { display: none; }
 .swap-ask[open] { min-width: 210px; }
 .sched-leave { display: block; border-radius: 6px; padding: 2px 6px; font-size: .75rem; font-weight: 600; background: var(--warning-soft); color: var(--warning); }
+.to-bill { max-width: 680px; margin: 1rem auto 0; padding: 1rem 1.1rem; background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+@media (max-width: 720px) { .to-bill { margin: 1rem 1.1rem 0; } }
+.to-bill h2 { font-size: 1.15rem; margin: 0 0 .4rem; }
+.to-tips { border: 0; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; }
+.to-tips legend { font-weight: 600; margin-bottom: .4rem; font-size: .9rem; }
+.to-tips label { cursor: pointer; }
+.to-tips input { position: absolute; opacity: 0; }
+.to-tips span { display: flex; flex-direction: column; align-items: center; padding: .5rem .2rem; border: 1px solid var(--border-strong); border-radius: 10px; font-weight: 600; font-size: .9rem; }
+.to-tips span small { font-weight: 400; color: var(--muted); font-size: .72rem; }
+.to-tips input:checked + span { border-color: var(--primary); background: var(--primary); color: #fff; }
+.to-tips input:checked + span small { color: rgba(255,255,255,.85); }
+.to-tips input:focus-visible + span { outline: 2px solid var(--primary); outline-offset: 2px; }

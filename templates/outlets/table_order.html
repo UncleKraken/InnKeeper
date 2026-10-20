@@ -20,6 +20,7 @@
   </header>
 
   <div class="to-status" id="to-status">
+    {% for m in messages %}<div class="alert alert-{% if m.tags == 'error' %}error{% else %}{{ m.tags }}{% endif %}" role="status">{{ m }}</div>{% endfor %}
     {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
     {% if sent == "order" %}<div class="alert alert-success" role="status">{% translate "Sent! Our staff will confirm your order in a moment." %}</div>
     {% elif sent == "waiter" %}<div class="alert alert-success" role="status">{% translate "A waiter is on the way." %}</div>
@@ -33,6 +34,23 @@
       </div>
     {% endif %}{% endfor %}
   </div>
+
+  {% if bill %}
+  <section class="to-bill">
+    <h2>{% translate "Your bill" %}</h2>
+    {% for l in bill_lines %}<div class="to-cart-line"><span>{{ l.quantity }} × {{ l.name }}</span><span>{{ l.line_total|money }}</span></div>{% endfor %}
+    {% if bill.discount %}<div class="to-cart-line"><span>{% translate "Discount" %}</span><span>−{{ bill.discount|money }}</span></div>{% endif %}
+    {% if bill.paid %}<div class="to-cart-line"><span>{% translate "Already paid" %}</span><span>−{{ bill.paid|money }}</span></div>{% endif %}
+    <div class="to-cart-line" style="font-size:1.1rem"><strong>{% translate "To pay" %}</strong><strong>{{ bill.remaining|money }}</strong></div>
+    <form method="post" action="{% url 'menu:table_pay' table.qr_token %}" style="margin-top:.8rem">{% csrf_token %}<input type="hidden" name="lang" value="{{ lang }}">
+      <fieldset class="to-tips"><legend>{% translate "Add a tip for the staff?" %}</legend>
+        {% for p, amount in tips %}<label><input type="radio" name="tip" value="{{ p }}" {% if p == 0 %}checked{% endif %}><span>{% if p %}{{ p }}%<small>{{ amount|money }}</small>{% else %}{% translate "No tip" %}{% endif %}</span></label>{% endfor %}
+      </fieldset>
+      <button class="btn" style="width:100%; justify-content:center; margin-top:.6rem">{% icon "wallet" %} {% translate "Pay by card" %}</button>
+      <p class="muted" style="font-size:.8rem; margin:.4rem 0 0; text-align:center">{% translate "On the secure page of our payment provider. Your receipt is printed by our staff." %}</p>
+    </form>
+  </section>
+  {% endif %}
 
   <div class="to-calls">
     <form method="post">{% csrf_token %}<input type="hidden" name="kind" value="waiter"><button class="btn btn-secondary">{% icon "users" %} {% translate "Call the waiter" %}</button></form>
@@ -92,7 +110,7 @@
   </div></div>
 
   {{ catalog|json_script:"to-catalog" }}
-  <svg style="display:none"><symbol id="i-send" viewBox="0 0 24 24"><path d="M21.5 2.5 10.5 13.5M21.5 2.5l-7 19-4-8-8-4z"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/></symbol><symbol id="i-receipt" viewBox="0 0 24 24"><path d="M5 2.5h14v19l-2.3-1.5-2.4 1.5-2.3-1.5-2.3 1.5L7.3 20 5 21.5z"/><path d="M8.5 7h7M8.5 11h7M8.5 15h4"/></symbol></svg>
+  <svg style="display:none"><symbol id="i-send" viewBox="0 0 24 24"><path d="M21.5 2.5 10.5 13.5M21.5 2.5l-7 19-4-8-8-4z"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/></symbol><symbol id="i-wallet" viewBox="0 0 24 24"><path d="M20 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h15v14H5a2 2 0 0 1-2-2V5"/><path d="M16 14h.01"/></symbol><symbol id="i-receipt" viewBox="0 0 24 24"><path d="M5 2.5h14v19l-2.3-1.5-2.4 1.5-2.3-1.5-2.3 1.5L7.3 20 5 21.5z"/><path d="M8.5 7h7M8.5 11h7M8.5 15h4"/></symbol></svg>
 <script>
 (function () {
   var catalog = JSON.parse(document.getElementById('to-catalog').textContent);

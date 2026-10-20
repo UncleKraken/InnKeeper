@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.22.0 — pay by card from the table
+
+**Shqip**
+
+- **Pagesa nga tavolina:** faqja QR e tavolinës tregon faturën e hapur dhe sa ka mbetur, me zgjedhje bakshishi (pa, 5, 10, 15%), dhe klienti paguan me kartë te POK ose Paysera. Pagesa regjistrohet në faturë, bakshishi shkon te stafi, dhe fatura mbyllet me kuponin fiskal kur paguhet e gjitha.
+- Nëse fatura ndryshoi ndërkohë (p.sh. një pjesë u pagua me para), pagesa me kartë nuk humbet: çdo tepricë shënohet te *Porositë nga tavolina* për ta kthyer.
+- Ndizeni për çdo pikë: *Klientët paguajnë faturën me kartë nga tavolina*.
+
+**English**
+
+- **Pay from the table:** the table's QR page shows the open bill and what's left, with a tip choice (none, 5, 10, 15%), and the guest pays by card through POK or Paysera. The payment goes on the bill, the tip to the staff, and the bill closes with its fiscal receipt once fully paid.
+- If the bill changed in the meantime (say part was paid in cash), the card payment isn't lost: anything over is flagged under *Table orders* for a refund.
+- Turn it on per outlet: *Guests can pay the bill by card from the table*.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.22.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.21.0 — leave and shift swaps
 
 **Shqip**
