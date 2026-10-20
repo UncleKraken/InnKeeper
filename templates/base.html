@@ -46,6 +46,7 @@
       {% if "outlets" in modules %}
         <div class="nav-section">{% translate "Services" %}</div>
         <a href="{% url 'outlets:home' %}" class="{% if request.path|slice:':9' == '/outlets/' and '/outlets/setup' not in request.path and '/outlets/receipts' not in request.path and '/outlets/kitchen' not in request.path %}active{% endif %}">{% icon "utensils" %} {% translate "Restaurant, bar & services" %}</a>
+        {% if guest_requests is not None %}<a href="{% url 'outlets:guest_requests' %}" class="{% active '/outlets/requests' %}" id="guest-req-link" data-count-url="{% url 'outlets:guest_requests_count' %}">{% icon "qr" %} {% translate "Table orders" %} <span class="nav-badge{% if not guest_requests %} is-hidden{% endif %}" id="guest-req-badge">{{ guest_requests }}</span></a>{% endif %}
         <a href="{% url 'outlets:receipts' %}" class="{% active '/outlets/receipts' %}">{% icon "receipt" %} {% translate "Receipts" %}</a>
         <a href="{% url 'finance:accounts' %}" class="{% active '/finance/accounts' %}">{% icon "users" %} {% translate "Customer accounts" %}</a>
         {% if hotel.vouchers_enabled %}<a href="{% url 'outlets:vouchers' %}" class="{% active '/outlets/vouchers' %}">{% icon "gift" %} {% translate "Gift vouchers" %}</a>{% endif %}
@@ -146,6 +147,35 @@
     function reset() { clearTimeout(t); t = setTimeout(function () { var f = document.getElementById('lock-form'); if (f) f.submit(); }, ms); }
     ['pointerdown', 'keydown', 'touchstart', 'scroll'].forEach(function (e) { document.addEventListener(e, reset, { passive: true }); });
     reset();
+  })();
+  {% endif %}
+  {% if guest_requests is not None %}
+  // Table orders from QR codes: keep the badge current and chime when a new one arrives.
+  (function () {
+    var link = document.getElementById('guest-req-link'), badge = document.getElementById('guest-req-badge');
+    if (!link) return;
+    var latest = null, base = document.title.replace(/^\(\d+\) /, '');
+    function chime() {
+      try {
+        var C = window.AudioContext || window.webkitAudioContext, c = new C(), o = c.createOscillator(), g = c.createGain();
+        o.frequency.value = 880; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0.15, c.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.6); o.start(); o.stop(c.currentTime + 0.6);
+      } catch (e) {}
+    }
+    function poll() {
+      if (document.hidden) return;
+      fetch(link.dataset.countUrl, { headers: { 'Accept': 'application/json' } }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+        if (!d) return;
+        badge.textContent = d.count; badge.classList.toggle('is-hidden', !d.count);
+        document.title = (d.count ? '(' + d.count + ') ' : '') + base;
+        if (latest !== null && d.latest > latest) {
+          chime();
+          if (location.pathname === link.getAttribute('href')) location.reload();
+        }
+        latest = d.latest;
+      }).catch(function () {});
+    }
+    poll(); setInterval(poll, 15000);
   })();
   {% endif %}
 </script>

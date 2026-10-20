@@ -33,6 +33,16 @@
     {% endfor %}
   </section>
   <aside class="stack">
+    {% if outlet.uses_tables %}
+    <section class="card">
+      <div class="card-header"><h3>{% translate "Ordering from the table" %}</h3>{% if outlet.qr_ordering %}{% translate "On" as l %}{% status_badge "success" l %}{% else %}{% translate "Off" as l %}{% status_badge "closed" l %}{% endif %}</div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0; font-size:.9rem">{% translate "Each table gets its own QR code: guests order, call the waiter or ask for the bill from their phone. Staff accept each order under Table orders before it goes on the bill and to the kitchen." %}</p>
+        {% if outlet.qr_ordering %}<a class="btn btn-sm" href="{% url 'outlets:table_qr_cards' outlet.pk %}" target="_blank">{% icon "print" %} {% translate "Print table codes" %}</a>
+        {% else %}<a class="btn btn-secondary btn-sm" href="{% url 'outlets:outlet_edit' outlet.pk %}">{% translate "Turn it on in the outlet's settings" %}</a>{% endif %}
+      </div>
+    </section>
+    {% endif %}
     <section class="card">
       <div class="card-header"><h3>{% translate "QR code" %}</h3>{% if outlet.menu_public %}{% translate "Public" as l %}{% status_badge "success" l %}{% else %}{% translate "Hidden" as l %}{% status_badge "closed" l %}{% endif %}</div>
       <div class="card-body" style="text-align:center">

@@ -21,10 +21,17 @@ class HotelTestCase(TestCase):
         super()._pre_setup()
         clear_settings_cache()  # settings are cached per thread; each test starts from the database
 
+    def _post_teardown(self):
+        from apps.core.models import clear_settings_cache
+
+        super()._post_teardown()
+        clear_settings_cache()  # never hand one test's settings to the next class's setUpTestData
+
     @classmethod
     def setUpTestData(cls):
-        from apps.core.models import HotelSettings
+        from apps.core.models import HotelSettings, clear_settings_cache
 
+        clear_settings_cache()
         cls.today = timezone.localdate()
         hs = HotelSettings.load()
         hs.setup_completed = True

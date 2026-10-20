@@ -1,0 +1,204 @@
+{% load static i18n innkeeper %}<!doctype html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% translate "Table" %} {{ table.name }} · {{ outlet.name }}</title>
+  <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <meta name="robots" content="noindex">
+</head>
+<body class="menu-page to-page">
+  <header class="menu-hero">
+    <div class="menu-lang">
+      <a href="?lang=sq" class="{% if lang == 'sq' %}active{% endif %}">SQ</a>
+      <a href="?lang=en" class="{% if lang == 'en' %}active{% endif %}">EN</a>
+    </div>
+    {% if hotel.logo %}<img src="{{ hotel.logo }}" alt="{{ hotel.name }}" class="menu-logo">{% endif %}
+    <p class="menu-eyebrow">{{ hotel.name }} · {{ outlet.name }}</p>
+    <h1>{% translate "Table" %} {{ table.name }}</h1>
+    <p class="menu-intro">{% translate "Choose from the menu and send your order. Our staff confirm it before it goes to the kitchen." %}</p>
+  </header>
+
+  <div class="to-status" id="to-status">
+    {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+    {% if sent == "order" %}<div class="alert alert-success" role="status">{% translate "Sent! Our staff will confirm your order in a moment." %}</div>
+    {% elif sent == "waiter" %}<div class="alert alert-success" role="status">{% translate "A waiter is on the way." %}</div>
+    {% elif sent == "bill" %}<div class="alert alert-success" role="status">{% translate "We'll bring the bill shortly." %}</div>{% endif %}
+    {% for r in mine %}{% if r.kind == "order" %}
+      <div class="alert {% if r.status == 'accepted' %}alert-success{% elif r.status == 'declined' %}alert-error{% elif r.created_at < stale_before %}alert-warning{% else %}alert-info{% endif %}" data-req="{{ r.pk }}" data-status="{{ r.status }}">
+        <strong>{{ r.created_at|time:"H:i" }} · {% blocktranslate count n=r.item_count %}{{ n }} item{% plural %}{{ n }} items{% endblocktranslate %}:</strong>
+        {% if r.status == "pending" %}{% if r.created_at < stale_before %}{% translate "not answered — please ask our staff." %}{% else %}{% translate "waiting for our staff to confirm…" %}{% endif %}
+        {% elif r.status == "accepted" %}{% translate "confirmed, it's being prepared." %}{% if r.reason %} {{ r.reason }}{% endif %}
+        {% else %}{% translate "not accepted." %}{% if r.reason %} {{ r.reason }}{% endif %} {% translate "Please ask our staff." %}{% endif %}
+      </div>
+    {% endif %}{% endfor %}
+  </div>
+
+  <div class="to-calls">
+    <form method="post">{% csrf_token %}<input type="hidden" name="kind" value="waiter"><button class="btn btn-secondary">{% icon "users" %} {% translate "Call the waiter" %}</button></form>
+    <form method="post">{% csrf_token %}<input type="hidden" name="kind" value="bill"><button class="btn btn-secondary">{% icon "receipt" %} {% translate "Bill, please" %}</button></form>
+  </div>
+
+  {% if sections|length > 1 %}
+  <nav class="menu-nav">{% for s in sections %}<a href="#s{{ forloop.counter }}">{{ s.name }}</a>{% endfor %}</nav>
+  {% endif %}
+  <main class="menu-body">
+    {% for s in sections %}
+      <section id="s{{ forloop.counter }}">
+        <h2>{{ s.name }}</h2>
+        {% for i in s.items %}
+          <div class="menu-item">
+            <div><strong>{{ i.name }}</strong>{% if i.description %}<p>{{ i.description }}</p>{% endif %}</div>
+            <div class="to-item-right">
+              <span class="menu-price">{{ i.price|money }}</span>
+              <button type="button" class="to-add" data-item="{{ i.id }}" aria-label="{% translate 'Add' %} {{ i.name }}">+</button>
+            </div>
+          </div>
+        {% endfor %}
+      </section>
+    {% empty %}
+      <p class="empty">{% translate "The menu is being updated. Please ask our staff." %}</p>
+    {% endfor %}
+    <p class="menu-foot">{% if hotel.charges_vat %}{% blocktranslate with rate=hotel.vat_rate|floatformat:"-2" %}Prices include VAT ({{ rate }}%){% endblocktranslate %}{% endif %}</p>
+  </main>
+
+  <div class="to-bar is-hidden" id="to-bar"><div class="to-bar-inner">
+    <button type="button" class="btn" id="to-open-cart">{% translate "View order" %} · <span id="to-count">0</span> · <span id="to-total"></span></button>
+  </div></div>
+
+  <div class="to-sheet is-hidden" id="to-options" role="dialog" aria-modal="true"><div class="to-sheet-body">
+    <h2 id="to-opt-title"></h2>
+    <div id="to-opt-groups"></div>
+    <div class="field"><label for="to-opt-note">{% translate "Note (optional)" %}</label><input class="input" id="to-opt-note" maxlength="80" placeholder="{% translate 'e.g. no onions' %}"></div>
+    <div class="row" style="gap:.5rem; margin-top:1rem">
+      <button type="button" class="btn btn-secondary" data-close>{% translate "Cancel" %}</button>
+      <button type="button" class="btn" id="to-opt-add" style="flex:1; justify-content:center">{% translate "Add" %}</button>
+    </div>
+    <p class="alert alert-error is-hidden" id="to-opt-error" style="margin-top:.6rem"></p>
+  </div></div>
+
+  <div class="to-sheet is-hidden" id="to-cart" role="dialog" aria-modal="true"><div class="to-sheet-body">
+    <h2>{% translate "Your order" %} · {% translate "Table" %} {{ table.name }}</h2>
+    <div id="to-cart-lines"></div>
+    <form method="post" id="to-send">{% csrf_token %}
+      <input type="hidden" name="kind" value="order"><input type="hidden" name="cart" id="to-cart-json">
+      <div class="field" style="margin-top:.8rem"><label for="to-note">{% translate "Anything we should know? (optional)" %}</label><input class="input" name="note" id="to-note" maxlength="200"></div>
+      <p style="display:flex; justify-content:space-between; font-size:1.1rem"><span>{% translate "Total" %}</span><strong id="to-cart-total"></strong></p>
+      <div class="row" style="gap:.5rem">
+        <button type="button" class="btn btn-secondary" data-close>{% translate "Back" %}</button>
+        <button class="btn" style="flex:1; justify-content:center">{% icon "send" %} {% translate "Send order" %}</button>
+      </div>
+    </form>
+  </div></div>
+
+  {{ catalog|json_script:"to-catalog" }}
+  <svg style="display:none"><symbol id="i-send" viewBox="0 0 24 24"><path d="M21.5 2.5 10.5 13.5M21.5 2.5l-7 19-4-8-8-4z"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/></symbol><symbol id="i-receipt" viewBox="0 0 24 24"><path d="M5 2.5h14v19l-2.3-1.5-2.4 1.5-2.3-1.5-2.3 1.5L7.3 20 5 21.5z"/><path d="M8.5 7h7M8.5 11h7M8.5 15h4"/></symbol></svg>
+<script>
+(function () {
+  var catalog = JSON.parse(document.getElementById('to-catalog').textContent);
+  var key = 'innkeeper-cart-{{ table.qr_token|escapejs }}', cart = [], editing = null;
+  var symbol = '{{ hotel.currency_symbol|escapejs }}';
+  function money(v) { var p = (Math.round(v * 100) / 100).toFixed(2).split('.'); return p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + '.' + p[1] + ' ' + symbol; }
+  function load() { try { cart = JSON.parse(localStorage.getItem(key) || '[]') || []; } catch (e) { cart = []; } cart = cart.filter(function (l) { return catalog[l.item]; }); }
+  function save() { try { localStorage.setItem(key, JSON.stringify(cart)); } catch (e) {} }
+  function linePrice(l) {
+    var it = catalog[l.item], p = parseFloat(it.price);
+    it.groups.forEach(function (g) { g.options.forEach(function (o) { if (l.options.indexOf(o.id) >= 0) p += parseFloat(o.price); }); });
+    return p;
+  }
+  function optionNames(l) {
+    var n = []; catalog[l.item].groups.forEach(function (g) { g.options.forEach(function (o) { if (l.options.indexOf(o.id) >= 0) n.push(o.name); }); });
+    return n.join(', ');
+  }
+  function draw() {
+    var count = 0, total = 0;
+    cart.forEach(function (l) { count += l.quantity; total += linePrice(l) * l.quantity; });
+    document.getElementById('to-bar').classList.toggle('is-hidden', !count);
+    document.getElementById('to-count').textContent = count;
+    document.getElementById('to-total').textContent = money(total);
+    document.getElementById('to-cart-total').textContent = money(total);
+    var box = document.getElementById('to-cart-lines'); box.innerHTML = '';
+    cart.forEach(function (l, i) {
+      var row = document.createElement('div'); row.className = 'to-cart-line';
+      var left = document.createElement('div'), name = document.createElement('strong');
+      name.textContent = catalog[l.item].name; left.appendChild(name);
+      var extra = [optionNames(l), l.note].filter(Boolean).join(' · ');
+      if (extra) { var s = document.createElement('small'); s.className = 'muted'; s.textContent = ' · ' + extra; left.appendChild(s); }
+      var q = document.createElement('div'); q.className = 'to-qty';
+      var minus = document.createElement('button'); minus.type = 'button'; minus.textContent = '−'; minus.setAttribute('aria-label', '−');
+      var n = document.createElement('span'); n.textContent = l.quantity;
+      var plus = document.createElement('button'); plus.type = 'button'; plus.textContent = '+'; plus.setAttribute('aria-label', '+');
+      minus.onclick = function () { l.quantity -= 1; if (l.quantity < 1) cart.splice(i, 1); save(); draw(); if (!cart.length) close(); };
+      plus.onclick = function () { if (l.quantity < 20) l.quantity += 1; save(); draw(); };
+      q.appendChild(minus); q.appendChild(n); q.appendChild(plus);
+      row.appendChild(left); row.appendChild(q); box.appendChild(row);
+    });
+  }
+  function add(item, options, note) {
+    var same = cart.filter(function (l) { return l.item === item && l.note === note && l.options.join() === options.join(); })[0];
+    if (same) same.quantity = Math.min(20, same.quantity + 1); else cart.push({ item: item, quantity: 1, options: options, note: note });
+    save(); draw();
+  }
+  function open(id) { document.getElementById(id).classList.remove('is-hidden'); }
+  function close() { document.querySelectorAll('.to-sheet').forEach(function (s) { s.classList.add('is-hidden'); }); }
+  document.querySelectorAll('[data-close]').forEach(function (b) { b.onclick = close; });
+  document.querySelectorAll('.to-sheet').forEach(function (s) { s.addEventListener('click', function (e) { if (e.target === s) close(); }); });
+  document.querySelectorAll('.to-add').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var id = b.dataset.item, it = catalog[id];
+      if (!it.groups.length) { add(id, [], ''); b.textContent = '✓'; setTimeout(function () { b.textContent = '+'; }, 700); return; }
+      editing = id;
+      document.getElementById('to-opt-title').textContent = it.name;
+      document.getElementById('to-opt-note').value = '';
+      document.getElementById('to-opt-error').classList.add('is-hidden');
+      var box = document.getElementById('to-opt-groups'); box.innerHTML = '';
+      it.groups.forEach(function (g) {
+        var fs = document.createElement('fieldset'); fs.className = 'to-group'; fs.style.border = '0'; fs.style.padding = '0';
+        var lg = document.createElement('legend'); lg.textContent = g.name + (g.required ? ' *' : ''); fs.appendChild(lg);
+        g.options.forEach(function (o, k) {
+          var lab = document.createElement('label'), inp = document.createElement('input'), span = document.createElement('span');
+          inp.type = g.multiple ? 'checkbox' : 'radio'; inp.name = 'g' + g.id; inp.value = o.id;
+          if (g.required && !g.multiple && k === 0) inp.checked = true;
+          span.appendChild(inp); span.appendChild(document.createTextNode(' ' + o.name)); lab.appendChild(span);
+          var pr = document.createElement('span'); pr.className = 'muted'; pr.textContent = parseFloat(o.price) ? '+' + money(parseFloat(o.price)) : ''; lab.appendChild(pr);
+          fs.appendChild(lab);
+        });
+        box.appendChild(fs);
+      });
+      open('to-options');
+    });
+  });
+  document.getElementById('to-opt-add').onclick = function () {
+    var it = catalog[editing], options = [], missing = null;
+    it.groups.forEach(function (g) {
+      var picked = Array.prototype.map.call(document.querySelectorAll('input[name="g' + g.id + '"]:checked'), function (x) { return parseInt(x.value, 10); });
+      if (g.required && !picked.length) missing = g.name;
+      options = options.concat(picked);
+    });
+    if (missing) { var er = document.getElementById('to-opt-error'); er.textContent = '{% translate "Choose:" %} ' + missing; er.classList.remove('is-hidden'); return; }
+    add(editing, options.sort(function (a, b) { return a - b; }), document.getElementById('to-opt-note').value.trim().slice(0, 80));
+    close();
+  };
+  document.getElementById('to-open-cart').onclick = function () { open('to-cart'); };
+  document.getElementById('to-send').addEventListener('submit', function (e) {
+    if (!cart.length) { e.preventDefault(); return; }
+    document.getElementById('to-cart-json').value = JSON.stringify(cart);
+  });
+  load();
+  {% if sent == "order" and not error %}cart = []; save();{% endif %}
+  draw();
+  // Keep the status of this phone's orders up to date.
+  var waiting = document.querySelectorAll('[data-status="pending"]');
+  if (waiting.length) {
+    var t = setInterval(function () {
+      fetch('{% url "menu:table_status" table.qr_token %}').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+        if (!d) return;
+        var changed = Array.prototype.some.call(waiting, function (el) { return d.requests[el.dataset.req] && d.requests[el.dataset.req] !== 'pending'; });
+        if (changed) { clearInterval(t); location.href = location.pathname + '?lang={{ lang }}'; }
+      }).catch(function () {});
+    }, 8000);
+  }
+})();
+</script>
+</body>
+</html>

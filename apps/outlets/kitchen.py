@@ -116,7 +116,10 @@ def floor_signature(request, pk):
         "pk", flat=True
     )
     lines = OrderLine.objects.filter(order__outlet_id=pk, order__status=Order.Status.OPEN).values_list("pk", "quantity")
-    raw = f"{sorted(orders)}|{sorted(ready)}|{sorted(lines)}"
+    from .models import GuestRequest
+
+    asking = GuestRequest.objects.filter(outlet_id=pk, status=GuestRequest.Status.PENDING).values_list("pk", flat=True)
+    raw = f"{sorted(orders)}|{sorted(ready)}|{sorted(lines)}|{sorted(asking)}"
     ready_orders = (
         Order.objects.filter(pk__in=KitchenTicket.objects.filter(pk__in=list(ready)).values("order_id"))
         .select_related("table")

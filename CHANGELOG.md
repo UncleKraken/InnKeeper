@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.17.0 — ordering from the table (QR)
+
+**Shqip**
+
+- **Porosia nga tavolina:** çdo tavolinë merr kartën e vet QR (*Pikat & menutë → Menuja → Printo kodet e tavolinave*). Klientët porosisin nga telefoni, me opsione dhe shënim, në shqip ose anglisht; mund edhe të thërrasin kamarierin ose të kërkojnë faturën.
+- **Stafi pranon çdo porosi:** te *Porositë nga tavolina* (me numër të kuq, zile dhe ikonë në planin e sallës). *Prano dhe dërgo* e shton në faturën e tavolinës dhe e dërgon direkt në kuzhinë/bar; *Refuzo* me arsye që klienti e sheh në telefon. Asgjë nuk shkon në faturë pa u pranuar.
+- **E sigurt:** kufi kërkesash për telefon dhe për tavolinë, vetëm artikujt në dispozicion të asaj pike, kërkesat pa përgjigje skadojnë pas një ore, dhe *Krijo kode të reja* çaktivizon kartat e vjetra.
+- Ndizeni për çdo pikë te cilësimet e saj: *Klientët porosisin nga tavolina*.
+
+**English**
+
+- **Ordering from the table:** each table gets its own QR card (*Outlets & menus → Menu → Print table codes*). Guests order from their phone, with options and a note, in Albanian or English; they can also call the waiter or ask for the bill.
+- **Staff accept every order:** under *Table orders* (with a red count, a chime and an icon on the floor plan). *Accept and send* puts it on the table's bill and straight to the kitchen/bar; *Decline* with a reason the guest sees on their phone. Nothing reaches a bill without being accepted.
+- **Safe:** limits per phone and per table, only that outlet's available items, unanswered requests expire after an hour, and *Make new codes* stops old cards working.
+- Turn it on per outlet in its settings: *Guests can order from the table*.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.17.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.16.0 — tourist tax
 
 **Shqip**

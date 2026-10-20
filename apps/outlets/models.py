@@ -117,6 +117,14 @@ class Outlet(models.Model):
         _("public menu"), default=True, help_text=_("Guests can open this menu on their phone by scanning a QR code.")
     )
     menu_intro = models.CharField(_("menu introduction"), max_length=255, blank=True)
+    qr_ordering = models.BooleanField(
+        _("guests can order from the table"),
+        default=False,
+        help_text=_(
+            "Each table gets its own QR code. Guests choose from the menu on their phone, call the waiter or ask "
+            "for the bill; staff accept each order before it goes to the kitchen."
+        ),
+    )
     menu_token = models.CharField(max_length=24, unique=True, editable=False, default="")
     receipt_printer = models.ForeignKey(
         Printer,
@@ -342,6 +350,7 @@ class Table(models.Model):
     height = models.PositiveSmallIntegerField(default=90)
     sort_order = models.PositiveSmallIntegerField(_("order"), default=0)
     is_active = models.BooleanField(_("active"), default=True)
+    qr_token = models.CharField(max_length=24, editable=False, default="", db_index=True)
 
     class Meta:
         verbose_name = _("table")
@@ -354,6 +363,11 @@ class Table(models.Model):
 
     def open_order(self):
         return self.orders.filter(status=Order.Status.OPEN).first()
+
+    def save(self, *args, **kwargs):
+        if not self.qr_token:
+            self.qr_token = secrets.token_urlsafe(9)
+        super().save(*args, **kwargs)
 
 
 class TableBooking(models.Model):
@@ -601,3 +615,46 @@ class PrintJob(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+class GuestRequest(models.Model):
+    """Sent by a guest from the QR code on their table: an order (accepted by staff before it reaches the
+    bill and the kitchen), a call for the waiter, or a request for the bill."""
+
+    class Kind(models.TextChoices):
+        ORDER = "order", _("Order")
+        WAITER = "waiter", _("Call the waiter")
+        BILL = "bill", _("Bill, please")
+
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Waiting")
+        ACCEPTED = "accepted", _("Accepted")
+        DECLINED = "declined", _("Declined")
+        DONE = "done", _("Done")
+
+    outlet = models.ForeignKey(Outlet, on_delete=models.CASCADE, related_name="guest_requests")
+    table = models.ForeignKey(Table, on_delete=models.CASCADE, related_name="guest_requests")
+    kind = models.CharField(max_length=8, choices=Kind.choices, default=Kind.ORDER)
+    # [{"item": id, "name": "...", "quantity": n, "options": [ids], "option_names": "...", "price": "..."}]
+    lines = models.JSONField(default=list, blank=True)
+    note = models.CharField(_("note"), max_length=200, blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING, db_index=True)
+    reason = models.CharField(_("reason"), max_length=120, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    handled_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    handled_at = models.DateTimeField(null=True, blank=True)
+    order = models.ForeignKey("Order", null=True, blank=True, on_delete=models.SET_NULL, related_name="guest_requests")
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.table} · {self.get_kind_display()}"
+
+    @property
+    def total(self) -> Decimal:
+        return sum((Decimal(x.get("price", "0")) * int(x.get("quantity", 1)) for x in self.lines), Decimal("0"))
+
+    @property
+    def item_count(self) -> int:
+        return sum(int(x.get("quantity", 1)) for x in self.lines)

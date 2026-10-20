@@ -57,6 +57,7 @@
            title="{{ t.table.name }} · {{ t.table.seats }}">
           {% if t.order.has_ready %}<span class="p-ready" title="{% translate 'Ready to serve' %}"></span>{% endif %}
           {% if t.order.has_unsent %}<span class="p-new" title="{% translate 'Not sent to the kitchen' %}"></span>{% endif %}
+          {% if t.asking %}<span class="p-asking" title="{% translate 'The guests sent a request from the QR code' %}">{% icon "qr" %}</span>{% endif %}
           <span class="p-name">{{ t.table.name }}</span>
           {% if t.order %}<span class="p-total">{{ t.order.total|money }}</span><span class="p-meta">{{ t.order.opened_at|time:"H:i" }}</span>
           {% elif t.booking %}<span class="p-booked">{{ t.booking.time|time:"H:i" }} · {{ t.booking.name|truncatechars:14 }} ({{ t.booking.party_size }})</span>
@@ -69,6 +70,7 @@
     {% for t in tables %}
       <a class="table-tile {% if t.order %}busy{% endif %}" href="{% url 'outlets:open_table' outlet.pk t.table.pk %}">
         {% if t.order.has_ready %}<span class="p-ready"></span>{% endif %}
+        {% if t.asking %}<span class="p-asking">{% icon "qr" %}</span>{% endif %}
         <div><div class="t-name">{{ t.table.name }}</div><div class="t-meta">{% blocktranslate count n=t.table.seats %}{{ n }} seat{% plural %}{{ n }} seats{% endblocktranslate %}</div></div>
         {% if t.order %}<div><div class="t-total">{{ t.order.total|money }}</div><div class="t-meta">{{ t.order.opened_by|default:"" }} · {{ t.order.opened_at|time:"H:i" }}</div></div>
         {% elif t.booking %}<div class="t-meta p-booked">{% translate "Reserved" %} {{ t.booking.time|time:"H:i" }}<br>{{ t.booking.name }} ({{ t.booking.party_size }}){% if t.booking.minimum_spend %} · min. {{ t.booking.minimum_spend|money }}{% endif %}</div>

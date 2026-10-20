@@ -57,6 +57,7 @@ FULL_MODELS = [
     "outlets.TableBooking",
     "outlets.KitchenTicket",
     "outlets.OrderLine",
+    "outlets.GuestRequest",
     "finance.CustomerAccount",
     "finance.Shift",
     "finance.Folio",

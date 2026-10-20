@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Table orders" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Restaurant, bar & services" %}</div><h1>{% translate "Table orders" %}</h1><p>{% translate "Sent by guests from the QR code on their table. Nothing goes on the bill or to the kitchen until you accept it." %}</p></div>
+</div>
+<div class="stack">
+  {% for r in pending %}
+    <section class="card greq greq-{{ r.kind }}">
+      <div class="card-header"><h2>{{ r.outlet.name }} · {% translate "Table" %} {{ r.table.name }}</h2><span class="muted">{{ r.created_at|time:"H:i" }} · {{ r.created_at|timesince }}</span></div>
+      <div class="card-body">
+        {% if r.kind == "order" %}
+          <ul class="greq-lines">
+            {% for l in r.lines %}<li><span><strong>{{ l.quantity }} ×</strong> {{ l.name }}{% if l.option_names %} <small>· {{ l.option_names }}</small>{% endif %}{% if l.note %} <small>· {{ l.note }}</small>{% endif %}</span><span class="num">{{ l.price|money }}</span></li>{% endfor %}
+          </ul>
+          <p style="margin:.5rem 0 0; display:flex; justify-content:space-between"><span class="muted">{% if r.note %}“{{ r.note }}”{% endif %}</span><strong>{{ r.total|money }}</strong></p>
+        {% else %}
+          <p style="margin:0; font-size:1.15rem"><strong>{{ r.get_kind_display }}</strong>{% if r.note %} · “{{ r.note }}”{% endif %}</p>
+        {% endif %}
+      </div>
+      <div class="card-footer greq-actions">
+        <form method="post" action="{% url 'outlets:guest_request_accept' r.pk %}">{% csrf_token %}<button class="btn">{% icon "check" %} {% if r.kind == "order" %}{% translate "Accept and send" %}{% else %}{% translate "Done" %}{% endif %}</button></form>
+        {% if r.kind == "order" %}
+        <form method="post" action="{% url 'outlets:guest_request_decline' r.pk %}" class="greq-actions">{% csrf_token %}
+          <input class="input" name="reason" placeholder="{% translate 'Reason for the guest (optional)' %}" maxlength="120">
+          <button class="btn btn-secondary">{% icon "x" %} {% translate "Decline" %}</button>
+        </form>
+        {% endif %}
+      </div>
+    </section>
+  {% empty %}
+    <div class="card"><div class="card-body empty"><p>{% translate "No table orders waiting. This page updates itself and chimes when one arrives." %}</p></div></div>
+  {% endfor %}
+
+  {% if recent %}
+  <section class="card card-flush">
+    <div class="card-header"><h2>{% translate "Answered in the last 3 hours" %}</h2></div>
+    <div class="table-wrap"><table class="table table-sm"><tbody>
+      {% for r in recent %}<tr><td>{{ r.handled_at|time:"H:i" }}</td><td>{{ r.outlet.name }} · {{ r.table.name }}</td><td>{{ r.get_kind_display }}{% if r.kind == "order" %} · {{ r.item_count }}{% endif %}</td><td>{{ r.get_status_display }}{% if r.reason %} <small class="muted">· {{ r.reason }}</small>{% endif %}</td><td>{{ r.handled_by|default:"" }}</td><td class="num">{% if r.order_id %}<a href="{% url 'outlets:order' r.order_id %}">#{{ r.order.number }}</a>{% endif %}</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

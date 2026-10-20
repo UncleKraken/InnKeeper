@@ -99,9 +99,16 @@ def floor(request, pk):
     zone = request.GET.get("zone", zones[0] if zones else "")
     if zone not in zones and zones:
         zone = zones[0]
+    asking = set()
+    if outlet.qr_ordering:
+        from .guest_orders import fresh
+        from .models import GuestRequest
+
+        asking = set(fresh(GuestRequest.objects.filter(outlet=outlet, status=GuestRequest.Status.PENDING)).values_list("table_id", flat=True))
     tables = [
         {
             "table": t,
+            "asking": t.pk in asking,
             "order": by_table.get(t.pk),
             "left": t.pos_x / 10,
             "top": t.pos_y / 6.4,
@@ -649,6 +656,7 @@ class OutletForm(StyledFormMixin, forms.ModelForm):
             "fiscal_opening_cash",
             "menu_public",
             "menu_intro",
+            "qr_ordering",
             "sort_order",
             "is_active",
             "staff",
