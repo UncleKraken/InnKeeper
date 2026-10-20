@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Send goods" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="eyebrow"><a href="{% url 'inventory:transfers' %}">{% icon "back" %} {% translate "Transfers" %}</a></div><h1>{% translate "Send goods" %}</h1><p>{% translate "Write how much of each item leaves for your other business. It is taken out of stock at its average cost." %}</p></div></div>
+<form method="post" class="stack">{% csrf_token %}
+  <section class="card"><div class="card-body form-grid">
+    <div class="field"><label for="to">{% translate "To which business" %} <span class="req">*</span></label><input class="input" id="to" name="to" maxlength="120" list="businesses" value="{{ posted.to|default:'' }}" required><datalist id="businesses">{% for b in businesses %}<option value="{{ b }}">{% endfor %}</datalist></div>
+    <div class="field"><label for="note">{% translate "Note" %}</label><input class="input" id="note" name="note" maxlength="255" value="{{ posted.note|default:'' }}"></div>
+  </div></section>
+  <section class="card card-flush"><div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Item" %}</th><th class="num">{% translate "In stock" %}</th><th class="num">{% translate "Cost" %}</th><th class="num" style="width:10rem">{% translate "Send" %}</th></tr></thead>
+    <tbody>{% for i in items %}<tr>
+      <td><strong>{{ i.name }}</strong> <span class="muted">{{ i.get_unit_display }}</span></td><td class="num">{{ i.on_hand|qty }}</td><td class="num">{{ i.cost|money }}</td>
+      <td class="num"><input class="input num" name="q{{ i.pk }}" inputmode="decimal" autocomplete="off" value="{{ posted|get_item:i.pk|default_if_none:'' }}" aria-label="{% translate 'Send' %} {{ i.name }}"></td>
+    </tr>{% empty %}<tr><td colspan="4" class="empty">{% translate "Nothing in stock." %}</td></tr>{% endfor %}</tbody>
+  </table></div></section>
+  <div class="form-actions"><a class="btn btn-secondary" href="{% url 'inventory:transfers' %}">{% translate "Cancel" %}</a><button class="btn" data-confirm="{% translate 'Take these goods out of stock?' %}">{% icon "upload" %} {% translate "Send" %}</button></div>
+</form>
+{% endblock %}

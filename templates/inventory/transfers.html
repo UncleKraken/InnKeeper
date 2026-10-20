@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Transfers" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Stock" %}</div><h1>{% translate "Transfers" %}</h1><p>{% translate "Goods moved between your businesses: the sender takes them out of stock and gets a code; the receiver pastes it to take them in at the same cost." %}</p></div>
+  <div class="actions">
+    <a class="btn btn-secondary" href="{% url 'inventory:transfer_receive' %}">{% icon "download" %} {% translate "Receive a transfer" %}</a>
+    <a class="btn" href="{% url 'inventory:transfer_send' %}">{% icon "upload" %} {% translate "Send goods" %}</a>
+  </div>
+</div>
+{% include "inventory/_tabs.html" %}
+<section class="card card-flush"><div class="table-wrap"><table class="table">
+  <thead><tr><th>{% translate "Date" %}</th><th>{% translate "Code" %}</th><th></th><th>{% translate "Business" %}</th><th class="num">{% translate "Lines" %}</th><th class="num">{% translate "Value" %}</th></tr></thead>
+  <tbody>
+    {% for t in transfers %}<tr>
+      <td>{{ t.created_at|date:"d.m.Y H:i" }}</td><td><a href="{% url 'inventory:transfer_detail' t.pk %}" class="mono">{{ t.code }}</a></td>
+      <td>{% if t.direction == "out" %}<span class="badge b-warning">{{ t.get_direction_display }}</span>{% else %}<span class="badge b-success">{{ t.get_direction_display }}</span>{% endif %}</td>
+      <td>{{ t.other }}</td><td class="num">{{ t.lines|length }}</td><td class="num">{{ t.total|money }}</td>
+    </tr>{% empty %}<tr><td colspan="6" class="empty">{% translate "No transfers yet." %}</td></tr>{% endfor %}
+  </tbody>
+</table></div></section>
+<p class="muted" style="font-size:.85rem; margin-top:1rem">{% translate "Between separate companies a transfer is a sale for tax purposes: make the invoice as usual. InnKeeper only moves the stock." %}</p>
+{% endblock %}

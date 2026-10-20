@@ -108,3 +108,35 @@ class GroupOverviewTests(HotelTestCase):
     def test_connection_banner_is_on_every_page(self):
         self.client.login(username="boss", password=PASSWORD)
         self.assertContains(self.client.get("/"), 'id="conn-banner"')
+
+
+class GroupMonthTests(HotelTestCase):
+    def test_shared_month_and_report(self):
+        from datetime import date
+
+        from apps.finance.models import Charge
+
+        hs = HotelSettings.load()
+        hs.group_token = "k" * 43
+        hs.save()
+        Charge.objects.create(kind="extra", description="x", quantity=1, unit_price=D("100"), business_date=date(2026, 9, 10))
+        self.assertEqual(self.client.get(reverse("core:group_month_shared") + "?month=2026-09").status_code, 403)
+        r = self.client.get(reverse("core:group_month_shared") + "?month=2026-09", HTTP_AUTHORIZATION="Bearer " + "k" * 43)
+        self.assertEqual(r.json()["sales"], "100.00")
+        GroupMember.objects.create(name="Bar", url="http://100.64.0.9:8765", token="k1")
+        remote = {"name": "Bar", "symbol": "€", "currency": "EUR", "sales": "250.00", "received": "250.00", "expenses": "50.00",
+                  "profit": "200.00", "vat": "41.67", "tourist_tax": "0", "discounts": "0", "bills": 30}
+
+        def fake(req, timeout):
+            self.assertIn("/group/month/?month=2026-09", req.full_url)
+            return FakeResponse(json.dumps(remote).encode())
+
+        self.client.login(username="boss", password=PASSWORD)
+        with mock.patch("urllib.request.urlopen", side_effect=fake):
+            r = self.client.get(reverse("core:group_month") + "?month=2026-09")
+        self.assertEqual(r.context["totals"]["sales"], D("350.00"))
+        with mock.patch("urllib.request.urlopen", side_effect=urllib.error.URLError("down")):
+            r = self.client.get(reverse("core:group_month") + "?month=2026-09")
+        self.assertIsNone(r.context["totals"])  # no misleading partial total
+        with mock.patch("urllib.request.urlopen", side_effect=fake):
+            self.assertEqual(self.client.get(reverse("core:group_month") + "?month=2026-09&format=xlsx").status_code, 200)

@@ -169,6 +169,7 @@ class StockMove(models.Model):
         WASTE = "waste", _("Waste / breakage")
         COUNT = "count", _("Count correction")
         ADJUST = "adjust", _("Adjustment")
+        TRANSFER = "transfer", _("Sent to another business")
 
     stock_item = models.ForeignKey(StockItem, on_delete=models.CASCADE, related_name="moves")
     kind = models.CharField(_("type"), max_length=12, choices=Kind.choices)
@@ -181,6 +182,7 @@ class StockMove(models.Model):
     )
     delivery = models.ForeignKey(Delivery, null=True, blank=True, on_delete=models.CASCADE, related_name="moves")
     count = models.ForeignKey(StockCount, null=True, blank=True, on_delete=models.CASCADE, related_name="moves")
+    transfer = models.ForeignKey("StockTransfer", null=True, blank=True, on_delete=models.CASCADE, related_name="moves")
     balance = models.DecimalField(_("in stock after"), default=ZERO, **QTY)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -258,3 +260,30 @@ class PurchaseOrderLine(models.Model):
     @property
     def total(self) -> Decimal:
         return (self.quantity * self.unit_cost).quantize(Decimal("0.01"))
+
+
+class StockTransfer(models.Model):
+    """Goods moved between the owner's businesses. The sender records them going out and gets a code;
+    the receiver pastes the code and takes them in at the same cost (as a delivery)."""
+
+    class Direction(models.TextChoices):
+        OUT = "out", _("Sent")
+        IN = "in", _("Received")
+
+    code = models.CharField(_("code"), max_length=20, db_index=True)
+    direction = models.CharField(max_length=3, choices=Direction.choices)
+    other = models.CharField(_("business"), max_length=120)
+    lines = models.JSONField(default=list)  # [{"name", "unit", "quantity", "unit_cost"}]
+    total = models.DecimalField(_("value"), default=ZERO, **MONEY)
+    note = models.CharField(_("note"), max_length=255, blank=True)
+    business_date = models.DateField(_("date"), default=business_date)
+    delivery = models.ForeignKey(Delivery, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [models.UniqueConstraint(fields=["code", "direction"], name="unique_transfer_code_per_direction")]
+
+    def __str__(self) -> str:
+        return self.code

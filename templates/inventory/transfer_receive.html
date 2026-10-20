@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Receive a transfer" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="eyebrow"><a href="{% url 'inventory:transfers' %}">{% icon "back" %} {% translate "Transfers" %}</a></div><h1>{% translate "Receive a transfer" %}</h1><p>{% translate "Paste the code the other business gave you, or open its file. You check the items before anything goes into stock." %}</p></div></div>
+{% if not data %}
+<form method="post" enctype="multipart/form-data" class="card" style="max-width:760px">{% csrf_token %}
+  <div class="card-body">
+    <div class="field"><label for="code">{% translate "Transfer code" %}</label><textarea class="input mono" id="code" name="code" rows="4" placeholder="IKT1.…" style="font-size:.8rem"></textarea></div>
+    <div class="field"><label for="file">{% translate "or the file" %}</label><input class="input" type="file" id="file" name="file" accept=".txt,text/plain"></div>
+  </div>
+  <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% translate "Check" %}</button></div>
+</form>
+{% else %}
+<form method="post" class="stack">{% csrf_token %}<input type="hidden" name="code" value="{{ code }}"><input type="hidden" name="confirm" value="1">
+  <section class="card"><div class="card-body">
+    <strong>{{ data.code }}</strong> · {% translate "from" %} <strong>{{ data.from }}</strong>{% if data.date %} · {{ data.date }}{% endif %}{% if data.note %}<div class="muted">{{ data.note }}</div>{% endif %}
+  </div></section>
+  <section class="card card-flush"><div class="table-wrap"><table class="table">
+    <thead><tr><th>{% translate "Their item" %}</th><th class="num">{% translate "Quantity" %}</th><th class="num">{% translate "Cost" %}</th><th>{% translate "Our stock item" %}</th></tr></thead>
+    <tbody>{% for l in lines %}<tr>
+      <td>{{ l.name }}</td><td class="num">{{ l.quantity|qty }} {{ l.unit_label }}</td><td class="num">{{ l.unit_cost|money }}</td>
+      <td><select class="input" name="m{{ forloop.counter0 }}" aria-label="{% translate 'Our stock item' %}">
+        <option value="">{% blocktranslate with n=l.name %}New item: {{ n }}{% endblocktranslate %}</option>
+        {% for s in stock_items %}<option value="{{ s.pk }}" {% if l.match and l.match.pk == s.pk %}selected{% endif %}>{{ s.name }} ({{ s.get_unit_display }})</option>{% endfor %}
+      </select></td>
+    </tr>{% endfor %}</tbody>
+  </table></div></section>
+  <div class="form-actions"><a class="btn btn-secondary" href="{% url 'inventory:transfer_receive' %}">{% translate "Cancel" %}</a><button class="btn">{% icon "check" %} {% translate "Take into stock" %}</button></div>
+</form>
+{% endif %}
+{% endblock %}

@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.24.0 — group month report and stock transfers
+
+**Shqip**
+
+- **Raporti mujor i grupit** (*Pamja e grupit → Raporti mujor*): muaji i çdo biznesi krah për krah — shitjet, paratë e marra, shpenzimet, fitimi, TVSH, taksa e turizmit, zbritjet, kuponat, zënia e dhomave — me totale dhe Excel. Totali del vetëm kur janë përgjigjur të gjitha bizneset, që të mos jetë i pjesshëm.
+- **Transferimi i mallit mes bizneseve** (*Stoku → Transferimet*): dërguesi e heq mallin nga stoku dhe merr një kod; marrësi e ngjit, kontrollon artikujt dhe e fut në stok me të njëjtën kosto. Çdo kod merret vetëm një herë. Asnjë biznes nuk mund të ndryshojë të dhënat e tjetrit.
+
+**English**
+
+- **Group month report** (*Group overview → Month report*): each business's month side by side — sales, money received, expenses, profit, VAT, tourist tax, discounts, receipts, room occupancy — with totals and Excel. A total appears only when every business answered, so it's never partial.
+- **Moving goods between businesses** (*Stock → Transfers*): the sender takes the goods out of stock and gets a code; the receiver pastes it, checks the items and takes them into stock at the same cost. Each code can be received once. No business can change another's data.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.24.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.23.0 — breakfast and minibar
 
 **Shqip**

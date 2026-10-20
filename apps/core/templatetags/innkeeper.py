@@ -96,3 +96,12 @@ def stamp_range(n):
         return range(min(int(n), 30))
     except (TypeError, ValueError):
         return range(0)
+
+
+@register.filter
+def mul(a, b):
+    """a × b as money-safe decimals (quantity × price)."""
+    try:
+        return (Decimal(str(a)) * Decimal(str(b))).quantize(Decimal("0.01"))
+    except (InvalidOperation, TypeError, ValueError):
+        return ""

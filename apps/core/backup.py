@@ -74,6 +74,7 @@ FULL_MODELS = [
     "inventory.RecipeLine",
     "inventory.Delivery",
     "inventory.StockCount",
+    "inventory.StockTransfer",
     "inventory.StockMove",
     "inventory.PurchaseOrder",
     "inventory.PurchaseOrderLine",

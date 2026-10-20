@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Group month" %} {{ start|date:"m.Y" }}{% endblock %}
+{% block content %}
+<div class="page-header no-print">
+  <div><div class="eyebrow">{% translate "Group overview" %}</div><h1>{% translate "Group month" %}</h1><p>{% translate "Each business's month side by side, read from its own InnKeeper." %}</p></div>
+  <div class="actions">
+    <form method="get" class="filters"><div class="field"><label for="month">{% translate "Month" %}</label><input class="input" type="month" id="month" name="month" value="{{ month_value }}" onchange="this.form.submit()"></div></form>
+    <a class="btn btn-secondary" href="?month={{ month_value }}&format=xlsx">{% icon "download" %} {% translate "Excel" %}</a>
+    <button class="btn btn-secondary" onclick="window.print()">{% icon "print" %} {% translate "Print / PDF" %}</button>
+    <a class="btn btn-secondary" href="{% url 'core:group' %}">{% translate "Today" %}</a>
+  </div>
+</div>
+<div class="month-doc">
+  <div class="doc-head"><div class="doc-title">{% translate "Group month" %}</div><div>{{ start|date:"F Y" }}</div></div>
+  <section class="card card-flush"><div class="table-wrap"><table class="table">
+    <thead><tr><th></th>{% for c in columns %}<th class="num">{{ c.name }}{% if c.here %} <small class="muted" style="font-weight:400">· {% translate "this computer" %}</small>{% endif %}</th>{% endfor %}{% if totals %}<th class="num">{% translate "Total" %}</th>{% endif %}</tr></thead>
+    <tbody>
+      {% for key, label in rows %}
+      <tr><td>{{ label }}</td>
+        {% for c in columns %}<td class="num">{% if c.data.error %}{% if forloop.parentloop.first %}<span style="color:var(--warning); font-size:.85rem">{{ c.data.error }}</span>{% endif %}{% else %}{% with v=c.data|get_item:key %}{% if key == "occupancy" %}{{ v|default:"—" }}{% if v %}%{% endif %}{% elif key == "bills" %}{{ v }}{% else %}{{ v|money:c.data.symbol }}{% endif %}{% endwith %}{% endif %}</td>{% endfor %}
+        {% if totals %}<td class="num"><strong>{% with v=totals|get_item:key %}{% if v is not None %}{{ v|money:symbol }}{% endif %}{% endwith %}</strong></td>{% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table></div></section>
+  {% if not totals and columns|length > 1 %}<p class="muted" style="font-size:.85rem">{% translate "No total: the businesses use different currencies, or one could not be reached." %}</p>{% endif %}
+</div>
+{% endblock %}

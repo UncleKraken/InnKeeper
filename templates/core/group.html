@@ -5,6 +5,7 @@
 <div class="page-header">
   <div><div class="eyebrow">{% translate "Management" %}</div><h1>{% translate "Group overview" %}</h1><p>{% translate "All your businesses on one page. Each one keeps its own InnKeeper and data; this page only reads a short summary." %}</p></div>
   <div class="actions">
+    <a class="btn btn-secondary" href="{% url 'core:group_month' %}">{% icon "chart" %} {% translate "Month report" %}</a>
     <a class="btn btn-secondary" href="?refresh=1">{% icon "sync" %} {% translate "Refresh" %}</a>
     <a class="btn" href="{% url 'core:group_add' %}">{% icon "plus" %} {% translate "Add a business" %}</a>
   </div>
