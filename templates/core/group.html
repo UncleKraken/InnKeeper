@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Group overview" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Management" %}</div><h1>{% translate "Group overview" %}</h1><p>{% translate "All your businesses on one page. Each one keeps its own InnKeeper and data; this page only reads a short summary." %}</p></div>
+  <div class="actions">
+    <a class="btn btn-secondary" href="?refresh=1">{% icon "sync" %} {% translate "Refresh" %}</a>
+    <a class="btn" href="{% url 'core:group_add' %}">{% icon "plus" %} {% translate "Add a business" %}</a>
+  </div>
+</div>
+
+{% if totals %}
+<div class="grid grid-3" style="margin-bottom:1.25rem">
+  {% for symbol, t in totals.items %}
+    <div class="card stat"><div class="stat-label">{% translate "Sales today, all businesses" %}</div><div class="stat-value">{{ t.sales_today|money:symbol }}</div></div>
+    <div class="card stat"><div class="stat-label">{% translate "This month so far" %}</div><div class="stat-value">{{ t.sales_month|money:symbol }}</div></div>
+    <div class="card stat"><div class="stat-label">{% translate "Received today" %}</div><div class="stat-value">{{ t.received_today|money:symbol }}</div></div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="grid grid-2" style="align-items:start">
+  {% for c in cards %}
+    <section class="card">
+      <div class="card-header">
+        <h2>{% if c.here %}{{ c.data.name }} <small class="muted" style="font-weight:400">· {% translate "this computer" %}</small>{% else %}{{ c.member.name }}{% endif %}</h2>
+        {% if not c.here %}<a href="{% url 'core:group_edit' c.member.pk %}" class="muted">{% icon "edit" %}</a>{% endif %}
+      </div>
+      <div class="card-body">
+        {% if c.data.error %}
+          <div class="alert alert-warning" style="margin:0">{{ c.data.error }}{% if c.member.last_ok_at %}<br><small>{% translate "Last reached" %}: {{ c.member.last_ok_at|date:"d.m.Y H:i" }}</small>{% endif %}</div>
+        {% else %}
+          {% with d=c.data %}
+          <dl class="dl">
+            <dt>{% translate "Sales today" %}</dt><dd><strong>{{ d.sales_today|money:d.symbol }}</strong> <small class="muted">· {% translate "yesterday" %} {{ d.sales_yesterday|money:d.symbol }}</small></dd>
+            <dt>{% translate "This month so far" %}</dt><dd>{{ d.sales_month|money:d.symbol }}</dd>
+            <dt>{% translate "Received today" %}</dt><dd>{{ d.received_today|money:d.symbol }}</dd>
+            <dt>{% translate "Open bills" %}</dt><dd>{{ d.open_bills }}{% if d.open_bills %} · {{ d.open_bills_total|money:d.symbol }}{% endif %}</dd>
+            {% if d.rooms %}<dt>{% translate "Rooms" %}</dt><dd>{% blocktranslate with a=d.rooms.in_house b=d.rooms.total p=d.rooms.occupancy %}{{ a }} of {{ b }} in house ({{ p }}%){% endblocktranslate %} · {% translate "arrivals" %} {{ d.rooms.arrivals }} · {% translate "departures" %} {{ d.rooms.departures }}</dd>{% endif %}
+            <dt>{% translate "At work now" %}</dt><dd>{{ d.at_work }}</dd>
+            <dt>{% translate "Last day close" %}</dt><dd>{{ d.last_day_close|default:"—" }}</dd>
+          </dl>
+          {% for w in d.warnings %}<div class="alert alert-warning" style="margin:.6rem 0 0">{{ w }}</div>{% endfor %}
+          {% endwith %}
+        {% endif %}
+      </div>
+    </section>
+  {% endfor %}
+</div>
+{% if not members %}
+<div class="card" style="margin-top:1.25rem"><div class="card-body">
+  <h3 style="margin-top:0">{% translate "How to add your other businesses" %}</h3>
+  <ol>
+    <li>{% translate "On the other business's InnKeeper: Settings → Group overview → Share this business's summary. Copy the key and the address." %}</li>
+    <li>{% translate "Make sure this computer can reach it: install Tailscale on both computers (free) and use its 100.x address, or use the other business's public address." %}</li>
+    <li>{% translate "Here: Add a business, paste the address and the key." %}</li>
+  </ol>
+</div></div>
+{% endif %}
+{% endblock %}

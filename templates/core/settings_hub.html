@@ -14,6 +14,7 @@
     {% if hotel.module_rooms %}<a href="?tab=booking" class="{% if tab == 'booking' %}active{% endif %}">{% icon "calendar" %} {% translate "Online booking" %}</a>{% endif %}
     {% if hotel.module_rooms %}<a href="?tab=messages" class="{% if tab == 'messages' %}active{% endif %}">{% icon "send" %} {% translate "Guest messages" %}</a>{% endif %}
     {% if hotel.module_rooms %}<a href="?tab=tourist_tax" class="{% if tab == 'tourist_tax' %}active{% endif %}">{% icon "percent" %} {% translate "Tourist tax" %}</a>{% endif %}
+    <a href="?tab=group" class="{% if tab == 'group' %}active{% endif %}">{% icon "building" %} {% translate "Group overview" %}</a>
     <a href="?tab=remote" class="{% if tab == 'remote' %}active{% endif %}">{% icon "sync" %} {% translate "Access from outside" %}</a>
     <a href="?tab=tills" class="{% if tab == 'tills' %}active{% endif %}">{% icon "lock" %} {% translate "Shared tills & PINs" %}</a>
     {% if hotel.module_outlets %}<a href="?tab=loyalty" class="{% if tab == 'loyalty' %}active{% endif %}">{% icon "gift" %} {% translate "Loyalty & gift vouchers" %}</a>{% endif %}
@@ -183,6 +184,36 @@
           <li>{% translate "Give every person their own account and a long password, and deactivate accounts of people who leave." %}</li>
           <li>{% translate "The Activity log shows every sign-in." %}</li>
         </ul>
+      </div>
+    </section>
+
+  {% elif tab == "group" %}
+    <section class="card">
+      <div class="card-header"><h2>{% translate "Group overview" %}</h2>{% if hotel.group_token %}{% translate "Sharing" as l %}{% status_badge "success" l %}{% endif %}</div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0">{% translate "Own several businesses? Each keeps its own InnKeeper and data. Share a short, read-only summary from each one (sales, money received, rooms, open bills, who is at work, warnings — no guest or staff names), and see them all on one page in the owner's InnKeeper." %}</p>
+        {% if hotel.group_token %}
+          <div class="field"><label>{% translate "Sharing key" %}</label><input class="input mono" readonly value="{{ hotel.group_token }}" onclick="this.select()"></div>
+          <div class="field"><label>{% translate "Addresses of this computer" %}</label>
+            <ul style="margin:.2rem 0 0; padding-left:1.1rem">
+              {% for a in group_addresses %}<li class="mono" style="font-size:.85rem">{{ a }}</li>{% empty %}<li class="muted">{% translate "Set up Tailscale or the public address in Access from outside." %}</li>{% endfor %}
+            </ul>
+          </div>
+          <div class="row" style="gap:.5rem; flex-wrap:wrap; margin-top:.75rem">
+            <form method="post" action="{% url 'core:group_sharing' %}" data-confirm="{% translate 'The old key stops working. Continue?' %}">{% csrf_token %}<input type="hidden" name="on" value="1"><button class="btn btn-secondary">{% translate "New key" %}</button></form>
+            <form method="post" action="{% url 'core:group_sharing' %}">{% csrf_token %}<input type="hidden" name="on" value="0"><button class="btn btn-ghost">{% translate "Stop sharing" %}</button></form>
+          </div>
+        {% else %}
+          <form method="post" action="{% url 'core:group_sharing' %}">{% csrf_token %}<input type="hidden" name="on" value="1"><button class="btn">{% icon "key" %} {% translate "Share this business's summary" %}</button></form>
+        {% endif %}
+      </div>
+    </section>
+    <section class="card">
+      <div class="card-header"><h2>{% translate "Your other businesses" %}</h2><a href="{% url 'core:group_add' %}">{% translate "Add a business" %}</a></div>
+      <div class="card-body">
+        {% if group_members %}<ul style="margin:0; padding-left:1.1rem">{% for m in group_members %}<li><a href="{% url 'core:group_edit' m.pk %}">{{ m.name }}</a> <span class="muted mono" style="font-size:.8rem">{{ m.url }}</span></li>{% endfor %}</ul>
+        <p><a class="btn" href="{% url 'core:group' %}">{% translate "Open the group overview" %}</a></p>
+        {% else %}<p class="muted" style="margin:0">{% translate "None yet. Add the businesses whose summary you want to see here." %}</p>{% endif %}
       </div>
     </section>
 

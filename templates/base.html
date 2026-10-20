@@ -72,6 +72,7 @@
 
       {% if "management" in modules %}
         <div class="nav-section">{% translate "Management" %}</div>
+        {% if has_group %}<a href="{% url 'core:group' %}" class="{% active '/group' %}">{% icon "building" %} {% translate "Group overview" %}</a>{% endif %}
         {% if hotel.module_rooms %}<a href="{% url 'frontdesk:room_list' %}" class="{% active '/front-desk/setup' %}">{% icon "bed" %} {% translate "Rooms & rates" %}</a>{% endif %}
         {% if hotel.module_outlets %}<a href="{% url 'outlets:setup' %}" class="{% active '/outlets/setup' %}">{% icon "store" %} {% translate "Outlets & menus" %}</a>{% endif %}
         <a href="{% url 'accounts:staff_list' %}" class="{% active '/accounts/staff' '/team/positions' %}">{% icon "staff" %} {% translate "Staff" %}</a>
@@ -117,6 +118,8 @@
     </main>
   </div>
 </div>
+<div class="conn-banner is-hidden" id="conn-banner" role="alert">{% icon "alert" %} <span><strong>{% translate "No connection to InnKeeper." %}</strong> {% translate "Check the Wi-Fi and that the InnKeeper computer is on. Nothing is saved until it is back; this message goes away by itself." %}</span></div>
+<div class="conn-banner conn-ok is-hidden" id="conn-ok" role="status">{% icon "check" %} <span>{% translate "Connected again." %}</span></div>
 <script>
   // Close the mobile menu when tapping outside it.
   document.addEventListener('click', function (e) {
@@ -149,6 +152,28 @@
     reset();
   })();
   {% endif %}
+  // Lost connection (Wi-Fi down, InnKeeper computer off): say so clearly, and don't send forms into the void.
+  (function () {
+    var bar = document.getElementById('conn-banner'), down = false, fails = 0;
+    if (!bar) return;
+    function set(isDown) {
+      if (isDown === down) return;
+      down = isDown; bar.classList.toggle('is-hidden', !down);
+      if (!down) { var ok = document.getElementById('conn-ok'); ok.classList.remove('is-hidden'); setTimeout(function () { ok.classList.add('is-hidden'); }, 3000); }
+    }
+    function check() {
+      var c = new AbortController(), t = setTimeout(function () { c.abort(); }, 5000);
+      fetch('{% url "core:health" %}', { cache: 'no-store', signal: c.signal }).then(function (r) {
+        clearTimeout(t); fails = 0; set(!r.ok);
+      }).catch(function () { clearTimeout(t); fails += 1; if (fails >= 2 || !navigator.onLine) set(true); });
+    }
+    window.addEventListener('offline', function () { set(true); });
+    window.addEventListener('online', check);
+    document.addEventListener('submit', function (e) {
+      if (down || !navigator.onLine) { e.preventDefault(); e.stopImmediatePropagation(); set(true); check(); bar.classList.add('shake'); setTimeout(function () { bar.classList.remove('shake'); }, 600); }
+    }, true);
+    setTimeout(function tick() { if (!document.hidden || down) check(); setTimeout(tick, down ? 5000 : 20000); }, 20000);
+  })();
   {% if guest_requests is not None %}
   // Table orders from QR codes: keep the badge current and chime when a new one arrives.
   (function () {

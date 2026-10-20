@@ -34,6 +34,7 @@ FULL_MODELS = [
     "core.HotelSettings",
     "core.Sequence",
     "core.AuditLog",
+    "core.GroupMember",
     "frontdesk.RoomType",
     "frontdesk.Room",
     "frontdesk.CalendarFeed",

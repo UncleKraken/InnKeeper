@@ -441,6 +441,15 @@ def settings_hub(request):
             from apps.outlets.menu import public_link
 
             ctx["booking_link"] = public_link(request, reverse("booking:search"))
+    elif tab == "group":
+        from . import remote
+        from .models import GroupMember
+
+        addresses = remote.local_addresses()
+        found = [f"http://{a}:{remote.port()}" for a in filter(None, [remote.tailscale_address(addresses), remote.lan_address(addresses)])]
+        if hs.public_url:
+            found.insert(0, hs.public_url.rstrip("/"))
+        ctx.update(group_addresses=found, group_members=GroupMember.objects.all())
     elif tab == "import":
         from . import importer
 

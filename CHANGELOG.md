@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.19.0 — several businesses, one owner; tills that warn when offline
+
+**Shqip**
+
+- **Pamja e grupit:** për pronarët me disa biznese. Çdo biznes mban InnKeeper-in dhe të dhënat e veta (arkat, stafin, regjistrimin fiskal); secili mund të ndajë një përmbledhje vetëm për lexim me një çelës sekret (*Cilësimet → Pamja e grupit*). Te InnKeeper-i i pronarit, *Menaxhimi → Pamja e grupit* tregon të gjitha bizneset në një faqe: shitjet sot dhe këtë muaj, paratë e arkëtuara, faturat e hapura, dhomat, kush është në punë, paralajmërimet, dhe totalet. Pa emra mysafirësh ose stafi; funksionon me Tailscale ose adresë publike.
+- **Kur humbet lidhja:** nëse një tablet humbet Wi-Fi-n ose kompjuteri i InnKeeper fiket, një mesazh i kuq e thotë qartë dhe prekjet që do të ruanin diçka mbahen, që asgjë të mos ruhet përgjysmë. Largohet vetë kur kthehet lidhja.
+
+**English**
+
+- **Group overview:** for owners of several businesses. Each business keeps its own InnKeeper and data (tills, staff, fiscal registration); each can share a read-only summary with a secret key (*Settings → Group overview*). On the owner's InnKeeper, *Management → Group overview* shows every business on one page: sales today and this month, money received, open bills, rooms, who is at work, warnings, and totals. No guest or staff names; works over Tailscale or a public address.
+- **When the connection drops:** if a tablet loses the Wi-Fi or the InnKeeper computer goes off, a red message says so clearly and taps that would save something are held back, so nothing is half-saved. It goes away by itself when the connection is back.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.19.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.18.0 — messages to guests
 
 **Shqip**

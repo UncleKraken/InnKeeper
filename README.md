@@ -31,6 +31,7 @@ It adapts to the business: a setup wizard asks whether you run a **hotel**, a **
 | **Staff** | Clock-in/out (menu button or shared-till PIN pad), weekly schedule with positions, attendance report (late, no-shows, forgotten clock-outs, Excel), employee details for managers |
 | **Housekeeping** | Room status board by floor, tasks created automatically at check-out, assign to staff, start → done |
 | **Maintenance** | Tickets with priority and assignee; a ticket can take a room out of order until resolved |
+| **Group** | Several businesses, one owner: each keeps its own data and shares a read-only summary; the owner sees all of them on one page |
 | **Finance** | Revenue, expenses and profit; tourist tax per guest or room with the monthly list for the municipality; end-of-day cash count with printable Z report; best sellers, sales by staff and busiest hours; occupancy, ADR, RevPAR; unpaid bills; ledger, sales, stock and guest register as real Excel files (.xlsx) or CSV; the owner's daily summary by email |
 | **Settings** | Setup wizard for hotels, guesthouses, restaurants and night bars/clubs, business day that can end after midnight, import of menu, stock and guests from Excel (.xlsx or CSV) with preview, a sample business to try everything first, business details, receipt design with preview, modules on/off, staff and roles, activity log |
 | **Backups** | Full backup (move to a new computer) and settings-only export (second location), restore with preview and automatic safety copy, daily automatic backups |

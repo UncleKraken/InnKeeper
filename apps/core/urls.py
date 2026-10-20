@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import settings_views, views
+from . import group, settings_views, views
 
 app_name = "core"
 
@@ -26,6 +26,11 @@ urlpatterns = [
     path("setup/sample/remove/", views.sample_remove, name="sample_remove"),
     path("audit/", views.AuditLogView.as_view(), name="audit_log"),
     path("health/", views.health, name="health"),
+    path("group/", group.overview, name="group"),
+    path("group/summary/", group.shared_summary, name="group_summary"),
+    path("group/add/", group.member_form, name="group_add"),
+    path("group/<int:pk>/", group.member_form, name="group_edit"),
+    path("settings/group/share/", group.sharing, name="group_sharing"),
     path("update/", views.update_page, name="update"),
     path("update/install/", views.update_install, name="update_install"),
     path("update/status/", views.update_status, name="update_status"),

@@ -243,6 +243,7 @@ class HotelSettings(models.Model):
     tourist_tax_max_nights = models.PositiveSmallIntegerField(
         _("at most (nights per stay)"), default=0, help_text=_("0: every night is charged.")
     )
+    group_token = models.CharField(max_length=64, blank=True, editable=False)  # read-only key for the owner's group overview
     tunnel_enabled = models.BooleanField(_("public address through Cloudflare Tunnel"), default=False)
     tunnel_token = models.CharField(
         _("tunnel token"),
@@ -533,3 +534,24 @@ def audit(user, action: str, description: str, obj=None) -> AuditLog:
         object_type=obj._meta.label if obj is not None else "",
         object_id=str(obj.pk) if obj is not None else "",
     )
+
+
+class GroupMember(models.Model):
+    """Another business of the same owner, shown on the group overview. Each business keeps its own
+    InnKeeper and data; this one only reads a short summary from it with a read-only key."""
+
+    name = models.CharField(_("name"), max_length=120)
+    url = models.URLField(
+        _("address"),
+        help_text=_("How this computer reaches the other InnKeeper, e.g. http://100.64.1.7:8765 (Tailscale) or https://hotel.example.com"),
+    )
+    token = models.CharField(_("sharing key"), max_length=64, help_text=_("From the other business: Settings → Group overview."))
+    sort_order = models.PositiveSmallIntegerField(_("order"), default=0)
+    last_ok_at = models.DateTimeField(null=True, blank=True, editable=False)
+
+    class Meta:
+        ordering = ["sort_order", "name"]
+        verbose_name = _("business in the group")
+
+    def __str__(self) -> str:
+        return self.name

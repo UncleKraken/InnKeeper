@@ -33,7 +33,13 @@ def innkeeper(request):
             from apps.outlets.guest_orders import pending_for
 
             guest_requests = len(pending_for(user))
+    has_group = False
+    if "management" in modules:
+        from .models import GroupMember
+
+        has_group = GroupMember.objects.exists()
     return {
+        "has_group": has_group,
         "guest_requests": guest_requests,
         "clocked_in": clocked_in,
         "shared_till": is_shared_till(request),

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Group overview" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="eyebrow">{% translate "Group overview" %}</div><h1>{% if member %}{{ member.name }}{% else %}{% translate "Add a business" %}{% endif %}</h1></div></div>
+<form method="post" class="card" style="max-width:720px" novalidate>{% csrf_token %}
+  <div class="card-body">
+    <p class="muted" style="margin-top:0">{% translate "On the other business's InnKeeper, open Settings → Group overview, share its summary, and copy the address and key here." %}</p>
+    {% include "includes/form_fields.html" %}
+  </div>
+  <div class="card-footer form-actions" style="margin-top:0">
+    {% if member %}<button class="btn btn-ghost" name="delete" value="1" data-confirm="{% translate 'Remove this business from the overview?' %}" formnovalidate>{% icon "trash" %} {% translate "Remove" %}</button>{% endif %}
+    <a class="btn btn-secondary" href="{% url 'core:group' %}">{% translate "Cancel" %}</a>
+    <button class="btn">{% icon "check" %} {% translate "Save and test" %}</button>
+  </div>
+</form>
+{% endblock %}
