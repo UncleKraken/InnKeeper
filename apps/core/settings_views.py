@@ -208,6 +208,12 @@ class GuestMessagesForm(StyledFormMixin, forms.ModelForm):
         return cleaned
 
 
+class BreakfastForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = HotelSettings
+        fields = ["breakfast_on", "breakfast_included_default", "breakfast_price"]
+
+
 class TouristTaxForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = HotelSettings
@@ -378,6 +384,7 @@ TABS = {
     "tills": TillSettingsForm,
     "loyalty": LoyaltySettingsForm,
     "tourist_tax": TouristTaxForm,
+    "breakfast": BreakfastForm,
     "messages": GuestMessagesForm,
     "remote": RemoteSettingsForm,
 }

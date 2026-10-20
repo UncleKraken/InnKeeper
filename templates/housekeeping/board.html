@@ -33,6 +33,7 @@
                 {% if room.hk_status == "clean" %}<form method="post" action="{% url 'housekeeping:room_status' room.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-secondary btn-sm" name="status" value="inspected">{% translate "Mark inspected" %}</button></form>{% endif %}
                 <form method="post" action="{% url 'housekeeping:room_status' room.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-ghost btn-sm" name="status" value="dirty">{% translate "Mark dirty" %}</button></form>
               {% endif %}
+              {% if it.occupied and has_minibar %}<a class="btn btn-ghost btn-sm" href="{% url 'housekeeping:minibar' room.pk %}">{% translate "Minibar" %}</a>{% endif %}
             </div>
             {% endif %}
           </div>

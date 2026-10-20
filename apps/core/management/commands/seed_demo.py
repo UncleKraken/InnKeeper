@@ -67,12 +67,16 @@ MENUS = {
         "Breakfast": [("Continental breakfast", "12.00"), ("Albanian breakfast", "14.00")],
         "Night menu": [("Club sandwich", "9.00"), ("Pizza Margherita", "10.00")],
     },
+    ("Minibar", Outlet.Kind.MINIBAR, False, 0): {
+        "Drinks": [("Water 0.5L", "1.50"), ("Coca-Cola 0.33L", "2.50"), ("Birra Korça 0.5L", "3.50")],
+        "Snacks": [("Chocolate", "2.00"), ("Peanuts", "2.50")],
+    },
     ("Laundry", Outlet.Kind.LAUNDRY, False, 0): {
         "Wash & iron": [("Shirt", "3.00"), ("Trousers", "4.00"), ("Suit", "12.00")],
     },
 }
 
-OUTLET_SQ = {"Restaurant": "Restoranti", "Lobby Bar": "Bari", "Room Service": "Shërbimi në dhomë", "Laundry": "Lavanderia"}
+OUTLET_SQ = {"Minibar": "Minibari", "Restaurant": "Restoranti", "Lobby Bar": "Bari", "Room Service": "Shërbimi në dhomë", "Laundry": "Lavanderia"}
 
 # Menu names are Albanian on the till; the English name is kept for the English menu.
 ITEM_SQ = {
@@ -108,6 +112,8 @@ ITEM_EN_TO_SQ = {
     "Shirt": "Këmishë",
     "Trousers": "Pantallona",
     "Suit": "Kostum",
+    "Chocolate": "Çokollatë",
+    "Peanuts": "Kikirikë",
 }
 
 
@@ -138,6 +144,7 @@ CATEGORY_SQ = {
     "Night menu": "Menu nate",
     "Drinks": "Pije",
     "Wash & iron": "Larje & hekurosje",
+    "Snacks": "Snacks",
 }
 
 GUESTS = [
@@ -171,6 +178,8 @@ def create_demo(password: str | None, prefix: str = "") -> dict:
     hotel.setup_completed = True
     hotel.receipt_header = "Wi-Fi: HotelDemo · 08:00–23:00"
     hotel.max_staff_discount = 10
+    hotel.breakfast_on = True
+    hotel.breakfast_price = Decimal("8.00")
     hotel.save()
 
     users = {}
@@ -491,7 +500,7 @@ def create_demo(password: str | None, prefix: str = "") -> dict:
     order = pos.open_order(rest, table=rest.tables.get(name="5"), user=users["waiter"], guests=4)
     pos.add_item(order, _item("Pasta with seafood"), user=users["waiter"], quantity=2)
     order = pos.open_order(bar, table=bar.tables.get(name="5"), user=users["bar"])
-    pos.add_item(order, _item("Birra Korça 0.5L"), user=users["bar"], quantity=2)
+    pos.add_item(order, _item("Birra Korça 0.5L", category__outlet=outlets["Lobby Bar"]), user=users["bar"], quantity=2)
 
     inv.record_waste(stock["Birra Korça 0.5L"], Decimal("1"), user=users["bar"], reason="Shishe e thyer")
     inv.apply_count(

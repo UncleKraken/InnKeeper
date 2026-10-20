@@ -1,12 +1,13 @@
 from django.urls import path
 
-from . import views
+from . import minibar, views
 
 app_name = "housekeeping"
 
 urlpatterns = [
     path("board/", views.board, name="board"),
     path("rooms/<int:pk>/status/", views.room_status, name="room_status"),
+    path("rooms/<int:pk>/minibar/", minibar.minibar, name="minibar"),
     path("tasks/new/", views.task_create, name="task_create"),
     path("tasks/<int:pk>/advance/", views.task_advance, name="task_advance"),
     path("tasks/<int:pk>/assign/", views.task_assign, name="task_assign"),

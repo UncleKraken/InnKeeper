@@ -63,6 +63,7 @@ FULL_MODELS = [
     "finance.Shift",
     "finance.Folio",
     "finance.Charge",
+    "frontdesk.BreakfastServed",
     "finance.Payment",
     "finance.Expense",
     "finance.DayClose",

@@ -30,6 +30,7 @@
         <div class="nav-section">{% translate "Front desk" %}</div>
         <a href="{% url 'frontdesk:rack' %}" class="{% active '/front-desk/rack' %}">{% icon "calendar" %} {% translate "Room rack" %}</a>
         <a href="{% url 'frontdesk:reservation_list' %}" class="{% active '/front-desk/reservations' %}">{% icon "list" %} {% translate "Reservations" %}</a>
+        {% if hotel.breakfast_on %}<a href="{% url 'frontdesk:breakfast' %}" class="{% active '/front-desk/breakfast' %}">{% icon "utensils" %} {% translate "Breakfast" %}</a>{% endif %}
       {% endif %}
       {% if "guests" in modules %}
         <a href="{% url 'frontdesk:guest_list' %}" class="{% active '/front-desk/guests' %}">{% icon "users" %} {% translate "Guests" %}</a>
@@ -47,6 +48,7 @@
         <div class="nav-section">{% translate "Services" %}</div>
         <a href="{% url 'outlets:home' %}" class="{% if request.path|slice:':9' == '/outlets/' and '/outlets/setup' not in request.path and '/outlets/receipts' not in request.path and '/outlets/kitchen' not in request.path %}active{% endif %}">{% icon "utensils" %} {% translate "Restaurant, bar & services" %}</a>
         {% if guest_requests is not None %}<a href="{% url 'outlets:guest_requests' %}" class="{% active '/outlets/requests' %}" id="guest-req-link" data-count-url="{% url 'outlets:guest_requests_count' %}">{% icon "qr" %} {% translate "Table orders" %} <span class="nav-badge{% if not guest_requests %} is-hidden{% endif %}" id="guest-req-badge">{{ guest_requests }}</span></a>{% endif %}
+        {% if hotel.breakfast_on and "frontdesk" not in modules and hotel.module_rooms %}<a href="{% url 'frontdesk:breakfast' %}" class="{% active '/front-desk/breakfast' %}">{% icon "utensils" %} {% translate "Breakfast" %}</a>{% endif %}
         <a href="{% url 'outlets:receipts' %}" class="{% active '/outlets/receipts' %}">{% icon "receipt" %} {% translate "Receipts" %}</a>
         <a href="{% url 'finance:accounts' %}" class="{% active '/finance/accounts' %}">{% icon "users" %} {% translate "Customer accounts" %}</a>
         {% if hotel.vouchers_enabled %}<a href="{% url 'outlets:vouchers' %}" class="{% active '/outlets/vouchers' %}">{% icon "gift" %} {% translate "Gift vouchers" %}</a>{% endif %}

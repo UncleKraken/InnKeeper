@@ -67,12 +67,20 @@ class ReservationForm(StyledFormMixin, forms.ModelForm):
 
     class Meta:
         model = Reservation
-        fields = ["room", "arrival", "departure", "adults", "children", "rate", "source", "external_ref", "notes"]
+        fields = ["room", "arrival", "departure", "adults", "children", "rate", "breakfast", "source", "external_ref", "notes"]
         widgets = {"arrival": DateInput(), "departure": DateInput()}
+        field_classes = {"breakfast": forms.BooleanField}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["room"].queryset = Room.objects.filter(is_active=True).select_related("room_type")
+        from apps.core.models import HotelSettings
+
+        if HotelSettings.load().breakfast_on:
+            self.fields["breakfast"].required = False
+            self.initial["breakfast"] = self.instance.breakfast_included
+        else:
+            del self.fields["breakfast"]
         if self.instance.pk:
             for name in ("guest", "new_first_name", "new_last_name", "new_phone", "new_email"):
                 del self.fields[name]

@@ -60,8 +60,8 @@ class ModuleRequiredMixin(LoginRequiredMixin):
         return super().dispatch(request, *args, **kwargs)
 
 
-def module_required(module: str):
-    """Function-based view decorator."""
+def module_required(module: str, *others: str):
+    """Function-based view decorator. With several modules, any one of them is enough."""
 
     def decorator(view):
         @wraps(view)
@@ -70,7 +70,7 @@ def module_required(module: str):
                 from django.contrib.auth.views import redirect_to_login
 
                 return redirect_to_login(request.get_full_path())
-            if not can_access(request.user, module):
+            if not any(can_access(request.user, m) for m in (module, *others)):
                 raise PermissionDenied
             return view(request, *args, **kwargs)
 

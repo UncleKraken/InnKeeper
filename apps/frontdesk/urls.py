@@ -1,12 +1,14 @@
 from django.urls import path
 
-from . import channel_manager, channels, groups, register, views
+from . import breakfast_views, channel_manager, channels, groups, register, views
 
 app_name = "frontdesk"
 
 urlpatterns = [
     path("rack/", views.rack, name="rack"),
     path("reservations/", views.reservation_list, name="reservation_list"),
+    path("breakfast/", breakfast_views.breakfast_list, name="breakfast"),
+    path("breakfast/<int:pk>/", breakfast_views.breakfast_serve, name="breakfast_serve"),
     path("reservations/new/", views.reservation_form, name="reservation_create"),
     path("reservations/<int:pk>/", views.reservation_detail, name="reservation_detail"),
     path("reservations/<int:pk>/edit/", views.reservation_form, name="reservation_edit"),

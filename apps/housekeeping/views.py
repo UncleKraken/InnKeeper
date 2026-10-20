@@ -72,7 +72,8 @@ def board(request):
     return render(
         request,
         "housekeeping/board.html",
-        {"floors": sorted(floors.items()), "tasks": tasks.distinct(), "staff": staff, "show": show, "counts": counts},
+        {"floors": sorted(floors.items()), "tasks": tasks.distinct(), "staff": staff, "show": show, "counts": counts,
+         "has_minibar": _has_minibar()},
     )
 
 
@@ -174,3 +175,9 @@ def ticket_status(request, pk):
     except BusinessError as e:
         messages.error(request, str(e))
     return redirect("housekeeping:ticket_list")
+
+
+def _has_minibar() -> bool:
+    from .minibar import minibar_outlet
+
+    return minibar_outlet() is not None

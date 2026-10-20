@@ -13,6 +13,7 @@
     <a href="?tab=modules" class="{% if tab == 'modules' %}active{% endif %}">{% icon "grid" %} {% translate "Modules" %}</a>
     {% if hotel.module_rooms %}<a href="?tab=booking" class="{% if tab == 'booking' %}active{% endif %}">{% icon "calendar" %} {% translate "Online booking" %}</a>{% endif %}
     {% if hotel.module_rooms %}<a href="?tab=messages" class="{% if tab == 'messages' %}active{% endif %}">{% icon "send" %} {% translate "Guest messages" %}</a>{% endif %}
+    {% if hotel.module_rooms %}<a href="?tab=breakfast" class="{% if tab == 'breakfast' %}active{% endif %}">{% icon "utensils" %} {% translate "Breakfast" %}</a>{% endif %}
     {% if hotel.module_rooms %}<a href="?tab=tourist_tax" class="{% if tab == 'tourist_tax' %}active{% endif %}">{% icon "percent" %} {% translate "Tourist tax" %}</a>{% endif %}
     <a href="?tab=group" class="{% if tab == 'group' %}active{% endif %}">{% icon "building" %} {% translate "Group overview" %}</a>
     <a href="?tab=remote" class="{% if tab == 'remote' %}active{% endif %}">{% icon "sync" %} {% translate "Access from outside" %}</a>
@@ -234,6 +235,16 @@
         <div style="min-width:0"><h3 style="margin-top:0">{% translate "After check-out" %}</h3><pre style="white-space:pre-wrap; overflow-wrap:anywhere; font-family:inherit; background:var(--surface-2, #f6f4f0); padding:.8rem; border-radius:8px; margin:0">{{ preview_review|urlize }}</pre></div>
       </div>
     </section>
+
+  {% elif tab == "breakfast" %}
+    <form method="post" class="card" novalidate>{% csrf_token %}
+      <div class="card-header"><h2>{% translate "Breakfast" %}</h2></div>
+      <div class="card-body">
+        <p class="muted" style="margin-top:0">{% translate "Each morning, Front desk → Breakfast lists the guests who slept here, how many they are and whether breakfast is in their price. Staff mark each room as served; for guests without it included, breakfast is added to their bill. Set “breakfast included” on each booking." %}</p>
+        {% include "includes/form_fields.html" %}
+      </div>
+      <div class="card-footer form-actions" style="margin-top:0"><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
+    </form>
 
   {% elif tab == "tourist_tax" %}
     <form method="post" class="card" novalidate>{% csrf_token %}

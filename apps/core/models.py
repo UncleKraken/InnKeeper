@@ -243,6 +243,20 @@ class HotelSettings(models.Model):
     tourist_tax_max_nights = models.PositiveSmallIntegerField(
         _("at most (nights per stay)"), default=0, help_text=_("0: every night is charged.")
     )
+    breakfast_on = models.BooleanField(
+        _("we serve breakfast"), default=False, help_text=_("Shows the morning breakfast list for the guests in house.")
+    )
+    breakfast_included_default = models.BooleanField(
+        _("new bookings include breakfast"), default=True, help_text=_("Can be changed on each booking.")
+    )
+    breakfast_price = models.DecimalField(
+        _("breakfast price per person"),
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(0)],
+        max_digits=12,
+        decimal_places=2,
+        help_text=_("Added to the bill of guests whose booking doesn't include it."),
+    )
     payroll_overtime_percent = models.PositiveSmallIntegerField(
         _("overtime extra (%)"), default=25, validators=[MaxValueValidator(300)],
         help_text=_("For hours over the contract hours in a week. The Labour Code asks for at least 25%."),

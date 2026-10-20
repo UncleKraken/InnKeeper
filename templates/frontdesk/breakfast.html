@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Breakfast" %} {{ day|date:"d.m" }}{% endblock %}
+{% block content %}
+<div class="page-header no-print">
+  <div><div class="eyebrow">{% translate "Front desk" %}</div><h1>{% translate "Breakfast" %}</h1><p>{{ day|date:"l, d.m.Y" }} · {% translate "Guests who slept here last night." %}</p></div>
+  <div class="actions">
+    <a class="btn btn-secondary" href="?date={{ prev|date:'Y-m-d' }}" aria-label="{% translate 'Previous day' %}">{% icon "back" %}</a>
+    <a class="btn btn-secondary" href="?">{% translate "Today" %}</a>
+    <a class="btn btn-secondary" href="?date={{ next|date:'Y-m-d' }}" aria-label="{% translate 'Next day' %}">{% icon "next" %}</a>
+    <button class="btn btn-secondary" onclick="window.print()">{% icon "print" %} {% translate "Print" %}</button>
+  </div>
+</div>
+<div class="bf-stats">
+  <div><span>{% translate "Expected" %}</span><strong>{{ expected }}</strong><small>{% blocktranslate %}{{ included }} included{% endblocktranslate %}</small></div>
+  <div><span>{% translate "Served" %}</span><strong>{{ served }}</strong><small>{% blocktranslate count n=rooms_served %}{{ n }} room{% plural %}{{ n }} rooms{% endblocktranslate %}</small></div>
+  <div><span>{% translate "Rooms" %}</span><strong>{{ rows|length }}</strong></div>
+</div>
+<section class="card card-flush">
+  {% for r in rows %}
+  <div class="bf-row{% if r.served %} is-served{% endif %}">
+    <div class="bf-room">{{ r.room.number }}</div>
+    <div class="bf-who">
+      <strong>{{ r.guest }}</strong>{% if r.status == "checked_out" %} <small class="muted">· {% translate "left" %}</small>{% endif %}
+      <div class="bf-meta">{% blocktranslate count n=r.persons %}{{ n }} guest{% plural %}{{ n }} guests{% endblocktranslate %} ·
+        {% if r.breakfast_included %}<span class="badge b-success">{% translate "Included" %}</span>{% else %}<span class="badge b-warning">{% blocktranslate with p=hotel.breakfast_price|money %}Pays {{ p }} / person{% endblocktranslate %}</span>{% endif %}</div>
+    </div>
+    <div class="bf-act no-print">
+      {% if r.served %}
+        <span class="muted" style="font-size:.85rem">{% icon "check" %} {{ r.served.guests }} · {{ r.served.created_at|time:"H:i" }}</span>
+        <form method="post" action="{% url 'frontdesk:breakfast_serve' r.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="date" value="{{ day|date:'Y-m-d' }}"><button class="btn-link" name="undo" value="1" title="{% translate 'Undo' %}">×</button></form>
+      {% else %}
+        <form method="post" action="{% url 'frontdesk:breakfast_serve' r.pk %}" class="row" style="gap:.35rem; flex-wrap:nowrap">{% csrf_token %}<input type="hidden" name="date" value="{{ day|date:'Y-m-d' }}">
+          <input class="input" type="number" name="guests" value="{{ r.persons }}" min="1" max="20" style="width:3.6rem; text-align:center" aria-label="{% translate 'Guests' %}">
+          <button class="btn btn-sm">{% icon "check" %} {% if r.breakfast_included %}{% translate "Served" %}{% else %}{% translate "Served, add to bill" %}{% endif %}</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}<div class="card-body empty">{% translate "Nobody stayed here last night." %}</div>{% endfor %}
+</section>
+{% endblock %}

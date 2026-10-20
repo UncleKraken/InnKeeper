@@ -161,6 +161,8 @@ class Reservation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     checked_in_at = models.DateTimeField(null=True, blank=True)
     checked_out_at = models.DateTimeField(null=True, blank=True)
+    # None: as set in Settings for new bookings (so online and channel bookings follow it too).
+    breakfast = models.BooleanField(_("breakfast included"), null=True, blank=True, default=None)
     pre_arrival_sent_at = models.DateTimeField(null=True, blank=True, editable=False)
     review_sent_at = models.DateTimeField(null=True, blank=True, editable=False)
     cancelled_at = models.DateTimeField(null=True, blank=True)
@@ -246,6 +248,14 @@ class Reservation(models.Model):
                 }
         if errors:
             raise ValidationError(errors)
+
+    @property
+    def breakfast_included(self) -> bool:
+        if self.breakfast is not None:
+            return self.breakfast
+        from apps.core.models import HotelSettings
+
+        return HotelSettings.load().breakfast_included_default
 
     def accommodation_nights_posted(self) -> int:
         """Room nights already posted for this stay, on any bill. Voided nights count too: voiding a
@@ -420,3 +430,20 @@ class ChannelSyncState(models.Model):
     def get(cls) -> "ChannelSyncState":
         obj, _created = cls.objects.get_or_create(pk=1)
         return obj
+
+
+class BreakfastServed(models.Model):
+    """A room's breakfast on a morning: how many ate, and the charge if it wasn't included."""
+
+    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name="breakfasts")
+    date = models.DateField(db_index=True)
+    guests = models.PositiveSmallIntegerField(default=1)
+    charge = models.ForeignKey("finance.Charge", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    served_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["reservation", "date"], name="one_breakfast_per_room_per_day")]
+
+    def __str__(self) -> str:
+        return f"{self.reservation} {self.date} × {self.guests}"

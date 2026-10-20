@@ -15,7 +15,7 @@ It adapts to the business: a setup wizard asks whether you run a **hotel**, a **
 
 | Area | Highlights |
 |---|---|
-| **Front desk** | Room rack (calendar timeline), reservations with double-booking protection and room capacity checks, check-in / check-out, guest profiles with ID documents, booking sources (walk-in, phone, Booking.com, Airbnb…) |
+| **Front desk** | Room rack (calendar timeline), reservations with double-booking protection and room capacity checks, check-in / check-out, guest profiles with ID documents, booking sources (walk-in, phone, Booking.com, Airbnb…), daily breakfast list (included or charged to the room) |
 | **Guest bill (folio)** | Room nights, extras and outlet charges in one place; cash / card / bank transfer payments; refunds; printable invoice; check-out blocked until the bill is settled (manager override for company invoices) |
 | **Outlets (POS)** | Any number of outlets of any kind. Guests order from a QR code on their table (staff accept before it reaches the bill and kitchen) and can pay the bill by card from their phone. Touch-friendly ordering that works on phones, item options (sizes, extras), happy hour / time-based prices, table bookings shown on the floor plan, club tables with a minimum spend, one-tap entrance / ticket sales, customer accounts (tabs) with credit limits, staff shifts with cash-up, tips, discounts with staff limits, split and mixed payments, cash change calculator, move/merge tables, charge to room, sold-out items |
 | **Kitchen & bar** | Send orders to stations (Kitchen, Bar…); live kitchen display with sound, waiting time and Start → Ready; ready tables flagged on the waiter's floor plan; items removed after sending shown crossed out |
@@ -29,7 +29,7 @@ It adapts to the business: a setup wizard asks whether you run a **hotel**, a **
 | **Regulars** | Customer tabs (pay later), loyalty stamp cards (every Nth item free), gift vouchers sold at the till and spent over several visits |
 | **Stock** | Stock items and suppliers, recipes per menu item (sales and room charges take stock automatically, voids put it back), orders to suppliers from the low-stock list (WhatsApp, email or print, received as a delivery), deliveries with average cost and optional expense, waste, stock counts with variance, low-stock alerts, cost of sales report |
 | **Staff** | Clock-in/out (menu button or shared-till PIN pad), weekly schedule with positions, attendance report (late, no-shows, forgotten clock-outs, Excel), employee details for managers, leave requests and shift swaps, monthly payroll (gross pay with overtime, night and holiday extras, approve, Excel) |
-| **Housekeeping** | Room status board by floor, tasks created automatically at check-out, assign to staff, start → done |
+| **Housekeeping** | Room status board by floor, tasks created automatically at check-out, assign to staff, start → done, minibar check charged to the room |
 | **Maintenance** | Tickets with priority and assignee; a ticket can take a room out of order until resolved |
 | **Group** | Several businesses, one owner: each keeps its own data and shares a read-only summary; the owner sees all of them on one page |
 | **Finance** | Revenue, expenses and profit; tourist tax per guest or room with the monthly list for the municipality; end-of-day cash count with printable Z report; best sellers, sales by staff and busiest hours; occupancy, ADR, RevPAR; unpaid bills; ledger, sales, stock and guest register as real Excel files (.xlsx) or CSV; the owner's daily summary by email |

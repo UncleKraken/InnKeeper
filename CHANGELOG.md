@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.23.0 — breakfast and minibar
+
+**Shqip**
+
+- **Mëngjesi:** çdo mëngjes, *Recepsioni → Mëngjesi* liston mysafirët që fjetën mbrëmë, me sa veta janë dhe nëse mëngjesi është në çmim. Stafi i restorantit shënon çdo dhomë si të shërbyer; për ata pa mëngjes të përfshirë shtohet automatikisht në faturë. Çdo rezervim ka *Me mëngjes të përfshirë*; parazgjedhja dhe çmimi te *Cilësimet → Mëngjesi*.
+- **Minibari:** në tabelën e pastrimit, dhomat e zëna kanë butonin *Minibar* — numëroni çfarë mungon dhe shkon në faturën e mysafirit, me stokun e përditësuar.
+- Biznesi shembull ka minibar dhe mëngjes.
+
+**English**
+
+- **Breakfast:** each morning, *Front desk → Breakfast* lists the guests who slept here last night, how many they are and whether breakfast is in their price. Restaurant staff mark each room as served; for guests without it included, it goes on their bill automatically. Each booking has *Breakfast included*; the default and the price are in *Settings → Breakfast*.
+- **Minibar:** on the housekeeping board, occupied rooms have a *Minibar* button — count what's missing and it goes on the guest's bill, with stock updated.
+- The sample business has a minibar and breakfast.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.23.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.22.0 — pay by card from the table
 
 **Shqip**

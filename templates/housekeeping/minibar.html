@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Minibar" %} · {{ room.number }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow">{% translate "Housekeeping" %}</div><h1>{% translate "Minibar" %} · {% translate "Room" %} {{ room.number }}</h1><p>{% if guest %}{{ guest.guest }}{% else %}{% translate "Nobody is staying in this room." %}{% endif %}</p></div>
+  <div class="actions"><a class="btn btn-secondary" href="{% url 'housekeeping:board' %}">{% icon "back" %} {% translate "Back" %}</a></div>
+</div>
+{% if not outlet %}
+  <div class="card"><div class="card-body">{% translate "There is no minibar yet. Add an outlet of the type Minibar with its items." %}{% if request.user.is_manager %} <a href="{% url 'outlets:setup' %}">{% translate "Outlets & menus" %}</a>{% endif %}</div></div>
+{% else %}
+<form method="post" class="card" style="max-width:640px">{% csrf_token %}
+  <div class="card-body">
+    <p class="muted" style="margin-top:0">{% translate "Count what is missing from the minibar. It goes on the guest's bill." %}</p>
+    {% for i in items %}
+      <div class="mb-row">
+        <span><strong>{{ i.name }}</strong><br><small class="muted">{{ i.price|money }}</small></span>
+        <span class="to-qty"><button type="button" data-step="-1" aria-label="−">−</button><input class="input" type="number" name="q{{ i.pk }}" value="0" min="0" max="50" inputmode="numeric" aria-label="{{ i.name }}"><button type="button" data-step="1" aria-label="+">+</button></span>
+      </div>
+    {% empty %}<p class="muted">{% translate "The minibar has no items yet." %}</p>{% endfor %}
+  </div>
+  {% if items and guest %}<div class="card-footer form-actions" style="margin-top:0"><span class="muted" id="mb-total" style="margin-right:auto"></span><button class="btn">{% icon "check" %} {% translate "Add to the bill" %}</button></div>{% endif %}
+</form>
+<script>
+(function () {
+  var rows = document.querySelectorAll('.mb-row'), total = document.getElementById('mb-total');
+  function sum() {
+    var t = 0;
+    rows.forEach(function (r) { var inp = r.querySelector('input'), price = parseFloat(r.querySelector('small').textContent.replace(/[^0-9.]/g, '')) || 0; t += (parseInt(inp.value, 10) || 0) * price; });
+    if (total) total.textContent = t ? t.toFixed(2) + ' {{ hotel.currency_symbol|escapejs }}' : '';
+  }
+  rows.forEach(function (r) {
+    var inp = r.querySelector('input');
+    r.querySelectorAll('[data-step]').forEach(function (b) { b.onclick = function () { inp.value = Math.max(0, Math.min(50, (parseInt(inp.value, 10) || 0) + parseInt(b.dataset.step, 10))); sum(); }; });
+    inp.addEventListener('input', sum);
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}
