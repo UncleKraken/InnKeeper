@@ -29,7 +29,7 @@ class User(AbstractUser):
         max_length=8,
         blank=True,
         choices=[("sq", _("Albanian")), ("en", _("English"))],
-        help_text=_("Interface language for this user. Leave empty to use the hotel default."),
+        help_text=_("Interface language for this user. Leave empty to use the business's default."),
     )
 
     pin = models.CharField(_("PIN"), max_length=128, blank=True, editable=False)  # hashed, like passwords

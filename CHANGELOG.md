@@ -1,14 +1,30 @@
 # Changelog
 
-## Unreleased
+## 2.28.1 — clearer Albanian and English
 
 **Shqip**
 
-- Udhëzimi për Android tani thotë të zgjidhni **Create shortcut**: “Install” në Chrome funksionon vetëm me adresë https, jo në adresën e Wi-Fi-t.
+- **Përkthimi shqip u rishikua i gjithi** (rreth 2 800 tekste): u rregulluan gramatika, fjalët e paqarta dhe mospërputhjet. Disa shembuj:
+  - Butonat e recepsionit thonë tani **Bëj check-in** dhe **Bëj check-out**, në vend të “Regjistro hyrjen / largimin”, që ngatërroheshin me hyrjen e stafit në punë.
+  - “Order” te porositë e mysafirëve nga tavolina shfaqet si **Porosia** (më parë dilte gabimisht “Renditja”).
+  - Të njëjtat fjalë kudo: *zhvendos* (tavolinën, mysafirin), *niveli minimal* i stokut, *tema* e email-it, *ju lutemi*, dhe forma e sjellshme (*ju*) në vend të *ti*.
+- **Udhëzuesi** (Ndihmë) u përditësua me emrat e rinj të butonave, dhe tani përmend rolin *Kuzhina & bari* dhe pagesën e parapagimit me kartë.
+- **Telefonat Android:** udhëzimi thotë të zgjidhni *Create shortcut* (“Install” në Chrome kërkon adresë https).
+- **Faqja e InnKeeper dhe udhëzimet e instalimit** u rishikuan në të dy gjuhët; dosja e programit tregohet saktë (*Program Files (x86)*).
 
 **English**
 
-- The Android tip now says to choose **Create shortcut**: Chrome's “Install” only works over an https address, not the Wi-Fi address.
+- **The whole Albanian translation was reviewed** (about 2,800 texts): grammar, unclear words and inconsistencies fixed. For example:
+  - Front-desk buttons now say **Bëj check-in / Bëj check-out** instead of wording that was easy to confuse with staff clocking in.
+  - “Order” on guests' table orders now shows as *Porosia*; it wrongly showed the word for sort order.
+  - The same words everywhere for moving tables and guests, the stock minimum level, the email subject, and the polite form throughout.
+- **English texts:** a few help texts reworded, and the help guide now mentions the *Kitchen & bar* role and card deposits.
+- **Android phones:** the tip now says to choose *Create shortcut* (Chrome's “Install” needs an https address).
+- **The InnKeeper website and install guide** were reviewed in both languages; the program folder is now named correctly (*Program Files (x86)*).
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.28.1.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
 
 ## 2.28.0 — phones and tablets connect easier
 

@@ -13,7 +13,7 @@ wrong with the file. It only says Windows doesn't know the publisher yet.
 
 Never install InnKeeper from another website, a USB stick from a stranger or a file sent in a chat.
 
-### Optional: check the file is exactly the published one
+### Optional: check that the file is exactly the published one
 On the release page, GitHub shows a **sha256** code next to the installer. On your computer open
 **PowerShell** in the Downloads folder and run:
 
@@ -40,9 +40,9 @@ Then the normal installer opens. Windows may ask “Do you want to allow this ap
 
 Programs packaged with Python (like InnKeeper) are sometimes flagged by mistake (“false positive”).
 
-1. Check the file at <https://www.virustotal.com> (upload it): a few unknown engines out of ~70 is a false positive; many detections means don't install it.
-2. Restore it from the antivirus quarantine / history and allow it.
-3. If it keeps happening, add an exclusion for `C:\Program Files\InnKeeper` and `%LOCALAPPDATA%\InnKeeper` in the antivirus.
+1. Check the file at <https://www.virustotal.com> (upload it). If only a few little-known engines out of about 70 flag it, it is a false positive. If many do, don't install it.
+2. Restore it from the antivirus quarantine or history and allow it.
+3. If it keeps happening, add an exclusion in the antivirus for the InnKeeper program folder (`C:\Program Files (x86)\InnKeeper` or `C:\Program Files\InnKeeper`) and for `%LOCALAPPDATA%\InnKeeper`.
 
 ## 5. Updates
 
@@ -61,15 +61,15 @@ version from GitHub, checks its SHA-256 code and installs it without the browser
 InnKeeper është falas. Windows shfaq një paralajmërim herën e parë që hapni instaluesin, sepse
 instaluesi nuk është i *nënshkruar dixhitalisht*: certifikatat e nënshkrimit kushtojnë çdo vit, dhe
 Windows u beson programeve të reja vetëm pasi i kanë instaluar shumë njerëz. Paralajmërimi **nuk**
-do të thotë që skedari ka problem. Thjesht Windows nuk e njeh ende botuesin.
+do të thotë që skedari ka problem. Thjesht, Windows ende nuk e njeh botuesin.
 
 ## 1. Shkarkojeni vetëm nga faqja zyrtare
 
 <https://github.com/UncleKraken/InnKeeper/releases/latest> → te **Assets**, `InnKeeper-Setup-X.Y.Z.exe`.
 
-Mos e instaloni kurrë InnKeeper nga një faqe tjetër, nga një USB e panjohur ose nga një skedar i dërguar në chat.
+Mos e instaloni kurrë InnKeeper nga një faqe tjetër, nga USB-ja e dikujt që nuk e njihni ose nga një skedar i dërguar në chat.
 
-### Opsionale: kontrolloni që skedari është pikërisht ai i publikuari
+### Opsionale: kontrolloni që skedari të jetë pikërisht ai i publikuar
 Në faqen e versionit, GitHub tregon një kod **sha256** pranë instaluesit. Në kompjuter hapni
 **PowerShell** te dosja Downloads dhe shkruani:
 
@@ -87,7 +87,7 @@ Kodi i gjatë duhet të jetë i njëjtë me atë në GitHub. Nëse ndryshon, fsh
 ## 3. “Windows protected your PC” (SmartScreen)
 
 1. Klikoni **More info** (lidhja e vogël poshtë tekstit).
-2. Botuesi shfaqet si *Unknown publisher* — kjo pritet.
+2. Botuesi shfaqet si *Unknown publisher*. Kjo është normale.
 3. Klikoni **Run anyway**.
 
 Pastaj hapet instaluesi i zakonshëm. Windows mund të pyesë “Do you want to allow this app to make changes?” → **Yes**.
@@ -96,16 +96,16 @@ Pastaj hapet instaluesi i zakonshëm. Windows mund të pyesë “Do you want to 
 
 Programet e paketuara me Python (si InnKeeper) ndonjëherë shënohen gabimisht (“false positive”).
 
-1. Kontrollojeni skedarin te <https://www.virustotal.com> (ngarkojeni): disa motorë të panjohur nga ~70 është alarm i rremë; shumë zbulime do të thotë mos e instaloni.
-2. Riktheni nga karantina / historiku i antivirusit dhe lejojeni.
-3. Nëse përsëritet, shtoni përjashtim për `C:\Program Files\InnKeeper` dhe `%LOCALAPPDATA%\InnKeeper`.
+1. Kontrollojeni skedarin te <https://www.virustotal.com> (ngarkojeni aty). Nëse e shënojnë vetëm pak motorë të panjohur nga rreth 70, është alarm i rremë. Nëse e shënojnë shumë, mos e instaloni.
+2. Riktheni skedarin nga karantina ose historiku i antivirusit dhe lejojeni.
+3. Nëse kjo përsëritet, shtoni në antivirus një përjashtim për dosjen e programit (`C:\Program Files (x86)\InnKeeper` ose `C:\Program Files\InnKeeper`) dhe për `%LOCALAPPDATA%\InnKeeper`.
 
 ## 5. Përditësimet
 
-Pas instalimit të parë nuk ju duhet më: **Cilësimet → Përditësimet → Përditëso tani** e shkarkon versionin
+Pas instalimit të parë, këto hapa nuk ju duhen më: **Cilësimet → Përditësimet → Përditëso tani** e shkarkon versionin
 e ri nga GitHub, kontrollon kodin SHA-256 dhe e instalon pa paralajmërimet e shfletuesit apo SmartScreen.
 
-## Për njerëzit e IT-së
+## Për specialistët e IT-së
 
-* Skedarët e shkarkuar nga interneti kanë një “Mark of the Web”. Klikim i djathtë mbi instaluesin → **Properties** → shënoni **Unblock** → OK, ose në PowerShell: `Unblock-File .\InnKeeper-Setup-X.Y.Z.exe`. Pastaj hapet pa dritaren e SmartScreen.
+* Skedarët e shkarkuar nga interneti kanë një “Mark of the Web”. Klikoni me të djathtën mbi instaluesin → **Properties** → shënoni **Unblock** → OK, ose në PowerShell: `Unblock-File .\InnKeeper-Setup-X.Y.Z.exe`. Pastaj instaluesi hapet pa dritaren e SmartScreen.
 * Instalim i heshtur: `InnKeeper-Setup-X.Y.Z.exe /SILENT` (ose `/VERYSILENT`). Të dhënat janë te `%LOCALAPPDATA%\InnKeeper` dhe nuk fshihen kurrë nga një përditësim ose çinstalim.

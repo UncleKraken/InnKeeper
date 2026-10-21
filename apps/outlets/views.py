@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_POST
 
 from apps.accounts.permissions import module_required
@@ -721,7 +722,7 @@ class CategoryList(CrudListView):
         ("name", _("Name"), "text"),
         ("outlet.name", _("Outlet"), "text"),
         ("station.name", _("Prepared at"), "text"),
-        ("sort_order", _("Order"), "text"),
+        ("sort_order", pgettext_lazy("sort order", "Order"), "text"),
     ]
 
 

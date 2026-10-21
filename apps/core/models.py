@@ -268,7 +268,7 @@ class HotelSettings(models.Model):
     payroll_holiday_pay = models.BooleanField(
         _("pay extra for public holidays"),
         default=False,
-        help_text=_("Off for places open every day (hotels, bars) that don't pay holidays separately. Choose the dates under Public holidays."),
+        help_text=_("Leave off if you're open every day (hotels, bars) and don't pay extra for public holidays. Choose the dates under Public holidays."),
     )
     payroll_period_start = models.PositiveSmallIntegerField(
         _("pay period starts on day"),
