@@ -19,7 +19,7 @@
     <p>{% blocktranslate with code=r.code %}Please transfer the deposit and write {{ code }} as the payment reference.{% endblocktranslate %}</p>
     <pre style="background:#f4f2ee;padding:12px;border-radius:6px;white-space:pre-wrap;font-family:inherit">{{ hotel.bank_details }}</pre>
   {% endif %}
-  {% if kind != "declined" %}<p><a href="{{ url }}" style="display:inline-block;background:#0e6e64;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">{% translate "View your booking" %}</a></p>{% endif %}
+  {% if url and kind != "declined" %}<p><a href="{{ url }}" style="display:inline-block;background:#0e6e64;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">{% translate "View your booking" %}</a></p>{% endif %}
   <p style="color:#6b7381;font-size:13px;margin-top:24px">{{ hotel.name }}{% if hotel.address %} · {{ hotel.address }}{% endif %}{% if hotel.phone %} · {{ hotel.phone }}{% endif %}</p>
 </div>
 </body></html>

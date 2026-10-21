@@ -200,8 +200,19 @@ def order_view(request, pk):
     return render(
         request,
         "outlets/order.html",
-        {**_ticket_context(order), "menu": [m for m in menu if m["items"]], "item_options": options},
+        {
+            **_ticket_context(order),
+            "menu": [m for m in menu if m["items"]],
+            "item_options": options,
+            "buyer_draft": _buyer_draft(request, order),
+        },
     )
+
+
+def _buyer_draft(request, order):
+    from apps.fiscal.buyer import draft
+
+    return draft(request, f"order:{order.pk}")
 
 
 def _ticket_context(order) -> dict:
@@ -535,7 +546,8 @@ def invoice_buyer(request, pk):
         if order.buyer_nuis:
             messages.success(request, _("The invoice will be made out to %(name)s.") % {"name": order.buyer_name.rstrip(".")})
     else:
-        messages.error(request, " ".join(e for errs in form.errors.values() for e in errs))
+        buyer.keep_draft(request, f"order:{order.pk}", form)
+        messages.error(request, " ".join(dict.fromkeys(e for errs in form.errors.values() for e in errs)))
     return _back_to_order(order)
 
 

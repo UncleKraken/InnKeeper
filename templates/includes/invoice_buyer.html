@@ -6,10 +6,10 @@
     <div class="card-body">
       <p class="help" style="margin-top:0">{% translate "For a business that needs the invoice in its own name. The company's name and NUIS are printed on the invoice and sent to the tax office with it." %}</p>
       <div class="grid {% if compact %}grid-1{% else %}grid-2{% endif %}" style="gap:.75rem">
-        <div class="field"><label for="id_buyer_name">{% translate "Company name" %}</label>{{ form.buyer_name }}</div>
-        <div class="field"><label for="id_buyer_nuis">{% translate "NUIS" %}</label>{{ form.buyer_nuis }}</div>
-        <div class="field"><label for="id_buyer_address">{% translate "Address" %}</label>{{ form.buyer_address }}</div>
-        <div class="field"><label for="id_buyer_town">{% translate "Town" %}</label>{{ form.buyer_town }}</div>
+        <div class="field{% if form.buyer_name.errors %} has-error{% endif %}"><label for="id_buyer_name">{% translate "Company name" %}</label>{{ form.buyer_name }}{% for e in form.buyer_name.errors %}<div class="error">{{ e }}</div>{% endfor %}</div>
+        <div class="field{% if form.buyer_nuis.errors %} has-error{% endif %}"><label for="id_buyer_nuis">{% translate "NUIS" %}</label>{{ form.buyer_nuis }}{% for e in form.buyer_nuis.errors %}<div class="error">{{ e }}</div>{% endfor %}</div>
+        <div class="field{% if form.buyer_address.errors %} has-error{% endif %}"><label for="id_buyer_address">{% translate "Address" %}</label>{{ form.buyer_address }}{% for e in form.buyer_address.errors %}<div class="error">{{ e }}</div>{% endfor %}</div>
+        <div class="field{% if form.buyer_town.errors %} has-error{% endif %}"><label for="id_buyer_town">{% translate "Town" %}</label>{{ form.buyer_town }}{% for e in form.buyer_town.errors %}<div class="error">{{ e }}</div>{% endfor %}</div>
       </div>
     </div>
     <div class="card-footer row" style="gap:.6rem; flex-wrap:wrap">

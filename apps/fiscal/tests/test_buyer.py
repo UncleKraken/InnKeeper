@@ -111,3 +111,28 @@ class BuyerFiscalTests(HotelTestCase):
         self.client.post(url, {"clear": "1"})
         folio = Folio.objects.get(reservation=res)
         self.assertEqual((folio.buyer_name, folio.buyer_nuis), ("", ""))
+
+
+class BuyerMistakeTests(HotelTestCase):
+    def test_a_wrong_nuis_keeps_what_was_typed_and_shows_one_error_in_the_card(self):
+        self.client.login(username="desk", password=PASSWORD)
+        res = self.make_reservation(nights=1)
+        self.client.post(reverse("frontdesk:invoice_buyer", args=[res.pk]), {"buyer_name": "Alfa Tours", "buyer_nuis": "12345"})
+        r = self.client.get(reverse("frontdesk:reservation_detail", args=[res.pk]))
+        self.assertContains(r, 'value="Alfa Tours"')
+        self.assertContains(r, 'value="12345"')
+        self.assertContains(r, 'id="buyer" open')
+        self.assertContains(r, "L12345678A", count=1)
+        self.assertNotContains(r, "Enter the company&#x27;s NUIS")
+        # Only once: the next visit shows the saved state again.
+        r = self.client.get(reverse("frontdesk:reservation_detail", args=[res.pk]))
+        self.assertNotContains(r, 'value="12345"')
+
+    def test_till_keeps_the_typed_values_and_reopens_the_pane(self):
+        self.client.login(username="waiter", password=PASSWORD)
+        order = pos.open_order(self.restaurant, table=self.table, user=self.waiter)
+        pos.add_item(order, self.dish, user=self.waiter)
+        self.client.post(reverse("outlets:invoice_buyer", args=[order.pk]), {"buyer_name": "Beta", "buyer_nuis": "x1"})
+        r = self.client.get(reverse("outlets:order", args=[order.pk]))
+        self.assertContains(r, 'data-open="more"')
+        self.assertContains(r, 'value="x1"')

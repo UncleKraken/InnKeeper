@@ -489,6 +489,12 @@ class HotelSettings(models.Model):
         return bool(self.second_currency and self.second_currency_rate and self.second_currency_rate > 0)
 
     @property
+    def second_currency_whole(self) -> bool:
+        from apps.finance.currency import whole_units
+
+        return whole_units(self.second_currency)
+
+    @property
     def email_configured(self) -> bool:
         return bool(self.smtp_host and (self.email_from or self.smtp_username))
 

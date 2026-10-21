@@ -28,12 +28,18 @@ FIELDS = {PRE_ARRIVAL: "pre_arrival_sent_at", REVIEW: "review_sent_at"}
 MAX_PER_RUN = 60
 
 
+ALBANIAN_SPEAKING = {
+    "albania", "shqipëri", "shqiperi", "shqipëria", "shqiperia", "al", "alb",
+    "shqiptar", "shqiptare", "kosovo", "kosova", "kosovë", "kosove", "xk", "xkx", "rks",
+}
+
+
 def language(res: Reservation, hs=None) -> str:
     """The guest's language: what they booked in, else Albanian for Albanians and English for everyone else."""
     if res.guest_language:
         return res.guest_language
     nat = (res.guest.nationality or "").strip().lower()
-    if nat in ("albania", "shqipëri", "shqiperi", "shqipëria", "al", "alb", "kosovo", "kosova"):
+    if nat in ALBANIAN_SPEAKING:
         return "sq"
     if nat:
         return "en"

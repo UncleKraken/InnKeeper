@@ -148,18 +148,18 @@ CATEGORY_SQ = {
 }
 
 GUESTS = [
-    ("Ardit", "Gashi", "AL"),
-    ("Sara", "Rossi", "IT"),
-    ("Lukas", "Müller", "DE"),
-    ("Emma", "Dubois", "FR"),
-    ("Jonida", "Prifti", "AL"),
-    ("Oliver", "Smith", "GB"),
-    ("Ana", "García", "ES"),
-    ("Erion", "Kola", "XK"),
-    ("Mila", "Novak", "SI"),
-    ("Noah", "Johnson", "US"),
-    ("Blerta", "Hysa", "AL"),
-    ("Marco", "Bianchi", "IT"),
+    ("Ardit", "Gashi", "Shqipëri"),
+    ("Sara", "Rossi", "Itali"),
+    ("Lukas", "Müller", "Gjermani"),
+    ("Emma", "Dubois", "Francë"),
+    ("Jonida", "Prifti", "Shqipëri"),
+    ("Oliver", "Smith", "Mbretëri e Bashkuar"),
+    ("Ana", "García", "Spanjë"),
+    ("Erion", "Kola", "Kosovë"),
+    ("Mila", "Novak", "Slloveni"),
+    ("Noah", "Johnson", "SHBA"),
+    ("Blerta", "Hysa", "Shqipëri"),
+    ("Marco", "Bianchi", "Itali"),
 ]
 
 

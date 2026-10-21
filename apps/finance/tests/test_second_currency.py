@@ -112,3 +112,35 @@ class SecondCurrencyTests(HotelTestCase):
         self.assertIn(b"0.01", data)
         self.client.login(username="waiter", password=PASSWORD)
         self.assertContains(self.client.get(reverse("outlets:receipt", args=[o.pk])), "1200.00 ALL")
+
+
+class WholeUnitTests(HotelTestCase):
+    def test_lek_due_is_rounded_up_to_a_whole_lek(self):
+        from decimal import Decimal as D
+
+        from apps.finance.currency import due_in_second
+
+        self.assertEqual(due_in_second(D("4.40"), D("0.0104"), "ALL"), D("424.00"))
+        self.assertEqual(due_in_second(D("4.40"), D("0.0104"), "EUR"), D("423.08"))
+        self.assertEqual(due_in_second(D("1000"), D("100"), "EUR"), D("10.00"))
+
+
+class UnclosedDayTests(HotelTestCase):
+    def test_day_close_points_to_yesterday_when_it_was_not_closed(self):
+        from datetime import timedelta
+
+        order = pos.open_order(self.restaurant, table=self.table, user=self.waiter)
+        pos.add_item(order, self.dish, user=self.waiter)
+        pos.pay_order(order, method="cash", user=self.waiter)
+        Payment.objects.filter(order=order).update(business_date=self.today - timedelta(days=1))
+        self.client.login(username="boss", password=PASSWORD)
+        r = self.client.get(reverse("finance:day_close"))
+        self.assertContains(r, "alert alert-warning no-print")
+        self.assertContains(r, f"?date={(self.today - timedelta(days=1)).isoformat()}")
+        z = D("0")
+        DayClose.objects.create(
+            business_date=self.today - timedelta(days=1), opening_float=z, cash_sales=z, cash_expenses=z, expected_cash=z,
+            counted_cash=z, card_total=z, other_total=z, revenue_total=z,
+        )
+        r = self.client.get(reverse("finance:day_close"))
+        self.assertNotContains(r, "alert alert-warning no-print")

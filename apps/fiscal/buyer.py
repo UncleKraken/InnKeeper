@@ -44,9 +44,37 @@ class BuyerForm(forms.Form):
         name, nuis = (cleaned.get("buyer_name") or "").strip(), cleaned.get("buyer_nuis") or ""
         if nuis and not name:
             self.add_error("buyer_name", _("Enter the company name."))
-        if name and not nuis:
+        if name and not nuis and "buyer_nuis" not in self.errors:
             self.add_error("buyer_nuis", _("Enter the company's NUIS."))
         return cleaned
+
+
+FIELDS = ("buyer_name", "buyer_nuis", "buyer_address", "buyer_town")
+DRAFT = "innkeeper_buyer_draft"
+
+
+def keep_draft(request, key: str, form: BuyerForm) -> None:
+    """After a mistake, keep what was typed so the form comes back filled in, with the errors next to it."""
+    request.session[DRAFT] = {"key": key, "data": {k: form.data.get(k, "") for k in FIELDS}}
+
+
+def draft(request, key: str) -> dict | None:
+    d = request.session.get(DRAFT)
+    if d and d.get("key") == key:
+        request.session.pop(DRAFT, None)
+        return d["data"]
+    return None
+
+
+def form_for(request, key: str, obj, default_name: str = "") -> BuyerForm:
+    data = draft(request, key)
+    if data is not None:
+        form = BuyerForm(data)
+        form.is_valid()  # shows the errors
+        return form
+    if obj.buyer_nuis:
+        return BuyerForm(initial={k: getattr(obj, k) for k in FIELDS})
+    return BuyerForm(initial={"buyer_name": default_name})
 
 
 def save(obj, form: BuyerForm) -> None:

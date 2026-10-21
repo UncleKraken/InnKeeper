@@ -155,7 +155,8 @@ def _backup_first() -> None:
 def _run_installer(exe: Path) -> None:
     flags = getattr(subprocess, "DETACHED_PROCESS", 0) | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
     subprocess.Popen(
-        [str(exe), "/SILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/CLOSEAPPLICATIONS"],
+        # The log shows afterwards what happened (e.g. if InnKeeper did not open again by itself).
+        [str(exe), "/SILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/CLOSEAPPLICATIONS", f"/LOG={exe.with_suffix('.log')}"],
         creationflags=flags,
         close_fds=True,
     )

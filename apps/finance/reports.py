@@ -215,6 +215,21 @@ class DayCloseForm(StyledFormMixin, forms.Form):
                 self.fields[name].widget.attrs.update({"class": "input", "inputmode": "decimal"})
 
 
+def _unclosed_before(day):
+    """The latest of the last 7 days that had payments but was never closed (e.g. opening the page just after
+    midnight, before yesterday was closed)."""
+    from datetime import timedelta
+
+    closed = DayClose.objects.filter(business_date__gte=day - timedelta(days=7)).values_list("business_date", flat=True)
+    return (
+        Payment.objects.filter(business_date__gte=day - timedelta(days=7), business_date__lt=day, voided=False)
+        .exclude(business_date__in=list(closed))
+        .order_by("-business_date")
+        .values_list("business_date", flat=True)
+        .first()
+    )
+
+
 @module_required("finance")
 def day_close(request):
     try:
@@ -295,6 +310,7 @@ def day_close(request):
             "expected_now": expected_now,
             "history": DayClose.objects.all()[:14],
             "print_mode": request.GET.get("print") == "1",
+            "unclosed": None if request.GET.get("date") else _unclosed_before(day),
         },
     )
 

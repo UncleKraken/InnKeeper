@@ -156,7 +156,7 @@
           {% if checkin.whatsapp %}<a class="btn btn-secondary btn-sm" href="{{ checkin.whatsapp }}" target="_blank" rel="noopener">{% icon "send" %} WhatsApp</a>{% endif %}
         {% endif %}
       </div>
-      {% if checkin and checkin.local_only %}<p class="muted" style="font-size:.8rem; margin:.5rem 0 0">{% translate "Without a public web address the link opens only on your Wi-Fi (Settings → Online booking)." %}</p>{% endif %}
+      {% if checkin and checkin.local_only %}<p class="muted" style="font-size:.8rem; margin:.5rem 0 0">{% translate "Without a public web address the link opens only on your Wi-Fi, so the guest can use it at reception. To send it before arrival, set up a public address (Settings → Online booking)." %}</p>{% endif %}
       </div>
     </section>
     {% if guest_message %}

@@ -26,9 +26,19 @@ def to_main(foreign: Decimal, rate: Decimal) -> Decimal:
     return (Decimal(foreign) * Decimal(rate)).quantize(CENT, rounding=ROUND_HALF_UP)
 
 
-def due_in_second(amount: Decimal, rate: Decimal) -> Decimal:
-    """What the guest must hand over in the second currency to cover `amount` (rounded up to the cent)."""
-    return (Decimal(amount) / Decimal(rate)).quantize(CENT, rounding=ROUND_UP)
+# Currencies paid in whole units in practice (no coins under 1): the amount due is rounded up to a whole one.
+WHOLE_UNITS = {"ALL", "JPY", "KRW", "HUF", "ISK"}
+
+
+def whole_units(currency: str) -> bool:
+    return (currency or "").upper() in WHOLE_UNITS
+
+
+def due_in_second(amount: Decimal, rate: Decimal, currency: str = "") -> Decimal:
+    """What the guest must hand over in the second currency to cover `amount` (rounded up to the cent, or to
+    a whole unit for currencies such as the lek)."""
+    step = Decimal("1") if whole_units(currency) else CENT
+    return (Decimal(amount) / Decimal(rate)).quantize(step, rounding=ROUND_UP).quantize(CENT)
 
 
 def foreign_payment(currency: str, amount) -> dict | None:

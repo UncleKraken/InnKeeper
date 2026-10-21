@@ -121,3 +121,18 @@ class OnlineCheckinTests(HotelTestCase):
         r = self.client.get(reverse("frontdesk:reservation_detail", args=[self.res.pk]))
         self.assertContains(r, self.res.checkin_token)
         self.assertContains(r, reverse("frontdesk:stay_guests", args=[self.res.pk]))
+
+
+class CheckinLinkWithoutPublicAddressTests(HotelTestCase):
+    def test_link_uses_the_wifi_address_not_this_computer_and_no_whatsapp(self):
+        from unittest import mock
+
+        self.guest.phone = "+355 69 1234567"
+        self.guest.save()
+        res = self.make_reservation(start=2, nights=2)
+        self.client.login(username="desk", password=PASSWORD)
+        with mock.patch("apps.core.remote.lan_address", return_value="192.168.1.20"):
+            r = self.client.get(reverse("frontdesk:reservation_detail", args=[res.pk]), HTTP_HOST="127.0.0.1:8765")
+        self.assertContains(r, "http://192.168.1.20:8765/book/checkin/")
+        self.assertNotContains(r, "127.0.0.1:8765/book/checkin/")
+        self.assertNotContains(r, "check%20in%20online")

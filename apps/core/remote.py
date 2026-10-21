@@ -113,3 +113,17 @@ def is_local_request(request) -> bool:
     except ValueError:
         return False
     return ip.is_private or ip in TAILSCALE_NET
+
+
+def address_for_other_devices(request) -> str:
+    """The address another phone on the Wi-Fi can open (not 127.0.0.1, which is this computer only)."""
+    base = request.build_absolute_uri("/").rstrip("/")
+    host = request.get_host()
+    name, _sep, port = host.rpartition(":") if not host.endswith("]") else (host, "", "")
+    if not name or not port.isdigit():
+        name, port = host, request.get_port()
+    if name.strip("[]") in ("127.0.0.1", "localhost", "::1"):
+        lan = lan_address()
+        if lan:
+            return f"{request.scheme}://{lan}:{port}"
+    return base

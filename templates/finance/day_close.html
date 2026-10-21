@@ -10,6 +10,7 @@
   </div>
 </div>
 <div class="no-print">{% include "finance/_tabs.html" %}</div>
+{% if unclosed %}<div class="alert alert-warning no-print" style="margin-bottom:1rem">{% icon "alert" %} {% blocktranslate with d=unclosed|date:"d.m.Y" %}{{ d }} is not closed yet.{% endblocktranslate %} <a href="?date={{ unclosed|date:'Y-m-d' }}">{% translate "Close it now" %}</a></div>{% endif %}
 
 <div class="grid grid-main">
   <div class="stack">

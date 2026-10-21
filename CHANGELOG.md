@@ -1,5 +1,29 @@
 # Changelog
 
+## 2.32.1 — fixes from live testing
+
+**Shqip**
+
+- **Faturë për një kompani:** kur NUIS-i është i gabuar, ajo që shkruat mbetet në formular dhe gabimi shfaqet poshtë fushës (një herë, jo dy).
+- **Check-in online pa adresë publike:** linku tani përdor adresën e Wi-Fi-t (p.sh. 192.168.x.x) dhe jo 127.0.0.1, që hapet vetëm në kompjuterin e InnKeeper-it. Butoni WhatsApp për check-in shfaqet vetëm me adresë publike, sepse mysafiri që s'ka mbërritur nuk e hap dot linkun e Wi-Fi-t. Edhe emailet e mysafirëve nuk kanë më një lidhje që nuk hapet.
+- **Lekët pa qindarka:** kur klienti paguan me lekë, shuma për të paguar rrumbullakoset lart në lek të plotë (p.sh. 424 L, jo 423.08 L).
+- **Mbyllja e ditës pas mesnate:** nëse dita e djeshme nuk është mbyllur, faqja ju lajmëron dhe ju çon atje me një prekje.
+- Mysafirët nga Kosova marrin mesazhet dhe faqen e check-in-it në shqip.
+- Përditësimet nga brenda InnKeeper-it ruajnë një regjistër të instalimit, për të kuptuar pse InnKeeper ndonjëherë nuk hapet vetë pas përditësimit.
+
+**English**
+
+- **Invoice to a company:** when the NUIS is wrong, what you typed stays in the form and the error shows under the field (once, not twice).
+- **Online check-in without a public address:** the link now uses the Wi-Fi address (e.g. 192.168.x.x) instead of 127.0.0.1, which only opens on the InnKeeper computer. The WhatsApp button for check-in only shows with a public address, because a guest who hasn't arrived can't open a Wi-Fi link. Guest emails no longer contain a link that can't be opened.
+- **Lek without cents:** when a customer pays in lek, the amount to pay is rounded up to a whole lek (e.g. 424 L, not 423.08 L).
+- **Day close after midnight:** if yesterday wasn't closed, the page tells you and takes you there in one tap.
+- Guests from Kosovo get their messages and check-in page in Albanian.
+- Updates started inside InnKeeper keep an install log, to find out why InnKeeper sometimes doesn't reopen by itself after an update.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.32.1.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.32.0 — invoices to companies
 
 **Shqip**

@@ -17,6 +17,7 @@ from apps.accounts.permissions import module_required
 from apps.core.crud import CrudCreateView, CrudListView, CrudUpdateView
 from apps.core.exceptions import BusinessError
 from apps.core.models import HotelSettings
+from apps.core.remote import address_for_other_devices
 from apps.core.templatetags.innkeeper import money
 from apps.finance.models import Charge, Folio, Payment
 
@@ -265,21 +266,17 @@ def reservation_detail(request, pk):
             "link_amount": link_amount or max(folio.balance + pending_amount, Decimal("0")).quantize(Decimal("0.01")),
             "link_purpose": "deposit" if link_amount else "balance",
             "guest_message": _guest_message_ctx(res),
-            "checkin": _checkin_ctx(res, base),
-            "buyer_form": _buyer_form(folio, res),
+            "checkin": _checkin_ctx(res, address_for_other_devices(request)),
+            "buyer_form": _buyer_form(request, folio, res),
             "needs_einvoice": _needs_einvoice(folio, payments),
         },
     )
 
 
-def _buyer_form(folio, res):
-    from apps.fiscal.buyer import BuyerForm
+def _buyer_form(request, folio, res):
+    from apps.fiscal.buyer import form_for
 
-    if folio.buyer_nuis:
-        initial = {k: getattr(folio, k) for k in ("buyer_name", "buyer_nuis", "buyer_address", "buyer_town")}
-    else:
-        initial = {"buyer_name": res.guest.company}
-    return BuyerForm(initial=initial)
+    return form_for(request, f"folio:{folio.pk}", folio, res.guest.company)
 
 
 def _needs_einvoice(folio, payments):
@@ -301,7 +298,7 @@ def _checkin_ctx(res, base):
     url = checkin.link(res, base)
     number = gm.whatsapp_number(res.guest.phone)
     whatsapp = ""
-    if number:
+    if number and hs.public_url:  # a guest who is not here yet can't open an address on your Wi-Fi
         from django.utils import translation
 
         with translation.override(gm.language(res, hs)):
@@ -410,7 +407,7 @@ def invoice_buyer(request, pk):
         else:
             messages.success(request, _("The invoice will be made out to the guest."))
     else:
-        messages.error(request, " ".join(e for errs in form.errors.values() for e in errs))
+        buyer.keep_draft(request, f"folio:{folio.pk}", form)
     return redirect(reverse("frontdesk:reservation_detail", args=[pk]) + "#buyer")
 
 

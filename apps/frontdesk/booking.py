@@ -198,7 +198,8 @@ def send_guest_email(reservation: Reservation, kind: str, base_url: str = "", **
         reservation.guest.email,
         subject,
         "booking/email_guest.html",
-        {"r": reservation, "kind": kind, "url": booking_url(reservation, base_url), **extra},
+        # The guest reads the email away from the hotel: only a public address works there.
+        {"r": reservation, "kind": kind, "url": booking_url(reservation) if HotelSettings.load().public_url else "", **extra},
         language=lang,
     )
 
