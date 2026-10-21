@@ -41,6 +41,11 @@ class Folio(models.Model):
     invoice_number = models.CharField(_("invoice number"), max_length=20, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     closed_at = models.DateTimeField(null=True, blank=True)
+    # Invoice to a company: its NUIS goes on the fiscal invoice (see apps/fiscal/buyer.py).
+    buyer_name = models.CharField(_("company name"), max_length=100, blank=True)
+    buyer_nuis = models.CharField(_("company NUIS"), max_length=20, blank=True)
+    buyer_address = models.CharField(_("company address"), max_length=200, blank=True)
+    buyer_town = models.CharField(_("company town"), max_length=60, blank=True)
 
     class Meta:
         verbose_name = _("folio")

@@ -462,6 +462,11 @@ class Order(models.Model):
     discount = models.DecimalField(_("discount"), default=Decimal("0.00"), **MONEY)
     discount_reason = models.CharField(_("discount reason"), max_length=120, blank=True)
     receipt_number = models.CharField(_("receipt number"), max_length=20, blank=True, db_index=True)
+    # Invoice to a company: its NUIS goes on the fiscal invoice (see apps/fiscal/buyer.py).
+    buyer_name = models.CharField(_("company name"), max_length=100, blank=True)
+    buyer_nuis = models.CharField(_("company NUIS"), max_length=20, blank=True)
+    buyer_address = models.CharField(_("company address"), max_length=200, blank=True)
+    buyer_town = models.CharField(_("company town"), max_length=60, blank=True)
 
     opened_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+", verbose_name=_("opened by")

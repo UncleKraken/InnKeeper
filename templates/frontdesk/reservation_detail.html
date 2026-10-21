@@ -95,6 +95,8 @@
     </div>
     {% endif %}
 
+    {% url 'frontdesk:invoice_buyer' r.pk as buyer_url %}{% include "includes/invoice_buyer.html" with obj=folio form=buyer_form action_url=buyer_url %}
+
     {% if r.status == "checked_in" and request.user.is_manager and folio.balance > 0 %}
       <form method="post" action="{% url 'frontdesk:check_out' r.pk %}" class="card card-body row" data-confirm="{% translate 'Check out and leave the balance unpaid?' %}">{% csrf_token %}
         <input type="hidden" name="allow_balance" value="1">

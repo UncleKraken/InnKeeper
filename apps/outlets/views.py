@@ -521,6 +521,26 @@ def discount(request, pk):
 
 @require_POST
 @module_required("outlets")
+def invoice_buyer(request, pk):
+    """Invoice to a company: its name and NUIS go on the receipt and on the fiscal invoice."""
+    from apps.fiscal import buyer
+
+    order = _order_for(request, pk)
+    if order.status != Order.Status.OPEN:
+        messages.error(request, _("This bill is closed: the invoice was already issued."))
+        return _back_to_order(order)
+    form = buyer.BuyerForm({} if request.POST.get("clear") else request.POST)
+    if form.is_valid():
+        buyer.save(order, form)
+        if order.buyer_nuis:
+            messages.success(request, _("The invoice will be made out to %(name)s.") % {"name": order.buyer_name.rstrip(".")})
+    else:
+        messages.error(request, " ".join(e for errs in form.errors.values() for e in errs))
+    return _back_to_order(order)
+
+
+@require_POST
+@module_required("outlets")
 def move(request, pk):
     order = _order_for(request, pk)
     table = get_object_or_404(Table, pk=request.POST.get("table"), outlet=order.outlet, is_active=True)

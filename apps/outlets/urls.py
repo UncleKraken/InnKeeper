@@ -17,6 +17,7 @@ urlpatterns = [
     path("orders/<int:pk>/cancel/", views.cancel, name="cancel"),
     path("orders/<int:pk>/receipt/", views.receipt, name="receipt"),
     path("orders/<int:pk>/discount/", views.discount, name="discount"),
+    path("orders/<int:pk>/company/", views.invoice_buyer, name="invoice_buyer"),
     path("orders/<int:pk>/move/", views.move, name="move"),
     path("orders/<int:pk>/payments/<int:payment_id>/void/", views.void_payment, name="void_payment"),
     path("orders/<int:pk>/void/", views.void_receipt, name="void_receipt"),

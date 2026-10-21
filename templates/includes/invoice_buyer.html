@@ -1,0 +1,28 @@
+{% load i18n innkeeper %}{# Invoice to a company. Needs: obj (bill or order), form, action_url; optional needs_einvoice, compact. #}
+{% if obj.status == "open" %}
+<details class="card" id="buyer"{% if obj.buyer_nuis or form.errors %} open{% endif %}>
+  <summary class="card-header" style="cursor:pointer"><h3>{% icon "building" %} {% translate "Invoice to a company" %}</h3>{% if obj.buyer_nuis %}<span class="muted">{{ obj.buyer_name }} · <span class="mono">{{ obj.buyer_nuis }}</span></span>{% endif %}</summary>
+  <form method="post" action="{{ action_url }}" novalidate>{% csrf_token %}
+    <div class="card-body">
+      <p class="help" style="margin-top:0">{% translate "For a business that needs the invoice in its own name. The company's name and NUIS are printed on the invoice and sent to the tax office with it." %}</p>
+      <div class="grid {% if compact %}grid-1{% else %}grid-2{% endif %}" style="gap:.75rem">
+        <div class="field"><label for="id_buyer_name">{% translate "Company name" %}</label>{{ form.buyer_name }}</div>
+        <div class="field"><label for="id_buyer_nuis">{% translate "NUIS" %}</label>{{ form.buyer_nuis }}</div>
+        <div class="field"><label for="id_buyer_address">{% translate "Address" %}</label>{{ form.buyer_address }}</div>
+        <div class="field"><label for="id_buyer_town">{% translate "Town" %}</label>{{ form.buyer_town }}</div>
+      </div>
+    </div>
+    <div class="card-footer row" style="gap:.6rem; flex-wrap:wrap">
+      <button class="btn btn-secondary">{% icon "check" %} {% translate "Save" %}</button>
+      {% if obj.buyer_nuis %}<button class="btn btn-ghost" name="clear" value="1">{% translate "Make it out to the guest" %}</button>{% endif %}
+    </div>
+  </form>
+</details>
+{% elif obj.buyer_nuis %}
+<section class="card card-body" id="buyer">
+  <strong>{% translate "Invoice to" %}:</strong> {{ obj.buyer_name }} · NUIS <span class="mono">{{ obj.buyer_nuis }}</span>
+</section>
+{% endif %}
+{% if needs_einvoice %}
+<div class="alert alert-warning">{% icon "alert" %} {% translate "A company paying by bank transfer also needs an electronic invoice (e-faturë). Issue it in the tax office's self-care portal with the same items, NUIS and amount." %}</div>
+{% endif %}

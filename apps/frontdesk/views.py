@@ -266,8 +266,26 @@ def reservation_detail(request, pk):
             "link_purpose": "deposit" if link_amount else "balance",
             "guest_message": _guest_message_ctx(res),
             "checkin": _checkin_ctx(res, base),
+            "buyer_form": _buyer_form(folio, res),
+            "needs_einvoice": _needs_einvoice(folio, payments),
         },
     )
+
+
+def _buyer_form(folio, res):
+    from apps.fiscal.buyer import BuyerForm
+
+    if folio.buyer_nuis:
+        initial = {k: getattr(folio, k) for k in ("buyer_name", "buyer_nuis", "buyer_address", "buyer_town")}
+    else:
+        initial = {"buyer_name": res.guest.company}
+    return BuyerForm(initial=initial)
+
+
+def _needs_einvoice(folio, payments):
+    from apps.fiscal.buyer import needs_einvoice
+
+    return needs_einvoice(folio, payments)
 
 
 def _checkin_ctx(res, base):
@@ -371,6 +389,29 @@ def add_charge(request, pk):
     else:
         messages.error(request, _("Check the charge details."))
     return redirect(reverse("frontdesk:reservation_detail", args=[pk]) + "#folio")
+
+
+@require_POST
+@module_required("frontdesk")
+def invoice_buyer(request, pk):
+    """Invoice to a company: its name and NUIS go on the bill and on the fiscal invoice."""
+    from apps.fiscal import buyer
+
+    res = get_object_or_404(Reservation, pk=pk)
+    folio, _created = Folio.objects.get_or_create(reservation=res)
+    if folio.status != Folio.Status.OPEN:
+        messages.error(request, _("This bill is closed: the invoice was already issued."))
+        return redirect(reverse("frontdesk:reservation_detail", args=[pk]) + "#buyer")
+    form = buyer.BuyerForm({} if request.POST.get("clear") else request.POST)
+    if form.is_valid():
+        buyer.save(folio, form)
+        if folio.buyer_nuis:
+            messages.success(request, _("The invoice will be made out to %(name)s.") % {"name": folio.buyer_name.rstrip(".")})
+        else:
+            messages.success(request, _("The invoice will be made out to the guest."))
+    else:
+        messages.error(request, " ".join(e for errs in form.errors.values() for e in errs))
+    return redirect(reverse("frontdesk:reservation_detail", args=[pk]) + "#buyer")
 
 
 @require_POST

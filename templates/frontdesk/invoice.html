@@ -22,7 +22,11 @@
     </div>
   </div>
   <div class="grid grid-2" style="margin-bottom:1.5rem">
+    {% if folio.buyer_nuis %}
+    <div><div class="muted">{% translate "Invoice to" %}</div><strong>{{ folio.buyer_name }}</strong><br>NUIS: <span class="mono">{{ folio.buyer_nuis }}</span>{% if folio.buyer_address or folio.buyer_town %}<br>{{ folio.buyer_address }}{% if folio.buyer_address and folio.buyer_town %}, {% endif %}{{ folio.buyer_town }}{% endif %}<br><span class="muted">{% translate "Guest" %}: {{ r.guest }}</span></div>
+    {% else %}
     <div><div class="muted">{% translate "Guest" %}</div><strong>{{ r.guest }}</strong>{% if r.guest.company %}<br>{{ r.guest.company }}{% endif %}{% if r.guest.address %}<br>{{ r.guest.address }}{% endif %}</div>
+    {% endif %}
     <div><div class="muted">{% translate "Stay" %}</div>{% translate "Room" %} {{ r.room.number }} · {{ r.arrival|date:"d.m.Y" }} → {{ r.departure|date:"d.m.Y" }}<br><span class="mono">{{ r.code }}</span></div>
   </div>
   <div class="table-wrap"><table class="table">

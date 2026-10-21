@@ -274,6 +274,20 @@ def fiscal_probe():
     except Exception as e:
         check("Tax authority probe (receipt)", False, f"{type(e).__name__}: {e}", required=False)
 
+    # The same with a company as the buyer (invoice to a company, NUIS).
+    try:
+        order = pos.open_order(bar, user=user, label="E2E company")
+        pos.add_item(order, Item.objects.filter(category__outlet=bar).first(), user=user)
+        order.buyer_name, order.buyer_nuis, order.buyer_town = "E2E sh.p.k.", "L12345678A", "Tiranë"
+        order.save(update_fields=["buyer_name", "buyer_nuis", "buyer_town"])
+        pos.pay_order(order, method="card", user=user)
+        doc = FiscalDocument.objects.filter(order=order).first()
+        ok = doc is not None and (doc.payload or {}).get("buyer", {}).get("IDNum") == "L12345678A"
+        detail = f"status {doc.status}; answer: {(doc.last_error or doc.fic)[:200]}" if doc else "no fiscal document"
+        check("Tax authority test system (invoice to a company)", ok, detail, required=False)
+    except Exception as e:
+        check("Tax authority probe (company)", False, f"{type(e).__name__}: {e}", required=False)
+
 
 def _make_p12(attrs) -> bytes:
     from datetime import UTC, datetime, timedelta

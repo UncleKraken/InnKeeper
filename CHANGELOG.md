@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.32.0 — invoices to companies
+
+**Shqip**
+
+- **Faturë për një kompani:** kur një biznes e do faturën në emër të vet, shkruani emrin dhe NUIS-in e kompanisë (dhe, nëse i keni, adresën dhe qytetin) te *Faturë për një kompani*, poshtë faturës së mysafirit ose te butoni *%* në arkë.
+- Kompania shfaqet në faturën e printuar, në kupon dhe në kuponin termik. Fatura fiskale dërgohet te tatimet me kompaninë si blerëse (NUIS), edhe fatura korrigjuese kur anulohet.
+- NUIS-i kontrollohet (një shkronjë, 8 shifra, një shkronjë) dhe shkruhet me shkronja të mëdha. Emri i kompanisë nga profili i mysafirit plotësohet vetë.
+- Kur kompania paguan me transfertë bankare, fatura kujton që duhet edhe një faturë elektronike (e-faturë); për momentin lëshojeni te portali self-care i tatimeve.
+
+**English**
+
+- **Invoice to a company:** when a business needs the invoice in its own name, type the company's name and NUIS (and its address and town if you have them) under *Invoice to a company*, below the guest's bill or behind the *%* button at the till.
+- The company is shown on the printed invoice, the receipt and the thermal receipt. The fiscal invoice is sent to the tax authority with the company as the buyer (NUIS), and so is the correction when it is voided.
+- The NUIS is checked (a letter, 8 digits, a letter) and written in capitals. The company name from the guest's profile is filled in for you.
+- When the company pays by bank transfer, the bill reminds you that an electronic invoice (e-faturë) is also needed; for now, issue it in the tax authority's self-care portal.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.32.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.31.0 — two-step sign-in
 
 **Shqip**

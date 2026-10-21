@@ -42,6 +42,7 @@
     <tr><td>{% translate "Date" %}</td><td>{{ order.closed_at|default:order.opened_at|date:"d.m.Y H:i" }}</td></tr>
     {% if order.opened_by %}<tr><td>{% translate "Served by" %}</td><td>{{ order.opened_by }}</td></tr>{% endif %}
   </table>
+  {% if order.buyer_nuis %}<hr><div><strong>{% translate "Invoice to" %}:</strong> {{ order.buyer_name }}<br>NUIS {{ order.buyer_nuis }}{% if order.buyer_address or order.buyer_town %}<br>{{ order.buyer_address }}{% if order.buyer_address and order.buyer_town %}, {% endif %}{{ order.buyer_town }}{% endif %}</div>{% endif %}
   <hr>
   <table class="r-lines">
     {% for l in lines %}

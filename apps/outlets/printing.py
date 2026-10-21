@@ -227,6 +227,13 @@ def _receipt_document(order, printer: Printer, *, open_drawer: bool, language: s
     r.pair(order.display_name, timezone.localtime(order.closed_at or order.opened_at).strftime("%d.%m.%Y %H:%M"))
     if order.opened_by:
         r.pair(_("Served by"), str(order.opened_by))
+    if order.buyer_nuis:
+        r.rule()
+        r.wrap(f"{_('Invoice to')}: {order.buyer_name}")
+        r.wrap(f"NUIS {order.buyer_nuis}")
+        place = ", ".join(x for x in (order.buyer_address, order.buyer_town) if x)
+        if place:
+            r.wrap(place)
     r.rule()
     for line in order.active_lines:
         r.pair(f"{line.quantity} x {line_name(line, language)}", money(line.line_total, sym))

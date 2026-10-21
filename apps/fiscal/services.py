@@ -22,6 +22,7 @@ from django.utils.translation import gettext as _
 from apps.core.models import HotelSettings, audit
 
 from . import cis
+from .buyer import payload as buyer_payload
 from .models import CashDeposit, FiscalCounter, FiscalDocument
 from .signing import Certificate, CertificateError, iic
 
@@ -108,6 +109,7 @@ def create_document(
     folio=None,
     corrects: FiscalDocument | None = None,
     total: Decimal | None = None,
+    buyer: dict | None = None,
 ) -> FiscalDocument:
     hs = HotelSettings.load()
     cert = Certificate.from_settings(hs)
@@ -148,6 +150,7 @@ def create_document(
         "currency": hs.currency,
         "ex_rate": str(hs.fiscal_exchange_rate) if hs.fiscal_exchange_rate else None,
         "seller": _seller(hs),
+        "buyer": buyer,
         "lines": lines,
         "payments": pay,
         "invoice": {
@@ -423,6 +426,7 @@ def fiscalize_order(order, user) -> FiscalDocument | None:
         tcr=tcr_for_outlet(order.outlet),
         user=user,
         order=order,
+        buyer=buyer_payload(order),
     )
     return transmit(doc)
 
@@ -460,6 +464,7 @@ def fiscalize_folio(folio, user) -> FiscalDocument | None:
         tcr=hs.fiscal_tcr_code.strip(),
         user=user,
         folio=folio,
+        buyer=buyer_payload(folio),
     )
     return transmit(doc)
 
@@ -478,6 +483,7 @@ def correct_order(order, user) -> FiscalDocument | None:
         user=user,
         order=order,
         corrects=original,
+        buyer=(original.payload or {}).get("buyer"),
         total=-original.total,
     )
     return transmit(doc)

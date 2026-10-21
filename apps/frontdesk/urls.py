@@ -20,6 +20,7 @@ urlpatterns = [
     path("reservations/<int:pk>/payment/", views.add_payment, name="add_payment"),
     path("reservations/<int:pk>/void/<str:kind>/<int:entry_id>/", views.void_entry, name="void_entry"),
     path("reservations/<int:pk>/invoice/", views.invoice, name="invoice"),
+    path("reservations/<int:pk>/invoice/company/", views.invoice_buyer, name="invoice_buyer"),
     path("reservations/<int:pk>/move-room/", views.move_room, name="move_room"),
     path("reservations/<int:pk>/confirm/", views.confirm_booking, name="confirm_booking"),
     path("reservations/<int:pk>/message/", views.send_guest_message, name="send_guest_message"),
