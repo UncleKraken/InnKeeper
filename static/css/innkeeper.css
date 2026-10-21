@@ -1038,3 +1038,7 @@ body.kds-flash { animation: kds-flash 1.2s ease-out 2; }
 .cur-toggle button { border: 0; background: transparent; padding: .05rem .55rem; font: inherit; font-size: .8rem; font-weight: 700; color: var(--muted); cursor: pointer; }
 .cur-toggle button.active { background: var(--primary); color: #fff; }
 .cur-due { margin: .4rem 0 0; font-size: .95rem; }
+
+/* Two-step sign-in recovery codes */
+.recovery-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .5rem; font-size: 1.05rem; }
+.recovery-codes span { padding: .45rem .6rem; border: 1px dashed var(--border); border-radius: var(--radius-sm, 6px); text-align: center; }

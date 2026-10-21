@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 18:12+0200\n"
+"POT-Creation-Date: 2026-10-21 18:22+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: apps/accounts/apps.py:8 apps/accounts/views.py:86
-#: apps/accounts/views.py:114 apps/accounts/views.py:122
+#: apps/accounts/apps.py:8 apps/accounts/views.py:92
+#: apps/accounts/views.py:120 apps/accounts/views.py:128
 #: apps/finance/reports.py:386 apps/staff/views.py:29
 #: templates/accounts/pin_pad.html:34 templates/base.html:80
 #: templates/core/audit_log.html:11 templates/core/settings_hub.html:30
@@ -75,7 +75,7 @@ msgstr "Emri juaj"
 msgid "Your last name"
 msgstr "Mbiemri juaj"
 
-#: apps/accounts/forms.py:116 apps/accounts/views.py:102
+#: apps/accounts/forms.py:116 apps/accounts/views.py:108
 #: templates/accounts/login.html:32
 msgid "Username"
 msgstr "Emri i përdoruesit"
@@ -147,11 +147,11 @@ msgstr ""
 msgid "language"
 msgstr "gjuha"
 
-#: apps/accounts/models.py:31 apps/core/models.py:100 config/settings.py:140
+#: apps/accounts/models.py:31 apps/core/models.py:100 config/settings.py:141
 msgid "Albanian"
 msgstr "Shqip"
 
-#: apps/accounts/models.py:31 apps/core/models.py:100 config/settings.py:141
+#: apps/accounts/models.py:31 apps/core/models.py:100 config/settings.py:142
 msgid "English"
 msgstr "Anglisht"
 
@@ -166,12 +166,12 @@ msgstr ""
 msgid "PIN"
 msgstr "PIN"
 
-#: apps/accounts/models.py:38 apps/accounts/views.py:87
-#: apps/accounts/views.py:115 apps/accounts/views.py:123
+#: apps/accounts/models.py:43 apps/accounts/views.py:93
+#: apps/accounts/views.py:121 apps/accounts/views.py:129
 msgid "staff member"
 msgstr "anëtar stafi"
 
-#: apps/accounts/models.py:39 apps/outlets/models.py:111
+#: apps/accounts/models.py:44 apps/outlets/models.py:111
 msgid "staff"
 msgstr "stafi"
 
@@ -191,11 +191,11 @@ msgstr "PIN-i i ri"
 msgid "Repeat the PIN"
 msgstr "Përsëritni PIN-in"
 
-#: apps/accounts/pin.py:64
+#: apps/accounts/pin.py:64 templates/accounts/two_step.html:27
 msgid "Your password"
 msgstr "Fjalëkalimi juaj"
 
-#: apps/accounts/pin.py:73
+#: apps/accounts/pin.py:73 apps/accounts/twofactor.py:238
 msgid "Wrong password."
 msgstr "Fjalëkalim i gabuar."
 
@@ -253,11 +253,57 @@ msgstr "%(name)s doli nga puna në %(t)s: %(h)s orë."
 msgid "Wrong PIN."
 msgstr "PIN i gabuar."
 
-#: apps/accounts/views.py:76
+#: apps/accounts/twofactor.py:159
+msgid "Sign in again."
+msgstr "Hyni përsëri."
+
+#: apps/accounts/twofactor.py:169
+msgid "Too many wrong codes. Sign in again in 15 minutes."
+msgstr "Shumë kode të gabuara. Hyni përsëri pas 15 minutash."
+
+#: apps/accounts/twofactor.py:181
+msgid "Wrong code. Use the newest code in the app, or a recovery code."
+msgstr ""
+"Kod i gabuar. Përdorni kodin më të ri në aplikacion, ose një kod rikuperimi."
+
+#: apps/accounts/twofactor.py:210
+msgid ""
+"That code doesn't match. Check the phone's time and try the newest code."
+msgstr ""
+"Kodi nuk përputhet. Kontrolloni orën e telefonit dhe provoni kodin më të ri."
+
+#: apps/accounts/twofactor.py:219
+msgid "Two-step sign-in is on."
+msgstr "Hyrja me dy hapa u aktivizua."
+
+#: apps/accounts/twofactor.py:241
+msgid ""
+"Managers must use two-step sign-in here. Another manager can change that in "
+"Settings → Shared tills & PINs."
+msgstr ""
+"Këtu menaxherët duhet të përdorin hyrjen me dy hapa. Një menaxher tjetër "
+"mund ta ndryshojë këtë te Cilësimet → Arkat e përbashkëta & PIN."
+
+#: apps/accounts/twofactor.py:244
+msgid "Two-step sign-in is off."
+msgstr "Hyrja me dy hapa u çaktivizua."
+
+#: apps/accounts/twofactor.py:266
+#, python-format
+msgid "Two-step sign-in was switched off for %(name)s."
+msgstr "Hyrja me dy hapa u çaktivizua për %(name)s."
+
+#: apps/accounts/twofactor.py:282
+msgid "Set up two-step sign-in to continue: managers must use it here."
+msgstr ""
+"Aktivizoni hyrjen me dy hapa për të vazhduar: këtu menaxherët duhet ta "
+"përdorin."
+
+#: apps/accounts/views.py:82
 msgid "Your password was changed."
 msgstr "Fjalëkalimi juaj u ndryshua."
 
-#: apps/accounts/views.py:101 apps/frontdesk/views.py:663
+#: apps/accounts/views.py:107 apps/frontdesk/views.py:663
 #: apps/frontdesk/views.py:698 apps/inventory/views.py:83
 #: apps/inventory/views.py:520 apps/marketing/views.py:77
 #: apps/marketing/views.py:256 apps/outlets/menu_setup.py:62
@@ -275,16 +321,16 @@ msgstr "Fjalëkalimi juaj u ndryshua."
 msgid "Name"
 msgstr "Emri"
 
-#: apps/accounts/views.py:103 apps/staff/payroll_views.py:183
+#: apps/accounts/views.py:109 apps/staff/payroll_views.py:183
 #: apps/staff/views.py:121 templates/accounts/staff_form.html:10
 msgid "Position"
 msgstr "Pozicioni"
 
-#: apps/accounts/views.py:104
+#: apps/accounts/views.py:110
 msgid "Role"
 msgstr "Roli"
 
-#: apps/accounts/views.py:105 apps/core/forms.py:54
+#: apps/accounts/views.py:111 apps/core/forms.py:54
 #: apps/frontdesk/checkin.py:106 apps/frontdesk/forms.py:54
 #: apps/frontdesk/groups.py:138 apps/frontdesk/models.py:120
 #: apps/frontdesk/public.py:46 apps/inventory/views.py:522
@@ -297,11 +343,11 @@ msgstr "Roli"
 msgid "Phone"
 msgstr "Telefoni"
 
-#: apps/accounts/views.py:106
+#: apps/accounts/views.py:112
 msgid "Last sign-in"
 msgstr "Hyrja e fundit"
 
-#: apps/accounts/views.py:107 apps/frontdesk/views.py:634
+#: apps/accounts/views.py:113 apps/frontdesk/views.py:634
 #: apps/frontdesk/views.py:668 apps/frontdesk/views.py:705
 #: apps/inventory/views.py:524 apps/outlets/menu_setup.py:177
 #: apps/outlets/views.py:704 apps/outlets/views.py:833
@@ -309,17 +355,17 @@ msgstr "Hyrja e fundit"
 msgid "Active"
 msgstr "Aktiv"
 
-#: apps/accounts/views.py:129
+#: apps/accounts/views.py:135
 msgid "You cannot deactivate your own account."
 msgstr "Nuk mund të çaktivizoni llogarinë tuaj."
 
-#: apps/accounts/views.py:143
+#: apps/accounts/views.py:149
 #, python-format
 msgid "New password set for %(name)s. Tell them in person, not by message."
 msgstr ""
 "U vendos fjalëkalim i ri për %(name)s. Tregojani personalisht, jo me mesazh."
 
-#: apps/accounts/views.py:152
+#: apps/accounts/views.py:158
 msgid "Set password"
 msgstr "Vendos fjalëkalim"
 
@@ -735,7 +781,7 @@ msgstr ""
 "TVSH apo fiskalizim, dhe kuponat shënohen si kupona të brendshëm. Pyesni "
 "kontabilistin nëse nuk jeni të sigurt."
 
-#: apps/core/models.py:38 apps/core/models.py:605 apps/frontdesk/models.py:90
+#: apps/core/models.py:38 apps/core/models.py:610 apps/frontdesk/models.py:90
 #: apps/staff/models.py:69
 msgid "address"
 msgstr "adresa"
@@ -1025,7 +1071,7 @@ msgstr ""
 msgid "security"
 msgstr "siguria"
 
-#: apps/core/models.py:168 apps/core/models.py:321
+#: apps/core/models.py:168 apps/core/models.py:326
 msgid "None"
 msgstr "Asnjë"
 
@@ -1144,10 +1190,23 @@ msgid "thank-you text"
 msgstr "teksti i falënderimit"
 
 #: apps/core/models.py:226
+msgid "managers must use two-step sign-in"
+msgstr "menaxherët duhet të përdorin hyrjen me dy hapa"
+
+#: apps/core/models.py:228
+msgid ""
+"Managers then need a 6-digit code from a phone app after their password. "
+"Strongly recommended when InnKeeper can be reached from the internet."
+msgstr ""
+"Pas fjalëkalimit, menaxherëve u duhet edhe një kod me 6 shifra nga një "
+"aplikacion në telefon. Rekomandohet fort kur InnKeeper arrihet nga "
+"interneti."
+
+#: apps/core/models.py:231
 msgid "let guests check in online"
 msgstr "lejo mysafirët të bëjnë check-in online"
 
-#: apps/core/models.py:228
+#: apps/core/models.py:233
 msgid ""
 "The arrival email and the booking page carry a link where guests enter their"
 " ID or passport details, and those of the people with them, before they "
@@ -1157,27 +1216,27 @@ msgstr ""
 "shkruajnë të dhënat e kartës së identitetit ose pasaportës, të tyren dhe të "
 "personave që vijnë me ta, para se të mbërrijnë. Kërkon adresën publike."
 
-#: apps/core/models.py:231
+#: apps/core/models.py:236
 msgid "send at"
 msgstr "dërgo në orën"
 
-#: apps/core/models.py:231
+#: apps/core/models.py:236
 msgid "Hour of the day, 0–23."
 msgstr "Ora e ditës, 0–23."
 
-#: apps/core/models.py:235
+#: apps/core/models.py:240
 msgid "per guest, per night"
 msgstr "për mysafir, për natë"
 
-#: apps/core/models.py:236
+#: apps/core/models.py:241
 msgid "per room, per night"
 msgstr "për dhomë, për natë"
 
-#: apps/core/models.py:239
+#: apps/core/models.py:244
 msgid "add the tourist tax to guest bills"
 msgstr "shto taksën e turizmit në faturat e mysafirëve"
 
-#: apps/core/models.py:241
+#: apps/core/models.py:246
 msgid ""
 "The tax your municipality charges on overnight stays. It is not your income "
 "and has no VAT."
@@ -1185,14 +1244,14 @@ msgstr ""
 "Taksa që vendos bashkia për qëndrimet me fjetje. Nuk është e ardhur e juaja "
 "dhe nuk ka TVSH."
 
-#: apps/core/models.py:244 apps/finance/models.py:289
+#: apps/core/models.py:249 apps/finance/models.py:289
 #: apps/finance/models.py:326 apps/finance/models.py:379
 #: apps/fiscal/models.py:107 apps/frontdesk/models.py:426
 #: apps/payments/models.py:44 apps/staff/models.py:74 apps/staff/models.py:201
 msgid "amount"
 msgstr "shuma"
 
-#: apps/core/models.py:249
+#: apps/core/models.py:254
 msgid ""
 "In your currency, as the municipality sets it for your category (e.g. "
 "Tirana: 140 lek, 4–5 stars 350 lek)."
@@ -1200,57 +1259,57 @@ msgstr ""
 "Në monedhën tuaj, siç e vendos bashkia për kategorinë tuaj (p.sh. Tirana: "
 "140 lekë, 4–5 yje 350 lekë)."
 
-#: apps/core/models.py:252
+#: apps/core/models.py:257
 msgid "charged"
 msgstr "llogaritet"
 
-#: apps/core/models.py:255
+#: apps/core/models.py:260
 msgid "children pay too"
 msgstr "paguajnë edhe fëmijët"
 
-#: apps/core/models.py:255
+#: apps/core/models.py:260
 msgid "Leave off if your municipality exempts children."
 msgstr "Lëreni të fikur nëse bashkia i përjashton fëmijët."
 
-#: apps/core/models.py:258
+#: apps/core/models.py:263
 msgid "at most (nights per stay)"
 msgstr "maksimumi (netë për qëndrim)"
 
-#: apps/core/models.py:258
+#: apps/core/models.py:263
 msgid "0: every night is charged."
 msgstr "0: llogaritet çdo natë."
 
-#: apps/core/models.py:261
+#: apps/core/models.py:266
 msgid "we serve breakfast"
 msgstr "shërbejmë mëngjes"
 
-#: apps/core/models.py:261
+#: apps/core/models.py:266
 msgid "Shows the morning breakfast list for the guests in house."
 msgstr "Shfaq listën e mëngjesit për mysafirët që ndodhen në hotel."
 
-#: apps/core/models.py:264
+#: apps/core/models.py:269
 msgid "new bookings include breakfast"
 msgstr "rezervimet e reja përfshijnë mëngjesin"
 
-#: apps/core/models.py:264
+#: apps/core/models.py:269
 msgid "Can be changed on each booking."
 msgstr "Mund të ndryshohet në çdo rezervim."
 
-#: apps/core/models.py:267
+#: apps/core/models.py:272
 msgid "breakfast price per person"
 msgstr "çmimi i mëngjesit për person"
 
-#: apps/core/models.py:272
+#: apps/core/models.py:277
 msgid "Added to the bill of guests whose booking doesn't include it."
 msgstr ""
 "Shtohet në faturën e mysafirëve që nuk e kanë mëngjesin të përfshirë në "
 "rezervim."
 
-#: apps/core/models.py:275
+#: apps/core/models.py:280
 msgid "overtime extra (%)"
 msgstr "shtesa për orët jashtë orarit (%)"
 
-#: apps/core/models.py:276
+#: apps/core/models.py:281
 msgid ""
 "For hours over the contract hours in a week. The Labour Code asks for at "
 "least 25%."
@@ -1258,11 +1317,11 @@ msgstr ""
 "Për orët mbi orët e kontratës në një javë. Kodi i Punës kërkon të paktën "
 "25%."
 
-#: apps/core/models.py:279
+#: apps/core/models.py:284
 msgid "night work extra (%)"
 msgstr "shtesa për punën e natës (%)"
 
-#: apps/core/models.py:280
+#: apps/core/models.py:285
 msgid ""
 "For hours between 22:00 and 06:00, as your contracts or collective agreement"
 " say."
@@ -1270,11 +1329,11 @@ msgstr ""
 "Për orët nga 22:00 deri në 06:00, siç thonë kontratat ose marrëveshja "
 "kolektive."
 
-#: apps/core/models.py:283
+#: apps/core/models.py:288
 msgid "pay extra for public holidays"
 msgstr "paguaj shtesë për festat zyrtare"
 
-#: apps/core/models.py:285
+#: apps/core/models.py:290
 msgid ""
 "Leave off if you're open every day (hotels, bars) and don't pay extra for "
 "public holidays. Choose the dates under Public holidays."
@@ -1282,11 +1341,11 @@ msgstr ""
 "Lëreni të fikur nëse jeni të hapur çdo ditë (hotele, bare) dhe nuk i paguani"
 " festat veçmas. Datat zgjidhen te Festat zyrtare."
 
-#: apps/core/models.py:288
+#: apps/core/models.py:293
 msgid "pay period starts on day"
 msgstr "periudha e pagës fillon në datën"
 
-#: apps/core/models.py:291
+#: apps/core/models.py:296
 msgid ""
 "1: calendar months. 26: the October pay runs from 26 September to 25 "
 "October."
@@ -1294,19 +1353,19 @@ msgstr ""
 "1: muajt kalendarikë. 26: paga e tetorit llogaritet nga 26 shtatori deri më "
 "25 tetor."
 
-#: apps/core/models.py:294
+#: apps/core/models.py:299
 msgid "public holiday extra (%)"
 msgstr "shtesa për festat zyrtare (%)"
 
-#: apps/core/models.py:295
+#: apps/core/models.py:300
 msgid "For hours worked on a public holiday, as your contracts say."
 msgstr "Për orët e punuara në një festë zyrtare, siç thonë kontratat."
 
-#: apps/core/models.py:298
+#: apps/core/models.py:303
 msgid "show “Made with InnKeeper” on public pages"
 msgstr "shfaq “Bërë me InnKeeper” në faqet publike"
 
-#: apps/core/models.py:300
+#: apps/core/models.py:305
 msgid ""
 "A small link at the bottom of your booking, menu and table pages. It helps "
 "other businesses find this free app."
@@ -1314,15 +1373,15 @@ msgstr ""
 "Një link i vogël në fund të faqeve të rezervimit, menusë dhe tavolinave. "
 "Ndihmon biznese të tjera ta gjejnë këtë program falas."
 
-#: apps/core/models.py:303
+#: apps/core/models.py:308
 msgid "public address through Cloudflare Tunnel"
 msgstr "adresë publike përmes Cloudflare Tunnel"
 
-#: apps/core/models.py:305
+#: apps/core/models.py:310
 msgid "tunnel token"
 msgstr "tokeni i tunelit"
 
-#: apps/core/models.py:308
+#: apps/core/models.py:313
 msgid ""
 "From Cloudflare Zero Trust → Networks → Tunnels → your tunnel → Install "
 "connector (the long text after --token)."
@@ -1330,35 +1389,35 @@ msgstr ""
 "Nga Cloudflare Zero Trust → Networks → Tunnels → tuneli juaj → Install "
 "connector (teksti i gjatë pas --token)."
 
-#: apps/core/models.py:311
+#: apps/core/models.py:316
 msgid "lock shared tills after"
 msgstr "kyç arkat e përbashkëta pas"
 
-#: apps/core/models.py:313
+#: apps/core/models.py:318
 msgid "Never"
 msgstr "Kurrë"
 
-#: apps/core/models.py:313
+#: apps/core/models.py:318
 msgid "1 minute"
 msgstr "1 minute"
 
-#: apps/core/models.py:313
+#: apps/core/models.py:318
 msgid "2 minutes"
 msgstr "2 minutash"
 
-#: apps/core/models.py:313
+#: apps/core/models.py:318
 msgid "3 minutes"
 msgstr "3 minutash"
 
-#: apps/core/models.py:313
+#: apps/core/models.py:318
 msgid "5 minutes"
 msgstr "5 minutash"
 
-#: apps/core/models.py:313
+#: apps/core/models.py:318
 msgid "10 minutes"
 msgstr "10 minutash"
 
-#: apps/core/models.py:314
+#: apps/core/models.py:319
 msgid ""
 "On a shared till, the screen goes back to the PIN pad after this long "
 "without a tap."
@@ -1366,43 +1425,43 @@ msgstr ""
 "Në një arkë të përbashkët, ekrani kthehet te tastiera e PIN-it pas kaq kohe "
 "pa u prekur."
 
-#: apps/core/models.py:319
+#: apps/core/models.py:324
 msgid "payment provider"
 msgstr "ofruesi i pagesave"
 
-#: apps/core/models.py:325
+#: apps/core/models.py:330
 msgid "test mode"
 msgstr "mënyra provë"
 
-#: apps/core/models.py:325
+#: apps/core/models.py:330
 msgid "Use the provider's test system. No real money is charged."
 msgstr "Përdor sistemin provë të ofruesit. Nuk tërhiqen para të vërteta."
 
-#: apps/core/models.py:327
+#: apps/core/models.py:332
 msgid "POK key ID"
 msgstr "POK key ID"
 
-#: apps/core/models.py:328
+#: apps/core/models.py:333
 msgid "POK key secret"
 msgstr "POK key secret"
 
-#: apps/core/models.py:329
+#: apps/core/models.py:334
 msgid "POK merchant ID"
 msgstr "ID e tregtarit në POK"
 
-#: apps/core/models.py:330
+#: apps/core/models.py:335
 msgid "Paysera project ID"
 msgstr "ID e projektit në Paysera"
 
-#: apps/core/models.py:331
+#: apps/core/models.py:336
 msgid "Paysera project password"
 msgstr "Fjalëkalimi i projektit në Paysera"
 
-#: apps/core/models.py:333
+#: apps/core/models.py:338
 msgid "let guests pay the deposit by card"
 msgstr "lejo mysafirët të paguajnë parapagimin me kartë"
 
-#: apps/core/models.py:335
+#: apps/core/models.py:340
 msgid ""
 "Shows a “Pay now” button on the online booking page when a payment provider "
 "is set up."
@@ -1410,85 +1469,85 @@ msgstr ""
 "Shfaq butonin “Paguaj tani” në faqen e rezervimeve online kur është "
 "konfiguruar një ofrues pagesash."
 
-#: apps/core/models.py:340
+#: apps/core/models.py:345
 msgid "fiscalize receipts and invoices"
 msgstr "fiskalizo kuponat dhe faturat"
 
-#: apps/core/models.py:342
+#: apps/core/models.py:347
 msgid ""
 "Every sale is sent to the tax authority and gets an NSLF and NIVF code with "
 "a QR code."
 msgstr "Çdo shitje dërgohet në tatime dhe merr kodet NSLF dhe NIVF me kod QR."
 
-#: apps/core/models.py:345
+#: apps/core/models.py:350
 msgid "use the tax authority's test system"
 msgstr "përdor sistemin provë të tatimeve"
 
-#: apps/core/models.py:345
+#: apps/core/models.py:350
 msgid "Turn off only when going live."
 msgstr "Çaktivizojeni vetëm kur kaloni në punë reale."
 
-#: apps/core/models.py:348
+#: apps/core/models.py:353
 msgid "business unit code"
 msgstr "kodi i njësisë së biznesit"
 
-#: apps/core/models.py:348
+#: apps/core/models.py:353
 msgid "From the self-care portal, e.g. ab123cd456."
 msgstr "Nga portali self-care, p.sh. ab123cd456."
 
-#: apps/core/models.py:351 apps/outlets/models.py:144
+#: apps/core/models.py:356 apps/outlets/models.py:144
 msgid "cash register (TCR) code"
 msgstr "kodi i arkës (TCR)"
 
-#: apps/core/models.py:354
+#: apps/core/models.py:359
 msgid "Used by reception and by outlets without their own cash register code."
 msgstr ""
 "Përdoret nga recepsioni dhe nga pikat e shitjes që nuk kanë kodin e vet të "
 "arkës."
 
-#: apps/core/models.py:356
+#: apps/core/models.py:361
 msgid "software code"
 msgstr "kodi i softuerit"
 
-#: apps/core/models.py:357
+#: apps/core/models.py:362
 msgid "maintainer code"
 msgstr "kodi i mirëmbajtësit"
 
-#: apps/core/models.py:359
+#: apps/core/models.py:364
 msgid "default operator code"
 msgstr "kodi i paracaktuar i operatorit"
 
-#: apps/core/models.py:362
+#: apps/core/models.py:367
 msgid "Used for staff members who don't have their own operator code."
 msgstr "Përdoret për stafin që nuk ka kodin e vet të operatorit."
 
-#: apps/core/models.py:364
+#: apps/core/models.py:369
 msgid "town"
 msgstr "qyteti"
 
-#: apps/core/models.py:365
+#: apps/core/models.py:370
 msgid "digital certificate"
 msgstr "certifikata dixhitale"
 
-#: apps/core/models.py:366
+#: apps/core/models.py:371
 msgid "certificate password"
 msgstr "fjalëkalimi i certifikatës"
 
-#: apps/core/models.py:368
+#: apps/core/models.py:373
 msgid "VAT rate for accommodation (%)"
 msgstr "Norma e TVSH-së për akomodimin (%)"
 
-#: apps/core/models.py:372
+#: apps/core/models.py:377
 msgid "Room nights. Food, drinks and other services use the main VAT rate."
 msgstr ""
 "Netët e qëndrimit. Ushqimi, pijet dhe shërbimet e tjera përdorin normën "
 "kryesore të TVSH-së."
 
-#: apps/core/models.py:375
+#: apps/core/models.py:380
 msgid "exchange rate (lekë for 1 unit of your currency)"
 msgstr "kursi i këmbimit (lekë për 1 njësi të monedhës suaj)"
 
-#: apps/core/models.py:380
+#: apps/core/models.py:385
 msgid ""
 "Only if prices are not in lekë (ALL), e.g. 100.50 for EUR. Use the Bank of "
 "Albania rate."
@@ -1496,31 +1555,31 @@ msgstr ""
 "Vetëm nëse çmimet nuk janë në lekë (ALL), p.sh. 100.50 për EUR. Përdorni "
 "kursin e Bankës së Shqipërisë."
 
-#: apps/core/models.py:386
+#: apps/core/models.py:391
 msgid "Every 15 minutes"
 msgstr "Çdo 15 minuta"
 
-#: apps/core/models.py:387
+#: apps/core/models.py:392
 msgid "Every 30 minutes"
 msgstr "Çdo 30 minuta"
 
-#: apps/core/models.py:388
+#: apps/core/models.py:393
 msgid "Every hour"
 msgstr "Çdo orë"
 
-#: apps/core/models.py:389
+#: apps/core/models.py:394
 msgid "Every 4 hours"
 msgstr "Çdo 4 orë"
 
-#: apps/core/models.py:390
+#: apps/core/models.py:395
 msgid "Once a day"
 msgstr "Një herë në ditë"
 
-#: apps/core/models.py:393
+#: apps/core/models.py:398
 msgid "copy the data to another place automatically"
 msgstr "kopjo të dhënat automatikisht në një vend tjetër"
 
-#: apps/core/models.py:395
+#: apps/core/models.py:400
 msgid ""
 "A full copy is written there regularly, so a broken or stolen computer never"
 " loses your data."
@@ -1528,11 +1587,11 @@ msgstr ""
 "Aty shkruhet rregullisht një kopje e plotë, që të mos i humbni kurrë të "
 "dhënat, edhe nëse kompjuteri prishet ose vidhet."
 
-#: apps/core/models.py:398
+#: apps/core/models.py:403
 msgid "folder"
 msgstr "dosja"
 
-#: apps/core/models.py:402
+#: apps/core/models.py:407
 msgid ""
 "A USB drive (e.g. E:\\InnKeeper) or a folder that OneDrive, Google Drive or "
 "Dropbox keeps in the cloud."
@@ -1540,15 +1599,15 @@ msgstr ""
 "Një USB (p.sh. E:\\InnKeeper) ose një dosje që OneDrive, Google Drive ose "
 "Dropbox e mban në cloud."
 
-#: apps/core/models.py:405
+#: apps/core/models.py:410
 msgid "how often"
 msgstr "sa shpesh"
 
-#: apps/core/models.py:407
+#: apps/core/models.py:412
 msgid "password for the copies"
 msgstr "fjalëkalimi i kopjeve"
 
-#: apps/core/models.py:411
+#: apps/core/models.py:416
 msgid ""
 "Recommended for cloud folders: the copies are encrypted and can only be "
 "restored with this password. Write it down — without it the copies can't be "
@@ -1557,57 +1616,57 @@ msgstr ""
 "Rekomandohet për dosjet në cloud: kopjet enkriptohen dhe rikthehen vetëm me "
 "këtë fjalëkalim. Shkruajeni diku — pa të kopjet nuk hapen dot."
 
-#: apps/core/models.py:422
+#: apps/core/models.py:427
 msgid "connect to the channel manager"
 msgstr "lidhu me menaxherin e kanaleve"
 
-#: apps/core/models.py:423
+#: apps/core/models.py:428
 msgid "Channex API key"
 msgstr "Çelësi API i Channex"
 
-#: apps/core/models.py:424
+#: apps/core/models.py:429
 msgid "Channex property ID"
 msgstr "ID e pronës në Channex"
 
-#: apps/core/models.py:426
+#: apps/core/models.py:431
 msgid "use the Channex test system (staging)"
 msgstr "përdor sistemin provë të Channex (staging)"
 
-#: apps/core/models.py:426
+#: apps/core/models.py:431
 msgid "For trying it out before going live."
 msgstr "Për ta provuar para se ta përdorni realisht."
 
-#: apps/core/models.py:428
+#: apps/core/models.py:433
 msgid "send availability for (days)"
 msgstr "dërgo disponueshmërinë për (ditë)"
 
-#: apps/core/models.py:433 apps/core/models.py:434
+#: apps/core/models.py:438 apps/core/models.py:439
 msgid "hotel settings"
 msgstr "cilësimet e biznesit"
 
-#: apps/core/models.py:555
+#: apps/core/models.py:560
 msgid "action"
 msgstr "veprimi"
 
-#: apps/core/models.py:556 apps/finance/models.py:286
+#: apps/core/models.py:561 apps/finance/models.py:286
 #: apps/finance/models.py:377 apps/frontdesk/models.py:18
 #: apps/outlets/models.py:214 apps/payments/models.py:43
 msgid "description"
 msgstr "përshkrimi"
 
-#: apps/core/models.py:559 apps/outlets/models.py:393
+#: apps/core/models.py:564 apps/outlets/models.py:393
 msgid "time"
 msgstr "koha"
 
-#: apps/core/models.py:562
+#: apps/core/models.py:567
 msgid "audit entry"
 msgstr "regjistrim aktiviteti"
 
-#: apps/core/models.py:563
+#: apps/core/models.py:568
 msgid "audit log"
 msgstr "regjistri i aktivitetit"
 
-#: apps/core/models.py:603 apps/finance/models.py:76
+#: apps/core/models.py:608 apps/finance/models.py:76
 #: apps/finance/models.py:151 apps/frontdesk/models.py:16
 #: apps/frontdesk/models.py:304 apps/inventory/models.py:25
 #: apps/inventory/models.py:60 apps/marketing/models.py:31
@@ -1620,7 +1679,7 @@ msgstr "regjistri i aktivitetit"
 msgid "name"
 msgstr "emri"
 
-#: apps/core/models.py:606
+#: apps/core/models.py:611
 msgid ""
 "How this computer reaches the other InnKeeper, e.g. http://100.64.1.7:8765 "
 "(Tailscale) or https://hotel.example.com"
@@ -1628,15 +1687,15 @@ msgstr ""
 "Si e arrin ky kompjuter InnKeeper-in tjetër, p.sh. http://100.64.1.7:8765 "
 "(Tailscale) ose https://hotel.example.com"
 
-#: apps/core/models.py:608
+#: apps/core/models.py:613
 msgid "sharing key"
 msgstr "çelësi i ndarjes"
 
-#: apps/core/models.py:608
+#: apps/core/models.py:613
 msgid "From the other business: Settings → Group overview."
 msgstr "Nga biznesi tjetër: Cilësimet → Pamja e grupit."
 
-#: apps/core/models.py:609 apps/frontdesk/models.py:32
+#: apps/core/models.py:614 apps/frontdesk/models.py:32
 #: apps/outlets/models.py:74 apps/outlets/models.py:114
 #: apps/outlets/models.py:197 apps/outlets/models.py:220
 #: apps/outlets/models.py:253 apps/outlets/models.py:271
@@ -1645,7 +1704,7 @@ msgstr "Nga biznesi tjetër: Cilësimet → Pamja e grupit."
 msgid "order"
 msgstr "renditja"
 
-#: apps/core/models.py:614
+#: apps/core/models.py:619
 msgid "business in the group"
 msgstr "biznes në grup"
 
@@ -7372,6 +7431,7 @@ msgstr "Krijo llogarinë dhe vazhdo"
 #: templates/accounts/login.html:7 templates/accounts/login.html:27
 #: templates/accounts/login.html:40 templates/accounts/pin_pad.html:24
 #: templates/accounts/pin_pad.html:49
+#: templates/accounts/two_step_verify.html:26
 msgid "Sign in"
 msgstr "Hyr"
 
@@ -7563,6 +7623,167 @@ msgstr "Ka PIN: mund të hyjë në një arkë të përbashkët me emrin dhe PIN-
 msgid "No PIN yet: signs in with username and password."
 msgstr "Ende pa PIN: hyn me emër përdoruesi dhe fjalëkalim."
 
+#: templates/accounts/staff_form.html:27 templates/accounts/two_step.html:3
+#: templates/accounts/two_step.html:5
+#: templates/accounts/two_step_verify.html:7 templates/base.html:104
+msgid "Two-step sign-in"
+msgstr "Hyrja me dy hapa"
+
+#: templates/accounts/staff_form.html:28
+msgid ""
+"Switch off two-step sign-in for this person? Do this when they lost their "
+"phone; they can set it up again."
+msgstr ""
+"Ta çaktivizojmë hyrjen me dy hapa për këtë person? Bëjeni kur ka humbur "
+"telefonin; mund ta aktivizojë sërish."
+
+#: templates/accounts/staff_form.html:28 templates/accounts/two_step.html:28
+msgid "Switch off"
+msgstr "Çaktivizo"
+
+#: templates/accounts/staff_form.html:29
+#, python-format
+msgid "On since %(d)s: after the password, a code from their phone is needed."
+msgstr ""
+"Aktive që nga %(d)s: pas fjalëkalimit duhet edhe një kod nga telefoni."
+
+#: templates/accounts/staff_form.html:29
+msgid ""
+"Off: the password is enough. Each person switches it on under their name "
+"(lock icon)."
+msgstr ""
+"Joaktive: mjafton fjalëkalimi. Secili e aktivizon nën emrin e vet (ikona e "
+"drynit)."
+
+#: templates/accounts/two_step.html:6
+msgid ""
+"After your password, InnKeeper also asks for a 6-digit code from an app on "
+"your phone. Someone who learns your password still can't get in."
+msgstr ""
+"Pas fjalëkalimit, InnKeeper kërkon edhe një kod me 6 shifra nga një "
+"aplikacion në telefonin tuaj. Kush mëson fjalëkalimin tuaj, prapë nuk mund "
+"të hyjë."
+
+#: templates/accounts/two_step.html:10
+msgid "Your recovery codes"
+msgstr "Kodet tuaja të rikuperimit"
+
+#: templates/accounts/two_step.html:12
+msgid ""
+"If you lose your phone, each of these codes gets you in once instead of the "
+"app code. Write them down or print them now and keep them somewhere safe: "
+"they are shown only this once."
+msgstr ""
+"Nëse humbni telefonin, secili prej këtyre kodeve ju fut një herë në vend të "
+"kodit të aplikacionit. Shkruajini ose printojini tani dhe ruajini në vend të"
+" sigurt: shfaqen vetëm këtë herë."
+
+#: templates/accounts/two_step.html:14 templates/finance/shift_report.html:11
+#: templates/frontdesk/breakfast.html:11 templates/frontdesk/invoice.html:10
+#: templates/frontdesk/register.html:17 templates/help/help.html:9
+#: templates/inventory/count_detail.html:8
+#: templates/inventory/delivery_detail.html:8
+#: templates/inventory/order_detail.html:12
+#: templates/inventory/order_print.html:10
+#: templates/inventory/transfer_detail.html:7
+#: templates/marketing/poster.html:7 templates/outlets/menu_print.html:13
+#: templates/outlets/menu_qr_cards.html:8 templates/outlets/receipt.html:21
+#: templates/outlets/table_qr_cards.html:10 templates/outlets/voucher.html:8
+#: templates/staff/schedule.html:12
+msgid "Print"
+msgstr "Printo"
+
+#: templates/accounts/two_step.html:21 templates/core/settings_hub.html:330
+#: templates/outlets/menu_admin.html:38
+msgid "On"
+msgstr "Aktive"
+
+#: templates/accounts/two_step.html:23
+#, python-format
+msgid "%(n)s recovery code left."
+msgid_plural "%(n)s recovery codes left."
+msgstr[0] "Ka mbetur %(n)s kod rikuperimi."
+msgstr[1] "Kanë mbetur %(n)s kode rikuperimi."
+
+#: templates/accounts/two_step.html:24
+msgid "Make new recovery codes? The old ones stop working."
+msgstr "Të krijohen kode të reja rikuperimi? Të vjetrat nuk do të punojnë më."
+
+#: templates/accounts/two_step.html:24
+msgid "Make new recovery codes"
+msgstr "Krijo kode të reja rikuperimi"
+
+#: templates/accounts/two_step.html:32
+msgid "Managers must use two-step sign-in here. Set it up to continue."
+msgstr ""
+"Këtu menaxherët duhet të përdorin hyrjen me dy hapa. Aktivizojeni për të "
+"vazhduar."
+
+#: templates/accounts/two_step.html:34
+msgid "Switch it on"
+msgstr "Aktivizojeni"
+
+#: templates/accounts/two_step.html:37
+msgid ""
+"On your phone, install an authenticator app: Google Authenticator, Microsoft"
+" Authenticator, Authy or 2FAS (all free)."
+msgstr ""
+"Në telefon, instaloni një aplikacion autentifikimi: Google Authenticator, "
+"Microsoft Authenticator, Authy ose 2FAS (të gjitha falas)."
+
+#: templates/accounts/two_step.html:38
+msgid "In the app, add an account and scan this code."
+msgstr "Në aplikacion, shtoni një llogari dhe skanoni këtë kod."
+
+#: templates/accounts/two_step.html:39
+msgid "Type the 6-digit code the app shows."
+msgstr "Shkruani kodin me 6 shifra që tregon aplikacioni."
+
+#: templates/accounts/two_step.html:43
+msgid "Can't scan? Type this key in the app:"
+msgstr "Nuk skanohet? Shkruajeni këtë çelës në aplikacion:"
+
+#: templates/accounts/two_step.html:46
+msgid "Code from the app"
+msgstr "Kodi nga aplikacioni"
+
+#: templates/accounts/two_step.html:47
+msgid "Switch on"
+msgstr "Aktivizo"
+
+#: templates/accounts/two_step_verify.html:16
+msgid "One more step"
+msgstr "Edhe një hap"
+
+#: templates/accounts/two_step_verify.html:16
+msgid "Your password was right. Now the code from the app on your phone."
+msgstr ""
+"Fjalëkalimi ishte i saktë. Tani kodi nga aplikacioni në telefonin tuaj."
+
+#: templates/accounts/two_step_verify.html:21
+msgid "Code from your phone"
+msgstr "Kodi nga telefoni juaj"
+
+#: templates/accounts/two_step_verify.html:25
+msgid "6-digit code"
+msgstr "Kodi me 6 shifra"
+
+#: templates/accounts/two_step_verify.html:28
+msgid ""
+"Lost your phone? Type one of your recovery codes instead, or ask another "
+"manager to switch two-step sign-in off for you."
+msgstr ""
+"Keni humbur telefonin? Shkruani një nga kodet e rikuperimit, ose kërkojini "
+"një menaxheri tjetër të çaktivizojë hyrjen me dy hapa për ju."
+
+#: templates/accounts/two_step_verify.html:29 templates/core/setup.html:122
+#: templates/housekeeping/form.html:5 templates/housekeeping/minibar.html:7
+#: templates/outlets/menu_qr_cards.html:8
+#: templates/outlets/table_order.html:107
+#: templates/outlets/table_qr_cards.html:9
+msgid "Back"
+msgstr "Kthehu"
+
 #: templates/base.html:26 templates/outlets/floor.html:48
 #: templates/outlets/floor_plan.html:62
 msgid "Main"
@@ -7673,7 +7894,7 @@ msgstr "Orët e mia"
 msgid "About InnKeeper"
 msgstr "Rreth InnKeeper"
 
-#: templates/base.html:92 templates/base.html:116
+#: templates/base.html:92 templates/base.html:117
 msgid "Lock / switch user"
 msgstr "Kyç / ndrysho përdoruesin"
 
@@ -7682,46 +7903,46 @@ msgstr "Kyç / ndrysho përdoruesin"
 msgid "Clock out · in since %(t)s"
 msgstr "Dalje · në punë që nga %(t)s"
 
-#: templates/base.html:105
+#: templates/base.html:106
 msgid "Sign out"
 msgstr "Dil"
 
-#: templates/base.html:114 templates/outlets/_ticket_bar.html:1
+#: templates/base.html:115 templates/outlets/_ticket_bar.html:1
 #: templates/outlets/menu_print.html:5
 msgid "Menu"
 msgstr "Menuja"
 
-#: templates/base.html:116
+#: templates/base.html:117
 msgid "Switch"
 msgstr "Ndrysho"
 
-#: templates/base.html:119
+#: templates/base.html:120
 #, python-format
 msgid "A new version of InnKeeper (%(v)s) is available."
 msgstr "Ka dalë një version i ri i InnKeeper-it (%(v)s)."
 
-#: templates/base.html:119
+#: templates/base.html:120
 msgid "See what's new and update"
 msgstr "Shihni çfarë ka të re dhe përditësoni"
 
-#: templates/base.html:120
+#: templates/base.html:121
 msgid "Sample data"
 msgstr "Të dhëna shembull"
 
-#: templates/base.html:120
+#: templates/base.html:121
 msgid "Nothing here is real. Try anything you like."
 msgstr "Asgjë këtu nuk është e vërtetë. Provoni çfarë të doni."
 
-#: templates/base.html:120 templates/core/sample_remove.html:3
+#: templates/base.html:121 templates/core/sample_remove.html:3
 #: templates/core/sample_remove.html:7
 msgid "Start with my own business"
 msgstr "Fillo me biznesin tim"
 
-#: templates/base.html:126
+#: templates/base.html:127
 msgid "No connection to InnKeeper."
 msgstr "Nuk ka lidhje me InnKeeper."
 
-#: templates/base.html:126
+#: templates/base.html:127
 msgid ""
 "Check the Wi-Fi and that the InnKeeper computer is on. Nothing is saved "
 "until it is back; this message goes away by itself."
@@ -7729,7 +7950,7 @@ msgstr ""
 "Kontrolloni Wi-Fi-n dhe që kompjuteri i InnKeeper të jetë i ndezur. Asgjë "
 "nuk ruhet derisa të kthehet lidhja; ky mesazh largohet vetë."
 
-#: templates/base.html:127
+#: templates/base.html:128
 msgid "Connected again."
 msgstr "U lidh përsëri."
 
@@ -9315,8 +9536,8 @@ msgstr ""
 " zyrës dhe telefonat personalë mbeten pajisje të zakonshme."
 
 #: templates/core/settings_hub.html:304
-msgid "Locking"
-msgstr "Kyçja"
+msgid "Locking & sign-in"
+msgstr "Kyçja & hyrja"
 
 #: templates/core/settings_hub.html:309
 msgid "Who has a PIN"
@@ -9362,10 +9583,6 @@ msgstr "Dërgo email provë"
 #: templates/core/settings_hub.html:330
 msgid "Daily summary for the owner"
 msgstr "Përmbledhja ditore për pronarin"
-
-#: templates/core/settings_hub.html:330 templates/outlets/menu_admin.html:38
-msgid "On"
-msgstr "Aktive"
 
 #: templates/core/settings_hub.html:333
 msgid ""
@@ -9833,14 +10050,6 @@ msgid ""
 msgstr ""
 "Secila merr tavolina (nëse i përdor) dhe kategori menuje gati për artikujt "
 "tuaj."
-
-#: templates/core/setup.html:122 templates/housekeeping/form.html:5
-#: templates/housekeeping/minibar.html:7
-#: templates/outlets/menu_qr_cards.html:8
-#: templates/outlets/table_order.html:107
-#: templates/outlets/table_qr_cards.html:9
-msgid "Back"
-msgstr "Kthehu"
 
 #: templates/core/setup.html:124
 msgid "Next"
@@ -10622,21 +10831,6 @@ msgstr "Turni"
 #: templates/finance/shift_report.html:10
 msgid "still open"
 msgstr "ende i hapur"
-
-#: templates/finance/shift_report.html:11
-#: templates/frontdesk/breakfast.html:11 templates/frontdesk/invoice.html:10
-#: templates/frontdesk/register.html:17 templates/help/help.html:9
-#: templates/inventory/count_detail.html:8
-#: templates/inventory/delivery_detail.html:8
-#: templates/inventory/order_detail.html:12
-#: templates/inventory/order_print.html:10
-#: templates/inventory/transfer_detail.html:7
-#: templates/marketing/poster.html:7 templates/outlets/menu_print.html:13
-#: templates/outlets/menu_qr_cards.html:8 templates/outlets/receipt.html:21
-#: templates/outlets/table_qr_cards.html:10 templates/outlets/voucher.html:8
-#: templates/staff/schedule.html:12
-msgid "Print"
-msgstr "Printo"
 
 #: templates/finance/shift_report.html:18
 msgid "Card tips paid out"

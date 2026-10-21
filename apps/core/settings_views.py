@@ -245,7 +245,7 @@ class TouristTaxForm(StyledFormMixin, forms.ModelForm):
 class TillSettingsForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = HotelSettings
-        fields = ["pin_lock_minutes"]
+        fields = ["pin_lock_minutes", "require_two_step"]
 
 
 class SummarySettingsForm(StyledFormMixin, forms.ModelForm):

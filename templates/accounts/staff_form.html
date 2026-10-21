@@ -23,4 +23,9 @@
   <div class="card-header"><h2>{% translate "PIN for shared tills" %}</h2><a class="btn btn-secondary btn-sm" href="{% url 'accounts:staff_set_pin' object.pk %}">{% icon "grid" %} {% if object.has_pin %}{% translate "Change the PIN" %}{% else %}{% translate "Set a PIN" %}{% endif %}</a></div>
   <div class="card-body muted">{% if object.has_pin %}{% translate "Has a PIN: can switch in on a shared till with their name and PIN." %}{% else %}{% translate "No PIN yet: signs in with username and password." %}{% endif %}</div>
 </div>
+<div class="card" style="max-width:860px; margin-top:1.25rem">
+  <div class="card-header"><h2>{% translate "Two-step sign-in" %}</h2>
+    {% if object.has_two_step %}<form method="post" action="{% url 'accounts:staff_two_step_off' object.pk %}" data-confirm="{% translate 'Switch off two-step sign-in for this person? Do this when they lost their phone; they can set it up again.' %}">{% csrf_token %}<button class="btn btn-secondary btn-sm">{% translate "Switch off" %}</button></form>{% endif %}</div>
+  <div class="card-body muted">{% if object.has_two_step %}{% blocktranslate with d=object.totp_enabled_at|date:"d.m.Y" %}On since {{ d }}: after the password, a code from their phone is needed.{% endblocktranslate %}{% else %}{% translate "Off: the password is enough. Each person switches it on under their name (lock icon)." %}{% endif %}</div>
+</div>
 {% endblock %}

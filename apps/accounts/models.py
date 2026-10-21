@@ -33,6 +33,11 @@ class User(AbstractUser):
     )
 
     pin = models.CharField(_("PIN"), max_length=128, blank=True, editable=False)  # hashed, like passwords
+    # Two-step sign-in: a 6-digit code from an authenticator app after the password (see accounts/twofactor.py).
+    totp_secret = models.CharField(max_length=64, blank=True, editable=False)
+    totp_enabled_at = models.DateTimeField(null=True, blank=True, editable=False)
+    totp_last_step = models.BigIntegerField(default=0, editable=False)  # a code works only once
+    recovery_codes = models.JSONField(default=list, blank=True, editable=False)  # hashed, each works once
 
     class Meta:
         verbose_name = _("staff member")
@@ -45,6 +50,10 @@ class User(AbstractUser):
     @property
     def is_manager(self) -> bool:
         return self.is_superuser or self.role == Role.MANAGER
+
+    @property
+    def has_two_step(self) -> bool:
+        return bool(self.totp_secret and self.totp_enabled_at)
 
     @property
     def has_pin(self) -> bool:

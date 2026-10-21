@@ -1,0 +1,35 @@
+{% load static i18n innkeeper %}<!doctype html>
+{% get_current_language as LANG %}
+<html lang="{{ LANG }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% translate "Two-step sign-in" %} · {{ hotel.name }}</title>
+  <link rel="stylesheet" href="{% static 'css/innkeeper.css' %}">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <meta name="theme-color" content="#16202f">
+</head>
+<body>
+<div class="auth">
+  <section class="auth-art">
+    <div class="brand" style="padding:0"><span class="brand-mark">{{ hotel.name|slice:":1"|upper }}</span><span>{{ hotel.name }}<small>InnKeeper</small></span></div>
+    <div><h2>{% translate "One more step" %}</h2><p>{% translate "Your password was right. Now the code from the app on your phone." %}</p></div>
+    <small style="color:#7d8899">InnKeeper</small>
+  </section>
+  <section class="auth-form">
+    <div class="auth-card">
+      <h1>{% translate "Code from your phone" %}</h1>
+      <p class="muted">{{ pending_user.get_full_name|default:pending_user.username }}</p>
+      <form method="post" novalidate style="margin-top:1.5rem">{% csrf_token %}
+        {% if error %}<div class="alert alert-error" style="margin-bottom:1rem">{{ error }}</div>{% endif %}
+        <div class="field" style="margin-bottom:1.5rem"><label for="id_code">{% translate "6-digit code" %}</label>{{ form.code }}</div>
+        <button class="btn btn-lg btn-block" type="submit">{% translate "Sign in" %}</button>
+      </form>
+      <p class="muted" style="margin-top:1.5rem; font-size:.85rem">{% translate "Lost your phone? Type one of your recovery codes instead, or ask another manager to switch two-step sign-in off for you." %}</p>
+      <p style="margin-top:1rem"><a href="{% url 'accounts:login' %}">{% icon "back" %} {% translate "Back" %}</a></p>
+    </div>
+  </section>
+</div>
+{% include "includes/icons.svg" %}
+</body>
+</html>

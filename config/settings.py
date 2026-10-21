@@ -86,6 +86,7 @@ MIDDLEWARE = [
     "apps.accounts.middleware.UserLanguageMiddleware",
     "apps.core.middleware.SetupRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "apps.accounts.twofactor.RequireTwoStepMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 

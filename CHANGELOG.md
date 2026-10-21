@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.31.0 — two-step sign-in
+
+**Shqip**
+
+- **Hyrja me dy hapa:** nën emrin tuaj, ikona e drynit e aktivizon. Pas fjalëkalimit, InnKeeper kërkon edhe kodin me 6 shifra nga një aplikacion falas në telefon (Google Authenticator, Microsoft Authenticator, Authy, 2FAS). Një fjalëkalim i vjedhur nuk mjafton më për të hyrë.
+- **8 kode rikuperimi**, që shfaqen vetëm një herë, për rastin kur humbet telefoni; çdo kod punon një herë. Menaxheri mund ta çaktivizojë për dikë te *Stafi → ndrysho*.
+- Te *Cilësimet → Arkat e përbashkëta & PIN* mund ta bëni të detyrueshme për menaxherët (rekomandohet kur InnKeeper arrihet nga interneti).
+- Mbrojtje: çdo kod pranohet vetëm një herë, pas 5 kodeve të gabuara duhet hyrë përsëri, dhe hapi i dytë skadon pas 5 minutash. Hyrja me PIN në arkën e përbashkët mbetet si më parë (punon vetëm në rrjetin tuaj).
+
+**English**
+
+- **Two-step sign-in:** the lock icon under your name switches it on. After the password, InnKeeper also asks for the 6-digit code from a free phone app (Google Authenticator, Microsoft Authenticator, Authy, 2FAS). A stolen password alone is no longer enough.
+- **8 recovery codes**, shown only once, for when the phone is lost; each works once. A manager can switch it off for someone under *Staff → edit*.
+- In *Settings → Shared tills & PINs* you can require it for managers (recommended when InnKeeper can be reached from the internet).
+- Safety: each code works only once, 5 wrong codes send you back to the password, and the second step expires after 5 minutes. PIN sign-in on shared tills is unchanged (it only works on your own network).
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.31.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.30.0 — cash in two currencies
 
 **Shqip**

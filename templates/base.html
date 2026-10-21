@@ -101,6 +101,7 @@
         <span class="row" style="gap:.6rem">
           <a href="{% url 'accounts:password_change' %}" title="{% translate 'Change password' %}">{% icon "key" %}</a>
           <a href="{% url 'accounts:my_pin' %}" title="{% translate 'Your PIN for shared tills' %}">{% icon "grid" %}</a>
+          <a href="{% url 'accounts:two_step' %}" title="{% translate 'Two-step sign-in' %}">{% icon "lock" %}</a>
           <form method="post" action="{% url 'accounts:logout' %}" class="inline">{% csrf_token %}
             <button type="submit" class="btn-ghost" style="background:none;border:0;color:inherit;cursor:pointer;padding:0" title="{% translate 'Sign out' %}">{% icon "logout" %}</button>
           </form>

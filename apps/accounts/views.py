@@ -41,6 +41,12 @@ class LoginView(auth_views.LoginView):
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
+        from . import twofactor
+
+        user = form.get_user()
+        if user.has_two_step:
+            twofactor.start_pending(self.request, user, user.backend, self.get_success_url())
+            return redirect("accounts:two_step_verify")
         response = super().form_valid(form)
         audit(self.request.user, "auth.login", str(self.request.user))
         return response

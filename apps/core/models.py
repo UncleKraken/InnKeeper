@@ -222,6 +222,11 @@ class HotelSettings(models.Model):
         help_text=_("Where guests leave a review: your Google Maps, TripAdvisor or Booking.com page."),
     )
     message_review_text = models.TextField(_("thank-you text"), blank=True)
+    require_two_step = models.BooleanField(
+        _("managers must use two-step sign-in"),
+        default=False,
+        help_text=_("Managers then need a 6-digit code from a phone app after their password. Strongly recommended when InnKeeper can be reached from the internet."),
+    )
     online_checkin = models.BooleanField(
         _("let guests check in online"),
         default=True,

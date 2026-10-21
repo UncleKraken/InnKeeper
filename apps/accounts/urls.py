@@ -1,7 +1,7 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path
 
-from . import pin, views
+from . import pin, twofactor, views
 
 app_name = "accounts"
 
@@ -20,4 +20,9 @@ urlpatterns = [
     path("pin/", pin.pin_pad, name="pin_pad"),
     path("lock/", pin.lock, name="lock"),
     path("shared-till/", pin.shared_till, name="shared_till"),
+    path("two-step/", twofactor.manage, name="two_step"),
+    path("two-step/verify/", twofactor.verify, name="two_step_verify"),
+    path("two-step/off/", twofactor.disable, name="two_step_off"),
+    path("two-step/recovery/", twofactor.new_recovery_codes, name="two_step_recovery"),
+    path("staff/<int:pk>/two-step/off/", twofactor.staff_reset, name="staff_two_step_off"),
 ]

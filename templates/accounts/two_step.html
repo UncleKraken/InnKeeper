@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Two-step sign-in" %}{% endblock %}
+{% block content %}
+<div class="page-header"><div><h1>{% translate "Two-step sign-in" %}</h1>
+  <p>{% translate "After your password, InnKeeper also asks for a 6-digit code from an app on your phone. Someone who learns your password still can't get in." %}</p></div></div>
+
+{% if recovery %}
+<section class="card" style="max-width:640px; border-color:var(--warning)">
+  <div class="card-header"><h2>{% translate "Your recovery codes" %}</h2></div>
+  <div class="card-body">
+    <p style="margin-top:0">{% translate "If you lose your phone, each of these codes gets you in once instead of the app code. Write them down or print them now and keep them somewhere safe: they are shown only this once." %}</p>
+    <div class="recovery-codes mono">{% for c in recovery %}<span>{{ c }}</span>{% endfor %}</div>
+    <button class="btn btn-secondary no-print" type="button" onclick="window.print()" style="margin-top:1rem">{% icon "print" %} {% translate "Print" %}</button>
+  </div>
+</section>
+{% endif %}
+
+{% if on %}
+<section class="card" style="max-width:640px; margin-top:1.25rem">
+  <div class="card-header"><h2>{% translate "On" %}</h2>{% translate "On" as l %}{% status_badge "success" l %}</div>
+  <div class="card-body">
+    <p style="margin-top:0">{% blocktranslate count n=left %}{{ n }} recovery code left.{% plural %}{{ n }} recovery codes left.{% endblocktranslate %}</p>
+    <form method="post" action="{% url 'accounts:two_step_recovery' %}" data-confirm="{% translate 'Make new recovery codes? The old ones stop working.' %}">{% csrf_token %}<button class="btn btn-secondary">{% icon "sync" %} {% translate "Make new recovery codes" %}</button></form>
+  </div>
+  <form method="post" action="{% url 'accounts:two_step_off' %}" class="card-footer row" style="gap:.6rem; align-items:end; flex-wrap:wrap">{% csrf_token %}
+    <div class="field" style="margin:0"><label for="id_password">{% translate "Your password" %}</label>{{ password_form.password }}</div>
+    <button class="btn btn-secondary">{% translate "Switch off" %}</button>
+  </form>
+</section>
+{% else %}
+{% if required %}<div class="alert alert-warning" style="max-width:640px; margin-bottom:1rem">{% icon "alert" %} {% translate "Managers must use two-step sign-in here. Set it up to continue." %}</div>{% endif %}
+<section class="card" style="max-width:640px">
+  <div class="card-header"><h2>{% translate "Switch it on" %}</h2></div>
+  <div class="card-body">
+    <ol class="steps-list">
+      <li>{% translate "On your phone, install an authenticator app: Google Authenticator, Microsoft Authenticator, Authy or 2FAS (all free)." %}</li>
+      <li>{% translate "In the app, add an account and scan this code." %}</li>
+      <li>{% translate "Type the 6-digit code the app shows." %}</li>
+    </ol>
+    <div class="row" style="gap:1.25rem; align-items:center; flex-wrap:wrap; margin:1rem 0">
+      <div class="qr-box qr-sm">{{ qr|safe }}</div>
+      <div style="flex:1; min-width:220px"><p class="muted" style="margin:0 0 .3rem; font-size:.85rem">{% translate "Can't scan? Type this key in the app:" %}</p><p class="mono" style="margin:0; font-weight:700; word-break:break-all">{{ secret }}</p></div>
+    </div>
+    <form method="post" class="row" style="gap:.6rem; align-items:end; flex-wrap:wrap" novalidate>{% csrf_token %}
+      <div class="field{% if form.code.errors %} has-error{% endif %}" style="margin:0"><label for="id_code">{% translate "Code from the app" %}</label>{{ form.code }}{% for e in form.code.errors %}<div class="error">{{ e }}</div>{% endfor %}</div>
+      <button class="btn">{% icon "check" %} {% translate "Switch on" %}</button>
+    </form>
+  </div>
+</section>
+{% endif %}
+{% endblock %}
