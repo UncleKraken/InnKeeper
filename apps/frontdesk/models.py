@@ -166,6 +166,9 @@ class Reservation(models.Model):
     pre_arrival_sent_at = models.DateTimeField(null=True, blank=True, editable=False)
     review_sent_at = models.DateTimeField(null=True, blank=True, editable=False)
     cancelled_at = models.DateTimeField(null=True, blank=True)
+    checkin_token = models.CharField(max_length=32, blank=True, db_index=True, editable=False)
+    online_checkin_at = models.DateTimeField(null=True, blank=True, editable=False)
+    arrival_time = models.CharField(_("expected arrival time"), max_length=20, blank=True)
 
     class Meta:
         verbose_name = _("reservation")
@@ -271,6 +274,28 @@ class Reservation(models.Model):
         """Nights actually stayed if the guest leaves on `on_date` (at least one)."""
         on_date = on_date or timezone.localdate()
         return max(1, (on_date - self.arrival).days)
+
+
+
+class StayGuest(models.Model):
+    """Another person staying in the room (the main guest is the reservation's guest). Kept for the guest register."""
+
+    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name="companions")
+    first_name = models.CharField(_("first name"), max_length=80)
+    last_name = models.CharField(_("last name"), max_length=80)
+    is_child = models.BooleanField(_("child"), default=False)
+    nationality = models.CharField(_("nationality"), max_length=60, blank=True)
+    document_type = models.CharField(_("document type"), max_length=20, choices=Guest.DocumentType.choices, blank=True)
+    document_number = models.CharField(_("document number"), max_length=60, blank=True)
+    date_of_birth = models.DateField(_("date of birth"), null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("person in the stay")
+        verbose_name_plural = _("people in the stay")
+        ordering = ["is_child", "pk"]
+
+    def __str__(self) -> str:
+        return f"{self.first_name} {self.last_name}".strip()
 
 
 class SeasonRate(models.Model):

@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.29.0 — online check-in
+
+**Shqip**
+
+- **Check-in online:** para se të mbërrijnë, mysafirët hapin një link privat (në email-in e mbërritjes, në faqen e rezervimit, ose me WhatsApp nga rezervimi) dhe shkruajnë të dhënat e kartës së identitetit ose pasaportës për të gjithë personat në dhomë, si dhe orën e mbërritjes. Në mbërritje recepsioni thjesht jep çelësin.
+- **Të gjithë personat në dhomë**, jo vetëm mysafiri kryesor: te rezervimi, *Mysafirët e këtij qëndrimi* i lejon recepsionit t'i shkruajë vetë (për ata pa rezervim).
+- **Regjistri i mysafirëve** liston tani çdo person, me çfarë mungon ende për secilin, edhe në Excel dhe CSV.
+- Paneli dhe rezervimi tregojnë kush ka bërë check-in online dhe orën e pritshme të mbërritjes.
+- Linku punon derisa mysafiri të bëjë check-in, nuk shfaq numrat e dokumenteve të ruajtur më parë, dhe kërkon adresën publike. Mund ta çaktivizoni te *Cilësimet → Mesazhet për mysafirët*.
+
+**English**
+
+- **Online check-in:** before arriving, guests open a private link (in the arrival email, on the booking page, or sent by WhatsApp from the reservation) and enter the ID card or passport details of everyone in the room, and their expected arrival time. At arrival, reception just hands over the key.
+- **Everyone in the room**, not only the main guest: on the reservation, *Guests in this stay* lets reception enter them for walk-ins.
+- **The guest register** now lists every person, with what is still missing for each, in Excel and CSV too.
+- The dashboard and the reservation show who checked in online and the expected arrival time.
+- The link works until the guest checks in, never shows ID numbers stored earlier, and needs the public web address. Switch it off under *Settings → Guest messages*.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.29.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.28.1 — clearer Albanian and English
 
 **Shqip**

@@ -23,8 +23,8 @@ class RegisterTests(HotelTestCase):
         lena = Guest.objects.create(first_name="Lena", last_name="Weber", nationality="Germany")
         other = self.make_reservation(room=self.room2, status=Reservation.Status.CHECKED_IN)
         Reservation.objects.filter(pk=other.pk).update(guest=lena)
-        rows = register.stays(self.today, self.today, foreign_only=True)
-        self.assertEqual([r.guest for r in rows], [lena])
+        rows = register.people(register.stays(self.today, self.today), foreign_only=True)
+        self.assertEqual([x["p"] for x in rows], [lena])
 
     def test_page_and_csv(self):
         self.guest.document_type = "passport"

@@ -264,8 +264,31 @@ def reservation_detail(request, pk):
             "link_amount": link_amount or max(folio.balance + pending_amount, Decimal("0")).quantize(Decimal("0.01")),
             "link_purpose": "deposit" if link_amount else "balance",
             "guest_message": _guest_message_ctx(res),
+            "checkin": _checkin_ctx(res, base),
         },
     )
+
+
+def _checkin_ctx(res, base):
+    """The online check-in link for a booking that hasn't arrived yet (copy it, or send it by WhatsApp)."""
+    from urllib.parse import quote
+
+    from . import checkin
+    from . import guest_messages as gm
+
+    hs = HotelSettings.load()
+    if not hs.online_checkin or not checkin.open_for_guest(res):
+        return None
+    url = checkin.link(res, base)
+    number = gm.whatsapp_number(res.guest.phone)
+    whatsapp = ""
+    if number:
+        from django.utils import translation
+
+        with translation.override(gm.language(res, hs)):
+            text = _("Dear %(name)s, save time at reception: check in online before you arrive.") % {"name": res.guest.first_name or res.guest}
+        whatsapp = f"https://wa.me/{number}?text={quote(text + chr(10) + url)}"
+    return {"url": url, "whatsapp": whatsapp, "local_only": not hs.public_url}
 
 
 def _free_rooms(res: Reservation) -> list[Room]:

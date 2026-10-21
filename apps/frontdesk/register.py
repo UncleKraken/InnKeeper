@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 
 from apps.accounts.permissions import module_required
 from apps.core.models import SafeCSVWriter, audit
@@ -25,32 +26,50 @@ def is_foreign(nationality: str) -> bool:
     return bool(n) and n not in HOME_COUNTRY
 
 
-def stays(start: date, end: date, *, foreign_only: bool = False):
+def stays(start: date, end: date):
     """Reservations of guests who were in the property at any time between start and end (inclusive)."""
-    qs = (
+    return list(
         Reservation.objects.filter(
             Q(status=Reservation.Status.CHECKED_IN) | Q(status=Reservation.Status.CHECKED_OUT),
             arrival__lte=end,
             departure__gt=start,
         )
         .select_related("guest", "room")
+        .prefetch_related("companions")
         .order_by("arrival", "room__number")
     )
-    rows = list(qs)
-    if foreign_only:
-        rows = [r for r in rows if is_foreign(r.guest.nationality)]
-    return rows
 
 
-def missing(guest) -> list[str]:
+def missing(person, *, child: bool = False) -> list[str]:
     out = []
-    if not guest.document_number:
+    if child:
+        if not person.date_of_birth:
+            out.append(_("date of birth"))
+        return out
+    if not person.document_number:
         out.append(_("document"))
-    if not guest.nationality:
+    if not person.nationality:
         out.append(_("nationality"))
-    if not guest.date_of_birth:
+    if not person.date_of_birth:
         out.append(_("date of birth"))
     return out
+
+
+def people(reservations, *, foreign_only: bool = False) -> list[dict]:
+    """One row per person: the main guest, then the others in the room (online check-in or reception)."""
+    rows = []
+    for r in reservations:
+        companions = list(r.companions.all())
+        main_missing = missing(r.guest)
+        not_entered = max(0, r.adults - 1 - sum(1 for c in companions if not c.is_child))
+        if not_entered:
+            main_missing.append(ngettext("%(n)s other guest", "%(n)s other guests", not_entered) % {"n": not_entered})
+        persons = [{"res": r, "p": r.guest, "main": True, "child": False, "missing": main_missing}]
+        persons += [{"res": r, "p": c, "main": False, "child": c.is_child, "missing": missing(c, child=c.is_child)} for c in companions]
+        if foreign_only:
+            persons = [x for x in persons if is_foreign(x["p"].nationality)]
+        rows += persons
+    return rows
 
 
 def _dates(request) -> tuple[date, date]:
@@ -72,7 +91,8 @@ def _dates(request) -> tuple[date, date]:
 def guest_register(request):
     start, end = _dates(request)
     foreign_only = request.GET.get("foreign") == "1"
-    rows = [(r, missing(r.guest)) for r in stays(start, end, foreign_only=foreign_only)]
+    reservations = stays(start, end)
+    rows = people(reservations, foreign_only=foreign_only)
     fmt = request.GET.get("format")
     if fmt in ("csv", "xlsx"):
         audit(request.user, "register.export", f"{start}–{end} ({len(rows)})")
@@ -83,21 +103,21 @@ def guest_register(request):
         ]
         body = [
             [
-                r.room.number,
-                r.guest.last_name,
-                r.guest.first_name,
-                r.guest.nationality,
-                r.guest.date_of_birth,
-                r.guest.get_document_type_display() if r.guest.document_type else "",
-                r.guest.document_number,
-                r.guest.address,
-                r.arrival,
-                r.departure,
-                r.adults,
-                r.children,
-                r.code,
+                x["res"].room.number,
+                x["p"].last_name,
+                x["p"].first_name,
+                x["p"].nationality,
+                x["p"].date_of_birth,
+                x["p"].get_document_type_display() if x["p"].document_type else "",
+                x["p"].document_number,
+                x["p"].address if x["main"] else "",
+                x["res"].arrival,
+                x["res"].departure,
+                x["res"].adults if x["main"] else "",
+                x["res"].children if x["main"] else "",
+                x["res"].code,
             ]
-            for r, _m in rows
+            for x in rows
         ]
         if fmt == "xlsx":
             from apps.core import spreadsheet
@@ -116,11 +136,12 @@ def guest_register(request):
         "frontdesk/register.html",
         {
             "rows": rows,
+            "stays": len({x["res"].pk for x in rows}),
             "start": start,
             "end": end,
             "foreign_only": foreign_only,
-            "incomplete": sum(1 for _r, m in rows if m),
-            "people": sum(r.adults + r.children for r, _m in rows),
+            "incomplete": sum(1 for x in rows if x["missing"]),
+            "people": sum(r.adults + r.children for r in reservations),
             "query": request.GET.urlencode(),
         },
     )

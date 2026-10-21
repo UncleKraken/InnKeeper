@@ -143,7 +143,19 @@
         <dt>{% translate "Email" %}</dt><dd>{{ r.guest.email|default:"—" }}</dd>
         <dt>{% translate "Nationality" %}</dt><dd>{{ r.guest.nationality|default:"—" }}</dd>
         <dt>{% translate "Document" %}</dt><dd>{% if r.guest.document_number %}{{ r.guest.get_document_type_display }} {{ r.guest.document_number }}{% else %}<span style="color:var(--warning)">{% translate "Missing" %}</span>{% endif %}</dd>
-      </dl></div>
+        {% if r.arrival_time %}<dt>{% translate "Expected arrival time" %}</dt><dd>{{ r.arrival_time }}</dd>{% endif %}
+        {% for c in r.companions.all %}<dt>{% if c.is_child %}{% translate "Child" %}{% else %}{% translate "Guest" %}{% endif %}</dt><dd>{{ c }}{% if not c.is_child %} · {% if c.document_number %}<span class="mono">{{ c.document_number }}</span>{% else %}<span style="color:var(--warning)">{% translate "Missing" %}</span>{% endif %}{% endif %}</dd>{% endfor %}
+        {% if checkin or r.online_checkin_at %}<dt>{% translate "Online check-in" %}</dt><dd>{% if r.online_checkin_at %}<span style="color:var(--success)">{% icon "check" %} {{ r.online_checkin_at|date:"d.m.Y H:i" }}</span>{% else %}<span class="muted">{% translate "Not yet" %}</span>{% endif %}</dd>{% endif %}
+      </dl>
+      <div class="row" style="flex-wrap:wrap; gap:.5rem; margin-top:.75rem">
+        {% if r.is_active %}<a class="btn btn-secondary btn-sm" href="{% url 'frontdesk:stay_guests' r.pk %}">{% icon "users" %} {% translate "Guests in this stay" %}</a>{% endif %}
+        {% if checkin %}
+          <button type="button" class="btn btn-secondary btn-sm" data-copy="{{ checkin.url }}" onclick="try { navigator.clipboard.writeText(this.dataset.copy); this.textContent = '✓'; } catch (e) {}">{% icon "copy" %} {% translate "Copy check-in link" %}</button>
+          {% if checkin.whatsapp %}<a class="btn btn-secondary btn-sm" href="{{ checkin.whatsapp }}" target="_blank" rel="noopener">{% icon "send" %} WhatsApp</a>{% endif %}
+        {% endif %}
+      </div>
+      {% if checkin and checkin.local_only %}<p class="muted" style="font-size:.8rem; margin:.5rem 0 0">{% translate "Without a public web address the link opens only on your Wi-Fi (Settings → Online booking)." %}</p>{% endif %}
+      </div>
     </section>
     {% if guest_message %}
     <section class="card">

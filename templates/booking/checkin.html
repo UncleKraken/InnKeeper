@@ -1,0 +1,53 @@
+{% extends "booking/base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Online check-in" %}{% endblock %}
+{% block eyebrow %}{% translate "Online check-in" %}{% endblock %}
+{% block langq %}{% if done %}done=1&{% endif %}{% endblock %}
+{% block langq2 %}{% if done %}done=1&{% endif %}{% endblock %}
+{% block content %}
+<section class="card booking-narrow">
+  <div class="card-body">
+    <dl class="dl">
+      <dt>{% translate "Booking" %}</dt><dd class="mono">{{ r.code }}</dd>
+      <dt>{% translate "Guest" %}</dt><dd>{{ r.guest }}</dd>
+      <dt>{% translate "Room" %}</dt><dd>{{ room_name }}</dd>
+      <dt>{% translate "Arrival" %}</dt><dd>{{ r.arrival|date:"D, d.m.Y" }}{% if hotel.check_in_time %} · {% translate "from" %} {{ hotel.check_in_time|time:"H:i" }}{% endif %}</dd>
+      <dt>{% translate "Departure" %}</dt><dd>{{ r.departure|date:"D, d.m.Y" }}{% if hotel.check_out_time %} · {% translate "until" %} {{ hotel.check_out_time|time:"H:i" }}{% endif %}</dd>
+      <dt>{% translate "Guests" %}</dt><dd>{{ r.adults }} {% translate "adults" %}{% if r.children %}, {{ r.children }} {% translate "children" %}{% endif %}</dd>
+    </dl>
+  </div>
+</section>
+
+{% if done %}
+<section class="card booking-narrow" style="margin-top:1rem">
+  <div class="card-body" style="text-align:center; padding:2rem 1.25rem">
+    <div class="success-mark">{% icon "check" %}</div>
+    <h2 style="margin-top:1rem">{% translate "You're checked in online" %}</h2>
+    <p class="muted">{% translate "Thank you. When you arrive, just tell reception your name: your details are already there." %}</p>
+    <p style="margin:.75rem 0 0">{{ r.guest }}{% for c in r.companions.all %} · {{ c }}{% endfor %}</p>
+    {% if editable %}<p style="margin-top:1rem"><a class="btn btn-secondary" href="?lang={{ lang }}&edit=1">{% icon "edit" %} {% translate "Change the details" %}</a></p>{% endif %}
+  </div>
+</section>
+{% elif not editable %}
+<section class="card card-body booking-narrow" style="margin-top:1rem; text-align:center">
+  <h2>{% translate "You're already checked in" %}</h2>
+  <p class="muted">{% translate "To change anything, please ask reception." %}</p>
+</section>
+{% else %}
+<form method="post" class="booking-narrow" novalidate style="margin-top:1rem">{% csrf_token %}
+  <input type="hidden" name="lang" value="{{ lang }}">
+  <p class="muted" style="margin:0 0 1rem">{% translate "Save time at reception: enter the details of everyone staying in the room, as on their ID card or passport. By law we keep them in our guest register; they are used for nothing else." %}</p>
+  <section class="card">
+    <div class="card-header"><h3>{% translate "You" %}</h3></div>
+    <div class="card-body">{% include "includes/form_fields.html" with form=main %}</div>
+  </section>
+  {% for f in others %}
+  <section class="card" style="margin-top:1rem">
+    <div class="card-header"><h3>{{ f.heading }}</h3></div>
+    <div class="card-body">{% if f.child %}<p class="muted" style="margin-top:0; font-size:.9rem">{% translate "For children, the name and date of birth are enough." %}</p>{% endif %}{% include "includes/form_fields.html" with form=f %}</div>
+  </section>
+  {% endfor %}
+  <button class="btn btn-lg btn-block" style="margin-top:1rem">{% icon "check" %} {% translate "Check in" %}</button>
+</form>
+{% endif %}
+{% endblock %}

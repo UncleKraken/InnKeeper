@@ -59,6 +59,10 @@ def text(kind: str, res: Reservation, hs) -> str:
             _("We look forward to welcoming you on %(date)s. Check-in is from %(time)s.")
             % {"date": res.arrival.strftime("%d.%m.%Y"), "time": hs.check_in_time.strftime("%H:%M")},
         ]
+        from . import checkin
+
+        if checkin.offered(res) and not res.online_checkin_at:
+            parts.append(_("Save time at reception: check in online before you arrive.") + "\n" + checkin.link(res))
         if hs.message_pre_arrival_text.strip():
             parts.append(hs.message_pre_arrival_text.strip())
         if hs.address:
@@ -94,7 +98,8 @@ def send(kind: str, res: Reservation, user=None, *, force: bool = False) -> bool
             res.guest.email,
             subject(kind, res, hs),
             "booking/email_message.html",
-            {"r": res, "kind": kind, "body": text(kind, res, hs), "map": map_link(hs), "review_url": hs.message_review_url},
+            {"r": res, "kind": kind, "body": text(kind, res, hs), "map": map_link(hs), "review_url": hs.message_review_url,
+             "checkin_url": _checkin_url(kind, res)},
             language=lang,
         )
     if not ok:
@@ -103,6 +108,12 @@ def send(kind: str, res: Reservation, user=None, *, force: bool = False) -> bool
     setattr(res, field, now)
     audit(user, f"guest_message.{kind}", f"{res.code} {res.guest} → {res.guest.email}", res)
     return True
+
+
+def _checkin_url(kind: str, res: Reservation) -> str:
+    from . import checkin
+
+    return checkin.link(res) if kind == PRE_ARRIVAL and checkin.offered(res) and not res.online_checkin_at else ""
 
 
 def due(kind: str, today=None):

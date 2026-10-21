@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import breakfast_views, channel_manager, channels, groups, register, views
+from . import breakfast_views, channel_manager, channels, checkin, groups, register, views
 
 app_name = "frontdesk"
 
@@ -11,6 +11,7 @@ urlpatterns = [
     path("breakfast/<int:pk>/", breakfast_views.breakfast_serve, name="breakfast_serve"),
     path("reservations/new/", views.reservation_form, name="reservation_create"),
     path("reservations/<int:pk>/", views.reservation_detail, name="reservation_detail"),
+    path("reservations/<int:pk>/guests/", checkin.staff_page, name="stay_guests"),
     path("reservations/<int:pk>/edit/", views.reservation_form, name="reservation_edit"),
     path("reservations/<int:pk>/check-in/", views.check_in, name="check_in"),
     path("reservations/<int:pk>/check-out/", views.check_out, name="check_out"),

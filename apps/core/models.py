@@ -213,6 +213,11 @@ class HotelSettings(models.Model):
         help_text=_("Where guests leave a review: your Google Maps, TripAdvisor or Booking.com page."),
     )
     message_review_text = models.TextField(_("thank-you text"), blank=True)
+    online_checkin = models.BooleanField(
+        _("let guests check in online"),
+        default=True,
+        help_text=_("The arrival email and the booking page carry a link where guests enter their ID or passport details, and those of the people with them, before they arrive. Needs the public web address."),
+    )
     message_hour = models.PositiveSmallIntegerField(
         _("send at"), default=10, validators=[MaxValueValidator(23)], help_text=_("Hour of the day, 0–23.")
     )

@@ -4,7 +4,7 @@
 {% block content %}
 <div class="page-header">
   <div><div class="eyebrow">{% translate "Front desk" %}</div><h1>{% translate "Guest register" %}</h1>
-    <p>{% if start == end %}{{ start|date:"d.m.Y" }}{% else %}{{ start|date:"d.m.Y" }} – {{ end|date:"d.m.Y" }}{% endif %} · {% blocktranslate count n=rows|length %}{{ n }} stay{% plural %}{{ n }} stays{% endblocktranslate %} · {% blocktranslate count n=people %}{{ n }} person{% plural %}{{ n }} people{% endblocktranslate %}</p></div>
+    <p>{% if start == end %}{{ start|date:"d.m.Y" }}{% else %}{{ start|date:"d.m.Y" }} – {{ end|date:"d.m.Y" }}{% endif %} · {% blocktranslate count n=stays %}{{ n }} stay{% plural %}{{ n }} stays{% endblocktranslate %} · {% blocktranslate count n=people %}{{ n }} person{% plural %}{{ n }} people{% endblocktranslate %}</p></div>
   <div class="actions no-print">
     <form method="get" class="filters" style="flex-wrap:wrap">
       <div class="field"><label for="from">{% translate "From" %}</label><input class="input" type="date" id="from" name="from" value="{{ start|date:'Y-m-d' }}"></div>
@@ -28,18 +28,18 @@
   <div class="table-wrap"><table class="table table-sm">
     <thead><tr><th>{% translate "Room" %}</th><th>{% translate "Guest" %}</th><th>{% translate "Nationality" %}</th><th>{% translate "Date of birth" %}</th><th>{% translate "Document" %}</th><th>{% translate "Arrival" %}</th><th>{% translate "Departure" %}</th><th class="num">{% translate "Persons" %}</th></tr></thead>
     <tbody>
-    {% for r, miss in rows %}
-      <tr>
-        <td><strong>{{ r.room.number }}</strong></td>
-        <td><a href="{% url 'frontdesk:guest_edit' r.guest_id %}?next={{ request.get_full_path|urlencode }}"><strong>{{ r.guest.last_name }}</strong> {{ r.guest.first_name }}</a>{% if miss %}<br><small style="color:var(--warning)" class="no-print">{% translate "Missing" %}: {{ miss|join:", " }}</small>{% endif %}</td>
-        <td>{{ r.guest.nationality|default:"—" }}</td>
-        <td class="nowrap">{{ r.guest.date_of_birth|date:"d.m.Y"|default:"—" }}</td>
-        <td>{% if r.guest.document_number %}{{ r.guest.get_document_type_display }} <span class="mono">{{ r.guest.document_number }}</span>{% else %}—{% endif %}</td>
+    {% for x in rows %}{% with r=x.res p=x.p %}
+      <tr{% if not x.main %} class="row-sub"{% endif %}>
+        <td>{% if x.main %}<strong>{{ r.room.number }}</strong>{% endif %}</td>
+        <td>{% if x.main %}<a href="{% url 'frontdesk:guest_edit' r.guest_id %}?next={{ request.get_full_path|urlencode }}">{% else %}<a href="{% url 'frontdesk:stay_guests' r.pk %}">{% endif %}<strong>{{ p.last_name }}</strong> {{ p.first_name }}</a>{% if x.child %} <small class="muted">({% translate "child" %})</small>{% endif %}{% if x.missing %}<br><small style="color:var(--warning)" class="no-print">{% translate "Missing" %}: {{ x.missing|join:", " }}</small>{% endif %}</td>
+        <td>{{ p.nationality|default:"—" }}</td>
+        <td class="nowrap">{{ p.date_of_birth|date:"d.m.Y"|default:"—" }}</td>
+        <td>{% if p.document_number %}{{ p.get_document_type_display }} <span class="mono">{{ p.document_number }}</span>{% else %}—{% endif %}</td>
         <td class="nowrap">{{ r.arrival|date:"d.m.Y" }}</td>
         <td class="nowrap">{{ r.departure|date:"d.m.Y" }}</td>
-        <td class="num">{{ r.adults }}{% if r.children %}+{{ r.children }}{% endif %}</td>
+        <td class="num">{% if x.main %}{{ r.adults }}{% if r.children %}+{{ r.children }}{% endif %}{% endif %}</td>
       </tr>
-    {% endfor %}
+    {% endwith %}{% endfor %}
     </tbody>
   </table></div>
   {% else %}

@@ -17,6 +17,10 @@
       <p class="muted">{% translate "We'll confirm it shortly by email." %}</p>
     {% endif %}
     <p class="mono" style="font-size:1.2rem; margin-top:.5rem">{{ r.code }}</p>
+    {% if checkin_url %}
+      <p style="margin-top:1rem"><a class="btn" href="{{ checkin_url }}">{% icon "id" %} {% if r.online_checkin_at %}{% translate "Online check-in done: see or change" %}{% else %}{% translate "Check in online" %}{% endif %}</a></p>
+      {% if not r.online_checkin_at %}<p class="muted" style="font-size:.85rem; margin:.4rem 0 0">{% translate "Enter your ID or passport details now and save time at reception." %}</p>{% endif %}
+    {% endif %}
   </div>
   <div class="card-footer">
     <dl class="dl">

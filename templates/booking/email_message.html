@@ -10,6 +10,7 @@
       <tr><td style="color:#6b7381;padding:4px 0">{% translate "Arrival" %}</td><td style="text-align:right">{{ r.arrival|date:"D, d.m.Y" }}</td></tr>
       <tr><td style="color:#6b7381;padding:4px 0">{% translate "Departure" %}</td><td style="text-align:right">{{ r.departure|date:"D, d.m.Y" }}</td></tr>
     </table>
+    {% if checkin_url %}<p><a href="{{ checkin_url }}" style="display:inline-block;background:#0e6e64;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">{% translate "Check in online" %}</a></p>{% endif %}
     {% if map %}<p><a href="{{ map }}" style="display:inline-block;background:#0e6e64;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">{% translate "Open in maps" %}</a></p>{% endif %}
   {% elif review_url %}
     <p><a href="{{ review_url }}" style="display:inline-block;background:#0e6e64;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">{% translate "Leave a review" %}</a></p>

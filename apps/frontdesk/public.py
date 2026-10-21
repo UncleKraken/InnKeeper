@@ -6,6 +6,7 @@ from django import forms
 from django.core.cache import cache
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
@@ -208,8 +209,17 @@ def status(request, token):
             "name": _type_name(res.room.room_type, lang),
             "deposit_paid": links.filter(status="paid").exists(),
             "card_deposit": hs.payments_configured and hs.booking_card_deposit and res.status == res.Status.BOOKED,
+            "checkin_url": _checkin_url(res, lang),
         },
     )
+
+
+def _checkin_url(res, lang) -> str:
+    from . import checkin
+
+    if not res.confirmed or not checkin.offered(res):
+        return ""
+    return f"{reverse('booking:checkin', args=[checkin.ensure_token(res)])}?lang={lang}"
 
 
 @require_POST

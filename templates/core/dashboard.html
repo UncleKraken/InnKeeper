@@ -104,7 +104,7 @@
       <tbody>
       {% for r in arrivals %}
         <tr>
-          <td><a href="{% url 'frontdesk:reservation_detail' r.pk %}"><strong>{{ r.guest }}</strong></a>{% if r.guest.is_vip %} <span class="badge b-vip badge-plain">VIP</span>{% endif %}<br><small>{{ r.nights }} {% translate "nights" %} · {{ r.adults }}+{{ r.children }}</small></td>
+          <td><a href="{% url 'frontdesk:reservation_detail' r.pk %}"><strong>{{ r.guest }}</strong></a>{% if r.guest.is_vip %} <span class="badge b-vip badge-plain">VIP</span>{% endif %}<br><small>{{ r.nights }} {% translate "nights" %} · {{ r.adults }}+{{ r.children }}{% if r.arrival_time %} · {{ r.arrival_time }}{% endif %}{% if r.online_checkin_at %} · <span style="color:var(--success)">{% icon "check" %} {% translate "checked in online" %}</span>{% endif %}</small></td>
           <td>{% translate "Room" %} <strong>{{ r.room.number }}</strong><br>{% if r.room.is_ready %}{% translate "Ready" as l %}{% status_badge "clean" l %}{% elif r.room.out_of_order %}{% translate "Out of order" as l %}{% status_badge "ooo" l %}{% else %}{% translate "Not clean" as l %}{% status_badge "dirty" l %}{% endif %}</td>
           <td class="num"><form method="post" action="{% url 'frontdesk:check_in' r.pk %}" class="inline">{% csrf_token %}<button class="btn btn-sm">{% icon "login" %} {% translate "Check in" %}</button></form></td>
         </tr>

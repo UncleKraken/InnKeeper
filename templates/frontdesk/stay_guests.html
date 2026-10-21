@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n innkeeper %}
+{% block title %}{% translate "Guests in this stay" %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="eyebrow"><a href="{% url 'frontdesk:reservation_detail' r.pk %}">{% icon "back" %} {{ r.code }}</a></div><h1>{% translate "Guests in this stay" %}</h1>
+    <p>{% translate "Room" %} {{ r.room.number }} · {{ r.arrival|date:"d.m.Y" }} → {{ r.departure|date:"d.m.Y" }} · {{ r.adults }} {% translate "adults" %}{% if r.children %}, {{ r.children }} {% translate "children" %}{% endif %}</p></div>
+</div>
+{% if r.online_checkin_at %}<div class="alert alert-info" style="margin-bottom:1rem">{% icon "check" %} {% blocktranslate with when=r.online_checkin_at|date:"d.m.Y H:i" %}The guest checked in online on {{ when }}.{% endblocktranslate %}</div>{% endif %}
+<form method="post" novalidate>{% csrf_token %}
+  <section class="card">
+    <div class="card-header"><h3>{% translate "Main guest" %}</h3></div>
+    <div class="card-body">{% include "includes/form_fields.html" with form=main %}</div>
+  </section>
+  {% for f in others %}
+  <section class="card" style="margin-top:1rem">
+    <div class="card-header"><h3>{{ f.heading }}</h3></div>
+    <div class="card-body">{% include "includes/form_fields.html" with form=f %}</div>
+  </section>
+  {% empty %}
+  <p class="muted">{% translate "Only one guest in this stay. To add people, change the number of adults or children on the reservation." %}</p>
+  {% endfor %}
+  <div class="form-actions"><a class="btn btn-secondary" href="{% url 'frontdesk:reservation_detail' r.pk %}">{% translate "Cancel" %}</a><button class="btn">{% icon "check" %} {% translate "Save" %}</button></div>
+</form>
+<p class="muted" style="font-size:.85rem; margin-top:.75rem">{% translate "Leave a row empty if you don't have the details yet: the guest register shows what is missing." %}</p>
+{% endblock %}

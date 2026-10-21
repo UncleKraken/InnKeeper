@@ -196,6 +196,7 @@ class GuestMessagesForm(StyledFormMixin, forms.ModelForm):
             "message_review_url",
             "message_review_text",
             "message_hour",
+            "online_checkin",
         ]
         widgets = {
             "message_pre_arrival_text": forms.Textarea(attrs={"rows": 5}),
