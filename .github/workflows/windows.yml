@@ -106,6 +106,7 @@ jobs:
           $left = netsh advfirewall firewall show rule name=InnKeeper | Out-String
           if ($left -match "InnKeeper\.exe") { Fail "Rule left after uninstall.`n$left" }
           Write-Host "::notice title=firewall::Rule added on install and removed on uninstall"
+          exit 0  # netsh returns 1 when the (removed) rule is not found
 
       - name: Screenshot of the InnKeeper window
         shell: pwsh
