@@ -113,8 +113,10 @@
         <input type="hidden" name="how" value="cash">
         <div class="form-grid" style="grid-template-columns:1fr 1fr; gap:.6rem">
           <div class="field"><label>{% translate "Amount" %}</label><input class="input pay-amount" name="amount" inputmode="decimal" value="{{ order.remaining|stringformat:'.2f' }}"></div>
-          <div class="field"><label>{% translate "Cash given" %}</label><input class="input" name="tendered" inputmode="decimal" id="tendered" placeholder="{{ order.remaining|stringformat:'.2f' }}"></div>
+          <div class="field"><label>{% translate "Cash given" %}{% if hotel.second_cash %}<span class="cur-toggle" role="group" aria-label="{% translate 'Currency' %}"><button type="button" class="active" data-cur="">{{ hotel.currency_symbol }}</button><button type="button" data-cur="{{ hotel.second_currency }}">{{ hotel.second_currency_symbol }}</button></span>{% endif %}</label><input class="input" name="tendered" inputmode="decimal" id="tendered" placeholder="{{ order.remaining|stringformat:'.2f' }}"></div>
         </div>
+        {% if hotel.second_cash %}<input type="hidden" name="tender_currency" id="tender-currency" value="">
+        <div class="cur-due hidden" id="cur-due" data-rate="{{ hotel.second_currency_rate|stringformat:'s' }}" data-symbol="{{ hotel.second_currency_symbol }}">{% translate "To pay" %}: <strong></strong> <small class="muted">(1 {{ hotel.second_currency_symbol }} = {{ hotel.second_currency_rate|floatformat:"-4" }} {{ hotel.currency_symbol }})</small></div>{% endif %}
         <div class="quick" id="quick-cash"></div>
         <div class="change-due hidden" id="change-due">{% translate "Change" %}: <strong></strong>
           <label class="check" style="margin-left:auto; font-weight:500"><input type="checkbox" name="keep_change" value="1"> {% translate "Guest leaves it as a tip" %}</label></div>

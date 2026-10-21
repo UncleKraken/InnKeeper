@@ -172,6 +172,19 @@ class PaymentForm(StyledFormMixin, forms.Form):
     method = forms.ChoiceField(label=_("Method"), choices=Payment.Method.choices)
     reference = forms.CharField(label=_("Reference"), max_length=80, required=False)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from apps.core.models import HotelSettings
+
+        hs = HotelSettings.load()
+        if hs.second_cash:
+            self.fields["foreign_amount"] = forms.DecimalField(
+                label=_("Cash given in %(c)s") % {"c": hs.second_currency}, decimal_places=2, min_value=0, required=False,
+                help_text=_("Only when the guest pays cash in %(c)s: 1 %(s)s = %(r)s. The change is given in %(main)s.")
+                % {"c": hs.second_currency, "s": hs.second_currency_symbol, "r": f"{hs.second_currency_rate.normalize():f}", "main": hs.currency},
+            )
+            self.fields["foreign_amount"].widget.attrs.update({"class": "input", "inputmode": "decimal"})
+
     def clean_amount(self):
         amount = self.cleaned_data["amount"]
         if amount == 0:

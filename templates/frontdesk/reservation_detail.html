@@ -61,7 +61,7 @@
         {% for p in payments %}
           <tr class="{% if p.voided %}voided{% endif %}">
             <td class="nowrap">{{ p.business_date|date:"d.m" }}</td>
-            <td>{% if p.amount < 0 %}{% translate "Refund" %}{% else %}{% translate "Payment" %}{% endif %} · {{ p.get_method_display }}{% if p.reference %} <small>({{ p.reference }})</small>{% endif %}{% if p.voided %}<br><small>{% translate "Voided" %}: {{ p.void_reason }}</small>{% endif %}</td>
+            <td>{% if p.amount < 0 %}{% translate "Refund" %}{% else %}{% translate "Payment" %}{% endif %} · {{ p.get_method_display }}{% if p.foreign_currency %} <small>({{ p.foreign_amount|stringformat:".2f" }} {{ p.foreign_currency }}{% if p.change %} · {% translate "change" %} {{ p.change|money }}{% endif %})</small>{% endif %}{% if p.reference %} <small>({{ p.reference }})</small>{% endif %}{% if p.voided %}<br><small>{% translate "Voided" %}: {{ p.void_reason }}</small>{% endif %}</td>
             <td></td>
             <td class="num" style="color:var(--success)">{% if p.amount < 0 %}+{{ p.amount|absval|money }}{% else %}−{{ p.amount|money }}{% endif %}</td>
             <td class="num">{% if request.user.is_manager and not p.voided and folio.status == "open" %}

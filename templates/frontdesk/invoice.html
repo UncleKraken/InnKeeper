@@ -41,7 +41,7 @@
   {% if payments %}
   <table class="table table-sm" style="margin-top:1.5rem">
     <tbody>
-      {% for p in payments %}<tr><td>{{ p.business_date|date:"d.m.Y" }}</td><td>{% translate "Payment" %} · {{ p.get_method_display }}</td><td class="num">{% if p.amount < 0 %}+{{ p.amount|absval|money }}{% else %}−{{ p.amount|money }}{% endif %}</td></tr>{% endfor %}
+      {% for p in payments %}<tr><td>{{ p.business_date|date:"d.m.Y" }}</td><td>{% translate "Payment" %} · {{ p.get_method_display }}{% if p.foreign_currency %} ({{ p.foreign_amount|stringformat:".2f" }} {{ p.foreign_currency }}){% endif %}</td><td class="num">{% if p.amount < 0 %}+{{ p.amount|absval|money }}{% else %}−{{ p.amount|money }}{% endif %}</td></tr>{% endfor %}
     </tbody>
     <tfoot><tr><td colspan="2">{% translate "Balance due" %}</td><td class="num">{{ folio.balance|money }}</td></tr></tfoot>
   </table>

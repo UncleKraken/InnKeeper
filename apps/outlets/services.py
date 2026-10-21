@@ -270,6 +270,7 @@ def pay_order(
     reference: str = "",
     tip: Decimal | None = None,
     voucher_code: str = "",
+    foreign: dict | None = None,
 ) -> Payment:
     """Take a full or partial payment. The order closes when nothing is left to pay.
 
@@ -310,6 +311,10 @@ def pay_order(
         raise BusinessError(_("Enter an amount."))
     if amount > remaining:
         raise BusinessError(_("Only %(left)s is left to pay.") % {"left": f"{remaining:.2f}"})
+    if foreign:
+        if method != Payment.Method.CASH:
+            raise BusinessError(_("Only cash can be taken in another currency."))
+        tendered = foreign["tendered"]
     if tendered is not None:
         tendered = Decimal(tendered).quantize(Decimal("0.01"))
         if method != Payment.Method.CASH:
@@ -333,6 +338,7 @@ def pay_order(
         tip=tip,
         voucher=voucher,
         created_by=user,
+        **({k: v for k, v in foreign.items() if k != "tendered"} if foreign else {}),
     )
     audit(user, "order.payment", f"{order.outlet} #{order.number} {amount} ({Payment.Method(method).label if method in Payment.Method.values else method})", order)
     if order.remaining <= 0:

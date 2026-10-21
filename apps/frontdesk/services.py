@@ -313,18 +313,28 @@ def add_charge(
 
 
 @transaction.atomic
-def add_payment(folio: Folio, *, amount: Decimal, method: str, reference: str = "", user) -> Payment:
+def add_payment(folio: Folio, *, amount: Decimal, method: str, reference: str = "", user, foreign_amount=None) -> Payment:
     folio = Folio.objects.select_for_update().get(pk=folio.pk)
     _require_open(folio)
     if amount == 0:
         raise BusinessError(_("Enter an amount."))
+    foreign = {}
+    if foreign_amount:
+        from apps.finance import currency
+
+        if method != Payment.Method.CASH or amount < 0:
+            raise BusinessError(_("Only cash can be taken in another currency."))
+        foreign = currency.foreign_payment(HotelSettings.load().second_currency, foreign_amount)
+        if foreign["tendered"] < amount:
+            raise BusinessError(_("The cash given is less than the amount."))
     if amount < 0 and not getattr(user, "is_manager", False) and -amount > max(-folio.balance, Decimal("0")):
         # Staff may give back what the guest overpaid; larger refunds need a manager.
         raise BusinessError(
             _("Only a manager can refund more than the guest's credit (%(c)s).") % {"c": f"{max(-folio.balance, 0):.2f}"}
         )
-    payment = Payment.objects.create(folio=folio, amount=amount, method=method, reference=reference, created_by=user)
-    audit(user, "folio.payment", f"{folio.number}: {payment.get_method_display()} {amount}", folio)
+    payment = Payment.objects.create(folio=folio, amount=amount, method=method, reference=reference, created_by=user, **foreign)
+    audit(user, "folio.payment", f"{folio.number}: {payment.get_method_display()} {amount}"
+          + (f" ({foreign['foreign_amount']} {foreign['foreign_currency']})" if foreign else ""), folio)
     _close_if_settled(folio)
     return payment
 

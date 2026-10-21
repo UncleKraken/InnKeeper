@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.30.0 — cash in two currencies
+
+**Shqip**
+
+- **Para në dy monedha:** te *Cilësimet → Të dhënat e biznesit* vendosni monedhën e dytë që pranoni (p.sh. EUR kur çmimet janë në lekë) dhe kursin. Në arkë, prekni monedhën pranë *Para të dhëna*: InnKeeper tregon sa duhet paguar në atë monedhë dhe kusurin në monedhën tuaj. Në recepsion, pagesa e faturës së dhomës ka kutinë *Para të dhëna në EUR*.
+- Faturat dhe raportet mbeten në monedhën tuaj; kuponi (edhe ai i printerit termik) tregon shumën e dhënë dhe kursin.
+- **Mbyllja e ditës** numëron dy arkat veçmas: sa pritet në monedhën tuaj (duke llogaritur kusurin e dhënë) dhe sa nga monedha e dytë, me diferencën e secilës. Edhe **turni** i çdo punonjësi tregon sa duhet dorëzuar nga secila monedhë.
+
+**English**
+
+- **Cash in two currencies:** in *Settings → Business details* set the second currency you accept (for example EUR when your prices are in lekë) and its rate. On the till, tap the currency next to *Cash given*: InnKeeper shows what is due in that currency and the change in yours. At reception, room-bill payments have a *Cash given in EUR* box.
+- Bills and reports stay in your currency; the receipt (on screen and on the thermal printer) shows what was handed over and the rate.
+- **The day close** counts the two drawers separately: what is expected in your currency (taking the change given into account) and how much of the second currency, each with its own difference. Each staff **shift** shows how much to hand in in each currency too.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.30.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.29.0 — online check-in
 
 **Shqip**

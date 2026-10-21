@@ -17,10 +17,15 @@
       {% for label, v in summary.methods %}<tr><td>{{ label }}</td><td class="num">{{ v|money }}</td></tr>{% endfor %}
       {% if summary.tips_card %}<tr><td>{% translate "Card tips paid out" %}</td><td class="num">−{{ summary.tips_card|money }}</td></tr>{% endif %}
       {% if summary.tips_cash %}<tr class="muted"><td>{% translate "Cash tips" %}</td><td class="num">{{ summary.tips_cash|money }}</td></tr>{% endif %}
+      {% if summary.foreign_value %}<tr><td>{% blocktranslate with c=summary.foreign_code %}Paid in {{ c }} (hand it in separately){% endblocktranslate %}</td><td class="num">−{{ summary.foreign_value|money }}</td></tr>{% endif %}
       <tr style="font-weight:700"><td>{% translate "Cash expected" %}</td><td class="num">{{ shift.expected_cash|default:summary.expected_cash|money }}</td></tr>
       {% if shift.counted_cash is not None %}
       <tr style="font-weight:700"><td>{% translate "Cash counted" %}</td><td class="num">{{ shift.counted_cash|money }}</td></tr>
       <tr style="font-weight:700"><td>{% translate "Difference" %}</td><td class="num" style="color:{% if shift.difference < 0 %}var(--danger){% elif shift.difference > 0 %}var(--warning){% else %}var(--success){% endif %}">{{ shift.difference|money }}</td></tr>
+      {% endif %}
+      {% if summary.foreign_code %}
+      <tr style="font-weight:700"><td>{% blocktranslate with c=summary.foreign_code %}{{ c }} expected{% endblocktranslate %}</td><td class="num">{{ summary.foreign_received|stringformat:".2f" }} {{ summary.foreign_symbol }}</td></tr>
+      {% if shift.counted_second is not None %}<tr style="font-weight:700"><td>{% blocktranslate with c=summary.foreign_code %}{{ c }} counted{% endblocktranslate %}</td><td class="num">{{ shift.counted_second|stringformat:".2f" }} {{ summary.foreign_symbol }}</td></tr>{% endif %}
       {% endif %}
     </tbody></table>
     {% if shift.notes %}<p><strong>{% translate "Notes" %}:</strong> {{ shift.notes }}</p>{% endif %}
@@ -32,7 +37,7 @@
     {% for p in payments %}
       <tr class="{% if p.voided %}voided{% endif %}"><td class="nowrap">{{ p.created_at|time:"H:i" }}</td>
         <td>{% if p.order %}{{ p.order.outlet.name }} #{{ p.order.number }}{% elif p.folio %}{% translate "Room" %} {{ p.folio.reservation.room.number }}{% elif p.account %}{{ p.account.name }}{% endif %}</td>
-        <td>{{ p.get_method_display }}</td><td class="num">{{ p.amount|money }}{% if p.tip %}<br><small class="muted">+{{ p.tip|money }} {% translate "tip" %}</small>{% endif %}</td></tr>
+        <td>{{ p.get_method_display }}{% if p.foreign_currency %} · {{ p.foreign_amount|stringformat:".2f" }} {{ p.foreign_currency }}{% endif %}</td><td class="num">{{ p.amount|money }}{% if p.tip %}<br><small class="muted">+{{ p.tip|money }} {% translate "tip" %}</small>{% endif %}</td></tr>
     {% empty %}<tr><td class="empty">{% translate "No payments in this shift." %}</td></tr>{% endfor %}
   </tbody></table></div>
 </section>

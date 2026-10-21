@@ -41,6 +41,9 @@ class BusinessForm(StyledFormMixin, forms.ModelForm):
             "address",
             "currency",
             "currency_symbol",
+            "second_currency",
+            "second_currency_symbol",
+            "second_currency_rate",
             "vat_rate",
             "default_language",
             "day_ends_at",
@@ -62,6 +65,16 @@ class BusinessForm(StyledFormMixin, forms.ModelForm):
             self.add_error("vat_rate", _("Enter the VAT rate, or choose “Registered, without VAT”."))
         if status != HotelSettings.TaxStatus.VAT:
             cleaned["vat_rate"] = Decimal("0")
+        second = (cleaned.get("second_currency") or "").strip().upper()
+        cleaned["second_currency"] = second
+        if second:
+            if second == (cleaned.get("currency") or "").strip().upper():
+                self.add_error("second_currency", _("Choose a currency different from your main one."))
+            rate = cleaned.get("second_currency_rate")
+            if not rate or rate <= 0:
+                self.add_error("second_currency_rate", _("Enter how much 1 unit is worth in your currency."))
+            if not cleaned.get("second_currency_symbol"):
+                cleaned["second_currency_symbol"] = {"EUR": "€", "ALL": "L", "USD": "$", "GBP": "£", "CHF": "CHF"}.get(second, second)
         return cleaned
 
 

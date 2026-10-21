@@ -17,6 +17,7 @@ from apps.accounts.permissions import module_required
 from apps.core.crud import CrudCreateView, CrudListView, CrudUpdateView
 from apps.core.exceptions import BusinessError
 from apps.core.models import HotelSettings
+from apps.core.templatetags.innkeeper import money
 from apps.finance.models import Charge, Folio, Payment
 
 from . import services
@@ -379,8 +380,11 @@ def add_payment(request, pk):
     form = PaymentForm(request.POST)
     if form.is_valid():
         try:
-            services.add_payment(res.folio, user=request.user, **form.cleaned_data)
-            messages.success(request, _("Payment recorded."))
+            payment = services.add_payment(res.folio, user=request.user, **form.cleaned_data)
+            if payment.change:
+                messages.success(request, _("Payment recorded. Give back %(change)s change.") % {"change": money(payment.change)})
+            else:
+                messages.success(request, _("Payment recorded."))
         except BusinessError as e:
             messages.error(request, str(e))
     else:

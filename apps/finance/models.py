@@ -174,6 +174,9 @@ class Shift(models.Model):
     closed_at = models.DateTimeField(null=True, blank=True)
     counted_cash = models.DecimalField(_("cash counted"), null=True, blank=True, **MONEY)
     expected_cash = models.DecimalField(null=True, blank=True, **MONEY)
+    second_currency = models.CharField(max_length=3, blank=True)
+    expected_second = models.DecimalField(null=True, blank=True, **MONEY)
+    counted_second = models.DecimalField(null=True, blank=True, **MONEY)
     notes = models.CharField(_("notes"), max_length=255, blank=True)
 
     class Meta:
@@ -332,6 +335,11 @@ class Payment(LedgerEntry):
         "GiftVoucher", null=True, blank=True, on_delete=models.PROTECT, related_name="payments"
     )  # method "voucher": spending it; any other method: the voucher was sold
     shift = models.ForeignKey(Shift, null=True, blank=True, on_delete=models.SET_NULL, related_name="payments")
+    # Cash handed over in the second currency (e.g. euros on a lek bill): `tendered` is its value in the main
+    # currency at `foreign_rate`; the change is given in the main currency.
+    foreign_currency = models.CharField(max_length=3, blank=True)
+    foreign_amount = models.DecimalField(null=True, blank=True, **MONEY)
+    foreign_rate = models.DecimalField(max_digits=12, decimal_places=4, null=True, blank=True)
 
     class Meta:
         verbose_name = _("payment")
@@ -395,6 +403,11 @@ class DayClose(models.Model):
     card_total = models.DecimalField(_("card"), default=ZERO, **MONEY)
     other_total = models.DecimalField(_("bank & other"), default=ZERO, **MONEY)
     revenue_total = models.DecimalField(_("revenue"), default=ZERO, **MONEY)
+    # The second cash currency (e.g. euros in a lek drawer), counted separately.
+    second_currency = models.CharField(max_length=3, blank=True)
+    opening_second = models.DecimalField(default=ZERO, **MONEY)
+    expected_second = models.DecimalField(null=True, blank=True, **MONEY)
+    counted_second = models.DecimalField(null=True, blank=True, **MONEY)
     notes = models.CharField(_("notes"), max_length=255, blank=True)
     closed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
     closed_at = models.DateTimeField(auto_now_add=True)
@@ -410,3 +423,9 @@ class DayClose(models.Model):
     @property
     def difference(self) -> Decimal:
         return self.counted_cash - self.expected_cash
+
+    @property
+    def difference_second(self) -> Decimal | None:
+        if self.counted_second is None or self.expected_second is None:
+            return None
+        return self.counted_second - self.expected_second

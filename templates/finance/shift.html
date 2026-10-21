@@ -13,12 +13,15 @@
         {% for label, v in summary.methods %}<tr><td>{{ label }}</td><td class="num">{{ v|money }}</td></tr>{% endfor %}
         {% if summary.tips_card %}<tr><td>{% translate "Card tips (yours, take them from the cash)" %}</td><td class="num">−{{ summary.tips_card|money }}</td></tr>{% endif %}
         {% if summary.tips_cash %}<tr class="muted"><td>{% translate "Cash tips (already yours)" %}</td><td class="num">{{ summary.tips_cash|money }}</td></tr>{% endif %}
+        {% if summary.foreign_value %}<tr><td>{% blocktranslate with c=summary.foreign_code %}Paid in {{ c }} (hand it in separately){% endblocktranslate %}</td><td class="num">−{{ summary.foreign_value|money }}</td></tr>{% endif %}
         <tr style="font-weight:700"><td>{% translate "Cash to hand in" %}</td><td class="num">{{ summary.expected_cash|money }}</td></tr>
+        {% if summary.foreign_code %}<tr style="font-weight:700"><td>{% blocktranslate with c=summary.foreign_code %}{{ c }} to hand in{% endblocktranslate %}</td><td class="num">{{ summary.foreign_received|stringformat:".2f" }} {{ summary.foreign_symbol }}</td></tr>{% endif %}
       </tbody></table>
       <p class="muted" style="font-size:.85rem">{% blocktranslate count n=summary.count %}{{ n }} payment taken in this shift.{% plural %}{{ n }} payments taken in this shift.{% endblocktranslate %}</p>
     </div>
     <form method="post" action="{% url 'finance:shift_end' shift.pk %}" class="card-footer form-grid" style="grid-template-columns:1fr 1fr; align-items:end">{% csrf_token %}
       <div class="field"><label for="counted">{% translate "Cash counted now" %}</label><input class="input" id="counted" name="counted" inputmode="decimal" required></div>
+      {% if summary.foreign_code %}<div class="field"><label for="counted_second">{% blocktranslate with c=summary.foreign_code %}{{ c }} counted now{% endblocktranslate %}</label><input class="input" id="counted_second" name="counted_second" inputmode="decimal"></div>{% endif %}
       <div class="field"><label for="notes">{% translate "Notes" %}</label><input class="input" id="notes" name="notes" maxlength="255"></div>
       <div style="grid-column:1/-1"><button class="btn" data-confirm="{% translate 'End the shift now?' %}">{% icon "lock" %} {% translate "End shift" %}</button></div>
     </form>

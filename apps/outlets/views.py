@@ -321,10 +321,21 @@ def _report_print_failures(request, tickets) -> None:
             )
 
 
-def _tip(request, order) -> Decimal:
+def _tendered(request) -> tuple[Decimal | None, dict | None]:
+    """The cash handed over (its value in the main currency), and the second-currency details if it wasn't."""
+    from apps.finance import currency
+
+    given = _decimal(request.POST.get("tendered", ""))
+    cur = request.POST.get("tender_currency", "").strip()
+    if cur and request.POST.get("how") == Payment.Method.CASH:
+        foreign = currency.foreign_payment(cur, given)
+        return foreign["tendered"], foreign
+    return given, None
+
+
+def _tip(request, order, tendered=None) -> Decimal:
     """A card tip typed in, or the cash change the guest leaves."""
     if request.POST.get("keep_change") == "1":
-        tendered = _decimal(request.POST.get("tendered", ""))
         amount = _decimal(request.POST.get("amount", "")) or order.remaining
         if tendered and tendered > amount:
             return tendered - amount
@@ -366,15 +377,17 @@ def settle(request, pk):
             services.charge_to_room(order, reservation, user=request.user)
             messages.success(request, _("Charged to room %(room)s.") % {"room": reservation.room.number})
         elif how in Payment.Method.values:
+            tendered, foreign = _tendered(request)
             payment = services.pay_order(
                 order,
                 method=how,
                 user=request.user,
                 amount=_decimal(request.POST.get("amount", "")),
-                tendered=_decimal(request.POST.get("tendered", "")),
+                tendered=tendered,
                 reference=request.POST.get("reference", "")[:80],
-                tip=_tip(request, order),
+                tip=_tip(request, order, tendered),
                 voucher_code=request.POST.get("voucher_code", ""),
+                foreign=foreign,
             )
             order.refresh_from_db()
             cash = how == Payment.Method.CASH

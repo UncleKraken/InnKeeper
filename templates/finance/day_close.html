@@ -61,10 +61,23 @@
           <tr><td>+ {% translate "Cash received" %}</td><td class="num">{{ existing.cash_sales|money }}</td></tr>
           <tr><td>− {% translate "Cash paid out" %}</td><td class="num">{{ existing.cash_expenses|money }}</td></tr>
           {% if s.tips_paid_out %}<tr><td>− {% translate "Card tips paid out to staff" %}</td><td class="num">{{ s.tips_paid_out|money }}</td></tr>{% endif %}
+          {% if s.foreign_value %}<tr><td>− {% blocktranslate with c=s.foreign_code %}Paid in {{ c }} (in the other drawer){% endblocktranslate %}</td><td class="num">{{ s.foreign_value|money }}</td></tr>{% endif %}
           <tr><td><strong>{% translate "Expected in drawer" %}</strong></td><td class="num"><strong>{{ existing.expected_cash|money }}</strong></td></tr>
           <tr><td>{% translate "Counted" %}</td><td class="num">{{ existing.counted_cash|money }}</td></tr>
           <tr><td><strong>{% translate "Difference" %}</strong></td><td class="num"><strong style="color:{% if existing.difference < 0 %}var(--danger){% elif existing.difference > 0 %}var(--warning){% else %}var(--success){% endif %}">{{ existing.difference|money }}</strong></td></tr>
         </tbody></table>
+        {% if existing.second_currency %}
+        <h3 style="margin:1.25rem 0 .5rem">{% blocktranslate with c=existing.second_currency %}Cash drawer in {{ c }}{% endblocktranslate %}</h3>
+        <table class="table table-sm"><tbody>
+          <tr><td>{% translate "Opening float" %}</td><td class="num">{{ existing.opening_second|stringformat:".2f" }} {{ s.foreign_symbol }}</td></tr>
+          <tr><td>+ {% translate "Cash received" %}</td><td class="num">{{ s.foreign_received|stringformat:".2f" }} {{ s.foreign_symbol }}</td></tr>
+          <tr><td><strong>{% translate "Expected in drawer" %}</strong></td><td class="num"><strong>{{ existing.expected_second|stringformat:".2f" }} {{ s.foreign_symbol }}</strong></td></tr>
+          {% if existing.counted_second is not None %}
+          <tr><td>{% translate "Counted" %}</td><td class="num">{{ existing.counted_second|stringformat:".2f" }} {{ s.foreign_symbol }}</td></tr>
+          <tr><td><strong>{% translate "Difference" %}</strong></td><td class="num"><strong style="color:{% if existing.difference_second < 0 %}var(--danger){% elif existing.difference_second > 0 %}var(--warning){% else %}var(--success){% endif %}">{{ existing.difference_second|stringformat:"+.2f" }} {{ s.foreign_symbol }}</strong></td></tr>
+          {% endif %}
+        </tbody></table>
+        {% endif %}
         <p class="muted" style="font-size:.85rem; margin-top:.75rem">{% blocktranslate with who=existing.closed_by t=existing.closed_at|date:"d.m.Y H:i" %}Closed by {{ who }} at {{ t }}.{% endblocktranslate %}{% if existing.notes %} {{ existing.notes }}{% endif %}</p>
         {% endif %}
       </div>
@@ -80,9 +93,11 @@
           <dt>{% translate "Cash received" %}</dt><dd>{{ s.cash|money }}</dd>
           <dt>{% translate "Cash paid out" %}</dt><dd>{{ s.cash_expenses|money }}</dd>
           {% if s.tips_paid_out %}<dt>{% translate "Card tips paid out to staff" %}</dt><dd>{{ s.tips_paid_out|money }}</dd>{% endif %}
+          {% if s.foreign_code %}<dt>{% blocktranslate with c=s.foreign_code %}Paid in {{ c }} (in the other drawer){% endblocktranslate %}</dt><dd>{{ s.foreign_value|money }}</dd>
+          <dt>{% blocktranslate with c=s.foreign_code %}{{ c }} received{% endblocktranslate %}</dt><dd>{{ s.foreign_received|stringformat:".2f" }} {{ s.foreign_symbol }}</dd>{% endif %}
         </dl>
         {% include "includes/form_fields.html" %}
-        <div class="alert alert-info" style="margin-top:1rem" id="expected-box">{% translate "Expected in drawer" %}: <strong id="expected">{{ expected_now|money }}</strong></div>
+        <div class="alert alert-info" style="margin-top:1rem" id="expected-box">{% translate "Expected in drawer" %}: <strong id="expected">{{ expected_now|money }}</strong>{% if s.foreign_code %}<br>{% blocktranslate with c=s.foreign_code %}Expected in the {{ c }} drawer{% endblocktranslate %}: <strong id="expected-second"></strong>{% endif %}</div>
       </div>
       <div class="card-footer"><button class="btn btn-block">{% icon "lock" %} {% translate "Close the day" %}</button></div>
     </form>
@@ -102,9 +117,14 @@
 <script>
 (function () {
   var f = document.getElementById('id_opening_float'); if (!f) return;
-  var cash = {{ s.cash|stringformat:".2f" }}, out = {{ s.cash_expenses|stringformat:".2f" }} + {{ s.tips_paid_out|stringformat:".2f" }};
-  function upd() { var v = parseFloat(String(f.value).replace(',', '.')) || 0; document.getElementById('expected').textContent = (v + cash - out).toFixed(2) + ' {{ hotel.currency_symbol|escapejs }}'; }
-  f.addEventListener('input', upd); upd();
+  var cash = {{ s.cash|stringformat:".2f" }}, out = {{ s.cash_out|stringformat:".2f" }};
+  var f2 = document.getElementById('id_opening_second'), got2 = {{ s.foreign_received|stringformat:".2f" }};
+  function n(el) { return el ? (parseFloat(String(el.value).replace(',', '.')) || 0) : 0; }
+  function upd() {
+    document.getElementById('expected').textContent = (n(f) + cash - out).toFixed(2) + ' {{ hotel.currency_symbol|escapejs }}';
+    var e2 = document.getElementById('expected-second'); if (e2) e2.textContent = (n(f2) + got2).toFixed(2) + ' {{ s.foreign_symbol|escapejs }}';
+  }
+  f.addEventListener('input', upd); if (f2) f2.addEventListener('input', upd); upd();
 })();
 </script>
 {% endblock %}

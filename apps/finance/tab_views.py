@@ -160,7 +160,8 @@ def shift_end(request, pk):
     try:
         if counted is None:
             raise BusinessError(_("Count the cash and enter the amount."))
-        tabs.end_shift(shift, counted=counted, user=request.user, notes=request.POST.get("notes", ""))
+        tabs.end_shift(shift, counted=counted, user=request.user, notes=request.POST.get("notes", ""),
+                       counted_second=_amount(request.POST.get("counted_second", "")))
     except BusinessError as e:
         messages.error(request, str(e))
         return redirect("finance:my_shift")

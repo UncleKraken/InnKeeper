@@ -16,7 +16,7 @@ from apps.accounts.permissions import module_required
 from apps.core.businessday import business_date, day_range
 from apps.core.exceptions import BusinessError
 from apps.core.forms import DateInput, StyledFormMixin
-from apps.core.models import audit
+from apps.core.models import HotelSettings, audit
 from apps.outlets.models import Order, OrderLine
 
 from .loyalty import voucher_totals
@@ -140,9 +140,21 @@ def day_summary(day: date) -> dict:
     # Tips belong to the staff: card tips are paid out to them from the cash drawer.
     tips_paid_out = live_payments.exclude(method=Payment.Method.CASH).aggregate(t=Sum("tip"))["t"] or ZERO
     tips_cash = live_payments.filter(method=Payment.Method.CASH).aggregate(t=Sum("tip"))["t"] or ZERO
+    # Cash handed over in the second currency (e.g. euros): it sits in its own drawer, and its value in the
+    # main currency is not in the main drawer (the change was given from it).
+    foreign_cash = payments.filter(method=Payment.Method.CASH).exclude(foreign_currency="")
+    foreign = foreign_cash.aggregate(received=net("foreign_amount", day), value=net("tendered", day))
+    hs = HotelSettings.load()
+    foreign_code = hs.second_currency if hs.second_cash else (foreign_cash.values_list("foreign_currency", flat=True).first() or "")
     on_account = charges.filter(account__isnull=False).aggregate(t=amount)["t"] or ZERO
     account_payments = payments.filter(account__isnull=False).aggregate(t=amount)["t"] or ZERO
+    foreign_value = foreign["value"] or ZERO
     return {
+        "foreign_code": foreign_code,
+        "foreign_symbol": hs.second_currency_symbol if foreign_code and foreign_code == hs.second_currency else foreign_code,
+        "foreign_received": foreign["received"] or ZERO,
+        "foreign_value": foreign_value,
+        "cash_out": cash_expenses + tips_paid_out + foreign_value,
         "tips_paid_out": tips_paid_out,
         "tips_cash": tips_cash,
         "on_account": on_account,
@@ -190,6 +202,18 @@ class DayCloseForm(StyledFormMixin, forms.Form):
     counted_cash = forms.DecimalField(label=_("Cash counted now"), min_value=0, decimal_places=2)
     notes = forms.CharField(label=_("Notes"), max_length=255, required=False)
 
+    def __init__(self, *args, second: str = "", **kwargs):
+        super().__init__(*args, **kwargs)
+        if second:
+            notes = self.fields.pop("notes")
+            self.fields["opening_second"] = forms.DecimalField(
+                label=_("%(c)s in the drawer at the start of the day") % {"c": second}, min_value=0, decimal_places=2, initial=0
+            )
+            self.fields["counted_second"] = forms.DecimalField(label=_("%(c)s counted now") % {"c": second}, min_value=0, decimal_places=2)
+            self.fields["notes"] = notes
+            for name in ("opening_second", "counted_second"):
+                self.fields[name].widget.attrs.update({"class": "input", "inputmode": "decimal"})
+
 
 @module_required("finance")
 def day_close(request):
@@ -203,13 +227,26 @@ def day_close(request):
     initial = {"opening_float": existing.opening_float if existing else (previous.counted_cash if previous else ZERO)}
     if existing:
         initial.update(counted_cash=existing.counted_cash, notes=existing.notes)
-    form = DayCloseForm(request.POST or None, initial=initial)
+    if summary["foreign_code"]:
+        initial["opening_second"] = existing.opening_second if existing else (previous.counted_second if previous and previous.counted_second is not None else ZERO)
+        if existing and existing.counted_second is not None:
+            initial["counted_second"] = existing.counted_second
+    form = DayCloseForm(request.POST or None, initial=initial, second=summary["foreign_code"])
     if request.method == "POST" and form.is_valid():
         try:
             if existing and not request.user.is_manager:
                 raise BusinessError(_("This day is already closed. Only a manager can close it again."))
             d = form.cleaned_data
-            expected = d["opening_float"] + summary["cash"] - summary["cash_expenses"] - summary["tips_paid_out"]
+            expected = d["opening_float"] + summary["cash"] - summary["cash_out"]
+            second = {}
+            if summary["foreign_code"]:
+                opening_second = d.get("opening_second") or ZERO
+                second = {
+                    "second_currency": summary["foreign_code"],
+                    "opening_second": opening_second,
+                    "expected_second": opening_second + summary["foreign_received"],
+                    "counted_second": d.get("counted_second"),
+                }
             obj, _created = DayClose.objects.update_or_create(
                 business_date=day,
                 defaults={
@@ -223,6 +260,7 @@ def day_close(request):
                     "revenue_total": summary["revenue"],
                     "notes": d["notes"],
                     "closed_by": request.user,
+                    **second,
                 },
             )
             audit(request.user, "day.close", f"{day}: expected {expected}, counted {d['counted_cash']}", obj)
@@ -243,9 +281,9 @@ def day_close(request):
             messages.error(request, str(e))
     expected_now = form["opening_float"].value() or 0
     try:
-        expected_now = Decimal(str(expected_now)) + summary["cash"] - summary["cash_expenses"] - summary["tips_paid_out"]
+        expected_now = Decimal(str(expected_now)) + summary["cash"] - summary["cash_out"]
     except Exception:
-        expected_now = summary["cash"] - summary["cash_expenses"] - summary["tips_paid_out"]
+        expected_now = summary["cash"] - summary["cash_out"]
     return render(
         request,
         "finance/day_close.html",

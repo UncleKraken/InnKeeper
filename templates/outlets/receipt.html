@@ -69,7 +69,7 @@
     <table class="r-totals">
       {% for p in payments %}
         <tr><td>{{ p.get_method_display }}</td><td class="num">{{ p.amount|money }}</td></tr>
-        {% if p.tendered %}<tr class="r-small"><td>{% translate "Cash given" %}</td><td class="num">{{ p.tendered|money }}</td></tr><tr class="r-small"><td>{% translate "Change" %}</td><td class="num">{{ p.change|money }}</td></tr>{% endif %}
+        {% if p.tendered %}<tr class="r-small"><td>{% translate "Cash given" %}</td><td class="num">{% if p.foreign_currency %}{{ p.foreign_amount|stringformat:".2f" }} {{ p.foreign_currency }} = {% endif %}{{ p.tendered|money }}</td></tr><tr class="r-small"><td>{% translate "Change" %}</td><td class="num">{{ p.change|money }}</td></tr>{% endif %}
       {% endfor %}
       {% if room_charge %}
         <tr><td>{% translate "Charged to room" %} {{ room_charge.folio.reservation.room.number }}</td><td class="num">{{ room_charge.amount|money }}</td></tr>

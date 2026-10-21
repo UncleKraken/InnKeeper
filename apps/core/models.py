@@ -40,6 +40,15 @@ class HotelSettings(models.Model):
     email = models.EmailField(_("email"), blank=True)
     currency = models.CharField(_("currency code"), max_length=3, default="EUR")
     currency_symbol = models.CharField(_("currency symbol"), max_length=5, default="€")
+    second_currency = models.CharField(
+        _("second cash currency"), max_length=3, blank=True,
+        help_text=_("Cash you also accept, e.g. EUR when your prices are in lekë (or ALL when they are in euros). Leave empty if you take only one."),
+    )
+    second_currency_symbol = models.CharField(_("its symbol"), max_length=5, blank=True)
+    second_currency_rate = models.DecimalField(
+        _("its rate"), max_digits=12, decimal_places=4, null=True, blank=True,
+        help_text=_("How much 1 unit of the second currency is worth in your currency, e.g. 100 when 1 € = 100 lekë. Change it when your rate changes."),
+    )
     check_in_time = models.TimeField(_("standard check-in time"), default="14:00")
     check_out_time = models.TimeField(_("standard check-out time"), default="11:00")
     vat_rate = models.DecimalField(
@@ -469,6 +478,10 @@ class HotelSettings(models.Model):
     @property
     def summary_recipients(self) -> list[str]:
         return [a.strip() for a in (self.summary_to or "").replace(";", ",").split(",") if a.strip()]
+
+    @property
+    def second_cash(self) -> bool:
+        return bool(self.second_currency and self.second_currency_rate and self.second_currency_rate > 0)
 
     @property
     def email_configured(self) -> bool:

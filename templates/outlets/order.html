@@ -201,13 +201,31 @@
     var cashForm = settle.querySelector('.pane[data-pane=cash]');
     var amountIn = cashForm.querySelector('.pay-amount'), tendered = document.getElementById('tendered');
     var changeBox = document.getElementById('change-due');
+    var curIn = document.getElementById('tender-currency'), curDue = document.getElementById('cur-due');
+    var rate = curDue ? num(curDue.dataset.rate) : 0;
+    function foreign() { return curIn && curIn.value && rate > 0; }
+    function dueForeign(a) { return Math.ceil(a / rate * 100 - 1e-9) / 100; }
     function updateChange() {
       var t = num(tendered.value), a = num(amountIn.value);
+      if (foreign()) { t = Math.round(t * rate * 100) / 100; }
       changeBox.classList.toggle('hidden', !(t > a));
       changeBox.querySelector('strong').textContent = (t - a).toFixed(2) + ' {{ hotel.currency_symbol|escapejs }}';
+      if (curDue) {
+        curDue.classList.toggle('hidden', !foreign());
+        curDue.querySelector('strong').textContent = dueForeign(a).toFixed(2) + ' ' + curDue.dataset.symbol;
+      }
     }
+    settle.querySelectorAll('.cur-toggle button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        settle.querySelectorAll('.cur-toggle button').forEach(function (x) { x.classList.toggle('active', x === b); });
+        curIn.value = b.dataset.cur; tendered.value = '';
+        tendered.placeholder = (foreign() ? dueForeign(num(amountIn.value)) : num(amountIn.value)).toFixed(2);
+        quickButtons(); updateChange(); tendered.focus();
+      });
+    });
     function quickButtons() {
       var a = num(amountIn.value), box = document.getElementById('quick-cash'), notes = [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
+      if (foreign()) { a = dueForeign(a); }
       var picks = [a];
       notes.forEach(function (n) { var v = Math.ceil(a / n) * n; if (v > a && picks.indexOf(v) === -1 && picks.length < 5) picks.push(v); });
       box.innerHTML = '';

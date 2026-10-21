@@ -17,6 +17,7 @@ from decimal import Decimal
 
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from django.utils.translation import pgettext
 
 from .models import PrintJob, Printer
 
@@ -250,7 +251,12 @@ def _receipt_document(order, printer: Printer, *, open_drawer: bool, language: s
         for p in order.payments.filter(voided=False):
             r.pair(p.get_method_display(), money(p.amount, sym))
             if p.tendered:
-                r.pair(_("Cash given"), money(p.tendered, sym))
+                if p.foreign_currency:
+                    r.pair(_("Cash given"), f"{p.foreign_amount:.2f} {p.foreign_currency}")
+                    r.pair(pgettext("exchange rate", "Rate"), f"1 {p.foreign_currency} = {p.foreign_rate.normalize():f} {hs.currency}")
+                    r.pair(_("Value"), money(p.tendered, sym))
+                else:
+                    r.pair(_("Cash given"), money(p.tendered, sym))
                 r.pair(_("Change"), money(p.change, sym))
         room = (
             order.charges.filter(folio__isnull=False, voided=False).select_related("folio__reservation__room").first()

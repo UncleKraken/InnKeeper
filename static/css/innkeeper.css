@@ -1032,3 +1032,9 @@ body.kds-flash { animation: kds-flash 1.2s ease-out 2; }
 .about-links li { padding: .45rem 0; border-bottom: 1px dotted var(--border); }
 .about-links li:last-child { border-bottom: 0; }
 .about-links a { display: inline-flex; gap: .5rem; align-items: center; }
+
+/* Cash in a second currency (till) */
+.cur-toggle { display: inline-flex; margin-left: .5rem; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; vertical-align: middle; }
+.cur-toggle button { border: 0; background: transparent; padding: .05rem .55rem; font: inherit; font-size: .8rem; font-weight: 700; color: var(--muted); cursor: pointer; }
+.cur-toggle button.active { background: var(--primary); color: #fff; }
+.cur-due { margin: .4rem 0 0; font-size: .95rem; }

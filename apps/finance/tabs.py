@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from apps.core.exceptions import BusinessError
-from apps.core.models import audit
+from apps.core.models import HotelSettings, audit
 
 from .models import ZERO, Charge, CustomerAccount, Payment, Shift
 
@@ -99,6 +99,11 @@ def summary(shift: Shift) -> dict:
     tips_cash = payments.filter(method=Payment.Method.CASH).aggregate(t=Sum("tip"))["t"] or ZERO
     tips_other = payments.exclude(method=Payment.Method.CASH).aggregate(t=Sum("tip"))["t"] or ZERO
     labels = dict(Payment.Method.choices)
+    from . import currency
+
+    foreign = currency.drawer(payments)
+    code = shift.second_currency or payments.exclude(foreign_currency="").values_list("foreign_currency", flat=True).first() or ""
+    hs = HotelSettings.load()
     return {
         "methods": [(labels.get(m, m), v) for m, v in by_method.items() if v],
         "total": sum(by_method.values(), ZERO),
@@ -106,12 +111,16 @@ def summary(shift: Shift) -> dict:
         "cash": cash,
         "tips_cash": tips_cash,
         "tips_card": tips_other,
-        "expected_cash": shift.opening_float + cash - tips_other,
+        "foreign_code": code,
+        "foreign_symbol": hs.second_currency_symbol if code and code == hs.second_currency else code,
+        "foreign_received": foreign["received"],
+        "foreign_value": foreign["value"],
+        "expected_cash": shift.opening_float + cash - tips_other - foreign["value"],
     }
 
 
 @transaction.atomic
-def end_shift(shift: Shift, *, counted: Decimal, user, notes: str = "") -> Shift:
+def end_shift(shift: Shift, *, counted: Decimal, user, notes: str = "", counted_second: Decimal | None = None) -> Shift:
     shift = Shift.objects.select_for_update().get(pk=shift.pk)
     if not shift.is_open:
         raise BusinessError(_("This shift is already closed."))
@@ -120,10 +129,15 @@ def end_shift(shift: Shift, *, counted: Decimal, user, notes: str = "") -> Shift
     counted = Decimal(counted).quantize(Decimal("0.01"))
     if counted < 0:
         raise BusinessError(_("Enter an amount of zero or more."))
-    shift.expected_cash = summary(shift)["expected_cash"]
+    s = summary(shift)
+    shift.expected_cash = s["expected_cash"]
     shift.counted_cash = counted
+    if s["foreign_code"]:
+        shift.second_currency = s["foreign_code"]
+        shift.expected_second = s["foreign_received"]
+        shift.counted_second = Decimal(counted_second).quantize(Decimal("0.01")) if counted_second is not None else None
     shift.closed_at = timezone.now()
     shift.notes = notes.strip()[:255]
-    shift.save(update_fields=["expected_cash", "counted_cash", "closed_at", "notes"])
+    shift.save(update_fields=["expected_cash", "counted_cash", "second_currency", "expected_second", "counted_second", "closed_at", "notes"])
     audit(user, "shift.end", f"{shift.user} expected {shift.expected_cash} counted {counted}", shift)
     return shift
