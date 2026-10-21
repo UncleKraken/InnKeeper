@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+**Shqip**
+
+- Udhëzimi për Android tani thotë të zgjidhni **Create shortcut**: “Install” në Chrome funksionon vetëm me adresë https, jo në adresën e Wi-Fi-t.
+
+**English**
+
+- The Android tip now says to choose **Create shortcut**: Chrome's “Install” only works over an https address, not the Wi-Fi address.
+
 ## 2.28.0 — phones and tablets connect easier
 
 **Shqip**
