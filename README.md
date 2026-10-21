@@ -141,6 +141,5 @@ python manage.py compilemessages
 ```
 Each user can switch language (SQ / EN) from the sidebar; the choice is remembered.
 
-## Roadmap
-- Purchase orders to suppliers
-- Inventory and purchasing
+## Ideas and requests
+InnKeeper grows from what real businesses need. Suggest a feature or report a problem under [Issues](https://github.com/UncleKraken/InnKeeper/issues).

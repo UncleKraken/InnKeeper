@@ -126,8 +126,8 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: spa
       <span class="pill"><span class="sq">Punon edhe pa internet</span><span class="en">Works without internet</span></span>
     </div>
     <div class="shots">
-      <div class="desk"><img src="img/rack.webp" alt="Room rack" width="1366" height="820"></div>
-      <div class="phone"><img src="img/phone-order.webp" alt="Ordering from the table" width="390" height="780"></div>
+      <div class="desk"><img src="img/rack-sq.webp" data-sq="img/rack-sq.webp" data-en="img/rack.webp" alt="Tabela e dhomave" data-alt-en="Room rack" width="1366" height="820"></div>
+      <div class="phone"><img src="img/phone-order-sq.webp" data-sq="img/phone-order-sq.webp" data-en="img/phone-order.webp" alt="Porosia nga tavolina" data-alt-en="Ordering from the table" width="390" height="780"></div>
     </div>
   </div>
 </div>
@@ -155,21 +155,21 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: spa
         <p class="sub" style="margin:0"><span class="sq">Kamarierët hapin tavolinën me një prekje, porositë shkojnë direkt në kuzhinë dhe në bar, dhe klientët mund të porosisin vetë nga telefoni i tyre.</span><span class="en">Waiters open a table with one tap, orders go straight to the kitchen and the bar, and guests can order from their own phones.</span></p>
         <ul><li><span class="sq">PIN për çdo punonjës në arkën e përbashkët</span><span class="en">A PIN for each person on the shared till</span></li><li><span class="sq">Ndarja e faturës, ose hedhja në dhomë apo në llogarinë e klientit</span><span class="en">Split the bill, or charge it to a room or a customer account</span></li><li><span class="sq">Punon në tabletë dhe telefona</span><span class="en">Works on tablets and phones</span></li></ul>
       </div>
-      <div class="shot"><img src="img/floor.webp" alt="Floor plan" loading="lazy" width="1366" height="820"></div>
+      <div class="shot"><img src="img/floor-sq.webp" data-sq="img/floor-sq.webp" data-en="img/floor.webp" alt="Plani i sallës" data-alt-en="Floor plan" loading="lazy" width="1366" height="820"></div>
     </div>
     <div class="feature">
       <div class="txt">
         <h2><span class="sq">Stafi dhe orari pa letra</span><span class="en">Staff and schedule without paper</span></h2>
         <p class="sub" style="margin:0"><span class="sq">Kush është në punë, kush u vonua, sa orë punoi secili, dhe pagat e muajit gati për kontabilistin.</span><span class="en">Who is at work, who was late, how many hours everyone worked, and the month's pay ready for the accountant.</span></p>
       </div>
-      <div class="shot"><img src="img/schedule.webp" alt="Weekly schedule" loading="lazy" width="1366" height="820"></div>
+      <div class="shot"><img src="img/schedule-sq.webp" data-sq="img/schedule-sq.webp" data-en="img/schedule.webp" alt="Orari javor" data-alt-en="Weekly schedule" loading="lazy" width="1366" height="820"></div>
     </div>
     <div class="feature">
       <div class="txt">
         <h2><span class="sq">Disa biznese, një pamje</span><span class="en">Several businesses, one view</span></h2>
         <p class="sub" style="margin:0"><span class="sq">Çdo biznes mban të dhënat e veta; pronari i sheh të gjitha së bashku: shitjet, paratë, dhomat dhe paralajmërimet.</span><span class="en">Each business keeps its own data; the owner sees them all together: sales, money, rooms and warnings.</span></p>
       </div>
-      <div class="shot"><img src="img/group.webp" alt="Group overview" loading="lazy" width="1366" height="820"></div>
+      <div class="shot"><img src="img/group-sq.webp" data-sq="img/group-sq.webp" data-en="img/group.webp" alt="Pamja e grupit" data-alt-en="Group overview" loading="lazy" width="1366" height="820"></div>
     </div>
   </div>
 </section>
@@ -214,6 +214,11 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: spa
   function set(l) {
     document.body.dataset.lang = l; document.documentElement.lang = l;
     document.querySelectorAll('.lang button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.set === l)); });
+    document.querySelectorAll('img[data-en]').forEach(function (img) {
+      if (!img.dataset.altSq) img.dataset.altSq = img.alt;
+      img.src = l === 'en' ? img.dataset.en : img.dataset.sq;
+      img.alt = l === 'en' ? img.dataset.altEn : img.dataset.altSq;
+    });
     try { localStorage.setItem('innkeeper-lang', l); } catch (e) {}
   }
   document.querySelectorAll('.lang button').forEach(function (b) { b.addEventListener('click', function () { set(b.dataset.set); }); });
