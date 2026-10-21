@@ -550,6 +550,8 @@ textarea.input { min-height: 90px; resize: vertical; }
 .menu-columns { columns: 2; column-gap: 2.5rem; }
 .menu-columns section { break-inside: avoid; }
 .qr-box svg { width: 200px; height: 200px; max-width: 100%; }
+.qr-box.qr-sm { flex: 0 0 150px; line-height: 0; }
+.qr-box.qr-sm svg { width: 150px; height: 150px; display: block; }
 @media (max-width: 600px) { .menu-columns { columns: 1; } }
 .print-only { display: none; }
 @media print { .print-only { display: block; } .grid-main { grid-template-columns: 1fr; } .tabs { display: none; } }

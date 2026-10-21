@@ -16,7 +16,7 @@
     {% if hotel.module_rooms %}<a href="?tab=breakfast" class="{% if tab == 'breakfast' %}active{% endif %}">{% icon "utensils" %} {% translate "Breakfast" %}</a>{% endif %}
     {% if hotel.module_rooms %}<a href="?tab=tourist_tax" class="{% if tab == 'tourist_tax' %}active{% endif %}">{% icon "percent" %} {% translate "Tourist tax" %}</a>{% endif %}
     <a href="?tab=group" class="{% if tab == 'group' %}active{% endif %}">{% icon "building" %} {% translate "Group overview" %}</a>
-    <a href="?tab=remote" class="{% if tab == 'remote' %}active{% endif %}">{% icon "sync" %} {% translate "Access from outside" %}</a>
+    <a href="?tab=remote" class="{% if tab == 'remote' %}active{% endif %}">{% icon "sync" %} {% translate "Phones, tablets & remote access" %}</a>
     <a href="?tab=tills" class="{% if tab == 'tills' %}active{% endif %}">{% icon "lock" %} {% translate "Shared tills & PINs" %}</a>
     {% if hotel.module_outlets %}<a href="?tab=loyalty" class="{% if tab == 'loyalty' %}active{% endif %}">{% icon "gift" %} {% translate "Loyalty & gift vouchers" %}</a>{% endif %}
     <a href="?tab=email" class="{% if tab == 'email' %}active{% endif %}">{% icon "mail" %} {% translate "Email" %}</a>
@@ -125,10 +125,31 @@
 
   {% elif tab == "remote" %}
     <section class="card">
-      <div class="card-header"><h2>{% translate "On the business's Wi-Fi" %}</h2></div>
+      <div class="card-header"><h2>{% translate "Phones and tablets on the business's Wi-Fi" %}</h2></div>
       <div class="card-body">
-        <p class="muted" style="margin-top:0">{% translate "Phones and tablets connected to the same Wi-Fi as this computer open InnKeeper at:" %}</p>
-        {% if lan_url %}<p class="remote-url mono">{{ lan_url }}</p>{% else %}<p class="muted">{% translate "This computer has no local network address right now." %}</p>{% endif %}
+        <p class="muted" style="margin-top:0">{% translate "Install InnKeeper only on this computer. Other computers, phones and tablets need nothing installed: they open InnKeeper in their web browser, and everything they do is saved straight on this computer." %}</p>
+        {% if lan_url %}
+          <div class="row" style="gap:1.25rem; align-items:center; flex-wrap:wrap">
+            <div class="qr-box qr-sm">{{ lan_qr|safe }}</div>
+            <div style="flex:1; min-width:240px">
+              <p class="remote-url mono" style="margin-top:0">{{ lan_url }}</p>
+              <ol class="steps-list">
+                <li>{% translate "Connect the phone or tablet to the same Wi-Fi as this computer." %}</li>
+                <li>{% translate "Scan the code with its camera (or type the address in the browser)." %}</li>
+                <li>{% translate "Choose Add to Home Screen, so InnKeeper opens like an app with its own icon." %}</li>
+                <li>{% translate "Sign in with that person's own account. For a till several people share, mark it as a shared till instead: each person then taps their name and PIN." %} <a href="?tab=tills">{% translate "Shared tills & PINs" %}</a></li>
+              </ol>
+            </div>
+          </div>
+        {% else %}<p class="muted">{% translate "This computer has no local network address right now." %}</p>{% endif %}
+        <details class="help-body" style="margin-top:.75rem"><summary>{% translate "A device can't open it?" %}</summary>
+          <ul>
+            <li>{% translate "Check that the device is on the same Wi-Fi, not mobile data or a guest Wi-Fi." %}</li>
+            <li>{% translate "If Windows asked whether to allow InnKeeper on the network and the answer was Cancel: open Windows Security → Firewall & network protection → Allow an app through firewall, and tick InnKeeper. (Installing InnKeeper with administrator rights sets this up by itself.)" %}</li>
+            <li>{% translate "Keep this computer on and stop it from going to sleep (Windows Settings → System → Power)." %}</li>
+            <li>{% translate "The address changes when the router gives this computer a new one, for example after a power cut. To keep it the same, reserve the address for this computer in the router's settings (often called DHCP reservation or Static lease). The InnKeeper window always shows the current address." %}</li>
+          </ul>
+        </details>
       </div>
     </section>
 
@@ -138,7 +159,7 @@
         <p class="muted" style="margin-top:0">{% translate "Tailscale is a free app that links your phone and this computer privately, as if they were on the same Wi-Fi. Nothing is opened to the internet, so nobody else can even reach the sign-in page." %}</p>
         {% if tailscale_url %}
           <div class="row" style="gap:1.25rem; align-items:center; flex-wrap:wrap">
-            <div class="qr-box" style="width:150px">{{ tailscale_qr|safe }}</div>
+            <div class="qr-box qr-sm">{{ tailscale_qr|safe }}</div>
             <div><p style="margin:0">{% translate "Tailscale is working on this computer. On your phone (with Tailscale on), open:" %}</p><p class="remote-url mono">{{ tailscale_url }}</p><p class="muted" style="font-size:.85rem; margin:0">{% translate "Scan the code with the phone's camera, then choose Add to Home Screen." %}</p></div>
           </div>
         {% else %}
@@ -197,7 +218,7 @@
           <div class="field"><label>{% translate "Sharing key" %}</label><input class="input mono" readonly value="{{ hotel.group_token }}" onclick="this.select()"></div>
           <div class="field"><label>{% translate "Addresses of this computer" %}</label>
             <ul style="margin:.2rem 0 0; padding-left:1.1rem">
-              {% for a in group_addresses %}<li class="mono" style="font-size:.85rem">{{ a }}</li>{% empty %}<li class="muted">{% translate "Set up Tailscale or the public address in Access from outside." %}</li>{% endfor %}
+              {% for a in group_addresses %}<li class="mono" style="font-size:.85rem">{{ a }}</li>{% empty %}<li class="muted">{% translate "Set up Tailscale or the public address in Phones, tablets & remote access." %}</li>{% endfor %}
             </ul>
           </div>
           <div class="row" style="gap:.5rem; flex-wrap:wrap; margin-top:.75rem">

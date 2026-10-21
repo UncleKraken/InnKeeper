@@ -56,12 +56,29 @@ def configure_environment(data: Path) -> None:
 
 
 def lan_address() -> str:
+    """This computer's address on the business network (also without internet), or 127.0.0.1."""
+    try:
+        from apps.core.remote import lan_address as found
+
+        if addr := found():
+            return addr
+    except Exception:
+        pass
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             s.connect(("8.8.8.8", 80))
             return s.getsockname()[0]
     except OSError:
         return "127.0.0.1"
+
+
+def qr_matrix(text: str) -> list[list[bool]]:
+    import qrcode
+
+    qr = qrcode.QRCode(border=2, error_correction=qrcode.constants.ERROR_CORRECT_M)
+    qr.add_data(text)
+    qr.make(fit=True)
+    return qr.get_matrix()
 
 
 def already_running() -> bool:
@@ -261,7 +278,7 @@ TUNNEL = {"proc": None}  # so Stop can end cloudflared too
 
 
 def tunnel_jobs(log, stop: threading.Event) -> None:
-    """Keep Cloudflare Tunnel running while it is switched on in Settings → Access from outside."""
+    """Keep Cloudflare Tunnel running while it is switched on in Settings → Phones, tablets & remote access."""
     import subprocess
 
     from django.db import close_old_connections
@@ -498,7 +515,7 @@ def main() -> int:
 
     root = tk.Tk()
     root.title(APP_NAME)
-    root.geometry("440x260")
+    root.geometry("440x470")
     root.resizable(False, False)
     root.configure(bg="#16202f")
     ico = app_root() / "windows" / "innkeeper.ico"
@@ -521,7 +538,39 @@ def main() -> int:
     label("Në këtë kompjuter · On this computer:", 9, False, "#7d8899", (12, 0))
     label(local_url, 11, True, "#d9b679", 0)
     label("Pajisjet e tjera në Wi-Fi · Other devices on Wi-Fi:", 9, False, "#7d8899", (8, 0))
-    label(lan_url, 11, True, "#d9b679", 0)
+    lan_label = label(lan_url, 11, True, "#d9b679", 0)
+    qr_size = 150
+    qr_canvas = tk.Canvas(root, width=qr_size, height=qr_size, bg="#ffffff", highlightthickness=0)
+    qr_canvas.pack(pady=(8, 0))
+    label("Skanoje me kamerën e telefonit · Scan with the phone's camera", 8, False, "#7d8899", (2, 0))
+
+    def draw_qr(text: str) -> None:
+        qr_canvas.delete("all")
+        try:
+            matrix = qr_matrix(text)
+        except Exception as e:  # the address is still shown as text
+            log(f"QR code failed: {e}")
+            return
+        cell = qr_size / len(matrix)
+        for y, row in enumerate(matrix):
+            for x, dark in enumerate(row):
+                if dark:
+                    qr_canvas.create_rectangle(x * cell, y * cell, (x + 1) * cell, (y + 1) * cell, fill="#000000", width=0)
+
+    draw_qr(lan_url)
+    shown = {"url": lan_url}
+
+    def refresh_address() -> None:
+        # The router may give this computer a new address (after a power cut, say): keep the window right.
+        url = f"http://{lan_address()}:{PORT}/"
+        if url != shown["url"]:
+            shown["url"] = url
+            lan_label.config(text=url)
+            draw_qr(url)
+            log(f"Network address changed: {url}")
+        root.after(60_000, refresh_address)
+
+    root.after(60_000, refresh_address)
 
     bar = tk.Frame(root, bg="#16202f")
     bar.pack(pady=16)

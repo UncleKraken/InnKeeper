@@ -43,8 +43,16 @@ Name: "{autodesktop}\InnKeeper"; Filename: "{app}\InnKeeper.exe"; Tasks: desktop
 Name: "{userstartup}\InnKeeper"; Filename: "{app}\InnKeeper.exe"; Tasks: autostart
 
 [Run]
+; Let phones and tablets reach InnKeeper without Windows asking (only for installs with admin rights;
+; otherwise Windows asks once on first start). Only devices on the same local network or a Tailscale
+; network are allowed, on any network type, because Windows often marks a new Wi-Fi as "Public".
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""InnKeeper"""; Flags: runhidden; Check: IsAdminInstallMode; StatusMsg: "Firewall..."
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""InnKeeper"" dir=in action=allow program=""{app}\InnKeeper.exe"" enable=yes profile=any protocol=TCP remoteip=localsubnet,100.64.0.0/10 description=""InnKeeper: phones and tablets on this network"""; Flags: runhidden; Check: IsAdminInstallMode; StatusMsg: "Firewall..."
 Filename: "{app}\InnKeeper.exe"; Description: "{cm:LaunchProgram,InnKeeper}"; Flags: nowait postinstall skipifsilent
 ; An update started from inside InnKeeper runs silently: open InnKeeper again when it is done.
 Filename: "{app}\InnKeeper.exe"; Flags: nowait runasoriginaluser; Check: WizardSilent
+
+[UninstallRun]
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""InnKeeper"""; Flags: runhidden; RunOnceId: "DelFirewallRule"; Check: IsAdminInstallMode
 
 ; Data in %LOCALAPPDATA%\InnKeeper (database and backups) is deliberately kept on uninstall.

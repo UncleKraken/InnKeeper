@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 19:26+0200\n"
+"POT-Creation-Date: 2026-10-21 03:02+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,7 +23,7 @@ msgstr ""
 #: apps/finance/reports.py:348 apps/staff/views.py:29
 #: templates/accounts/pin_pad.html:34 templates/base.html:80
 #: templates/core/audit_log.html:11 templates/core/settings_hub.html:30
-#: templates/core/settings_hub.html:288 templates/finance/ledger.html:21
+#: templates/core/settings_hub.html:309 templates/finance/ledger.html:21
 #: templates/finance/ledger.html:30 templates/finance/sales.html:31
 #: templates/finance/shifts.html:11 templates/outlets/receipts.html:19
 #: templates/staff/attendance.html:6 templates/staff/payroll.html:6
@@ -376,7 +376,7 @@ msgstr "NIPT"
 #: apps/frontdesk/groups.py:139 apps/frontdesk/models.py:121
 #: apps/frontdesk/public.py:44 apps/marketing/views.py:77
 #: apps/marketing/views.py:257 templates/core/settings_hub.html:22
-#: templates/core/settings_hub.html:296
+#: templates/core/settings_hub.html:317
 #: templates/frontdesk/guest_detail.html:29
 #: templates/frontdesk/guest_list.html:16
 #: templates/frontdesk/reservation_detail.html:120
@@ -542,7 +542,7 @@ msgstr "TVSH"
 
 #: apps/core/group.py:334 apps/core/group.py:344 apps/finance/models.py:262
 #: apps/finance/models.py:305 apps/finance/tourist_tax.py:70
-#: templates/core/settings_hub.html:17 templates/core/settings_hub.html:251
+#: templates/core/settings_hub.html:17 templates/core/settings_hub.html:272
 #: templates/finance/_tabs.html:9 templates/finance/tourist_tax.html:3
 #: templates/finance/tourist_tax.html:6 templates/finance/tourist_tax.html:18
 msgid "Tourist tax"
@@ -1710,46 +1710,46 @@ msgstr "Ngarkoni certifikatën."
 msgid "Your prices are in %(c)s: the tax authority needs the rate to lekë."
 msgstr "Çmimet tuaja janë në %(c)s: tatimet kërkojnë kursin në lekë."
 
-#: apps/core/settings_views.py:407 apps/core/settings_views.py:507
-#: apps/core/settings_views.py:655 apps/frontdesk/channel_manager.py:66
+#: apps/core/settings_views.py:407 apps/core/settings_views.py:508
+#: apps/core/settings_views.py:656 apps/frontdesk/channel_manager.py:66
 #: apps/staff/payroll_views.py:94
 msgid "Settings saved."
 msgstr "Cilësimet u ruajtën."
 
-#: apps/core/settings_views.py:441 apps/marketing/views.py:209
+#: apps/core/settings_views.py:442 apps/marketing/views.py:209
 msgid "Ana"
 msgstr "Ana"
 
-#: apps/core/settings_views.py:503
+#: apps/core/settings_views.py:504
 #, python-format
 msgid "Saved. First copy written: %(name)s"
 msgstr "U ruajt. Kopja e parë u shkrua: %(name)s"
 
-#: apps/core/settings_views.py:505
+#: apps/core/settings_views.py:506
 #, python-format
 msgid "Saved, but the copy failed: %(e)s"
 msgstr "U ruajt, por kopjimi dështoi: %(e)s"
 
-#: apps/core/settings_views.py:519
+#: apps/core/settings_views.py:520
 #, python-format
 msgid "Copy written: %(name)s"
 msgstr "Kopja u shkrua: %(name)s"
 
-#: apps/core/settings_views.py:521
+#: apps/core/settings_views.py:522
 #, python-format
 msgid "The copy failed: %(e)s"
 msgstr "Kopjimi dështoi: %(e)s"
 
-#: apps/core/settings_views.py:561
+#: apps/core/settings_views.py:562
 #, python-format
 msgid "Backup saved: %(name)s"
 msgstr "Kopja rezervë u ruajt: %(name)s"
 
-#: apps/core/settings_views.py:604
+#: apps/core/settings_views.py:605
 msgid "This file is not an InnKeeper backup."
 msgstr "Ky skedar nuk është kopje rezervë e InnKeeper-it."
 
-#: apps/core/settings_views.py:622
+#: apps/core/settings_views.py:623
 #, python-format
 msgid ""
 "Settings imported: %(o)s outlets, %(i)s menu items, %(t)s tables, %(r)s "
@@ -1758,11 +1758,11 @@ msgstr ""
 "Cilësimet u importuan: %(o)s pika, %(i)s artikuj menuje, %(t)s tavolina, "
 "%(r)s dhoma."
 
-#: apps/core/settings_views.py:630
+#: apps/core/settings_views.py:631
 msgid "Type RESTORE to confirm."
 msgstr "Shkruani RESTORE për të konfirmuar."
 
-#: apps/core/settings_views.py:640
+#: apps/core/settings_views.py:641
 #, python-format
 msgid ""
 "Backup restored. Sign in with an account from the restored data. A copy of "
@@ -1771,20 +1771,20 @@ msgstr ""
 "Kopja rezervë u rikthye. Hyni me një llogari nga të dhënat e rikthyera. Një "
 "kopje e të dhënave të mëparshme u ruajt si %(name)s."
 
-#: apps/core/settings_views.py:672 apps/core/settings_views.py:692
+#: apps/core/settings_views.py:673 apps/core/settings_views.py:693
 msgid "Fill in and save the email settings first."
 msgstr "Plotësoni dhe ruani fillimisht cilësimet e email-it."
 
-#: apps/core/settings_views.py:674
+#: apps/core/settings_views.py:675
 msgid "Add the email address the summary goes to first."
 msgstr "Shtoni fillimisht adresën email ku shkon përmbledhja."
 
-#: apps/core/settings_views.py:678
+#: apps/core/settings_views.py:679
 #, python-format
 msgid "Summary of %(d)s sent to %(to)s."
 msgstr "Përmbledhja e %(d)s u dërgua te %(to)s."
 
-#: apps/core/settings_views.py:680 apps/core/settings_views.py:699
+#: apps/core/settings_views.py:681 apps/core/settings_views.py:700
 msgid ""
 "The email could not be sent. Check the server, port, security, username and "
 "password."
@@ -1792,40 +1792,40 @@ msgstr ""
 "Email-i nuk u dërgua. Kontrolloni serverin, portën, sigurinë, emrin e "
 "përdoruesit dhe fjalëkalimin."
 
-#: apps/core/settings_views.py:694
+#: apps/core/settings_views.py:695
 msgid ""
 "Add an email address to your staff account or the business details first."
 msgstr ""
 "Shtoni fillimisht një adresë email në llogarinë tuaj ose te të dhënat e "
 "biznesit."
 
-#: apps/core/settings_views.py:695
+#: apps/core/settings_views.py:696
 msgid "InnKeeper test email"
 msgstr "Email provë nga InnKeeper"
 
-#: apps/core/settings_views.py:696
+#: apps/core/settings_views.py:697
 #, python-format
 msgid "Test email sent to %(to)s."
 msgstr "Email-i provë u dërgua te %(to)s."
 
-#: apps/core/settings_views.py:738
+#: apps/core/settings_views.py:739
 msgid "Nothing to import."
 msgstr "Asgjë për t'u importuar."
 
-#: apps/core/settings_views.py:742
+#: apps/core/settings_views.py:743
 #, python-format
 msgid "Imported: %(c)s new, %(u)s updated."
 msgstr "U importuan: %(c)s të reja, %(u)s të përditësuara."
 
-#: apps/core/settings_views.py:747
+#: apps/core/settings_views.py:748
 msgid "Choose a file."
 msgstr "Zgjidhni një skedar."
 
-#: apps/core/settings_views.py:751
+#: apps/core/settings_views.py:752
 msgid "The file is too large (5 MB at most)."
 msgstr "Skedari është shumë i madh (maksimumi 5 MB)."
 
-#: apps/core/settings_views.py:754
+#: apps/core/settings_views.py:755
 msgid ""
 "This is an old Excel file (.xls). In Excel choose File → Save as → “Excel "
 "Workbook (.xlsx)”, then upload that."
@@ -1955,7 +1955,7 @@ msgstr "Kontrolloni dhomat dhe çmimet"
 msgid "Fill in your menu"
 msgstr "Plotësoni menunë"
 
-#: apps/core/views.py:378 templates/core/setup_done.html:40
+#: apps/core/views.py:378 templates/core/setup_done.html:44
 msgid "Add your logo and receipt text"
 msgstr "Shtoni logon dhe tekstin e kuponit"
 
@@ -2152,7 +2152,7 @@ msgstr "vlera"
 msgid "bought by"
 msgstr "blerë nga"
 
-#: apps/finance/models.py:120 templates/core/settings_hub.html:330
+#: apps/finance/models.py:120 templates/core/settings_hub.html:351
 msgid "valid until"
 msgstr "e vlefshme deri më"
 
@@ -2743,7 +2743,7 @@ msgid "Amount"
 msgstr "Shuma"
 
 #: apps/fiscal/apps.py:8 templates/core/settings_hub.html:23
-#: templates/core/settings_hub.html:327
+#: templates/core/settings_hub.html:348
 msgid "Fiscalization"
 msgstr "Fiskalizimi"
 
@@ -2949,7 +2949,7 @@ msgstr "Fatura e mysafirit është mbyllur. Merreni pagesën në restorant."
 
 #: apps/frontdesk/breakfast.py:54 templates/base.html:33
 #: templates/base.html:51 templates/core/settings_hub.html:16
-#: templates/core/settings_hub.html:241 templates/frontdesk/breakfast.html:3
+#: templates/core/settings_hub.html:262 templates/frontdesk/breakfast.html:3
 #: templates/frontdesk/breakfast.html:6
 msgid "Breakfast"
 msgstr "Mëngjesi"
@@ -5884,7 +5884,7 @@ msgid "Preparing"
 msgstr "Në përgatitje"
 
 #: apps/outlets/models.py:541 templates/core/dashboard.html:108
-#: templates/core/settings_hub.html:136
+#: templates/core/settings_hub.html:157
 #: templates/outlets/_board_tickets.html:23
 #: templates/outlets/_board_tickets.html:26 templates/outlets/floor.html:92
 msgid "Ready"
@@ -6013,7 +6013,7 @@ msgid "Cash given"
 msgstr "Para të dhëna"
 
 #: apps/outlets/printing.py:254 templates/core/about.html:38
-#: templates/core/settings_hub.html:290 templates/outlets/_ticket.html:119
+#: templates/core/settings_hub.html:311 templates/outlets/_ticket.html:119
 #: templates/outlets/receipt.html:72 templates/staff/holidays.html:18
 msgid "Change"
 msgstr "Kusuri"
@@ -7050,7 +7050,7 @@ msgstr "Orë të planifikuara"
 msgid "Difference"
 msgstr "Diferenca"
 
-#: apps/staff/views.py:121 templates/core/settings_hub.html:395
+#: apps/staff/views.py:121 templates/core/settings_hub.html:416
 #: templates/staff/attendance.html:36
 msgid "Late"
 msgstr "Me vonesë"
@@ -7238,7 +7238,7 @@ msgid "Change the PIN"
 msgstr "Ndrysho PIN-in"
 
 #: templates/accounts/pin_form.html:13 templates/accounts/staff_form.html:23
-#: templates/core/settings_hub.html:290
+#: templates/core/settings_hub.html:311
 msgid "Set a PIN"
 msgstr "Vendos një PIN"
 
@@ -7261,12 +7261,12 @@ msgstr "Hiq PIN-in"
 #: templates/accounts/pin_form.html:20 templates/core/crud_form.html:18
 #: templates/core/settings_hub.html:40 templates/core/settings_hub.html:62
 #: templates/core/settings_hub.html:102 templates/core/settings_hub.html:112
-#: templates/core/settings_hub.html:176 templates/core/settings_hub.html:229
-#: templates/core/settings_hub.html:246 templates/core/settings_hub.html:257
-#: templates/core/settings_hub.html:267 templates/core/settings_hub.html:285
-#: templates/core/settings_hub.html:302 templates/core/settings_hub.html:315
-#: templates/core/settings_hub.html:341 templates/core/settings_hub.html:356
-#: templates/core/settings_hub.html:416 templates/finance/account_form.html:13
+#: templates/core/settings_hub.html:197 templates/core/settings_hub.html:250
+#: templates/core/settings_hub.html:267 templates/core/settings_hub.html:278
+#: templates/core/settings_hub.html:288 templates/core/settings_hub.html:306
+#: templates/core/settings_hub.html:323 templates/core/settings_hub.html:336
+#: templates/core/settings_hub.html:362 templates/core/settings_hub.html:377
+#: templates/core/settings_hub.html:437 templates/finance/account_form.html:13
 #: templates/finance/expense_form.html:11
 #: templates/frontdesk/channel_manager.html:40
 #: templates/frontdesk/guest_form.html:8 templates/housekeeping/form.html:8
@@ -7452,7 +7452,7 @@ msgstr "Menaxhimi"
 #: templates/base.html:77 templates/core/group.html:3
 #: templates/core/group.html:6 templates/core/group_member_form.html:3
 #: templates/core/group_member_form.html:5 templates/core/group_month.html:6
-#: templates/core/settings_hub.html:18 templates/core/settings_hub.html:193
+#: templates/core/settings_hub.html:18 templates/core/settings_hub.html:214
 msgid "Group overview"
 msgstr "Pamja e grupit"
 
@@ -7985,7 +7985,7 @@ msgstr ""
 "Të dhënat tuaja janë vetëm në këtë kompjuter. Aktivizoni kopjet automatike "
 "në USB ose në cloud, që të mos humbasë asgjë nëse prishet."
 
-#: templates/core/dashboard.html:58 templates/core/settings_hub.html:296
+#: templates/core/dashboard.html:58 templates/core/settings_hub.html:317
 msgid "Set up"
 msgstr "Konfiguro"
 
@@ -8184,7 +8184,7 @@ msgid "Refresh"
 msgstr "Rifresko"
 
 #: templates/core/group.html:10 templates/core/group_member_form.html:5
-#: templates/core/settings_hub.html:213
+#: templates/core/settings_hub.html:234
 msgid "Add a business"
 msgstr "Shto një biznes"
 
@@ -8338,7 +8338,7 @@ msgid "Import"
 msgstr "Importo"
 
 #: templates/core/import_preview.html:6 templates/core/settings_hub.html:25
-#: templates/core/settings_hub.html:374
+#: templates/core/settings_hub.html:395
 msgid "Import from Excel"
 msgstr "Importo nga Excel"
 
@@ -8382,8 +8382,8 @@ msgstr[0] "Importo %(n)s rresht"
 msgstr[1] "Importo %(n)s rreshta"
 
 #: templates/core/restore_confirm.html:3
-#: templates/core/restore_password.html:3 templates/core/settings_hub.html:426
-#: templates/core/settings_hub.html:472
+#: templates/core/restore_password.html:3 templates/core/settings_hub.html:447
+#: templates/core/settings_hub.html:493
 msgid "Restore"
 msgstr "Rikthe"
 
@@ -8492,23 +8492,23 @@ msgstr "Kuponat & faturat"
 msgid "Modules"
 msgstr "Modulet"
 
-#: templates/core/settings_hub.html:15 templates/core/settings_hub.html:223
+#: templates/core/settings_hub.html:15 templates/core/settings_hub.html:244
 msgid "Guest messages"
 msgstr "Mesazhet për mysafirët"
 
 #: templates/core/settings_hub.html:19
-msgid "Access from outside"
-msgstr "Hyrja nga jashtë"
+msgid "Phones, tablets & remote access"
+msgstr "Telefonat, tabletët dhe qasja nga jashtë"
 
-#: templates/core/settings_hub.html:20
+#: templates/core/settings_hub.html:20 templates/core/settings_hub.html:140
 msgid "Shared tills & PINs"
 msgstr "Arkat e përbashkëta & PIN"
 
-#: templates/core/settings_hub.html:21 templates/core/settings_hub.html:262
+#: templates/core/settings_hub.html:21 templates/core/settings_hub.html:283
 msgid "Loyalty & gift vouchers"
 msgstr "Besnikëria & kuponat dhuratë"
 
-#: templates/core/settings_hub.html:24 templates/core/settings_hub.html:346
+#: templates/core/settings_hub.html:24 templates/core/settings_hub.html:367
 msgid "Card payments"
 msgstr "Pagesat me kartë"
 
@@ -8521,7 +8521,7 @@ msgstr "Përditësimet"
 msgid "These details appear on receipts, invoices and the guest menu."
 msgstr "Këto të dhëna shfaqen në kupona, fatura dhe menunë e mysafirëve."
 
-#: templates/core/settings_hub.html:57 templates/core/settings_hub.html:232
+#: templates/core/settings_hub.html:57 templates/core/settings_hub.html:253
 #: templates/marketing/campaign_detail.html:10
 msgid "Preview"
 msgstr "Parapamja"
@@ -8596,30 +8596,101 @@ msgid "Email settings"
 msgstr "Cilësimet e email-it"
 
 #: templates/core/settings_hub.html:128
-msgid "On the business's Wi-Fi"
-msgstr "Në Wi-Fi-n e biznesit"
+msgid "Phones and tablets on the business's Wi-Fi"
+msgstr "Telefonat dhe tabletët në Wi-Fi të biznesit"
 
 #: templates/core/settings_hub.html:130
 msgid ""
-"Phones and tablets connected to the same Wi-Fi as this computer open "
-"InnKeeper at:"
+"Install InnKeeper only on this computer. Other computers, phones and tablets"
+" need nothing installed: they open InnKeeper in their web browser, and "
+"everything they do is saved straight on this computer."
 msgstr ""
-"Telefonat dhe tabletat e lidhur në të njëjtin Wi-Fi me këtë kompjuter e "
-"hapin InnKeeper te:"
+"InnKeeper instalohet vetëm në këtë kompjuter. Kompjuterët e tjerë, telefonat"
+" dhe tabletët nuk kanë nevojë të instalojnë asgjë: e hapin InnKeeper në "
+"shfletues, dhe gjithçka që bëjnë ruhet direkt në këtë kompjuter."
 
-#: templates/core/settings_hub.html:131
+#: templates/core/settings_hub.html:137
+msgid "Connect the phone or tablet to the same Wi-Fi as this computer."
+msgstr "Lidheni telefonin ose tabletin me të njëjtin Wi-Fi si ky kompjuter."
+
+#: templates/core/settings_hub.html:138
+msgid "Scan the code with its camera (or type the address in the browser)."
+msgstr "Skanoni kodin me kamerën e tij (ose shkruani adresën në shfletues)."
+
+#: templates/core/settings_hub.html:139
+msgid ""
+"Choose Add to Home Screen, so InnKeeper opens like an app with its own icon."
+msgstr ""
+"Zgjidhni “Shto në ekranin kryesor” (Add to Home Screen), që InnKeeper të "
+"hapet si aplikacion me ikonën e vet."
+
+#: templates/core/settings_hub.html:140
+msgid ""
+"Sign in with that person's own account. For a till several people share, "
+"mark it as a shared till instead: each person then taps their name and PIN."
+msgstr ""
+"Hyni me llogarinë e vetë personit. Për një arkë që e përdorin disa veta, "
+"shënojeni si arkë të përbashkët: secili prek emrin e vet dhe shkruan PIN-in."
+
+#: templates/core/settings_hub.html:144
 msgid "This computer has no local network address right now."
 msgstr "Ky kompjuter nuk ka tani adresë në rrjetin lokal."
 
-#: templates/core/settings_hub.html:136
+#: templates/core/settings_hub.html:145
+msgid "A device can't open it?"
+msgstr "Një pajisje nuk e hap dot?"
+
+#: templates/core/settings_hub.html:147
+msgid ""
+"Check that the device is on the same Wi-Fi, not mobile data or a guest Wi-"
+"Fi."
+msgstr ""
+"Kontrolloni që pajisja të jetë në të njëjtin Wi-Fi, jo me internet celular "
+"apo në Wi-Fi-në e mysafirëve."
+
+#: templates/core/settings_hub.html:148
+msgid ""
+"If Windows asked whether to allow InnKeeper on the network and the answer "
+"was Cancel: open Windows Security → Firewall & network protection → Allow an"
+" app through firewall, and tick InnKeeper. (Installing InnKeeper with "
+"administrator rights sets this up by itself.)"
+msgstr ""
+"Nëse Windows pyeti nëse ta lejojë InnKeeper në rrjet dhe u zgjodh Anulo "
+"(Cancel): hapni Siguria e Windows (Windows Security) → Muri mbrojtës dhe "
+"mbrojtja e rrjetit (Firewall & network protection) → Lejo një aplikacion "
+"përmes murit mbrojtës (Allow an app through firewall) dhe shënoni InnKeeper."
+" (Kur InnKeeper instalohet me të drejta administratori, kjo bëhet vetë.)"
+
+#: templates/core/settings_hub.html:149
+msgid ""
+"Keep this computer on and stop it from going to sleep (Windows Settings → "
+"System → Power)."
+msgstr ""
+"Mbajeni këtë kompjuter ndezur dhe mos e lini të kalojë në gjumë (Cilësimet e"
+" Windows → Sistemi → Energjia)."
+
+#: templates/core/settings_hub.html:150
+msgid ""
+"The address changes when the router gives this computer a new one, for "
+"example after a power cut. To keep it the same, reserve the address for this"
+" computer in the router's settings (often called DHCP reservation or Static "
+"lease). The InnKeeper window always shows the current address."
+msgstr ""
+"Adresa ndryshon kur ruteri i jep këtij kompjuteri një të re, për shembull "
+"pas një ndërprerjeje të energjisë. Që të mbetet e njëjta, rezervojeni "
+"adresën për këtë kompjuter te cilësimet e ruterit (zakonisht quhet “DHCP "
+"reservation” ose “Static lease”). Dritarja e InnKeeper tregon gjithmonë "
+"adresën e tanishme."
+
+#: templates/core/settings_hub.html:157
 msgid "The owner's phone, from anywhere (private)"
 msgstr "Telefoni i pronarit, nga kudo (privat)"
 
-#: templates/core/settings_hub.html:136
+#: templates/core/settings_hub.html:157
 msgid "Recommended"
 msgstr "E rekomanduar"
 
-#: templates/core/settings_hub.html:138
+#: templates/core/settings_hub.html:159
 msgid ""
 "Tailscale is a free app that links your phone and this computer privately, "
 "as if they were on the same Wi-Fi. Nothing is opened to the internet, so "
@@ -8629,7 +8700,7 @@ msgstr ""
 "këtë kompjuter, sikur të ishin në të njëjtin Wi-Fi. Asgjë nuk hapet në "
 "internet, ndaj askush tjetër nuk arrin as faqen e hyrjes."
 
-#: templates/core/settings_hub.html:142
+#: templates/core/settings_hub.html:163
 msgid ""
 "Tailscale is working on this computer. On your phone (with Tailscale on), "
 "open:"
@@ -8637,12 +8708,12 @@ msgstr ""
 "Tailscale po punon në këtë kompjuter. Në telefon (me Tailscale të ndezur), "
 "hapni:"
 
-#: templates/core/settings_hub.html:142
+#: templates/core/settings_hub.html:163
 msgid "Scan the code with the phone's camera, then choose Add to Home Screen."
 msgstr ""
 "Skanoni kodin me kamerën e telefonit, pastaj zgjidhni Add to Home Screen."
 
-#: templates/core/settings_hub.html:146
+#: templates/core/settings_hub.html:167
 msgid ""
 "On this computer, install Tailscale from <a "
 "href=\"https://tailscale.com/download\" target=\"_blank\" "
@@ -8654,7 +8725,7 @@ msgstr ""
 "rel=\"noopener\">tailscale.com/download</a> dhe hyni (mjafton një llogari "
 "Google, Microsoft ose Apple)."
 
-#: templates/core/settings_hub.html:147
+#: templates/core/settings_hub.html:168
 msgid ""
 "On your phone, install the Tailscale app and sign in with the same account. "
 "Leave it switched on."
@@ -8662,7 +8733,7 @@ msgstr ""
 "Në telefon, instaloni aplikacionin Tailscale dhe hyni me të njëjtën llogari."
 " Lëreni të ndezur."
 
-#: templates/core/settings_hub.html:148
+#: templates/core/settings_hub.html:169
 msgid ""
 "Come back to this page: it shows the address and a code to scan with the "
 "phone."
@@ -8670,7 +8741,7 @@ msgstr ""
 "Kthehuni në këtë faqe: ajo tregon adresën dhe një kod për ta skanuar me "
 "telefon."
 
-#: templates/core/settings_hub.html:150
+#: templates/core/settings_hub.html:171
 msgid ""
 "Free for personal use (up to 3 people and 100 devices). Each person who "
 "should reach InnKeeper from outside needs Tailscale on their phone."
@@ -8678,26 +8749,26 @@ msgstr ""
 "Falas për përdorim personal (deri në 3 persona dhe 100 pajisje). Çdo person "
 "që duhet ta hapë InnKeeper nga jashtë ka nevojë për Tailscale në telefon."
 
-#: templates/core/settings_hub.html:156
+#: templates/core/settings_hub.html:177
 msgid "Public address (online booking, card payments)"
 msgstr "Adresa publike (rezervimi online, pagesat me kartë)"
 
-#: templates/core/settings_hub.html:157
+#: templates/core/settings_hub.html:178
 #: templates/frontdesk/channel_manager.html:18
 msgid "Connected"
 msgstr "I lidhur"
 
-#: templates/core/settings_hub.html:157
+#: templates/core/settings_hub.html:178
 #: templates/frontdesk/channel_manager.html:18
 #: templates/housekeeping/ticket_list.html:17
 msgid "Problem"
 msgstr "Problemi"
 
-#: templates/core/settings_hub.html:157
+#: templates/core/settings_hub.html:178
 msgid "Starting…"
 msgstr "Po nis…"
 
-#: templates/core/settings_hub.html:159
+#: templates/core/settings_hub.html:180
 msgid ""
 "Only needed for the online booking page, card payments and channel managers,"
 " which must reach InnKeeper from the internet over https. It uses a free "
@@ -8709,11 +8780,11 @@ msgstr ""
 "llogari falas Cloudflare dhe një domain që e keni (p.sh. "
 "book.hotelijuaj.al)."
 
-#: templates/core/settings_hub.html:163
+#: templates/core/settings_hub.html:184
 msgid "How to get the token"
 msgstr "Si merret tokeni"
 
-#: templates/core/settings_hub.html:165
+#: templates/core/settings_hub.html:186
 msgid ""
 "Create a free account at dash.cloudflare.com and add your domain (Cloudflare"
 " shows how to change the domain's name servers)."
@@ -8721,7 +8792,7 @@ msgstr ""
 "Krijoni një llogari falas te dash.cloudflare.com dhe shtoni domain-in tuaj "
 "(Cloudflare tregon si ndryshohen name servers të domain-it)."
 
-#: templates/core/settings_hub.html:166
+#: templates/core/settings_hub.html:187
 msgid ""
 "Open Zero Trust → Networks → Tunnels → Create a tunnel → Cloudflared. Give "
 "it a name, e.g. InnKeeper."
@@ -8729,7 +8800,7 @@ msgstr ""
 "Hapni Zero Trust → Networks → Tunnels → Create a tunnel → Cloudflared. "
 "Jepini një emër, p.sh. InnKeeper."
 
-#: templates/core/settings_hub.html:167
+#: templates/core/settings_hub.html:188
 msgid ""
 "On the “Install connector” page choose Windows and copy the long text after "
 "--token. Paste it here, tick the box above and save. InnKeeper downloads "
@@ -8739,7 +8810,7 @@ msgstr ""
 "pas --token. Ngjiteni këtu, shënoni kutinë sipër dhe ruani. InnKeeper "
 "shkarkon programin e Cloudflare dhe e mban tunelin në punë."
 
-#: templates/core/settings_hub.html:168
+#: templates/core/settings_hub.html:189
 #, python-format
 msgid ""
 "In Cloudflare, add a Public hostname: e.g. book · yourhotel.al, type HTTP, "
@@ -8748,7 +8819,7 @@ msgstr ""
 "Në Cloudflare, shtoni një Public hostname: p.sh. book · hotelijuaj.al, lloji"
 " HTTP, URL localhost:%(port)s."
 
-#: templates/core/settings_hub.html:169
+#: templates/core/settings_hub.html:190
 msgid ""
 "Put the address (https://book.yourhotel.al) in Settings → Online booking → "
 "public web address."
@@ -8756,15 +8827,15 @@ msgstr ""
 "Vendoseni adresën (https://book.hotelijuaj.al) te Cilësimet → Rezervimi "
 "online → adresa publike."
 
-#: templates/core/settings_hub.html:173
+#: templates/core/settings_hub.html:194
 msgid "On a server, run cloudflared next to InnKeeper (see the README)."
 msgstr "Në një server, nisni cloudflared pranë InnKeeper (shih README)."
 
-#: templates/core/settings_hub.html:180
+#: templates/core/settings_hub.html:201
 msgid "Safety"
 msgstr "Siguria"
 
-#: templates/core/settings_hub.html:183
+#: templates/core/settings_hub.html:204
 msgid ""
 "Sign-in from outside always needs the username and password; PINs work only "
 "on the business's own network."
@@ -8772,11 +8843,11 @@ msgstr ""
 "Hyrja nga jashtë kërkon gjithmonë emrin e përdoruesit dhe fjalëkalimin; PIN-"
 "et punojnë vetëm në rrjetin e biznesit."
 
-#: templates/core/settings_hub.html:184
+#: templates/core/settings_hub.html:205
 msgid "Five wrong passwords lock an account for 15 minutes."
 msgstr "Pesë fjalëkalime të gabuara e kyçin një llogari për 15 minuta."
 
-#: templates/core/settings_hub.html:185
+#: templates/core/settings_hub.html:206
 msgid ""
 "Give every person their own account and a long password, and deactivate "
 "accounts of people who leave."
@@ -8784,15 +8855,15 @@ msgstr ""
 "Jepini çdo personi llogarinë e vet dhe një fjalëkalim të gjatë, dhe "
 "çaktivizoni llogaritë e atyre që largohen."
 
-#: templates/core/settings_hub.html:186
+#: templates/core/settings_hub.html:207
 msgid "The Activity log shows every sign-in."
 msgstr "Regjistri i aktivitetit tregon çdo hyrje."
 
-#: templates/core/settings_hub.html:193
+#: templates/core/settings_hub.html:214
 msgid "Sharing"
 msgstr "Po ndahet"
 
-#: templates/core/settings_hub.html:195
+#: templates/core/settings_hub.html:216
 msgid ""
 "Own several businesses? Each keeps its own InnKeeper and data. Share a "
 "short, read-only summary from each one (sales, money received, rooms, open "
@@ -8805,47 +8876,50 @@ msgstr ""
 " emra mysafirësh ose stafi), dhe shihini të gjitha në një faqe te "
 "InnKeeper-i i pronarit."
 
-#: templates/core/settings_hub.html:197
+#: templates/core/settings_hub.html:218
 msgid "Sharing key"
 msgstr "Çelësi i ndarjes"
 
-#: templates/core/settings_hub.html:198
+#: templates/core/settings_hub.html:219
 msgid "Addresses of this computer"
 msgstr "Adresat e këtij kompjuteri"
 
-#: templates/core/settings_hub.html:200
-msgid "Set up Tailscale or the public address in Access from outside."
-msgstr "Konfiguroni Tailscale ose adresën publike te Hyrja nga jashtë."
+#: templates/core/settings_hub.html:221
+msgid ""
+"Set up Tailscale or the public address in Phones, tablets & remote access."
+msgstr ""
+"Konfiguroni Tailscale ose adresën publike te Telefonat, tabletët dhe qasja "
+"nga jashtë."
 
-#: templates/core/settings_hub.html:204
+#: templates/core/settings_hub.html:225
 msgid "The old key stops working. Continue?"
 msgstr "Çelësi i vjetër nuk do të punojë më. Vazhdoni?"
 
-#: templates/core/settings_hub.html:204
+#: templates/core/settings_hub.html:225
 msgid "New key"
 msgstr "Çelës i ri"
 
-#: templates/core/settings_hub.html:205
+#: templates/core/settings_hub.html:226
 msgid "Stop sharing"
 msgstr "Ndalo ndarjen"
 
-#: templates/core/settings_hub.html:208
+#: templates/core/settings_hub.html:229
 msgid "Share this business's summary"
 msgstr "Ndaj përmbledhjen e këtij biznesi"
 
-#: templates/core/settings_hub.html:213
+#: templates/core/settings_hub.html:234
 msgid "Your other businesses"
 msgstr "Bizneset tuaja të tjera"
 
-#: templates/core/settings_hub.html:216
+#: templates/core/settings_hub.html:237
 msgid "Open the group overview"
 msgstr "Hap pamjen e grupit"
 
-#: templates/core/settings_hub.html:217
+#: templates/core/settings_hub.html:238
 msgid "None yet. Add the businesses whose summary you want to see here."
 msgstr "Asnjë ende. Shtoni bizneset që doni të shihni këtu."
 
-#: templates/core/settings_hub.html:225
+#: templates/core/settings_hub.html:246
 msgid ""
 "Arrival information a few days before the stay, and a thank-you with your "
 "review link the day after check-out. Each guest gets each message once, by "
@@ -8857,25 +8931,25 @@ msgstr ""
 "herë, me email, në orën që zgjidhni. Për mysafirët pa email: hapni "
 "rezervimin dhe dërgojeni me WhatsApp me një prekje."
 
-#: templates/core/settings_hub.html:226
+#: templates/core/settings_hub.html:247
 msgid "Email is not set up yet, so nothing is sent automatically."
 msgstr ""
 "Email-i nuk është konfiguruar ende, prandaj asgjë nuk dërgohet "
 "automatikisht."
 
-#: templates/core/settings_hub.html:226
+#: templates/core/settings_hub.html:247
 msgid "Set up email"
 msgstr "Konfiguro email-in"
 
-#: templates/core/settings_hub.html:234
+#: templates/core/settings_hub.html:255
 msgid "Before arrival"
 msgstr "Para mbërritjes"
 
-#: templates/core/settings_hub.html:235
+#: templates/core/settings_hub.html:256
 msgid "After check-out"
 msgstr "Pas largimit"
 
-#: templates/core/settings_hub.html:243
+#: templates/core/settings_hub.html:264
 msgid ""
 "Each morning, Front desk → Breakfast lists the guests who slept here, how "
 "many they are and whether breakfast is in their price. Staff mark each room "
@@ -8887,7 +8961,7 @@ msgstr ""
 " për ata pa mëngjes të përfshirë, mëngjesi shtohet në faturë. Vendoseni “me "
 "mëngjes të përfshirë” në çdo rezervim."
 
-#: templates/core/settings_hub.html:253
+#: templates/core/settings_hub.html:274
 msgid ""
 "In Albania the tourist tax is a local tax: each municipality's council "
 "decides how much it is (usually a fixed amount per guest per night, "
@@ -8905,7 +8979,7 @@ msgstr ""
 "mysafirëve. Pyesni Drejtorinë e Taksave Vendore të bashkisë suaj për shumën "
 "tuaj."
 
-#: templates/core/settings_hub.html:254
+#: templates/core/settings_hub.html:275
 msgid ""
 "When it is on, InnKeeper adds it to the bill together with each room night. "
 "It is kept out of sales, VAT and the fiscal invoice, because it is not your "
@@ -8917,7 +8991,7 @@ msgstr ""
 "ardhura juaj. Financa → Taksa e turizmit tregon totalin e muajit dhe listën "
 "e qëndrimeve për t'u dorëzuar."
 
-#: templates/core/settings_hub.html:264
+#: templates/core/settings_hub.html:285
 msgid ""
 "Loyalty cards: regulars give their phone number at the till and collect a "
 "stamp for every item marked “earns a loyalty stamp” (Outlets & menus → "
@@ -8930,15 +9004,15 @@ msgstr ""
 "Kuponat dhuratë: shiten me para tani dhe shpenzohen më vonë në çdo arkë, në "
 "një ose disa vizita."
 
-#: templates/core/settings_hub.html:272
+#: templates/core/settings_hub.html:293
 msgid "This device"
 msgstr "Kjo pajisje"
 
-#: templates/core/settings_hub.html:272
+#: templates/core/settings_hub.html:293
 msgid "Shared till"
 msgstr "Arkë e përbashkët"
 
-#: templates/core/settings_hub.html:274
+#: templates/core/settings_hub.html:295
 msgid ""
 "A shared till is a tablet, phone or computer that several people use, like "
 "the one on the bar. It opens on a screen with everyone's name: each person "
@@ -8950,15 +9024,15 @@ msgstr ""
 "secili prek emrin dhe shkruan PIN-in, dhe çdo shitje regjistrohet në emrin e"
 " tij. Pas disa minutash pa u prekur kyçet vetë."
 
-#: templates/core/settings_hub.html:276
+#: templates/core/settings_hub.html:297
 msgid "Stop using this device as a shared till"
 msgstr "Mos e përdor më këtë pajisje si arkë të përbashkët"
 
-#: templates/core/settings_hub.html:277
+#: templates/core/settings_hub.html:298
 msgid "Use this device as a shared till"
 msgstr "Përdore këtë pajisje si arkë të përbashkët"
 
-#: templates/core/settings_hub.html:279
+#: templates/core/settings_hub.html:300
 msgid ""
 "Do this on each shared device, signed in as a manager. Office computers and "
 "personal phones stay normal devices."
@@ -8966,23 +9040,23 @@ msgstr ""
 "Bëjeni këtë në çdo pajisje të përbashkët, i futur si menaxher. Kompjuterët e"
 " zyrës dhe telefonat personalë mbeten pajisje të zakonshme."
 
-#: templates/core/settings_hub.html:283
+#: templates/core/settings_hub.html:304
 msgid "Locking"
 msgstr "Kyçja"
 
-#: templates/core/settings_hub.html:288
+#: templates/core/settings_hub.html:309
 msgid "Who has a PIN"
 msgstr "Kush ka PIN"
 
-#: templates/core/settings_hub.html:290
+#: templates/core/settings_hub.html:311
 msgid "PIN set"
 msgstr "Ka PIN"
 
-#: templates/core/settings_hub.html:290
+#: templates/core/settings_hub.html:311
 msgid "No PIN"
 msgstr "Pa PIN"
 
-#: templates/core/settings_hub.html:298
+#: templates/core/settings_hub.html:319
 msgid ""
 "Used for booking confirmations to guests and alerts to reception. Use the "
 "details from your email provider."
@@ -8990,11 +9064,11 @@ msgstr ""
 "Përdoret për konfirmimet e rezervimeve te mysafirët dhe njoftimet për "
 "recepsionin. Përdorni të dhënat nga ofruesi juaj i email-it."
 
-#: templates/core/settings_hub.html:300
+#: templates/core/settings_hub.html:321
 msgid "Gmail settings"
 msgstr "Cilësimet për Gmail"
 
-#: templates/core/settings_hub.html:300
+#: templates/core/settings_hub.html:321
 msgid ""
 "Server smtp.gmail.com, port 587, STARTTLS, your Gmail address as username, "
 "and an app password (Google Account → Security → App passwords)."
@@ -9003,23 +9077,23 @@ msgstr ""
 "përdoruesi dhe një fjalëkalim aplikacioni (Llogaria Google → Siguria → "
 "Fjalëkalimet e aplikacioneve)."
 
-#: templates/core/settings_hub.html:305
+#: templates/core/settings_hub.html:326
 msgid "Send a test email to yourself to check the settings."
 msgstr "Dërgojini vetes një email provë për të kontrolluar cilësimet."
 
-#: templates/core/settings_hub.html:306
+#: templates/core/settings_hub.html:327
 msgid "Send test email"
 msgstr "Dërgo email provë"
 
-#: templates/core/settings_hub.html:309
+#: templates/core/settings_hub.html:330
 msgid "Daily summary for the owner"
 msgstr "Përmbledhja ditore për pronarin"
 
-#: templates/core/settings_hub.html:309 templates/outlets/menu_admin.html:38
+#: templates/core/settings_hub.html:330 templates/outlets/menu_admin.html:38
 msgid "On"
 msgstr "Aktive"
 
-#: templates/core/settings_hub.html:312
+#: templates/core/settings_hub.html:333
 msgid ""
 "Every morning, one short email with how the day before went: sales, money "
 "received by method, the cash count and any difference, discounts, voids, "
@@ -9031,25 +9105,25 @@ msgstr ""
 " të shiturat, dhomat dhe çdo gjë që kërkon vëmendje. E dobishme kur nuk jeni"
 " në lokal."
 
-#: templates/core/settings_hub.html:319
+#: templates/core/settings_hub.html:340
 msgid "See how it looks: send yesterday's summary now."
 msgstr "Shikoni si duket: dërgoni tani përmbledhjen e djeshme."
 
-#: templates/core/settings_hub.html:320
+#: templates/core/settings_hub.html:341
 #: templates/marketing/campaign_detail.html:22
 msgid "Send now"
 msgstr "Dërgo tani"
 
-#: templates/core/settings_hub.html:327
+#: templates/core/settings_hub.html:348
 msgid "Test system"
 msgstr "Sistemi provë"
 
-#: templates/core/settings_hub.html:327 templates/core/settings_hub.html:346
+#: templates/core/settings_hub.html:348 templates/core/settings_hub.html:367
 #: templates/fiscal/documents.html:7
 msgid "Live"
 msgstr "Aktive"
 
-#: templates/core/settings_hub.html:329
+#: templates/core/settings_hub.html:350
 msgid ""
 "InnKeeper sends every paid bill and every guest bill directly to the tax "
 "authority (DPT), signed with your certificate, and prints the NSLF, NIVF and"
@@ -9061,15 +9135,15 @@ msgstr ""
 "NSLF, NIVF dhe kodin QR. Pa internet kuponi printohet me NSLF dhe dërgohet "
 "automatikisht më vonë (brenda 48 orëve)."
 
-#: templates/core/settings_hub.html:330
+#: templates/core/settings_hub.html:351
 msgid "Certificate"
 msgstr "Certifikata"
 
-#: templates/core/settings_hub.html:332
+#: templates/core/settings_hub.html:353
 msgid "Where do I get these codes?"
 msgstr "Ku i marr këto kode?"
 
-#: templates/core/settings_hub.html:334
+#: templates/core/settings_hub.html:355
 msgid ""
 "Apply for the electronic seal certificate for fiscalization (via e-Albania) "
 "and download the .p12 file."
@@ -9077,7 +9151,7 @@ msgstr ""
 "Aplikoni për certifikatën e vulës elektronike për fiskalizim (në e-Albania) "
 "dhe shkarkoni skedarin .p12."
 
-#: templates/core/settings_hub.html:335
+#: templates/core/settings_hub.html:356
 msgid ""
 "In the tax authority's self-care portal, register the business unit "
 "(premises), the software (InnKeeper, as in-house/own software) to get the "
@@ -9089,7 +9163,7 @@ msgstr ""
 "kodet e softuerit dhe të mirëmbajtësit, çdo arkë (TCR) dhe çdo operator. "
 "Kopjoni kodet këtu."
 
-#: templates/core/settings_hub.html:336
+#: templates/core/settings_hub.html:357
 msgid ""
 "Keep “Use the tax authority's test system” on and make a few sales: they "
 "must appear as Registered under Finance → Fiscal. Then turn it off to go "
@@ -9099,7 +9173,7 @@ msgstr ""
 "duhet të shfaqen si “I regjistruar” te Financa → Fiskalizimi. Pastaj "
 "çaktivizojeni për të kaluar në punë reale."
 
-#: templates/core/settings_hub.html:337
+#: templates/core/settings_hub.html:358
 msgid ""
 "Give every staff member who takes payments their own operator code (Staff → "
 "edit). Outlets with their own cash register get their own TCR code (Outlets "
@@ -9109,11 +9183,11 @@ msgstr ""
 " → ndrysho). Pikat me arkë të veten marrin kodin e vet TCR (Pikat & menutë →"
 " ndrysho)."
 
-#: templates/core/settings_hub.html:346
+#: templates/core/settings_hub.html:367
 msgid "Test mode"
 msgstr "Mënyra provë"
 
-#: templates/core/settings_hub.html:348
+#: templates/core/settings_hub.html:369
 msgid ""
 "Guests pay deposits and bills by card on the secure page of your payment "
 "provider. InnKeeper never sees card numbers. The money goes to your provider"
@@ -9124,11 +9198,11 @@ msgstr ""
 "në llogarinë tuaj te ofruesi dhe shfaqen në faturën e mysafirit si “Pagesë "
 "online me kartë”."
 
-#: templates/core/settings_hub.html:350
+#: templates/core/settings_hub.html:371
 msgid "Which provider?"
 msgstr "Cilin ofrues?"
 
-#: templates/core/settings_hub.html:351
+#: templates/core/settings_hub.html:372
 msgid ""
 "Albanian provider, accepts Albanian businesses (NUIS). Open a POK Business "
 "account, then ask POK for SDK API keys (key ID and secret) and your merchant"
@@ -9138,7 +9212,7 @@ msgstr ""
 "Business, pastaj kërkoni nga POK çelësat SDK API (key ID dhe secret) dhe ID-"
 "në e tregtarit. Mbështet ALL dhe EUR."
 
-#: templates/core/settings_hub.html:352
+#: templates/core/settings_hub.html:373
 msgid ""
 "European provider with an office in Albania. Open a business account, create"
 " a project for your website, and copy the project ID and project password."
@@ -9146,7 +9220,7 @@ msgstr ""
 "Ofrues evropian me zyrë në Shqipëri. Hapni një llogari biznesi, krijoni një "
 "projekt për faqen tuaj dhe kopjoni ID-në dhe fjalëkalimin e projektit."
 
-#: templates/core/settings_hub.html:353
+#: templates/core/settings_hub.html:374
 msgid ""
 "Payment confirmations reach InnKeeper over the internet, so the public web "
 "address (Settings → Online booking) must be set and reachable. Try "
@@ -9156,7 +9230,7 @@ msgstr ""
 "publike (Cilësimet → Rezervimi online) duhet të jetë e vendosur dhe e "
 "arritshme. Provoni gjithçka fillimisht në mënyrën provë."
 
-#: templates/core/settings_hub.html:376
+#: templates/core/settings_hub.html:397
 msgid ""
 "Bring in your menu, stock list or guest list from a spreadsheet instead of "
 "typing it. Download the Excel template, fill it in (one row per item), save "
@@ -9170,28 +9244,28 @@ msgstr ""
 "shihni një parapamje përpara se të ruhet diçka. Artikujt me të njëjtin emër "
 "përditësohen, asgjë nuk fshihet."
 
-#: templates/core/settings_hub.html:378 templates/core/settings_hub.html:384
+#: templates/core/settings_hub.html:399 templates/core/settings_hub.html:405
 #: templates/inventory/item_detail.html:18
 msgid "What"
 msgstr "Çfarë"
 
-#: templates/core/settings_hub.html:379
+#: templates/core/settings_hub.html:400
 msgid "File (Excel .xlsx or .csv)"
 msgstr "Skedari (Excel .xlsx ose .csv)"
 
-#: templates/core/settings_hub.html:380
+#: templates/core/settings_hub.html:401
 msgid "Show preview"
 msgstr "Shfaq parapamjen"
 
-#: templates/core/settings_hub.html:384
+#: templates/core/settings_hub.html:405
 msgid "Columns"
 msgstr "Kolonat"
 
-#: templates/core/settings_hub.html:386
+#: templates/core/settings_hub.html:407
 msgid "Excel template"
 msgstr "Shablloni Excel"
 
-#: templates/core/settings_hub.html:389
+#: templates/core/settings_hub.html:410
 msgid ""
 "Bold columns are required. Albanian column names (emri, çmimi, kategoria…) "
 "work too."
@@ -9199,28 +9273,28 @@ msgstr ""
 "Kolonat me shkronja të trasha janë të detyrueshme. Funksionojnë edhe emrat "
 "shqip (emri, çmimi, kategoria…)."
 
-#: templates/core/settings_hub.html:394
+#: templates/core/settings_hub.html:415
 msgid "Automatic copies to another place"
 msgstr "Kopje automatike në një vend tjetër"
 
-#: templates/core/settings_hub.html:395
+#: templates/core/settings_hub.html:416
 msgid "Working"
 msgstr "Po funksionon"
 
-#: templates/core/settings_hub.html:395
+#: templates/core/settings_hub.html:416
 msgid "Not working"
 msgstr "Nuk funksionon"
 
-#: templates/core/settings_hub.html:395
+#: templates/core/settings_hub.html:416
 msgid "Waiting for the first copy"
 msgstr "Në pritje të kopjes së parë"
 
-#: templates/core/settings_hub.html:395 templates/outlets/menu_admin.html:38
+#: templates/core/settings_hub.html:416 templates/outlets/menu_admin.html:38
 #: templates/outlets/printers.html:22
 msgid "Off"
 msgstr "Joaktiv"
 
-#: templates/core/settings_hub.html:397
+#: templates/core/settings_hub.html:418
 msgid ""
 "Your data lives on this computer. If it breaks, is stolen or the disk fails,"
 " everything is gone unless a copy is somewhere else. InnKeeper can keep a "
@@ -9232,23 +9306,23 @@ msgstr ""
 "mund të mbajë një kopje të plotë në USB ose në një dosje cloud (OneDrive, "
 "Google Drive, Dropbox) dhe ta përditësojë automatikisht."
 
-#: templates/core/settings_hub.html:400
+#: templates/core/settings_hub.html:421
 msgid "Last copy"
 msgstr "Kopja e fundit"
 
-#: templates/core/settings_hub.html:400
+#: templates/core/settings_hub.html:421
 msgid "No copy has been written yet."
 msgstr "Ende nuk është shkruar asnjë kopje."
 
-#: templates/core/settings_hub.html:406
+#: templates/core/settings_hub.html:427
 msgid "Found on this computer:"
 msgstr "U gjetën në këtë kompjuter:"
 
-#: templates/core/settings_hub.html:408
+#: templates/core/settings_hub.html:429
 msgid "Which folder should I choose?"
 msgstr "Cilën dosje të zgjedh?"
 
-#: templates/core/settings_hub.html:410
+#: templates/core/settings_hub.html:431
 msgid ""
 "Cloud (best): install OneDrive, Google Drive or Dropbox on this computer and"
 " sign in. Choose a folder inside it, for example "
@@ -9261,7 +9335,7 @@ msgstr ""
 "C:\\Users\\Emri\\OneDrive\\InnKeeper. Kopjet shkojnë vetë në cloud dhe "
 "presin aty edhe kur nuk ka internet. Vendosni një fjalëkalim për kopjet."
 
-#: templates/core/settings_hub.html:411
+#: templates/core/settings_hub.html:432
 msgid ""
 "USB drive: plug it in and choose it, for example E:\\InnKeeper. Leave it "
 "plugged in; take it home now and then and bring another one. If it is "
@@ -9271,13 +9345,13 @@ msgstr ""
 "here merreni në shtëpi dhe sillni një tjetër. Nëse mungon, InnKeeper ju "
 "paralajmëron në panel."
 
-#: templates/core/settings_hub.html:412
+#: templates/core/settings_hub.html:433
 msgid "Network drive (NAS) or another computer's shared folder work too."
 msgstr ""
 "Funksionon edhe një disk rrjeti (NAS) ose një dosje e ndarë e një kompjuteri"
 " tjetër."
 
-#: templates/core/settings_hub.html:414
+#: templates/core/settings_hub.html:435
 msgid ""
 "Each copy is a full backup. InnKeeper keeps every copy from the last two "
 "days, one per day for two months and one per month after that."
@@ -9285,15 +9359,15 @@ msgstr ""
 "Çdo kopje është një kopje rezervë e plotë. InnKeeper mban çdo kopje të dy "
 "ditëve të fundit, një në ditë për dy muaj dhe një në muaj më pas."
 
-#: templates/core/settings_hub.html:421
+#: templates/core/settings_hub.html:442
 msgid "Copy now"
 msgstr "Kopjo tani"
 
-#: templates/core/settings_hub.html:438
+#: templates/core/settings_hub.html:459
 msgid "Full backup"
 msgstr "Kopje e plotë"
 
-#: templates/core/settings_hub.html:440
+#: templates/core/settings_hub.html:461
 msgid ""
 "Everything: settings, rooms, menus, staff accounts, guests, bills, receipts "
 "and expenses. Use it to move to a new computer or to keep a safe copy."
@@ -9302,7 +9376,7 @@ msgstr ""
 "llogaritë, kuponat dhe shpenzimet. Përdoreni për të kaluar në kompjuter "
 "tjetër ose për të mbajtur një kopje të sigurt."
 
-#: templates/core/settings_hub.html:441
+#: templates/core/settings_hub.html:462
 msgid ""
 "The file contains guests' personal data and encrypted passwords. Keep it "
 "somewhere safe."
@@ -9310,19 +9384,19 @@ msgstr ""
 "Skedari përmban të dhëna personale të mysafirëve dhe fjalëkalime të "
 "enkriptuara. Ruajeni në vend të sigurt."
 
-#: templates/core/settings_hub.html:444
+#: templates/core/settings_hub.html:465
 msgid "Download full backup"
 msgstr "Shkarko kopjen e plotë"
 
-#: templates/core/settings_hub.html:445
+#: templates/core/settings_hub.html:466
 msgid "Save a copy on this server"
 msgstr "Ruaj një kopje në këtë server"
 
-#: templates/core/settings_hub.html:449
+#: templates/core/settings_hub.html:470
 msgid "Settings only"
 msgstr "Vetëm cilësimet"
 
-#: templates/core/settings_hub.html:451
+#: templates/core/settings_hub.html:472
 msgid ""
 "Business details, rooms and rates, outlets, menus, tables and floor plans — "
 "no guests or money. Use it to set up a second location or start fresh with "
@@ -9332,19 +9406,19 @@ msgstr ""
 " e sallës — pa mysafirë dhe para. Përdoreni për një vendndodhje të dytë ose "
 "për të nisur nga e para me të njëjtin konfigurim."
 
-#: templates/core/settings_hub.html:453
+#: templates/core/settings_hub.html:474
 msgid "Download settings"
 msgstr "Shkarko cilësimet"
 
-#: templates/core/settings_hub.html:458
+#: templates/core/settings_hub.html:479
 msgid "Restore or import"
 msgstr "Rikthe ose importo"
 
-#: templates/core/settings_hub.html:461
+#: templates/core/settings_hub.html:482
 msgid "Check file"
 msgstr "Kontrollo skedarin"
 
-#: templates/core/settings_hub.html:463
+#: templates/core/settings_hub.html:484
 msgid ""
 "You'll see what's inside the file before anything changes. Restoring a full "
 "backup replaces all current data; a copy of the current data is saved first."
@@ -9353,15 +9427,15 @@ msgstr ""
 "një kopjeje të plotë zëvendëson të gjitha të dhënat aktuale; fillimisht "
 "ruhet një kopje e tyre."
 
-#: templates/core/settings_hub.html:467
+#: templates/core/settings_hub.html:488
 msgid "Backups on this server"
 msgstr "Kopjet rezervë në këtë server"
 
-#: templates/core/settings_hub.html:474
+#: templates/core/settings_hub.html:495
 msgid "No backups saved yet."
 msgstr "Ende asnjë kopje rezervë."
 
-#: templates/core/settings_hub.html:478
+#: templates/core/settings_hub.html:499
 msgid ""
 "The Windows app makes an automatic backup every day. On a server, schedule: "
 "python manage.py backup"
@@ -9554,11 +9628,22 @@ msgstr ""
 msgid "Add room types such as Double or Suite and set prices."
 msgstr "Shtoni lloje dhomash si Dyshe ose Suitë dhe vendosni çmimet."
 
+#: templates/core/setup_done.html:40
+msgid "Connect phones and tablets"
+msgstr "Lidhni telefonat dhe tabletët"
+
 #: templates/core/setup_done.html:41
+msgid ""
+"Scan a code to open InnKeeper on the staff's devices. Nothing to install."
+msgstr ""
+"Skanoni një kod për ta hapur InnKeeper në pajisjet e stafit. Pa instaluar "
+"asgjë."
+
+#: templates/core/setup_done.html:45
 msgid "Make receipts and invoices look like yours."
 msgstr "Bëni kuponat dhe faturat me pamjen tuaj."
 
-#: templates/core/setup_done.html:44
+#: templates/core/setup_done.html:48
 msgid "Go to the dashboard"
 msgstr "Shko te paneli"
 

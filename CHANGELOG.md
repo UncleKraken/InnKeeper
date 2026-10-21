@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.28.0 — phones and tablets connect easier
+
+**Shqip**
+
+- **Kodi QR në dritaren e InnKeeper:** stafi skanon kodin me telefon ose tablet dhe InnKeeper hapet menjëherë, pa shkruar adresën. Nëse ruteri i jep kompjuterit adresë të re (p.sh. pas ndërprerjes së energjisë), dritarja e përditëson vetë adresën dhe kodin.
+- **Muri mbrojtës i Windows:** instaluesi e lejon vetë InnKeeper në rrjet, vetëm për pajisjet e rrjetit lokal (dhe Tailscale), kështu që telefonat dhe tabletët lidhen pa pyetjen e Windows-it. Hiqet kur çinstalohet InnKeeper.
+- Adresa për telefonat gjendet tani edhe kur kompjuteri nuk ka internet.
+- **Cilësimet → Telefonat, tabletët dhe qasja nga jashtë:** kodi për të skanuar, hapat (Wi-Fi, “Shto në ekranin kryesor”, hyrja ose arka e përbashkët me PIN) dhe çfarë të bëni kur një pajisje nuk lidhet (muri mbrojtës, gjumi i kompjuterit, rezervimi i adresës te ruteri).
+- Pas konfigurimit të parë, hapi i ri “Lidhni telefonat dhe tabletët”.
+
+**English**
+
+- **QR code in the InnKeeper window:** staff scan it with a phone or tablet and InnKeeper opens, with no address to type. If the router gives the computer a new address (after a power cut, say), the window updates the address and the code by itself.
+- **Windows Firewall:** the installer now allows InnKeeper on the network, only for devices on the local network (and Tailscale), so phones and tablets connect without Windows asking. The rule is removed on uninstall.
+- The address for phones is now found even when the computer has no internet.
+- **Settings → Phones, tablets & remote access:** a code to scan, the steps (Wi-Fi, Add to Home Screen, sign-in or a shared till with PINs) and what to check when a device can't connect (firewall, the computer going to sleep, reserving the address in the router).
+- After the first setup, a new “Connect phones and tablets” step.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.28.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.27.1 — fixes from a full check
 
 **Shqip**

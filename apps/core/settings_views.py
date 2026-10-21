@@ -426,6 +426,7 @@ def settings_hub(request):
                 windows_app=remote.is_windows_app(),
                 port=remote.port(),
                 lan_url=f"http://{lan}:{remote.port()}/" if lan else "",
+                lan_qr=qr_svg(f"http://{lan}:{remote.port()}/") if lan else "",
                 tailscale_url=f"http://{ts}:{remote.port()}/" if ts else "",
                 tailscale_qr=qr_svg(f"http://{ts}:{remote.port()}/") if ts else "",
                 tunnel=remote.read_status(),

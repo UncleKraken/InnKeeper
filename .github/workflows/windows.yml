@@ -85,6 +85,47 @@ jobs:
           Get-Content "$env:INNKEEPER_DATA_DIR\logs\selftest.txt"
           if ($app.ExitCode -ne 0) { throw "Installed app self-test failed" }
 
+      - name: Test the firewall rule (install for all users, then uninstall)
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem dist\installer\*.exe | Select-Object -First 1
+          $dir = "$env:RUNNER_TEMP\InnKeeperAllUsers"
+          $p = Start-Process -FilePath $setup.FullName -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/ALLUSERS", "/DIR=$dir" -PassThru
+          if (-not $p.WaitForExit(300000)) { $p.Kill(); throw "Installer timed out" }
+          if ($p.ExitCode -ne 0) { throw "Installer failed with exit code $($p.ExitCode)" }
+          $rule = netsh advfirewall firewall show rule name=InnKeeper verbose | Out-String
+          Write-Host $rule
+          if ($rule -notmatch "InnKeeper\.exe") { throw "Firewall rule was not added" }
+          if ($rule -notmatch "LocalSubnet") { throw "Firewall rule is not limited to the local network" }
+          $u = Start-Process -FilePath "$dir\unins000.exe" -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -PassThru
+          if (-not $u.WaitForExit(300000)) { $u.Kill(); throw "Uninstaller timed out" }
+          Start-Sleep -Seconds 5
+          $left = netsh advfirewall firewall show rule name=InnKeeper | Out-String
+          if ($left -match "InnKeeper\.exe") { throw "Firewall rule was left after uninstall" }
+
+      - name: Screenshot of the InnKeeper window
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          $env:INNKEEPER_DATA_DIR = "$env:RUNNER_TEMP\innkeeper-window-test"
+          $env:INNKEEPER_PORT = "8792"
+          $app = Start-Process -FilePath "$env:RUNNER_TEMP\InnKeeperInstalled\InnKeeper.exe" -PassThru
+          Start-Sleep -Seconds 45
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+          [System.Drawing.Graphics]::FromImage($bmp).CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+          New-Item -ItemType Directory -Force screenshots | Out-Null
+          $bmp.Save("screenshots\window.png")
+          Get-Process InnKeeper -ErrorAction SilentlyContinue | Stop-Process -Force
+          Get-Content "$env:INNKEEPER_DATA_DIR\logs\*.log" -ErrorAction SilentlyContinue | Select-Object -Last 10
+
+      - uses: actions/upload-artifact@v7
+        continue-on-error: true
+        with:
+          name: window-screenshot
+          path: screenshots/
+
       - uses: actions/upload-artifact@v7
         with:
           name: InnKeeper-Setup-${{ steps.version.outputs.version }}

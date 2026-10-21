@@ -36,6 +36,10 @@
       <p class="muted">{% translate "Add room types such as Double or Suite and set prices." %}</p>
     </a>
     {% endif %}
+    <a class="card stat next-step" href="{% url 'core:settings' %}?tab=remote">
+      <div class="stat-label">{% icon "phone" %}</div><h3>{% translate "Connect phones and tablets" %}</h3>
+      <p class="muted">{% translate "Scan a code to open InnKeeper on the staff's devices. Nothing to install." %}</p>
+    </a>
     <a class="card stat next-step" href="{% url 'core:settings' %}">
       <div class="stat-label">✦</div><h3>{% translate "Add your logo and receipt text" %}</h3>
       <p class="muted">{% translate "Make receipts and invoices look like yours." %}</p>

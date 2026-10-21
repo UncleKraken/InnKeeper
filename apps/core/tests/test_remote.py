@@ -114,3 +114,29 @@ class LauncherProxyTests(HotelTestCase):
         except ImportError:
             return
         Adjustments(**launcher.PROXY_OPTIONS)  # valid for this waitress version
+
+
+class ConnectDevicesTests(HotelTestCase):
+    def test_wifi_address_with_a_code_to_scan(self):
+        self.client.login(username="boss", password=PASSWORD)
+        with mock.patch.object(remote, "local_addresses", return_value=["192.168.1.20"]):
+            r = self.client.get(reverse("core:settings") + "?tab=remote")
+        self.assertContains(r, "http://192.168.1.20:8765/")
+        self.assertIn("<svg", r.context["lan_qr"])
+        self.assertContains(r, "?tab=tills")
+
+    def test_no_network(self):
+        self.client.login(username="boss", password=PASSWORD)
+        with mock.patch.object(remote, "local_addresses", return_value=[]):
+            r = self.client.get(reverse("core:settings") + "?tab=remote")
+        self.assertEqual(r.context["lan_qr"], "")
+
+    def test_launcher_code_reads_back(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "windows"))
+        try:
+            import launcher
+        finally:
+            sys.path.pop(0)
+        matrix = launcher.qr_matrix("http://192.168.1.20:8765/")
+        self.assertEqual(len(matrix), len(matrix[0]))
+        self.assertGreaterEqual(len(matrix), 21)

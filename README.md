@@ -57,7 +57,7 @@ Download **InnKeeper-Setup-x.y.z.exe** from the [Releases page](https://github.c
 > **“Windows protected your PC”?** InnKeeper is free and its installer isn't code-signed, so Windows warns the first time. Click **More info → Run anyway**. Step-by-step help (browser warnings, antivirus, checking the file's SHA-256) in English and Albanian: [docs/windows-install.md](docs/windows-install.md).
 
 - Data is kept in `%LOCALAPPDATA%\InnKeeper` (database, daily backups, logs), so updating or reinstalling never touches it.
-- Other devices on the same Wi-Fi (tablets for waiters, a phone for housekeeping) open the address shown in the InnKeeper window.
+- **Install it on one computer only.** Other computers, phones and tablets on the same Wi-Fi (waiters' tablets, the housekeeper's phone) need nothing installed: they scan the QR code in the InnKeeper window, or open the address shown there, and can *Add to Home Screen*. Everything is saved on the main computer. The installer adds a Windows Firewall rule that lets in only devices on the local network (and Tailscale). Each person signs in with their own account, or taps their name and PIN on a shared till; their role decides what they can open.
 - When a new version is published, managers see a notice in the app. **Settings → Updates → Update now** downloads it from GitHub, checks its SHA-256, saves a backup and installs it; InnKeeper reopens by itself.
 - **Automatic copies:** Settings → Backup & restore → *Automatic copies to another place* keeps a full, verified copy on a USB drive or in a OneDrive / Google Drive / Dropbox folder (optionally password-encrypted), thinned out over time. The dashboard warns when it stops working.
 
@@ -80,7 +80,7 @@ python manage.py runserver
 
 (Skip `seed_demo` to start empty: you'll be asked to create the first manager account and run the setup wizard.)
 
-Open http://127.0.0.1:8000 and sign in as `manager`, `reception`, `housekeeping`, `maintenance`, `waiter`, `bar`, `spa` or `finance` (password `demo-pass-2026`). Each role sees only its own tools.
+Open http://127.0.0.1:8000 and sign in as `manager`, `reception`, `housekeeping`, `maintenance`, `waiter`, `bar`, `spa`, `finance` or `kitchen` (password `demo-pass-2026`). Each role sees only its own tools.
 
 Run the tests with `python manage.py test`.
 
@@ -94,7 +94,7 @@ Run the tests with `python manage.py test`.
    docker compose up -d
    ```
    This runs InnKeeper, PostgreSQL, and the nightly room-charge job. Open the site and create the first manager account.
-2. **HTTPS.** Put it behind a reverse proxy (Caddy, Nginx, or Cloudflare Tunnel: `cloudflared tunnel run --token …` pointing at the web service) with a certificate. The Windows app runs Cloudflare Tunnel itself from *Settings → Access from outside*; for the owner's phone, Tailscale is the private alternative. On a closed office LAN without HTTPS, set `DJANGO_SECURE_SSL_REDIRECT=0`.
+2. **HTTPS.** Put it behind a reverse proxy (Caddy, Nginx, or Cloudflare Tunnel: `cloudflared tunnel run --token …` pointing at the web service) with a certificate. The Windows app runs Cloudflare Tunnel itself from *Settings → Phones, tablets & remote access*; for the owner's phone, Tailscale is the private alternative. On a closed office LAN without HTTPS, set `DJANGO_SECURE_SSL_REDIRECT=0`.
 3. **Set up the business.** The setup wizard runs on first sign-in. Then follow the getting-started checklist on the dashboard.
 4. **Nightly room charges.** `python manage.py night_audit` posts last night's room charge for every in-house guest, so revenue is reported on the right day. The Docker setup runs it at 03:00; otherwise schedule it with cron or Windows Task Scheduler. Check-out always posts any nights still missing, so a missed run never loses money.
 5. **Guest messages.** `python manage.py guest_messages` emails arrival information and review requests when due (Settings → Guest messages). Docker and the Windows app run it every 15 minutes.
