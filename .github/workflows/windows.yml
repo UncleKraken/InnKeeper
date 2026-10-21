@@ -88,20 +88,24 @@ jobs:
       - name: Test the firewall rule (install for all users, then uninstall)
         shell: pwsh
         run: |
+          function Fail($msg) { $t = ($msg -replace "`r", "") -replace "`n", "%0A"; Write-Host "::error title=firewall::$t"; exit 1 }
           $setup = Get-ChildItem dist\installer\*.exe | Select-Object -First 1
           $dir = "$env:RUNNER_TEMP\InnKeeperAllUsers"
-          $p = Start-Process -FilePath $setup.FullName -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/ALLUSERS", "/DIR=$dir" -PassThru
-          if (-not $p.WaitForExit(300000)) { $p.Kill(); throw "Installer timed out" }
-          if ($p.ExitCode -ne 0) { throw "Installer failed with exit code $($p.ExitCode)" }
+          $log = "$env:RUNNER_TEMP\setup-allusers.log"
+          $p = Start-Process -FilePath $setup.FullName -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/ALLUSERS", "/DIR=$dir", "/LOG=$log" -PassThru
+          if (-not $p.WaitForExit(300000)) { $p.Kill(); Fail "Installer timed out" }
+          $netshLog = (Get-Content $log -ErrorAction SilentlyContinue | Select-String -Pattern "netsh|admin|Filename|exit code" -SimpleMatch:$false | Select-Object -Last 15) -join "`n"
+          if ($p.ExitCode -ne 0) { Fail "Installer exit code $($p.ExitCode)`n$netshLog" }
           $rule = netsh advfirewall firewall show rule name=InnKeeper verbose | Out-String
           Write-Host $rule
-          if ($rule -notmatch "InnKeeper\.exe") { throw "Firewall rule was not added" }
-          if ($rule -notmatch "LocalSubnet") { throw "Firewall rule is not limited to the local network" }
+          if ($rule -notmatch "InnKeeper\.exe") { Fail "Rule not added.`n$rule`n--- setup log ---`n$netshLog" }
+          if ($rule -notmatch "LocalSubnet") { Fail "Rule not limited to the local network.`n$rule" }
           $u = Start-Process -FilePath "$dir\unins000.exe" -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -PassThru
-          if (-not $u.WaitForExit(300000)) { $u.Kill(); throw "Uninstaller timed out" }
+          if (-not $u.WaitForExit(300000)) { $u.Kill(); Fail "Uninstaller timed out" }
           Start-Sleep -Seconds 5
           $left = netsh advfirewall firewall show rule name=InnKeeper | Out-String
-          if ($left -match "InnKeeper\.exe") { throw "Firewall rule was left after uninstall" }
+          if ($left -match "InnKeeper\.exe") { Fail "Rule left after uninstall.`n$left" }
+          Write-Host "::notice title=firewall::Rule added on install and removed on uninstall"
 
       - name: Screenshot of the InnKeeper window
         shell: pwsh
