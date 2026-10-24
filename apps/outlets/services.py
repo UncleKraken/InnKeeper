@@ -314,6 +314,9 @@ def pay_order(
     if foreign:
         if method != Payment.Method.CASH:
             raise BusinessError(_("Only cash can be taken in another currency."))
+        from apps.finance.currency import drop_odd_change
+
+        foreign = drop_odd_change(foreign, amount)
         tendered = foreign["tendered"]
     if tendered is not None:
         tendered = Decimal(tendered).quantize(Decimal("0.01"))

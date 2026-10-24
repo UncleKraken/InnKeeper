@@ -144,3 +144,24 @@ class UnclosedDayTests(HotelTestCase):
         )
         r = self.client.get(reverse("finance:day_close"))
         self.assertNotContains(r, "alert alert-warning no-print")
+
+
+class WholeLekChangeTests(HotelTestCase):
+    def test_exact_whole_lek_gives_no_cent_of_change(self):
+        hs = HotelSettings.load()
+        hs.currency, hs.second_currency, hs.second_currency_symbol, hs.second_currency_rate = "EUR", "ALL", "L", D("0.0104")
+        hs.save()
+        clear_settings_cache()
+        from apps.finance.currency import foreign_payment
+
+        order = pos.open_order(self.restaurant, table=self.table, user=self.waiter)
+        pos.add_item(order, self.wine, user=self.waiter, quantity=2)  # 9.00 €; 866 L = 9.0064 € → would be 0.01 change
+        self.assertEqual(foreign_payment("ALL", D("866"))["tendered"], D("9.01"))
+        pos.pay_order(order, method="cash", user=self.waiter, foreign=foreign_payment("ALL", D("866")))
+        p = Payment.objects.get(order=order)
+        self.assertEqual((p.tendered, p.change, p.foreign_amount), (D("9.00"), D("0"), D("866.00")))
+        # A real overpayment still gives change.
+        order2 = pos.open_order(self.restaurant, table=self.table, user=self.waiter)
+        pos.add_item(order2, self.wine, user=self.waiter)
+        pos.pay_order(order2, method="cash", user=self.waiter, foreign=foreign_payment("ALL", D("500")))
+        self.assertEqual(Payment.objects.get(order=order2).change, D("0.70"))

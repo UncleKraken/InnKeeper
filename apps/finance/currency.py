@@ -74,3 +74,13 @@ def drawer(payments) -> dict:
         received += p.foreign_amount or ZERO
         value += p.tendered or ZERO
     return {"received": received, "value": value}
+
+
+def drop_odd_change(foreign: dict, amount) -> dict:
+    """In a whole-unit currency the guest hands over the amount rounded up to a whole lek: the few cents over
+    are not change to give back (there is no coin for them), so the payment counts as exact."""
+    if foreign and whole_units(foreign["foreign_currency"]):
+        over = foreign["tendered"] - Decimal(amount)
+        if ZERO < over < foreign["foreign_rate"]:
+            foreign = {**foreign, "tendered": Decimal(amount).quantize(CENT)}
+    return foreign

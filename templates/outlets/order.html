@@ -209,7 +209,7 @@
     function dueForeign(a) { return whole ? Math.ceil(a / rate - 1e-9) : Math.ceil(a / rate * 100 - 1e-9) / 100; }
     function updateChange() {
       var t = num(tendered.value), a = num(amountIn.value);
-      if (foreign()) { t = Math.round(t * rate * 100) / 100; }
+      if (foreign()) { t = Math.round(t * rate * 100) / 100; if (whole && t > a && t - a < rate) { t = a; } }
       changeBox.classList.toggle('hidden', !(t > a));
       changeBox.querySelector('strong').textContent = (t - a).toFixed(2) + ' {{ hotel.currency_symbol|escapejs }}';
       if (curDue) {

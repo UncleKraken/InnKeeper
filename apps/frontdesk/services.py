@@ -325,6 +325,7 @@ def add_payment(folio: Folio, *, amount: Decimal, method: str, reference: str = 
         if method != Payment.Method.CASH or amount < 0:
             raise BusinessError(_("Only cash can be taken in another currency."))
         foreign = currency.foreign_payment(HotelSettings.load().second_currency, foreign_amount)
+        foreign = currency.drop_odd_change(foreign, amount)
         if foreign["tendered"] < amount:
             raise BusinessError(_("The cash given is less than the amount."))
     if amount < 0 and not getattr(user, "is_manager", False) and -amount > max(-folio.balance, Decimal("0")):
