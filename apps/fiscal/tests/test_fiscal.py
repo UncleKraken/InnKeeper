@@ -64,15 +64,29 @@ def configure(**extra):
 class FakeCIS:
     """Stands in for the tax authority: checks the XML signature and answers with a NIVF."""
 
-    def __init__(self, fail=None):
+    def __init__(self, fail=None, fail_einvoice=None):
         self.requests = []
         self.fail = fail
+        self.fail_einvoice = fail_einvoice
+        self.einvoices = []
 
-    def __call__(self, xml, action, *, test, timeout=6):
+    def __call__(self, xml, action, *, test, timeout=6, service="fiscal"):
         doc = etree.fromstring(xml)
         body = doc.find(f"{{{cis.SOAP}}}Body")[0]
         assert signing.verify_xml(body, _KEY.public_key()), "bad XML signature"
         self.requests.append((action, body))
+        if action == "RegisterEinvoice":
+            assert service == "einvoice"
+            from apps.fiscal import ubl
+
+            invoice = base64.b64decode(body.findtext(f".//{{{cis.EINVOICE_NS}}}UblInvoice"))
+            assert ubl.verify(invoice, _KEY.public_key()), "bad e-invoice signature"
+            self.einvoices.append(etree.fromstring(invoice))
+            if self.fail_einvoice == "offline":
+                raise cis.CISUnavailable("timed out")
+            if self.fail_einvoice == "reject":
+                raise cis.CISError("Schematron validations failed.", "12")
+            return etree.fromstring(f'<r xmlns="{cis.EINVOICE_NS}"><EIC>aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee</EIC></r>')
         if self.fail == "offline":
             raise cis.CISUnavailable("timed out")
         if self.fail == "reject":

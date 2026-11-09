@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.33.0 — electronic invoices (e-faturë)
+
+**Shqip**
+
+- **E-fatura dërgohet vetë:** kur një kompani (me NUIS) paguan me transfertë bankare ose fatura lihet për t'u paguar më vonë, InnKeeper e shënon faturën fiskale si e-faturë, menjëherë pas NIVF-it krijon faturën elektronike sipas standardit evropian (UBL 2.1, EN 16931), e nënshkruan me certifikatën tuaj dhe e regjistron te shërbimi i e-faturës i tatimeve. Kodi i e-faturës (EIC) shtypet në faturë dhe shfaqet te dokumentet fiskale.
+- Pa internet, e-fatura dërgohet automatikisht kur kthehet lidhja. Nëse refuzohet, arsyeja shfaqet te dokumentet fiskale dhe butoni "Dërgo sërish" e provon përsëri (pa kërkuar NIVF të ri).
+- **Cilësimet → Fiskalizimi:** IBAN-i juaj (kontrollohet për gabime shtypi) dhe sa ditë ka kompania për të paguar.
+- Për faturat në një monedhë tjetër nga leku, e-fatura lëshohet ende te portali self-care (fatura jua kujton), sepse specifikimi i publikuar nuk tregon si shkon kursi i këmbimit në e-faturë.
+- Pagesat në lekë të rrumbullakosura lart nuk japin më 0.01 € kusur.
+
+**English**
+
+- **E-invoices are sent automatically:** when a company (with a NUIS) pays by bank transfer or the bill is left on account, InnKeeper marks the fiscal invoice as an e-invoice. Right after the NIVF it builds the electronic invoice in the European standard (UBL 2.1, EN 16931), signs it with your certificate and registers it with the tax authority's e-invoice service. The e-invoice code (EIC) is printed on the invoice and shown in the fiscal documents.
+- Without internet, the e-invoice is sent automatically when the connection returns. If it's rejected, the reason shows in the fiscal documents and "Send again" retries it (without asking for a new NIVF).
+- **Settings → Fiscalization:** your IBAN (checked for typing mistakes) and how many days the company has to pay.
+- For bills in a currency other than the lek, the e-invoice is still issued in the self-care portal (the bill reminds you): the published specification doesn't say how the exchange rate goes into an e-invoice.
+- Rounded-up lek payments no longer give 0.01 € of change.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.33.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.32.1 — fixes from live testing
 
 **Shqip**

@@ -4,6 +4,7 @@
   <div>{% translate "Invoice no." %} {{ fdoc.inv_num }}</div>
   <div>NSLF: <span class="mono">{{ fdoc.iic }}</span></div>
   <div>NIVF: <span class="mono">{% if fdoc.fic %}{{ fdoc.fic }}{% else %}{% translate "will be added when the connection returns" %}{% endif %}</span></div>
+  {% if fdoc.eic %}<div>EIC: <span class="mono">{{ fdoc.eic }}</span></div>{% endif %}
   <div>{% translate "Operator" %}: {{ fdoc.operator_code }} · TCR {{ fdoc.tcr_code }}</div>
   {% if fdoc.test %}<div><strong>{% translate "TEST – not valid for tax" %}</strong></div>{% endif %}
 </div>

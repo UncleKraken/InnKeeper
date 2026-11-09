@@ -102,6 +102,16 @@ def payload(obj) -> dict | None:
     }
 
 
-def needs_einvoice(obj, payments) -> bool:
-    """A company paying by bank transfer (or another non-cash way): an e-invoice is required."""
-    return bool(getattr(obj, "buyer_nuis", "")) and any(p.method in NONCASH_METHODS for p in payments if not p.voided)
+def needs_einvoice(obj, payments) -> str:
+    """A company paying by bank transfer (or another non-cash way) needs an e-invoice.
+
+    Returns "" (no e-invoice needed), "auto" (InnKeeper sends it with the fiscal invoice) or "manual"
+    (fiscalization is off here or the bill isn't in lekë: issue it in the self-care portal)."""
+    if not getattr(obj, "buyer_nuis", "") or not any(p.method in NONCASH_METHODS for p in payments if not p.voided):
+        return ""
+    from apps.core.models import HotelSettings
+
+    from . import ubl
+
+    hs = HotelSettings.load()
+    return "auto" if hs.fiscal_configured and ubl.supported({"currency": hs.currency}) else "manual"

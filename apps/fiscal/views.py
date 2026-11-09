@@ -63,6 +63,14 @@ def documents(request):
 def resend(request, pk=None):
     if pk:
         doc = get_object_or_404(FiscalDocument, pk=pk)
+        if doc.status == FiscalDocument.Status.REGISTERED and doc.is_einvoice and not doc.eic:
+            doc.einvoice_status = services.EINVOICE_PENDING
+            services.send_einvoice(doc)
+            if doc.eic:
+                messages.success(request, _("E-invoice registered: EIC %(eic)s") % {"eic": doc.eic})
+            else:
+                messages.error(request, doc.einvoice_error)
+            return redirect("fiscal:documents")
         if doc.status == FiscalDocument.Status.FAILED:
             doc.status = FiscalDocument.Status.PENDING
             doc.save(update_fields=["status"])

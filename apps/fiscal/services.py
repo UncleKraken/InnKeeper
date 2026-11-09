@@ -21,7 +21,7 @@ from django.utils.translation import gettext as _
 
 from apps.core.models import HotelSettings, audit
 
-from . import cis
+from . import cis, ubl
 from .buyer import payload as buyer_payload
 from .models import CashDeposit, FiscalCounter, FiscalDocument
 from .signing import Certificate, CertificateError, iic
@@ -136,6 +136,11 @@ def create_document(
             {"type": p["type"], "amount": str(-Decimal(p["amount"]))}
             for p in (corrects.payload["payments"] if corrects else pay)
         ]
+    # A company (NUIS) paying by bank transfer or on account gets an electronic invoice (e-faturë) too.
+    is_einvoice = bool(
+        buyer and inv_type == "NONCASH" and total > 0 and kind != FiscalDocument.Kind.CORRECTION
+        and ubl.supported({"currency": hs.currency})
+    )
     issued = cis.now_str()
     year = int(issued[:4])
     ord_num = FiscalCounter.next(tcr, year)
@@ -165,6 +170,7 @@ def create_document(
             "iic": code,
             "iic_signature": signature,
             "corrects": {"iic": corrects.iic, "issue_datetime": corrects.issue_datetime} if corrects else None,
+            "is_einvoice": is_einvoice,
         },
     }
     doc = FiscalDocument.objects.create(
@@ -185,6 +191,7 @@ def create_document(
         iic_signature=signature,
         test=hs.fiscal_test,
         payload=payload,
+        einvoice_status=EINVOICE_PENDING if is_einvoice else "",
         created_by=user if getattr(user, "is_authenticated", False) else None,
     )
     audit(user, "fiscal.issue", f"{doc.inv_num} {doc.total} NSLF {doc.iic}", doc)
@@ -230,6 +237,39 @@ def transmit(doc: FiscalDocument) -> FiscalDocument:
         )
     doc.attempts += 1
     doc.save(update_fields=["status", "fic", "last_error", "registered_at", "was_offline", "attempts"])
+    if doc.status == FiscalDocument.Status.REGISTERED and doc.einvoice_status == EINVOICE_PENDING:
+        send_einvoice(doc)
+    return doc
+
+
+EINVOICE_PENDING, EINVOICE_REGISTERED, EINVOICE_FAILED = "pending", "registered", "failed"
+
+
+def send_einvoice(doc: FiscalDocument) -> FiscalDocument:
+    """Register the electronic invoice of a fiscalized invoice. Never raises: see doc.einvoice_status."""
+    if not doc.is_einvoice or doc.einvoice_status == EINVOICE_REGISTERED or not doc.fic:
+        return doc
+    hs = HotelSettings.load()
+    try:
+        cert = Certificate.from_settings(hs)
+        invoice = ubl.signed_bytes(doc.payload, doc.fic, cert, iban=hs.bank_iban, due_days=hs.einvoice_due_days)
+        eic = cis.register_einvoice(cis.einvoice_request(invoice, cert), test=doc.test)
+    except cis.CISUnavailable as e:
+        doc.einvoice_status = EINVOICE_PENDING
+        doc.einvoice_error = _("No connection to the e-invoice service (%(e)s). It will be sent automatically.") % {"e": e}
+    except (cis.CISError, CertificateError) as e:
+        doc.einvoice_status = EINVOICE_FAILED
+        doc.einvoice_error = f"{getattr(e, 'code', '')} {e}".strip()
+        log.warning("E-invoice for %s rejected: %s", doc.inv_num, doc.einvoice_error)
+    except Exception as e:  # never block the queue
+        doc.einvoice_status = EINVOICE_FAILED
+        doc.einvoice_error = f"{type(e).__name__}: {e}"[:500]
+        log.exception("E-invoice for %s could not be sent", doc.inv_num)
+    else:
+        doc.eic, doc.einvoice_status, doc.einvoice_error = eic, EINVOICE_REGISTERED, ""
+        audit(doc.created_by, "fiscal.einvoice", f"{doc.inv_num} EIC {eic}", doc)
+    doc.einvoice_attempts += 1
+    doc.save(update_fields=["eic", "einvoice_status", "einvoice_error", "einvoice_attempts"])
     return doc
 
 
@@ -250,6 +290,12 @@ def resend_pending() -> int:
             n += 1
         elif doc.status == FiscalDocument.Status.PENDING:
             break  # still no connection: try the rest next time
+    einvoices = FiscalDocument.objects.filter(
+        status=FiscalDocument.Status.REGISTERED, einvoice_status=EINVOICE_PENDING, registered_at__lt=recent
+    )
+    for doc in einvoices.order_by("registered_at")[:20]:
+        if send_einvoice(doc).einvoice_status == EINVOICE_PENDING:
+            break  # still no connection
     for kind, obj in unfiscalized(limit=20):
         safely(fiscalize_order if kind == "order" else fiscalize_folio, obj, None)
     return n

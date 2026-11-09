@@ -23,6 +23,8 @@
   <strong>{% translate "Invoice to" %}:</strong> {{ obj.buyer_name }} · NUIS <span class="mono">{{ obj.buyer_nuis }}</span>
 </section>
 {% endif %}
-{% if needs_einvoice %}
+{% if needs_einvoice == "manual" %}
 <div class="alert alert-warning">{% icon "alert" %} {% translate "A company paying by bank transfer also needs an electronic invoice (e-faturë). Issue it in the tax office's self-care portal with the same items, NUIS and amount." %}</div>
+{% elif needs_einvoice == "auto" and obj.status == "open" %}
+<div class="alert alert-info">{% icon "check" %} {% translate "When the bill is closed, InnKeeper also sends it to the tax office as an electronic invoice (e-faturë) for this company." %}</div>
 {% endif %}

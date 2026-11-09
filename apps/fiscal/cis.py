@@ -32,6 +32,14 @@ VERIFY = {
     True: "https://efiskalizimi-app-test.tatime.gov.al/invoice-check/#/verify",
     False: "https://efiskalizimi-app.tatime.gov.al/invoice-check/#/verify",
 }
+# Einvoice Service ("Einvoice Service - Technical specification"): registers the electronic invoice (UBL) of a
+# fiscalized NONCASH invoice to a company and answers with its EIC.
+EINVOICE_NS = "https://Einvoice.tatime.gov.al/EinvoiceService/schema"
+EINVOICE_ACTION = "https://Einvoice.tatime.gov.al/EinvoiceService/"
+EINVOICE_ENDPOINTS = {
+    True: "https://einvoice-test.tatime.gov.al/EinvoiceService-v1",
+    False: "https://einvoice.tatime.gov.al/EinvoiceService-v1",
+}
 CENT = Decimal("0.01")
 
 # InnKeeper payment method → fiscal payment type (cash-type invoices use the first group).
@@ -160,6 +168,8 @@ def invoice_request(payload: dict, cert: Certificate, *, subsequent: str = "") -
         "IICSignature": inv["iic_signature"],
         "IsReverseCharge": "false",
     }
+    if inv.get("is_einvoice"):
+        attrs["IsEinvoice"] = "true"
     if in_vat:
         attrs["TotVATAmt"] = money(t["vat"])
     el = etree.SubElement(root, f"{{{NS}}}Invoice", **attrs)
@@ -236,6 +246,18 @@ def cash_deposit_request(*, nuis: str, tcr: str, operation: str, amount, when: s
     return _envelope(root)
 
 
+def einvoice_request(ubl_xml: bytes, cert: Certificate) -> bytes:
+    """RegisterEinvoiceRequest carrying the signed UBL invoice (base64), signed with the same key."""
+    import base64
+
+    root = etree.Element(f"{{{EINVOICE_NS}}}RegisterEinvoiceRequest", nsmap={None: EINVOICE_NS}, Id="Request", Version="1")
+    etree.SubElement(root, f"{{{EINVOICE_NS}}}Header", UUID=str(uuid.uuid4()), SendDateTime=now_str())
+    envelope = etree.SubElement(root, f"{{{EINVOICE_NS}}}EinvoiceEnvelope")
+    etree.SubElement(envelope, f"{{{EINVOICE_NS}}}UblInvoice").text = base64.b64encode(ubl_xml).decode()
+    sign_xml(root, cert)
+    return _envelope(root)
+
+
 def _envelope(root) -> bytes:
     env = etree.Element(f"{{{SOAP}}}Envelope", nsmap={"SOAP-ENV": SOAP})
     etree.SubElement(env, f"{{{SOAP}}}Header")
@@ -247,10 +269,11 @@ def _envelope(root) -> bytes:
 # ---------- Sending ----------
 
 
-def send(xml: bytes, action: str, *, test: bool, timeout: int = 6) -> etree._Element:
-    req = urllib.request.Request(ENDPOINTS[test], data=xml, method="POST")
+def send(xml: bytes, action: str, *, test: bool, timeout: int = 6, service: str = "fiscal") -> etree._Element:
+    einvoice = service == "einvoice"
+    req = urllib.request.Request((EINVOICE_ENDPOINTS if einvoice else ENDPOINTS)[test], data=xml, method="POST")
     req.add_header("Content-Type", "text/xml; charset=utf-8")
-    req.add_header("SOAPAction", f'"{ACTION}{action}"')
+    req.add_header("SOAPAction", f'"{EINVOICE_ACTION if einvoice else ACTION}{action}"')
     try:
         with urllib.request.urlopen(req, timeout=timeout, context=ssl.create_default_context()) as resp:  # noqa: S310
             raw = resp.read()
@@ -278,6 +301,14 @@ def register_invoice(xml: bytes, *, test: bool) -> str:
     if not fic:
         raise CISError("No NIVF (FIC) in the answer")
     return fic.strip()
+
+
+def register_einvoice(xml: bytes, *, test: bool) -> str:
+    doc = send(xml, "RegisterEinvoice", test=test, timeout=20, service="einvoice")
+    eic = doc.findtext(f".//{{{EINVOICE_NS}}}EIC")
+    if not eic:
+        raise CISError("No EIC in the answer")
+    return eic.strip()
 
 
 def register_cash_deposit(xml: bytes, *, test: bool) -> str:

@@ -65,6 +65,11 @@ class FiscalDocument(models.Model):
     last_error = models.TextField(_("problem"), blank=True)
     test = models.BooleanField(default=False)
     payload = models.JSONField(default=dict)  # the data the XML is built from, so it can be re-sent unchanged
+    # Electronic invoice (e-faturë) for a company paying by bank transfer: registered after the NIVF.
+    eic = models.CharField(_("e-invoice code (EIC)"), max_length=40, blank=True)
+    einvoice_status = models.CharField(max_length=12, blank=True)  # "" (not an e-invoice) / pending / registered / failed
+    einvoice_error = models.TextField(blank=True)
+    einvoice_attempts = models.PositiveSmallIntegerField(default=0)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
@@ -78,6 +83,10 @@ class FiscalDocument(models.Model):
 
     def __str__(self) -> str:
         return self.inv_num
+
+    @property
+    def is_einvoice(self) -> bool:
+        return bool(self.einvoice_status)
 
     @property
     def nslf(self) -> str:

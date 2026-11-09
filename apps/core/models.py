@@ -376,6 +376,15 @@ class HotelSettings(models.Model):
         default=Decimal("6.00"),
         help_text=_("Room nights. Food, drinks and other services use the main VAT rate."),
     )
+    bank_iban = models.CharField(
+        _("IBAN for bank transfers"),
+        max_length=34,
+        blank=True,
+        help_text=_("Printed on e-invoices to companies, so they know where to pay. E.g. AL47 2121 1009 0000 0002 3569 8741."),
+    )
+    einvoice_due_days = models.PositiveSmallIntegerField(
+        _("days to pay an e-invoice"), default=15, help_text=_("The payment due date on e-invoices to companies.")
+    )
     fiscal_exchange_rate = models.DecimalField(
         _("exchange rate (lekë for 1 unit of your currency)"),
         max_digits=10,

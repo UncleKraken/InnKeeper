@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 00:06+0200\n"
+"POT-Creation-Date: 2026-11-09 08:14+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -782,7 +782,7 @@ msgstr ""
 "TVSH apo fiskalizim, dhe kuponat shënohen si kupona të brendshëm. Pyesni "
 "kontabilistin nëse nuk jeni të sigurt."
 
-#: apps/core/models.py:38 apps/core/models.py:616 apps/frontdesk/models.py:90
+#: apps/core/models.py:38 apps/core/models.py:625 apps/frontdesk/models.py:90
 #: apps/staff/models.py:69
 msgid "address"
 msgstr "adresa"
@@ -1247,7 +1247,7 @@ msgstr ""
 
 #: apps/core/models.py:249 apps/finance/models.py:294
 #: apps/finance/models.py:331 apps/finance/models.py:384
-#: apps/fiscal/models.py:107 apps/frontdesk/models.py:426
+#: apps/fiscal/models.py:116 apps/frontdesk/models.py:426
 #: apps/payments/models.py:44 apps/staff/models.py:74 apps/staff/models.py:201
 msgid "amount"
 msgstr "shuma"
@@ -1545,10 +1545,30 @@ msgstr ""
 "kryesore të TVSH-së."
 
 #: apps/core/models.py:380
+msgid "IBAN for bank transfers"
+msgstr "IBAN për transfertat bankare"
+
+#: apps/core/models.py:383
+msgid ""
+"Printed on e-invoices to companies, so they know where to pay. E.g. AL47 "
+"2121 1009 0000 0002 3569 8741."
+msgstr ""
+"Shtypet në e-faturat për kompanitë, që të dinë ku të paguajnë. P.sh. AL47 "
+"2121 1009 0000 0002 3569 8741."
+
+#: apps/core/models.py:386
+msgid "days to pay an e-invoice"
+msgstr "ditë për pagesën e e-faturës"
+
+#: apps/core/models.py:386
+msgid "The payment due date on e-invoices to companies."
+msgstr "Afati i pagesës në e-faturat për kompanitë."
+
+#: apps/core/models.py:389
 msgid "exchange rate (lekë for 1 unit of your currency)"
 msgstr "kursi i këmbimit (lekë për 1 njësi të monedhës suaj)"
 
-#: apps/core/models.py:385
+#: apps/core/models.py:394
 msgid ""
 "Only if prices are not in lekë (ALL), e.g. 100.50 for EUR. Use the Bank of "
 "Albania rate."
@@ -1556,31 +1576,31 @@ msgstr ""
 "Vetëm nëse çmimet nuk janë në lekë (ALL), p.sh. 100.50 për EUR. Përdorni "
 "kursin e Bankës së Shqipërisë."
 
-#: apps/core/models.py:391
+#: apps/core/models.py:400
 msgid "Every 15 minutes"
 msgstr "Çdo 15 minuta"
 
-#: apps/core/models.py:392
+#: apps/core/models.py:401
 msgid "Every 30 minutes"
 msgstr "Çdo 30 minuta"
 
-#: apps/core/models.py:393
+#: apps/core/models.py:402
 msgid "Every hour"
 msgstr "Çdo orë"
 
-#: apps/core/models.py:394
+#: apps/core/models.py:403
 msgid "Every 4 hours"
 msgstr "Çdo 4 orë"
 
-#: apps/core/models.py:395
+#: apps/core/models.py:404
 msgid "Once a day"
 msgstr "Një herë në ditë"
 
-#: apps/core/models.py:398
+#: apps/core/models.py:407
 msgid "copy the data to another place automatically"
 msgstr "kopjo të dhënat automatikisht në një vend tjetër"
 
-#: apps/core/models.py:400
+#: apps/core/models.py:409
 msgid ""
 "A full copy is written there regularly, so a broken or stolen computer never"
 " loses your data."
@@ -1588,11 +1608,11 @@ msgstr ""
 "Aty shkruhet rregullisht një kopje e plotë, që të mos i humbni kurrë të "
 "dhënat, edhe nëse kompjuteri prishet ose vidhet."
 
-#: apps/core/models.py:403
+#: apps/core/models.py:412
 msgid "folder"
 msgstr "dosja"
 
-#: apps/core/models.py:407
+#: apps/core/models.py:416
 msgid ""
 "A USB drive (e.g. E:\\InnKeeper) or a folder that OneDrive, Google Drive or "
 "Dropbox keeps in the cloud."
@@ -1600,15 +1620,15 @@ msgstr ""
 "Një USB (p.sh. E:\\InnKeeper) ose një dosje që OneDrive, Google Drive ose "
 "Dropbox e mban në cloud."
 
-#: apps/core/models.py:410
+#: apps/core/models.py:419
 msgid "how often"
 msgstr "sa shpesh"
 
-#: apps/core/models.py:412
+#: apps/core/models.py:421
 msgid "password for the copies"
 msgstr "fjalëkalimi i kopjeve"
 
-#: apps/core/models.py:416
+#: apps/core/models.py:425
 msgid ""
 "Recommended for cloud folders: the copies are encrypted and can only be "
 "restored with this password. Write it down — without it the copies can't be "
@@ -1617,57 +1637,57 @@ msgstr ""
 "Rekomandohet për dosjet në cloud: kopjet enkriptohen dhe rikthehen vetëm me "
 "këtë fjalëkalim. Shkruajeni diku — pa të kopjet nuk hapen dot."
 
-#: apps/core/models.py:427
+#: apps/core/models.py:436
 msgid "connect to the channel manager"
 msgstr "lidhu me menaxherin e kanaleve"
 
-#: apps/core/models.py:428
+#: apps/core/models.py:437
 msgid "Channex API key"
 msgstr "Çelësi API i Channex"
 
-#: apps/core/models.py:429
+#: apps/core/models.py:438
 msgid "Channex property ID"
 msgstr "ID e pronës në Channex"
 
-#: apps/core/models.py:431
+#: apps/core/models.py:440
 msgid "use the Channex test system (staging)"
 msgstr "përdor sistemin provë të Channex (staging)"
 
-#: apps/core/models.py:431
+#: apps/core/models.py:440
 msgid "For trying it out before going live."
 msgstr "Për ta provuar para se ta përdorni realisht."
 
-#: apps/core/models.py:433
+#: apps/core/models.py:442
 msgid "send availability for (days)"
 msgstr "dërgo disponueshmërinë për (ditë)"
 
-#: apps/core/models.py:438 apps/core/models.py:439
+#: apps/core/models.py:447 apps/core/models.py:448
 msgid "hotel settings"
 msgstr "cilësimet e biznesit"
 
-#: apps/core/models.py:566
+#: apps/core/models.py:575
 msgid "action"
 msgstr "veprimi"
 
-#: apps/core/models.py:567 apps/finance/models.py:291
+#: apps/core/models.py:576 apps/finance/models.py:291
 #: apps/finance/models.py:382 apps/frontdesk/models.py:18
 #: apps/outlets/models.py:214 apps/payments/models.py:43
 msgid "description"
 msgstr "përshkrimi"
 
-#: apps/core/models.py:570 apps/outlets/models.py:393
+#: apps/core/models.py:579 apps/outlets/models.py:393
 msgid "time"
 msgstr "koha"
 
-#: apps/core/models.py:573
+#: apps/core/models.py:582
 msgid "audit entry"
 msgstr "regjistrim aktiviteti"
 
-#: apps/core/models.py:574
+#: apps/core/models.py:583
 msgid "audit log"
 msgstr "regjistri i aktivitetit"
 
-#: apps/core/models.py:614 apps/finance/models.py:81
+#: apps/core/models.py:623 apps/finance/models.py:81
 #: apps/finance/models.py:156 apps/frontdesk/models.py:16
 #: apps/frontdesk/models.py:304 apps/inventory/models.py:25
 #: apps/inventory/models.py:60 apps/marketing/models.py:31
@@ -1680,7 +1700,7 @@ msgstr "regjistri i aktivitetit"
 msgid "name"
 msgstr "emri"
 
-#: apps/core/models.py:617
+#: apps/core/models.py:626
 msgid ""
 "How this computer reaches the other InnKeeper, e.g. http://100.64.1.7:8765 "
 "(Tailscale) or https://hotel.example.com"
@@ -1688,15 +1708,15 @@ msgstr ""
 "Si e arrin ky kompjuter InnKeeper-in tjetër, p.sh. http://100.64.1.7:8765 "
 "(Tailscale) ose https://hotel.example.com"
 
-#: apps/core/models.py:619
+#: apps/core/models.py:628
 msgid "sharing key"
 msgstr "çelësi i ndarjes"
 
-#: apps/core/models.py:619
+#: apps/core/models.py:628
 msgid "From the other business: Settings → Group overview."
 msgstr "Nga biznesi tjetër: Cilësimet → Pamja e grupit."
 
-#: apps/core/models.py:620 apps/frontdesk/models.py:32
+#: apps/core/models.py:629 apps/frontdesk/models.py:32
 #: apps/outlets/models.py:74 apps/outlets/models.py:114
 #: apps/outlets/models.py:197 apps/outlets/models.py:220
 #: apps/outlets/models.py:253 apps/outlets/models.py:271
@@ -1705,7 +1725,7 @@ msgstr "Nga biznesi tjetër: Cilësimet → Pamja e grupit."
 msgid "order"
 msgstr "renditja"
 
-#: apps/core/models.py:625
+#: apps/core/models.py:634
 msgid "business in the group"
 msgstr "biznes në grup"
 
@@ -1790,11 +1810,15 @@ msgid ""
 msgstr ""
 "Certifikata e vulës elektronike për fiskalizim (nga e-Albania / AKSHI)."
 
-#: apps/core/settings_views.py:344
+#: apps/core/settings_views.py:336
+msgid "This IBAN isn't valid. Check it on your bank statement."
+msgstr "Ky IBAN nuk është i saktë. Kontrollojeni në ekstraktin e bankës."
+
+#: apps/core/settings_views.py:356
 msgid "The certificate can't be opened with this password."
 msgstr "Certifikata nuk hapet me këtë fjalëkalim."
 
-#: apps/core/settings_views.py:349 apps/core/settings_views.py:413
+#: apps/core/settings_views.py:361 apps/core/settings_views.py:425
 msgid ""
 "Fiscalization is for businesses registered with the tax authority (Business "
 "details)."
@@ -1802,7 +1826,7 @@ msgstr ""
 "Fiskalizimi është për bizneset e regjistruara në tatime (Të dhënat e "
 "biznesit)."
 
-#: apps/core/settings_views.py:351
+#: apps/core/settings_views.py:363
 msgid ""
 "Remove the sample data first (the banner at the top), then set up your own "
 "business."
@@ -1810,63 +1834,63 @@ msgstr ""
 "Hiqni fillimisht të dhënat shembull (shiriti lart), pastaj konfiguroni "
 "biznesin tuaj."
 
-#: apps/core/settings_views.py:353
+#: apps/core/settings_views.py:365
 msgid "Enter the NIPT in Business details first."
 msgstr "Vendosni fillimisht NIPT-in te Të dhënat e biznesit."
 
-#: apps/core/settings_views.py:356
+#: apps/core/settings_views.py:368
 msgid "Needed to fiscalize."
 msgstr "E nevojshme për fiskalizimin."
 
-#: apps/core/settings_views.py:358
+#: apps/core/settings_views.py:370
 msgid "Upload the certificate."
 msgstr "Ngarkoni certifikatën."
 
-#: apps/core/settings_views.py:362
+#: apps/core/settings_views.py:374
 #, python-format
 msgid "Your prices are in %(c)s: the tax authority needs the rate to lekë."
 msgstr "Çmimet tuaja janë në %(c)s: tatimet kërkojnë kursin në lekë."
 
-#: apps/core/settings_views.py:421 apps/core/settings_views.py:522
-#: apps/core/settings_views.py:670 apps/frontdesk/channel_manager.py:66
+#: apps/core/settings_views.py:433 apps/core/settings_views.py:534
+#: apps/core/settings_views.py:682 apps/frontdesk/channel_manager.py:66
 #: apps/staff/payroll_views.py:94
 msgid "Settings saved."
 msgstr "Cilësimet u ruajtën."
 
-#: apps/core/settings_views.py:456 apps/marketing/views.py:209
+#: apps/core/settings_views.py:468 apps/marketing/views.py:209
 msgid "Ana"
 msgstr "Ana"
 
-#: apps/core/settings_views.py:518
+#: apps/core/settings_views.py:530
 #, python-format
 msgid "Saved. First copy written: %(name)s"
 msgstr "U ruajt. Kopja e parë u shkrua: %(name)s"
 
-#: apps/core/settings_views.py:520
+#: apps/core/settings_views.py:532
 #, python-format
 msgid "Saved, but the copy failed: %(e)s"
 msgstr "U ruajt, por kopjimi dështoi: %(e)s"
 
-#: apps/core/settings_views.py:534
+#: apps/core/settings_views.py:546
 #, python-format
 msgid "Copy written: %(name)s"
 msgstr "Kopja u shkrua: %(name)s"
 
-#: apps/core/settings_views.py:536
+#: apps/core/settings_views.py:548
 #, python-format
 msgid "The copy failed: %(e)s"
 msgstr "Kopjimi dështoi: %(e)s"
 
-#: apps/core/settings_views.py:576
+#: apps/core/settings_views.py:588
 #, python-format
 msgid "Backup saved: %(name)s"
 msgstr "Kopja rezervë u ruajt: %(name)s"
 
-#: apps/core/settings_views.py:619
+#: apps/core/settings_views.py:631
 msgid "This file is not an InnKeeper backup."
 msgstr "Ky skedar nuk është kopje rezervë e InnKeeper-it."
 
-#: apps/core/settings_views.py:637
+#: apps/core/settings_views.py:649
 #, python-format
 msgid ""
 "Settings imported: %(o)s outlets, %(i)s menu items, %(t)s tables, %(r)s "
@@ -1875,11 +1899,11 @@ msgstr ""
 "Cilësimet u importuan: %(o)s pika, %(i)s artikuj menuje, %(t)s tavolina, "
 "%(r)s dhoma."
 
-#: apps/core/settings_views.py:645
+#: apps/core/settings_views.py:657
 msgid "Type RESTORE to confirm."
 msgstr "Shkruani RESTORE për të konfirmuar."
 
-#: apps/core/settings_views.py:655
+#: apps/core/settings_views.py:667
 #, python-format
 msgid ""
 "Backup restored. Sign in with an account from the restored data. A copy of "
@@ -1888,20 +1912,20 @@ msgstr ""
 "Kopja rezervë u rikthye. Hyni me një llogari nga të dhënat e rikthyera. Një "
 "kopje e të dhënave të mëparshme u ruajt si %(name)s."
 
-#: apps/core/settings_views.py:687 apps/core/settings_views.py:707
+#: apps/core/settings_views.py:699 apps/core/settings_views.py:719
 msgid "Fill in and save the email settings first."
 msgstr "Plotësoni dhe ruani fillimisht cilësimet e email-it."
 
-#: apps/core/settings_views.py:689
+#: apps/core/settings_views.py:701
 msgid "Add the email address the summary goes to first."
 msgstr "Shtoni fillimisht adresën email ku shkon përmbledhja."
 
-#: apps/core/settings_views.py:693
+#: apps/core/settings_views.py:705
 #, python-format
 msgid "Summary of %(d)s sent to %(to)s."
 msgstr "Përmbledhja e %(d)s u dërgua te %(to)s."
 
-#: apps/core/settings_views.py:695 apps/core/settings_views.py:714
+#: apps/core/settings_views.py:707 apps/core/settings_views.py:726
 msgid ""
 "The email could not be sent. Check the server, port, security, username and "
 "password."
@@ -1909,40 +1933,40 @@ msgstr ""
 "Email-i nuk u dërgua. Kontrolloni serverin, portën, sigurinë, emrin e "
 "përdoruesit dhe fjalëkalimin."
 
-#: apps/core/settings_views.py:709
+#: apps/core/settings_views.py:721
 msgid ""
 "Add an email address to your staff account or the business details first."
 msgstr ""
 "Shtoni fillimisht një adresë email në llogarinë tuaj ose te të dhënat e "
 "biznesit."
 
-#: apps/core/settings_views.py:710
+#: apps/core/settings_views.py:722
 msgid "InnKeeper test email"
 msgstr "Email provë nga InnKeeper"
 
-#: apps/core/settings_views.py:711
+#: apps/core/settings_views.py:723
 #, python-format
 msgid "Test email sent to %(to)s."
 msgstr "Email-i provë u dërgua te %(to)s."
 
-#: apps/core/settings_views.py:753
+#: apps/core/settings_views.py:765
 msgid "Nothing to import."
 msgstr "Asgjë për t'u importuar."
 
-#: apps/core/settings_views.py:757
+#: apps/core/settings_views.py:769
 #, python-format
 msgid "Imported: %(c)s new, %(u)s updated."
 msgstr "U importuan: %(c)s të reja, %(u)s të përditësuara."
 
-#: apps/core/settings_views.py:762
+#: apps/core/settings_views.py:774
 msgid "Choose a file."
 msgstr "Zgjidhni një skedar."
 
-#: apps/core/settings_views.py:766
+#: apps/core/settings_views.py:778
 msgid "The file is too large (5 MB at most)."
 msgstr "Skedari është shumë i madh (maksimumi 5 MB)."
 
-#: apps/core/settings_views.py:769
+#: apps/core/settings_views.py:781
 msgid ""
 "This is an old Excel file (.xls). In Excel choose File → Save as → “Excel "
 "Workbook (.xlsx)”, then upload that."
@@ -2131,14 +2155,14 @@ msgstr "Kuponi dhuratë %(code)s është përdorur plotësisht."
 msgid "Gift voucher %(code)s has only %(left)s left."
 msgstr "Kuponit dhuratë %(code)s i kanë mbetur vetëm %(left)s."
 
-#: apps/finance/loyalty.py:89 apps/frontdesk/services.py:346
-#: apps/outlets/services.py:502 apps/outlets/services.py:516
+#: apps/finance/loyalty.py:89 apps/frontdesk/services.py:347
+#: apps/outlets/services.py:505 apps/outlets/services.py:519
 msgid "Only a manager can void entries."
 msgstr "Vetëm menaxheri mund të anulojë regjistrime."
 
 #: apps/finance/loyalty.py:91 apps/finance/reports.py:93
-#: apps/frontdesk/services.py:348 apps/frontdesk/views.py:446
-#: apps/outlets/services.py:504 apps/outlets/services.py:518
+#: apps/frontdesk/services.py:349 apps/frontdesk/views.py:446
+#: apps/outlets/services.py:507 apps/outlets/services.py:521
 msgid "Give a reason for the void."
 msgstr "Jepni një arsye për anulimin."
 
@@ -2359,7 +2383,7 @@ msgid "shifts"
 msgstr "turnet"
 
 #: apps/finance/models.py:249 apps/finance/models.py:402
-#: apps/fiscal/models.py:104 apps/inventory/models.py:129
+#: apps/fiscal/models.py:113 apps/inventory/models.py:129
 #: apps/inventory/models.py:149 apps/inventory/models.py:178
 #: apps/inventory/models.py:279 apps/outlets/models.py:392
 #: apps/staff/models.py:145 apps/staff/models.py:183
@@ -2804,7 +2828,7 @@ msgstr "Vetëm menaxheri mund të kthejë para."
 msgid "You already have a shift open."
 msgstr "Keni tashmë një turn të hapur."
 
-#: apps/finance/tabs.py:83 apps/finance/tabs.py:131 apps/fiscal/views.py:93
+#: apps/finance/tabs.py:83 apps/finance/tabs.py:131 apps/fiscal/views.py:101
 msgid "Enter an amount of zero or more."
 msgstr "Shkruani një shumë zero ose më shumë."
 
@@ -2963,7 +2987,7 @@ msgstr "Korrigjim"
 msgid "corrects"
 msgstr "korrigjon"
 
-#: apps/fiscal/models.py:51 apps/fiscal/models.py:105
+#: apps/fiscal/models.py:51 apps/fiscal/models.py:114
 msgid "cash register"
 msgstr "arka"
 
@@ -2976,70 +3000,88 @@ msgstr "totali"
 msgid "problem"
 msgstr "problemi"
 
-#: apps/fiscal/models.py:75
+#: apps/fiscal/models.py:69
+msgid "e-invoice code (EIC)"
+msgstr "kodi i e-faturës (EIC)"
+
+#: apps/fiscal/models.py:80
 msgid "fiscal document"
 msgstr "dokument fiskal"
 
-#: apps/fiscal/models.py:76
+#: apps/fiscal/models.py:81
 msgid "fiscal documents"
 msgstr "dokumente fiskale"
 
-#: apps/fiscal/models.py:101 templates/fiscal/documents.html:48
+#: apps/fiscal/models.py:110 templates/fiscal/documents.html:48
 msgid "Opening cash"
 msgstr "Gjendja fillestare e arkës"
 
-#: apps/fiscal/models.py:102 templates/fiscal/documents.html:48
+#: apps/fiscal/models.py:111 templates/fiscal/documents.html:48
 msgid "Cash taken out"
 msgstr "Tërheqje parash"
 
-#: apps/fiscal/models.py:106
+#: apps/fiscal/models.py:115
 msgid "operation"
 msgstr "veprimi"
 
-#: apps/fiscal/models.py:119
+#: apps/fiscal/models.py:128
 msgid "cash deposit"
 msgstr "deklarim i arkës"
 
-#: apps/fiscal/models.py:120
+#: apps/fiscal/models.py:129
 msgid "cash deposits"
 msgstr "deklarime të arkës"
 
-#: apps/fiscal/services.py:202 apps/fiscal/services.py:211
+#: apps/fiscal/services.py:209 apps/fiscal/services.py:218
 msgid "offline"
 msgstr "pa lidhje"
 
-#: apps/fiscal/services.py:214
+#: apps/fiscal/services.py:221
 #, python-format
 msgid ""
 "No connection to the tax authority (%(e)s). It will be sent automatically."
 msgstr "Nuk ka lidhje me tatimet (%(e)s). Do të dërgohet automatikisht."
 
-#: apps/fiscal/services.py:453 templates/booking/search.html:31
+#: apps/fiscal/services.py:259
+#, python-format
+msgid ""
+"No connection to the e-invoice service (%(e)s). It will be sent "
+"automatically."
+msgstr ""
+"Nuk ka lidhje me shërbimin e e-faturës (%(e)s). Do të dërgohet "
+"automatikisht."
+
+#: apps/fiscal/services.py:499 templates/booking/search.html:31
 #: templates/frontdesk/reservation_detail.html:180
 #: templates/staff/payroll.html:48
 msgid "night"
 msgstr "natë"
 
-#: apps/fiscal/views.py:71
+#: apps/fiscal/views.py:70
+#, python-format
+msgid "E-invoice registered: EIC %(eic)s"
+msgstr "E-fatura u regjistrua: EIC %(eic)s"
+
+#: apps/fiscal/views.py:79
 #, python-format
 msgid "Registered: NIVF %(fic)s"
 msgstr "U regjistrua: NIVF %(fic)s"
 
-#: apps/fiscal/views.py:76
+#: apps/fiscal/views.py:84
 #, python-format
 msgid "%(n)s document(s) registered."
 msgstr "U regjistruan %(n)s dokument(e)."
 
-#: apps/fiscal/views.py:84
+#: apps/fiscal/views.py:92
 msgid "Fiscalization is not set up."
 msgstr "Fiskalizimi nuk është konfiguruar."
 
-#: apps/fiscal/views.py:103
+#: apps/fiscal/views.py:111
 #, python-format
 msgid "Reported to the tax authority: %(op)s %(a)s."
 msgstr "U deklarua në tatime: %(op)s %(a)s."
 
-#: apps/fiscal/views.py:106
+#: apps/fiscal/views.py:114
 #, python-format
 msgid "Not registered: %(e)s"
 msgstr "Nuk u regjistrua: %(e)s"
@@ -3317,7 +3359,7 @@ msgid "Too many attempts. Please try again later or contact us."
 msgstr "Shumë përpjekje. Ju lutemi provoni më vonë ose na kontaktoni."
 
 #: apps/frontdesk/checkin.py:258 apps/frontdesk/services.py:30
-#: apps/frontdesk/services.py:374 apps/frontdesk/views.py:180
+#: apps/frontdesk/services.py:375 apps/frontdesk/views.py:180
 msgid "Closed or cancelled reservations cannot be changed."
 msgstr "Rezervimet e mbyllura ose të anuluara nuk mund të ndryshohen."
 
@@ -4074,7 +4116,7 @@ msgid "The arrival date can't change after check-in."
 msgstr "Data e mbërritjes nuk mund të ndryshojë pas check-in."
 
 #: apps/frontdesk/services.py:37 apps/frontdesk/services.py:67
-#: apps/frontdesk/services.py:379
+#: apps/frontdesk/services.py:380
 #, python-format
 msgid "Room %(n)s is out of order."
 msgstr "Dhoma %(n)s është jashtë përdorimit."
@@ -4096,7 +4138,7 @@ msgstr ""
 msgid "The departure date has already passed. Update the dates first."
 msgstr "Data e largimit ka kaluar. Përditësoni fillimisht datat."
 
-#: apps/frontdesk/services.py:70 apps/frontdesk/services.py:387
+#: apps/frontdesk/services.py:70 apps/frontdesk/services.py:388
 #, python-format
 msgid "Room %(n)s is still occupied by %(g)s."
 msgstr "Dhoma %(n)s është ende e zënë nga %(g)s."
@@ -4160,21 +4202,21 @@ msgstr "Sasia duhet të jetë të paktën 1 dhe çmimi nuk mund të jetë negati
 msgid "Only cash can be taken in another currency."
 msgstr "Në një monedhë tjetër mund të merren vetëm para në dorë."
 
-#: apps/frontdesk/services.py:329 apps/outlets/services.py:323
+#: apps/frontdesk/services.py:330 apps/outlets/services.py:326
 msgid "The cash given is less than the amount."
 msgstr "Paratë e dhëna janë më pak se shuma."
 
-#: apps/frontdesk/services.py:333
+#: apps/frontdesk/services.py:334
 #, python-format
 msgid "Only a manager can refund more than the guest's credit (%(c)s)."
 msgstr ""
 "Vetëm menaxheri mund të rimbursojë më shumë se teprica e mysafirit (%(c)s)."
 
-#: apps/frontdesk/services.py:351
+#: apps/frontdesk/services.py:352
 msgid "Already voided."
 msgstr "Është anuluar tashmë."
 
-#: apps/frontdesk/services.py:356
+#: apps/frontdesk/services.py:357
 msgid ""
 "This comes from a restaurant/bar bill. Void that receipt instead (Receipts →"
 " void), so stock and the fiscal receipt are corrected too."
@@ -5488,7 +5530,7 @@ msgid "Sold: %(n)s × %(item)s · %(total)s"
 msgstr "U shit: %(n)s × %(item)s · %(total)s"
 
 #: apps/outlets/bookings.py:21 apps/outlets/services.py:28
-#: apps/outlets/services.py:449
+#: apps/outlets/services.py:452
 msgid "That table belongs to another outlet."
 msgstr "Ajo tavolinë i përket një pike tjetër."
 
@@ -6345,11 +6387,11 @@ msgstr "Nr. i faturës"
 msgid "will be added when the connection returns"
 msgstr "do të shtohet kur të kthehet lidhja"
 
-#: apps/outlets/printing.py:283 templates/fiscal/_block.html:7
+#: apps/outlets/printing.py:283 templates/fiscal/_block.html:8
 msgid "Operator"
 msgstr "Operatori"
 
-#: apps/outlets/printing.py:285 templates/fiscal/_block.html:8
+#: apps/outlets/printing.py:285 templates/fiscal/_block.html:9
 msgid "TEST – not valid for tax"
 msgstr "PROVË – jo e vlefshme për tatimet"
 
@@ -6444,8 +6486,8 @@ msgstr ""
 msgid "Give a reason for the discount."
 msgstr "Jepni një arsye për zbritjen."
 
-#: apps/outlets/services.py:296 apps/outlets/services.py:363
-#: apps/outlets/services.py:407
+#: apps/outlets/services.py:296 apps/outlets/services.py:366
+#: apps/outlets/services.py:410
 msgid "The order is empty."
 msgstr "Porosia është bosh."
 
@@ -6454,27 +6496,27 @@ msgstr "Porosia është bosh."
 msgid "Only %(left)s is left to pay."
 msgstr "Mbeten vetëm %(left)s për t'u paguar."
 
-#: apps/outlets/services.py:326
+#: apps/outlets/services.py:329
 msgid "The tip can't be negative."
 msgstr "Bakshishi nuk mund të jetë negativ."
 
-#: apps/outlets/services.py:328
+#: apps/outlets/services.py:331
 msgid "The tip can't be more than the change."
 msgstr "Bakshishi nuk mund të jetë më shumë se kusuri."
 
-#: apps/outlets/services.py:365
+#: apps/outlets/services.py:368
 msgid "Only in-house guests can charge to their room."
 msgstr "Në dhomë mund të kalohet vetëm për mysafirët që janë në hotel."
 
-#: apps/outlets/services.py:368
+#: apps/outlets/services.py:371
 msgid "This guest's bill is closed."
 msgstr "Llogaria e këtij mysafiri është e mbyllur."
 
-#: apps/outlets/services.py:410
+#: apps/outlets/services.py:413
 msgid "This account is closed."
 msgstr "Kjo llogari është e mbyllur."
 
-#: apps/outlets/services.py:415
+#: apps/outlets/services.py:418
 #, python-format
 msgid ""
 "This would take %(name)s over the credit limit of %(limit)s (owes "
@@ -6483,7 +6525,7 @@ msgstr ""
 "Me këtë, %(name)s do të kalonte kufirin e kredisë prej %(limit)s (tani "
 "detyrohet %(balance)s). Menaxheri mund ta lejojë."
 
-#: apps/outlets/services.py:460
+#: apps/outlets/services.py:463
 msgid ""
 "This bill has payments, so it can't be merged. Move it to a free table "
 "instead."
@@ -6491,28 +6533,28 @@ msgstr ""
 "Kjo llogari ka pagesa, ndaj nuk mund të bashkohet. Kalojeni në një tavolinë "
 "të lirë."
 
-#: apps/outlets/services.py:470
+#: apps/outlets/services.py:473
 #, python-format
 msgid "Merged into #%(n)s"
 msgstr "U bashkua me #%(n)s"
 
-#: apps/outlets/services.py:484
+#: apps/outlets/services.py:487
 msgid "Only a manager can cancel an order that has items."
 msgstr "Vetëm menaxheri mund të anulojë një porosi me artikuj."
 
-#: apps/outlets/services.py:486
+#: apps/outlets/services.py:489
 msgid "This bill has payments. Void them first."
 msgstr "Kjo llogari ka pagesa. Anulojini fillimisht."
 
-#: apps/outlets/services.py:521
+#: apps/outlets/services.py:524
 msgid "Only closed bills can be voided."
 msgstr "Vetëm llogaritë e mbyllura mund të anulohen."
 
-#: apps/outlets/services.py:525
+#: apps/outlets/services.py:528
 msgid "This was charged to a guest bill that is already closed."
 msgstr "Kjo u kalua në një llogari mysafiri që është mbyllur tashmë."
 
-#: apps/outlets/services.py:530
+#: apps/outlets/services.py:533
 #, python-format
 msgid "Voided: %(r)s"
 msgstr "Anuluar: %(r)s"
@@ -10996,7 +11038,7 @@ msgstr ""
 "zyrën e taksave të bashkisë. Ndryshoni shumën te Cilësimet → Taksa e "
 "turizmit."
 
-#: templates/fiscal/_block.html:11
+#: templates/fiscal/_block.html:12
 msgid "Fiscal codes are being issued…"
 msgstr "Kodet fiskale po lëshohen…"
 
@@ -11037,6 +11079,14 @@ msgstr "korrigjim"
 #: templates/fiscal/documents.html:31
 msgid "sent later"
 msgstr "dërguar më vonë"
+
+#: templates/fiscal/documents.html:31
+msgid "E-invoice"
+msgstr "E-faturë"
+
+#: templates/fiscal/documents.html:31
+msgid "waiting to be sent"
+msgstr "në pritje për t'u dërguar"
 
 #: templates/fiscal/documents.html:32
 msgid "Send again"
@@ -12122,6 +12172,14 @@ msgstr ""
 "Një kompani që paguan me transfertë bankare ka nevojë edhe për një faturë "
 "elektronike (e-faturë). Lëshojeni te portali self-care i tatimeve me të "
 "njëjtat artikuj, NUIS dhe shumë."
+
+#: templates/includes/invoice_buyer.html:29
+msgid ""
+"When the bill is closed, InnKeeper also sends it to the tax office as an "
+"electronic invoice (e-faturë) for this company."
+msgstr ""
+"Kur fatura mbyllet, InnKeeper ia dërgon edhe tatimeve si faturë elektronike "
+"(e-faturë) për këtë kompani."
 
 #: templates/includes/made_with.html:1
 msgid "Made with InnKeeper"

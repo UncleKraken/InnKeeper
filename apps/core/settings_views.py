@@ -319,10 +319,22 @@ class FiscalSettingsForm(StyledFormMixin, forms.ModelForm):
             "fiscal_town",
             "vat_rate_accommodation",
             "fiscal_exchange_rate",
+            "bank_iban",
+            "einvoice_due_days",
             "certificate_file",
             "fiscal_certificate_password",
         ]
         widgets = {"fiscal_certificate_password": forms.PasswordInput(render_value=True)}
+
+    def clean_bank_iban(self):
+        """Spaces are fine when typing; the check digits catch a mistyped number (ISO 13616, mod 97)."""
+        iban = "".join((self.cleaned_data.get("bank_iban") or "").split()).upper()
+        if not iban:
+            return ""
+        digits = "".join(str(int(ch, 36)) for ch in iban[4:] + iban[:4]) if iban.isalnum() else ""
+        if not (15 <= len(iban) <= 34 and iban[:2].isalpha() and iban[2:4].isdigit() and digits and int(digits) % 97 == 1):
+            raise forms.ValidationError(_("This IBAN isn't valid. Check it on your bank statement."))
+        return iban
 
     def clean(self):
         import base64

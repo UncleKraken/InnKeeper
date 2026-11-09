@@ -248,6 +248,32 @@ def fiscal_probe():
         except Exception as e:  # informational only
             check(f"Tax authority probe ({label})", False, f"{type(e).__name__}: {e}", required=False)
 
+    # The Einvoice Service: a signed UBL invoice straight to its test endpoint. With a made-up certificate the
+    # answer is a certificate/signature fault, which still shows the address and SOAP action are right.
+    try:
+        from apps.fiscal import ubl
+
+        payload = {
+            "nuis": hs.tax_id, "in_vat": True, "currency": "ALL",
+            "seller": {"nuis": hs.tax_id, "name": "InnKeeper e2e", "address": "-", "town": "Tiranë"},
+            "buyer": {"IDType": "NUIS", "IDNum": "L12345678A", "Name": "E2E sh.p.k.", "Address": "-", "Town": "-", "Country": "ALB"},
+            "lines": [{"name": "Test", "code": "", "unit": "copë", "quantity": "1", "unit_price": "120", "vat_rate": "20.00"}],
+            "payments": [{"type": "ACCOUNT", "amount": "120.00"}],
+            "invoice": {
+                "type": "NONCASH", "issue_datetime": cis.now_str(), "inv_num": "1/2026/" + hs.fiscal_tcr_code,
+                "inv_ord_num": 1, "tcr": hs.fiscal_tcr_code, "operator": hs.fiscal_operator_code,
+                "business_unit": hs.fiscal_business_unit, "software": hs.fiscal_software_code,
+                "iic": "0" * 32, "iic_signature": "0" * 512, "corrects": None, "is_einvoice": True,
+            },
+        }
+        xml = cis.einvoice_request(ubl.signed_bytes(payload, "00000000-0000-4000-8000-000000000000", c), c)
+        eic = cis.register_einvoice(xml, test=True)
+        check("E-invoice test system", True, f"ACCEPTED, EIC {eic}", required=False)
+    except cis.CISError as e:
+        check("E-invoice test system", True, f"fault {e.code}: {str(e)[:160]}", required=False)
+    except Exception as e:  # informational only
+        check("E-invoice test system", False, f"{type(e).__name__}: {e}"[:200], required=False)
+
     # A real sale through the till: InnKeeper signs it and sends it to the test system.
     try:
         from apps.accounts.models import User
