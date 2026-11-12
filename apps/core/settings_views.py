@@ -56,10 +56,15 @@ class BusinessForm(StyledFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if "guest_id_keep_years" in self.fields:
+            self.fields["guest_id_keep_years"].required = False  # empty = keep them
         if not self.instance.module_rooms:
             del self.fields["check_in_time"]
             del self.fields["check_out_time"]
             del self.fields["guest_id_keep_years"]
+
+    def clean_guest_id_keep_years(self):
+        return self.cleaned_data.get("guest_id_keep_years") or 0
 
     def clean(self):
         cleaned = super().clean()

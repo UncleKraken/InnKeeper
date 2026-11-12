@@ -1,4 +1,3 @@
-from datetime import timedelta
 from decimal import Decimal
 
 from django.urls import reverse
@@ -7,7 +6,6 @@ from apps.core.models import HotelSettings, clear_settings_cache
 from apps.core.testing import PASSWORD, HotelTestCase
 from apps.finance.models import Folio
 from apps.frontdesk import privacy
-from apps.frontdesk import services as fd
 from apps.frontdesk.models import Guest, Reservation, StayGuest
 
 
