@@ -1,5 +1,29 @@
 # Changelog
 
+## 2.34.2 — fixes from the phone tests
+
+**Shqip**
+
+- **Kërkimi në menu (telefon):** butoni ✕ për të pastruar kërkimin mbetet tani i dukshëm, dhe zgjedhja e një kategorie e pastron kërkimin.
+- **Ekrani i kuzhinës në telefon:** njoftimi "Prekni këtu për zërin" nuk mbulon më butonat e porosisë së fundit.
+- **Njoftimet** ("Gati për t'u shërbyer" etj.) zënë tani gjithë gjerësinë e telefonit.
+- **Lekët shfaqen pa presje dhjetore:** "500 ALL" në vend të "500.00 ALL" (arka, kuponi, fatura, raporti i turnit).
+- **Përditësimet:** shënimet "Çfarë ka të re" shfaqen të formatuara dhe vetëm në gjuhën tuaj.
+- Kodet e rezervimeve nuk ndahen më në dy rreshta në telefon.
+
+**English**
+
+- **Menu search (phone):** the ✕ that clears the search now stays visible, and picking a category clears the search.
+- **Kitchen screen on a phone:** the "Tap here for sound" notice no longer covers the last order's buttons.
+- **Notices** ("Ready to serve" and others) now use the full width of the phone.
+- **Lekë are shown whole:** "500 ALL" instead of "500.00 ALL" (till, receipt, bill, shift report).
+- **Updates:** the "What's new" notes are formatted and shown only in your language.
+- Reservation codes no longer break onto two lines on a phone.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.34.2.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.34.1 — fixes from a full test day
 
 **Shqip**
