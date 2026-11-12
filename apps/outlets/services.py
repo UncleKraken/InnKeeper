@@ -329,6 +329,9 @@ def pay_order(
         raise BusinessError(_("The tip can't be negative."))
     if tendered is not None and tip > tendered - amount:
         raise BusinessError(_("The tip can't be more than the change."))
+    from apps.fiscal.buyer import check_payment
+
+    check_payment(order, method, order.total)
     if voucher is not None:
         loyalty.check_spend(voucher, amount)
         reference, tip, tendered = voucher.code, Decimal("0"), None

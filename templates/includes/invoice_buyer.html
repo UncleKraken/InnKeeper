@@ -23,6 +23,9 @@
   <strong>{% translate "Invoice to" %}:</strong> {{ obj.buyer_name }} · NUIS <span class="mono">{{ obj.buyer_nuis }}</span>
 </section>
 {% endif %}
+{% if buyer_over_limit %}
+<div class="alert alert-warning">{% icon "alert" %} {% translate "This bill is above 100,000 lekë: a company has to pay it by bank transfer, not cash or card." %}</div>
+{% endif %}
 {% if needs_einvoice == "manual" %}
 <div class="alert alert-warning">{% icon "alert" %} {% translate "A company paying by bank transfer also needs an electronic invoice (e-faturë). Issue it in the tax office's self-care portal with the same items, NUIS and amount." %}</div>
 {% elif needs_einvoice == "auto" and obj.status == "open" %}

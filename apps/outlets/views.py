@@ -215,6 +215,12 @@ def _buyer_draft(request, order):
     return draft(request, f"order:{order.pk}")
 
 
+def _over_limit(order) -> bool:
+    from apps.fiscal.buyer import over_cash_limit
+
+    return over_cash_limit(order, order.total)
+
+
 def _ticket_context(order) -> dict:
     """Everything the bill panel and the phone bar need (also rendered on their own after a tap)."""
     in_house = (
@@ -229,6 +235,7 @@ def _ticket_context(order) -> dict:
         "unsent": order.unsent_count,
         "ready_count": order.tickets.filter(status=KitchenTicket.Status.READY).count(),
         "in_house": in_house,
+        "buyer_over_limit": _over_limit(order),
         "methods": Payment.Method.choices,
         "payments": order.payments.filter(voided=False).select_related("created_by"),
         "move_tables": order.outlet.tables.filter(is_active=True).exclude(pk=order.table_id),

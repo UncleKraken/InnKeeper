@@ -222,3 +222,82 @@ class IbanSettingTests(HotelTestCase):
             self.assertEqual("bank_iban" not in f.errors, ok, value)
             if ok and value:
                 self.assertEqual(f.cleaned_data["bank_iban"], "AL47212110090000000235698741")
+
+
+class CompanyCashLimitTests(HotelTestCase):
+    """Fiscal package 2026: above 100,000 lekë a company pays by bank transfer (and gets an e-invoice)."""
+
+    def setUp(self):
+        configure()
+        clear_settings_cache()
+        self.cis = FakeCIS()
+        p = mock.patch.object(cis, "send", self.cis)
+        p.start()
+        self.addCleanup(p.stop)
+        services._offline_until = None
+
+    def _company_folio(self, amount):
+        res = self.make_reservation(nights=1, status=Reservation.Status.CHECKED_IN)
+        folio, _ = Folio.objects.get_or_create(reservation=res)
+        folio.buyer_name, folio.buyer_nuis = "Beta", "M01234567C"
+        folio.save()
+        fd.add_charge(folio, description="Conference", quantity=1, unit_price=D(amount), user=self.reception)
+        return res, folio
+
+    def test_cash_or_card_refused_above_the_limit_bank_transfer_accepted(self):
+        from apps.core.exceptions import BusinessError
+
+        res, folio = self._company_folio("120000")
+        for method in ("cash", "card"):
+            with self.assertRaises(BusinessError):
+                fd.add_payment(folio, amount=D("120000"), method=method, user=self.reception)
+        self.client.login(username="desk", password=PASSWORD)
+        page = self.client.get(reverse("frontdesk:reservation_detail", args=[res.pk])).content.decode()
+        self.assertTrue("100,000" in page or "100 000" in page)
+        fd.add_payment(folio, amount=D("120000"), method="bank_transfer", user=self.reception)
+
+    def test_under_the_limit_cash_is_fine_and_private_guests_are_not_limited(self):
+        _res, folio = self._company_folio("90000")
+        fd.add_payment(folio, amount=D("90000"), method="cash", user=self.reception)
+        res = self.make_reservation(room=self.room2, nights=1, status=Reservation.Status.CHECKED_IN)
+        folio, _ = Folio.objects.get_or_create(reservation=res)
+        fd.add_charge(folio, description="Wedding", quantity=1, unit_price=D("300000"), user=self.reception)
+        fd.add_payment(folio, amount=D("300000"), method="cash", user=self.reception)
+
+    def test_bills_in_euro_are_converted_and_unregistered_businesses_are_not_checked(self):
+        from apps.core.exceptions import BusinessError
+
+        HotelSettings.objects.update(currency="EUR", fiscal_exchange_rate=D("100.5"))
+        clear_settings_cache()
+        _res, folio = self._company_folio("1000")  # 100,500 lekë
+        with self.assertRaises(BusinessError):
+            fd.add_payment(folio, amount=D("1000"), method="cash", user=self.reception)
+        HotelSettings.objects.update(tax_status="none", fiscal_enabled=False)
+        clear_settings_cache()
+        fd.add_payment(folio, amount=D("1000"), method="cash", user=self.reception)
+
+    def test_till_company_bill_paid_by_bank_transfer_is_an_e_invoice(self):
+        from apps.outlets import services as pos
+
+        order = pos.open_order(self.restaurant, table=self.table, user=self.waiter)
+        pos.add_item(order, self.dish, user=self.waiter, quantity=10000)
+        order.buyer_name, order.buyer_nuis = "Gama", "K31234567Z"
+        order.save()
+        self.client.login(username="waiter", password=PASSWORD)
+        r = self.client.get(reverse("outlets:order", args=[order.pk]))
+        self.assertContains(r, 'name="how" value="bank_transfer"')
+        self.assertTrue("100,000" in r.content.decode() or "100 000" in r.content.decode())
+        order.refresh_from_db()
+        r = self.client.post(reverse("outlets:settle", args=[order.pk]), {"how": "card", "amount": f"{order.remaining:.2f}"})
+        order.refresh_from_db()
+        self.assertTrue(order.is_open)
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(
+                reverse("outlets:settle", args=[order.pk]),
+                {"how": "bank_transfer", "amount": f"{order.remaining:.2f}", "remaining": f"{order.remaining:.2f}"},
+            )
+        order.refresh_from_db()
+        self.assertFalse(order.is_open)
+        inv = self.cis.invoices()[-1].find(f"{{{cis.NS}}}Invoice")
+        self.assertEqual((inv.get("TypeOfInv"), inv.get("IsEinvoice")), ("NONCASH", "true"))
+        self.assertTrue(FiscalDocument.objects.get(order=order).eic)

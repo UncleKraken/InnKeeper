@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.33.1 — company payments above 100,000 lekë
+
+**Shqip**
+
+- **Kufiri i parave në dorë mes bizneseve (paketa fiskale 2026):** mbi 100 000 lekë një kompani paguan me transfertë bankare. Për një faturë me NUIS mbi këtë shumë, InnKeeper nuk pranon para në dorë, kartë ose kupon dhuratë dhe e shpjegon pse; me transfertë bankare e-fatura dërgohet vetë. (Kontrollohet vetëm për bizneset e regjistruara; faturat në euro kthehen në lekë me kursin e fiskalizimit.) Pa këtë, tatimet do ta refuzonin faturën (gabimi 40).
+- **Arka:** për një faturë me kompani, te butoni % ka tani "Paguar me transfertë bankare".
+- Te dokumentet fiskale: një faturë e shënuar si e-faturë konfirmohet nga tatimet vetëm pasi të regjistrohet e-fatura (specifikimi teknik v09), dhe kjo tani shkruhet aty.
+
+**English**
+
+- **Cash limit between businesses (fiscal package 2026):** above 100,000 lekë a company pays by bank transfer. For a bill with a NUIS above that amount, InnKeeper refuses cash, card or gift voucher and explains why; with a bank transfer the e-invoice is sent by itself. (Only checked for registered businesses; bills in euro are converted to lekë at the fiscal exchange rate.) Without this, the tax office would reject the invoice (error 40).
+- **Till:** for a bill with a company, the % button now has "Paid by bank transfer".
+- In the fiscal documents: an invoice marked as an e-invoice is confirmed by the tax office only once the e-invoice is registered (technical specification v09), and that is now said there.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.33.1.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.33.0 — electronic invoices (e-faturë)
 
 **Shqip**

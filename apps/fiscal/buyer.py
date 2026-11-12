@@ -8,6 +8,7 @@ self-care portal (the bill shows a reminder).
 """
 
 import re
+from decimal import Decimal
 
 from django import forms
 from django.utils.translation import gettext as _
@@ -15,6 +16,11 @@ from django.utils.translation import gettext_lazy
 
 NUIS_RE = re.compile(r"^[A-Z]\d{8}[A-Z]$")
 NONCASH_METHODS = {"bank_transfer", "other"}
+# Fiscal package 2026: businesses may not pay each other more than 100,000 lekë in cash; above that the payment
+# goes through a bank and the invoice is an e-invoice. Card payments are cash-type fiscal invoices too, which the
+# tax office rejects for a company above the limit (error 40), so only a bank transfer is allowed there.
+B2B_CASH_LIMIT = Decimal("100000")
+CASH_TYPE_METHODS = {"cash", "card", "online", "voucher"}
 
 
 def clean_nuis(value: str) -> str:
@@ -115,3 +121,33 @@ def needs_einvoice(obj, payments) -> str:
 
     hs = HotelSettings.load()
     return "auto" if hs.fiscal_configured and ubl.supported({"currency": hs.currency}) else "manual"
+
+
+def in_lek(amount) -> Decimal | None:
+    from apps.core.models import HotelSettings
+
+    hs = HotelSettings.load()
+    if (hs.currency or "ALL").upper() == "ALL":
+        return Decimal(amount)
+    return Decimal(amount) * hs.fiscal_exchange_rate if hs.fiscal_exchange_rate else None
+
+
+def over_cash_limit(obj, bill_amount) -> bool:
+    """A company's bill above the limit for cash between businesses (only checked for registered businesses)."""
+    from apps.core.models import HotelSettings
+
+    if not getattr(obj, "buyer_nuis", "") or not HotelSettings.load().registered:
+        return False
+    lek = in_lek(bill_amount)
+    return lek is not None and lek > B2B_CASH_LIMIT
+
+
+def check_payment(obj, method: str, bill_amount) -> None:
+    """Refuse cash, card or voucher for a company bill above 100,000 lekë: it must be paid by bank transfer."""
+    from apps.core.exceptions import BusinessError
+
+    if method in CASH_TYPE_METHODS and over_cash_limit(obj, bill_amount):
+        raise BusinessError(
+            _("Above 100,000 lekë a company must pay by bank transfer (the law on cash between businesses). "
+              "Record a bank transfer: the e-invoice is sent with it.")
+        )

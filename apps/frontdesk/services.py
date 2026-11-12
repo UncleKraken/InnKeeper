@@ -333,6 +333,10 @@ def add_payment(folio: Folio, *, amount: Decimal, method: str, reference: str = 
         raise BusinessError(
             _("Only a manager can refund more than the guest's credit (%(c)s).") % {"c": f"{max(-folio.balance, 0):.2f}"}
         )
+    if amount > 0:
+        from apps.fiscal.buyer import check_payment
+
+        check_payment(folio, method, max(folio.total_charges, folio.total_payments + amount))
     payment = Payment.objects.create(folio=folio, amount=amount, method=method, reference=reference, created_by=user, **foreign)
     audit(user, "folio.payment", f"{folio.number}: {payment.get_method_display()} {amount}"
           + (f" ({foreign['foreign_amount']} {foreign['foreign_currency']})" if foreign else ""), folio)

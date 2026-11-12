@@ -269,6 +269,7 @@ def reservation_detail(request, pk):
             "checkin": _checkin_ctx(res, address_for_other_devices(request)),
             "buyer_form": _buyer_form(request, folio, res),
             "needs_einvoice": _needs_einvoice(folio, payments),
+            "buyer_over_limit": _over_limit(folio),
         },
     )
 
@@ -277,6 +278,12 @@ def _buyer_form(request, folio, res):
     from apps.fiscal.buyer import form_for
 
     return form_for(request, f"folio:{folio.pk}", folio, res.guest.company)
+
+
+def _over_limit(folio):
+    from apps.fiscal.buyer import over_cash_limit
+
+    return over_cash_limit(folio, folio.total_charges)
 
 
 def _needs_einvoice(folio, payments):
