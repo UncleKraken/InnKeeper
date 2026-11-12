@@ -707,7 +707,11 @@ pre.bank { background: var(--surface-2); border: 1px solid var(--border); paddin
 .progress { border-radius: 99px; overflow: hidden; }
 .progress-bar { height: 100%; background: var(--primary); transition: width .4s; }
 #progress .progress { height: 10px; margin: .75rem 0; }
-.release-notes { font-size: .92rem; line-height: 1.55; max-height: 22rem; overflow: auto; }
+.release-notes { font-size: .92rem; line-height: 1.55; max-height: 22rem; overflow: auto; overflow-wrap: anywhere; }
+.release-notes h4 { margin: .6rem 0 .3rem; font-size: .95rem; }
+.release-notes ul { padding-left: 1.2rem; margin: .3rem 0; }
+.release-notes li { margin: .25rem 0; }
+.release-notes p { margin: .3rem 0; }
 
 /* Alerts with a button: text on the left, button on the right (stacked on phones). */
 .alert.row { gap: 1rem; }

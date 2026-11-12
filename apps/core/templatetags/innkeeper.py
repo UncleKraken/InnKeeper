@@ -105,3 +105,50 @@ def mul(a, b):
         return (Decimal(str(a)) * Decimal(str(b))).quantize(Decimal("0.01"))
     except (InvalidOperation, TypeError, ValueError):
         return ""
+
+
+@register.filter
+def release_notes(text):
+    """GitHub release notes (simple Markdown) as safe HTML, only in the reader's language (Shqip / English)."""
+    import re
+
+    from django.utils.html import escape
+    from django.utils.translation import get_language
+
+    text = (text or "").replace("\r\n", "\n")
+    # The notes hold "**Shqip**" and "**English**" sections; keep the one for the reader.
+    parts = re.split(r"^\*\*(Shqip|English)\*\*\s*$", text, flags=re.M)
+    if len(parts) >= 5:
+        sections = dict(zip(parts[1::2], parts[2::2]))
+        want = "Shqip" if (get_language() or "").startswith("sq") else "English"
+        body = sections.get(want, "")
+        # The install steps ("### Install or update ...") are for the download page, not this one.
+        text = re.split(r"^###\s", body, flags=re.M)[0]
+
+    def inline(s):
+        s = escape(s)
+        s = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", s)
+        s = re.sub(r"\[([^\]]+)\]\((https://[^)\s]+)\)", r'<a href="\2" target="_blank" rel="noopener">\1</a>', s)
+        return s
+
+    out, in_list = [], False
+    for line in text.split("\n"):
+        line = line.rstrip()
+        item = re.match(r"^\s*(?:[-*]|\d+\.)\s+(.*)", line)
+        if item:
+            if not in_list:
+                out.append("<ul>")
+                in_list = True
+            out.append(f"<li>{inline(item.group(1))}</li>")
+            continue
+        if in_list:
+            out.append("</ul>")
+            in_list = False
+        head = re.match(r"^(#{1,6})\s+(.*)", line)
+        if head:
+            out.append(f"<h4>{inline(head.group(2))}</h4>")
+        elif line.strip():
+            out.append(f"<p>{inline(line)}</p>")
+    if in_list:
+        out.append("</ul>")
+    return mark_safe("".join(out))

@@ -21,7 +21,7 @@
 <section class="card" id="offer">
   <div class="card-header"><h2>{% blocktranslate with v=newer.version %}InnKeeper {{ v }} is available{% endblocktranslate %}</h2></div>
   <div class="card-body">
-    {% if newer.notes %}<div class="release-notes">{{ newer.notes|linebreaksbr }}</div>{% endif %}
+    {% if newer.notes %}<div class="release-notes">{{ newer.notes|release_notes }}</div>{% endif %}
   </div>
   <div class="card-footer">
     {% if can_install %}
