@@ -255,6 +255,8 @@ class CompanyCashLimitTests(HotelTestCase):
         page = self.client.get(reverse("frontdesk:reservation_detail", args=[res.pk])).content.decode()
         self.assertTrue("100,000" in page or "100 000" in page)
         fd.add_payment(folio, amount=D("120000"), method="bank_transfer", user=self.reception)
+        page = self.client.get(reverse("frontdesk:reservation_detail", args=[res.pk])).content.decode()
+        self.assertFalse("100,000" in page or "100 000" in page)  # paid: no more warning
 
     def test_under_the_limit_cash_is_fine_and_private_guests_are_not_limited(self):
         _res, folio = self._company_folio("90000")

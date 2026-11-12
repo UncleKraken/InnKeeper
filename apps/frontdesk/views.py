@@ -283,7 +283,7 @@ def _buyer_form(request, folio, res):
 def _over_limit(folio):
     from apps.fiscal.buyer import over_cash_limit
 
-    return over_cash_limit(folio, folio.total_charges)
+    return folio.balance > 0 and over_cash_limit(folio, folio.total_charges)  # nothing to warn about once paid
 
 
 def _needs_einvoice(folio, payments):

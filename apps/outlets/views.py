@@ -218,7 +218,7 @@ def _buyer_draft(request, order):
 def _over_limit(order) -> bool:
     from apps.fiscal.buyer import over_cash_limit
 
-    return over_cash_limit(order, order.total)
+    return order.remaining > 0 and over_cash_limit(order, order.total)
 
 
 def _ticket_context(order) -> dict:
