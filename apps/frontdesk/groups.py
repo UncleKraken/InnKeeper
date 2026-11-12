@@ -106,7 +106,7 @@ def _shared_bill(group) -> bool:
     )
 
 
-def group_check_out(reservation: Reservation, user, *, allow_balance: bool = False) -> Reservation:
+def group_check_out(reservation: Reservation, user, *, allow_balance: bool = False, left_on=None) -> Reservation:
     """Check-out for a group room. On a shared bill, other rooms' charges go to the main room's bill."""
     reservation = Reservation.objects.select_related("group").get(pk=reservation.pk)
     group = reservation.group
@@ -114,7 +114,7 @@ def group_check_out(reservation: Reservation, user, *, allow_balance: bool = Fal
     with transaction.atomic():  # a refused check-out must not leave bills half moved
         if shared and group.master_id != reservation.pk:
             # Post the nights on this room's bill, then hand everything over to the main room.
-            reservation = services.check_out(reservation, user, allow_balance=True)
+            reservation = services.check_out(reservation, user, allow_balance=True, left_on=left_on)
             if move_to_master(reservation, user):
                 Folio.objects.filter(reservation=reservation, status=Folio.Status.OPEN).update(
                     status=Folio.Status.CLOSED, closed_at=timezone.now()
@@ -125,7 +125,7 @@ def group_check_out(reservation: Reservation, user, *, allow_balance: bool = Fal
                 if other.status == Reservation.Status.CHECKED_IN:
                     services.post_accommodation(other, user)  # nights so far, so the main room pays them
                 move_to_master(other, user)
-        return services.check_out(reservation, user, allow_balance=allow_balance)
+        return services.check_out(reservation, user, allow_balance=allow_balance, left_on=left_on)
 
 
 # ---------- Views ----------

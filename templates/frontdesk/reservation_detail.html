@@ -14,11 +14,21 @@
     <a class="btn btn-secondary" href="{% url 'frontdesk:invoice' r.pk %}" target="_blank">{% icon "print" %} {% if hotel.registered %}{% translate "Invoice" %}{% else %}{% translate "Bill" %}{% endif %}</a>
     {% if r.status == "booked" %}
       <form method="post" action="{% url 'frontdesk:check_in' r.pk %}" class="inline">{% csrf_token %}<button class="btn">{% icon "login" %} {% translate "Check in" %}</button></form>
-    {% elif r.status == "checked_in" %}
+    {% elif r.status == "checked_in" and not overdue_days %}
       <form method="post" action="{% url 'frontdesk:check_out' r.pk %}" class="inline">{% csrf_token %}<button class="btn">{% icon "logout" %} {% translate "Check out" %}</button></form>
     {% endif %}
   </div>
 </div>
+
+{% if overdue_days %}
+  <div class="alert alert-warning" style="margin-bottom:1.25rem">
+    <p style="margin:0 0 .6rem">{% icon "alert" %} {% blocktranslate with d=r.departure|date:"d.m.Y" count n=overdue_days %}Booked to leave on {{ d }}, {{ n }} day ago, but not checked out yet. When did the guest leave?{% plural %}Booked to leave on {{ d }}, {{ n }} days ago, but not checked out yet. When did the guest leave?{% endblocktranslate %}</p>
+    <div class="row" style="gap:.5rem; flex-wrap:wrap">
+      <form method="post" action="{% url 'frontdesk:check_out' r.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="left" value="booked"><button class="btn">{% icon "logout" %} {% blocktranslate with d=r.departure|date:"d.m" %}Left on {{ d }}, as booked{% endblocktranslate %}</button></form>
+      <form method="post" action="{% url 'frontdesk:check_out' r.pk %}" class="inline" data-confirm="{% blocktranslate count n=overdue_days %}Charge {{ n }} more night?{% plural %}Charge {{ n }} more nights?{% endblocktranslate %}">{% csrf_token %}<button class="btn btn-secondary">{% translate "Stayed until today" %}</button></form>
+    </div>
+  </div>
+{% endif %}
 
 {% if r.status == "booked" and not r.confirmed %}
   <div class="alert alert-warning row" style="margin-bottom:1.25rem; justify-content:space-between">
@@ -58,6 +68,7 @@
           <tr><td></td><td class="muted">{% translate "Accommodation not yet posted" %} ({{ pending_nights }} × {{ r.rate|money }})</td><td class="num muted">{{ pending_nights }}</td><td class="num muted">{{ pending_rooms|money }}</td><td></td></tr>
           {% if pending_tax %}<tr><td></td><td class="muted">{% translate "Tourist tax not yet posted" %}</td><td></td><td class="num muted">{{ pending_tax|money }}</td><td></td></tr>{% endif %}
         {% endif %}
+        {% if extra_nights %}<tr><td></td><td class="muted"><em>{% blocktranslate count n=extra_nights %}Only if the guest stayed until today: {{ n }} more night{% plural %}Only if the guest stayed until today: {{ n }} more nights{% endblocktranslate %}</em></td><td class="num muted">{{ extra_nights }}</td><td class="num muted">+{{ extra_amount|money }}</td><td></td></tr>{% endif %}
         {% for p in payments %}
           <tr class="{% if p.voided %}voided{% endif %}">
             <td class="nowrap">{{ p.business_date|date:"d.m" }}</td>

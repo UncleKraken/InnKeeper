@@ -225,9 +225,16 @@ def reservation_detail(request, pk):
     folio, _created = Folio.objects.get_or_create(reservation=res)
     charges = folio.charges.select_related("outlet", "created_by").order_by("business_date", "id")
     payments = folio.payments.select_related("created_by").order_by("business_date", "id")
+    overdue_days = (timezone.localdate() - res.departure).days if res.status == Reservation.Status.CHECKED_IN else 0
     pending_nights = 0
     posted = folio.accommodation_nights_posted()
-    if res.status == Reservation.Status.CHECKED_IN:
+    extra_nights, extra_amount = 0, Decimal("0")
+    if res.status == Reservation.Status.CHECKED_IN and overdue_days > 0:
+        # Past the booked day: show the booked stay, and the extra nights apart (reception decides at check-out).
+        pending_nights = max(0, res.nights - posted)
+        extra_nights = res.nights_to_charge() - max(res.nights, posted)
+        extra_amount = res.amount_for_nights(max(res.nights, posted), res.nights_to_charge())
+    elif res.status == Reservation.Status.CHECKED_IN:
         pending_nights = max(0, max(res.nights, res.nights_to_charge()) - posted)
     elif res.status == Reservation.Status.BOOKED:
         pending_nights = max(0, res.nights - posted)
@@ -251,6 +258,9 @@ def reservation_detail(request, pk):
             "charges": charges,
             "payments": payments,
             "pending_nights": pending_nights,
+            "overdue_days": max(overdue_days, 0),
+            "extra_nights": max(extra_nights, 0),
+            "extra_amount": extra_amount,
             "pending_amount": pending_amount,
             "pending_rooms": pending_rooms,
             "pending_tax": pending_tax,
@@ -362,12 +372,18 @@ def check_in(request, pk):
 @module_required("frontdesk")
 def check_out(request, pk):
     allow_balance = request.POST.get("allow_balance") == "1" and request.user.is_manager
+    left_on = None
+    if request.POST.get("left") == "booked":  # the guest left on the booked day; nobody pressed check-out then
+        res = get_object_or_404(Reservation, pk=pk)
+        if res.departure < timezone.localdate():
+            left_on = res.departure
     return _action(
         request,
         pk,
         group_check_out,
         _("%(guest)s checked out. Room %(room)s sent to housekeeping."),
         allow_balance=allow_balance,
+        left_on=left_on,
     )
 
 

@@ -183,11 +183,17 @@ def night_audit(on_date: date | None = None) -> int:
     return posted
 
 
-def check_out(reservation: Reservation, user, *, allow_balance: bool = False) -> Reservation:
-    """Post room charges, require a settled bill, release the room to housekeeping."""
+def check_out(reservation: Reservation, user, *, allow_balance: bool = False, left_on: date | None = None) -> Reservation:
+    """Post room charges, require a settled bill, release the room to housekeeping.
+
+    `left_on`: the day the guest really left, when reception checks out late (e.g. the guest left on the
+    booked day but nobody pressed check-out). Only the nights up to that day are charged."""
     if reservation.status != Reservation.Status.CHECKED_IN:
         raise BusinessError(_("Only guests who are in house can be checked out."))
-    post_accommodation(reservation, user)
+    today = timezone.localdate()
+    if left_on is not None and not (reservation.arrival < left_on <= today):
+        raise BusinessError(_("The day the guest left must be after the arrival and not in the future."))
+    post_accommodation(reservation, user, on_date=left_on)
 
     with transaction.atomic():
         reservation = Reservation.objects.select_for_update().select_related("room", "guest").get(pk=reservation.pk)
@@ -206,12 +212,11 @@ def check_out(reservation: Reservation, user, *, allow_balance: bool = False) ->
                 % {"amount": f"{-balance:.2f}"}
             )
 
-        today = timezone.localdate()
         reservation.status = Reservation.Status.CHECKED_OUT
         reservation.checked_out_at = timezone.now()
-        # The stay ends today (at least one night). A late departure is only recorded if the room is
-        # free, so it never runs into the next guest's booking on the room rack.
-        actual = max(today, reservation.arrival + timedelta(days=1))
+        # The stay ends today (at least one night), or on the day the guest really left. A late departure is
+        # only recorded if the room is free, so it never runs into the next guest's booking on the room rack.
+        actual = left_on or max(today, reservation.arrival + timedelta(days=1))
         if actual < reservation.departure or (actual > reservation.departure and _room_free_between(reservation, reservation.departure, actual)):
             reservation.departure = actual
         reservation.save(update_fields=["status", "checked_out_at", "departure"])
