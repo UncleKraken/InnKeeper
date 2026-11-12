@@ -19,6 +19,8 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.utils.translation import pgettext
 
+from apps.core.templatetags.innkeeper import foreign_cash
+
 from .models import PrintJob, Printer
 
 ESC, GS = b"\x1b", b"\x1d"
@@ -259,7 +261,7 @@ def _receipt_document(order, printer: Printer, *, open_drawer: bool, language: s
             r.pair(p.get_method_display(), money(p.amount, sym))
             if p.tendered:
                 if p.foreign_currency:
-                    r.pair(_("Cash given"), f"{p.foreign_amount:.2f} {p.foreign_currency}")
+                    r.pair(_("Cash given"), foreign_cash(p))
                     r.pair(pgettext("exchange rate", "Rate"), f"1 {p.foreign_currency} = {p.foreign_rate.normalize():f} {hs.currency}")
                     r.pair(_("Value"), money(p.tendered, sym))
                 else:

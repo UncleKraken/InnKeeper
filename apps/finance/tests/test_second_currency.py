@@ -83,7 +83,7 @@ class SecondCurrencyTests(HotelTestCase):
         p = fd.add_payment(res.folio, amount=D("80.00"), method="cash", user=self.reception, foreign_amount=D("8500"))
         self.assertEqual((p.tendered, p.change, p.foreign_currency), (D("85.00"), D("5.00"), "ALL"))
         self.client.login(username="desk", password=PASSWORD)
-        self.assertContains(self.client.get(reverse("frontdesk:reservation_detail", args=[res.pk])), "8500.00 ALL")
+        self.assertContains(self.client.get(reverse("frontdesk:reservation_detail", args=[res.pk])), "8500 ALL")
 
     def test_settings_validate_the_rate(self):
         self.client.login(username="boss", password=PASSWORD)
@@ -108,10 +108,10 @@ class SecondCurrencyTests(HotelTestCase):
         pos.pay_order(o, method="cash", user=self.waiter, foreign={"tendered": D("12.00"), "foreign_currency": "ALL", "foreign_amount": D("1200.00"), "foreign_rate": D("0.0100")})
         o.refresh_from_db()
         data = receipt_document(o, Printer(name="Bar", connection="network", address="127.0.0.1"))
-        self.assertIn(b"1200.00 ALL", data)
+        self.assertIn(b"1200 ALL", data)
         self.assertIn(b"0.01", data)
         self.client.login(username="waiter", password=PASSWORD)
-        self.assertContains(self.client.get(reverse("outlets:receipt", args=[o.pk])), "1200.00 ALL")
+        self.assertContains(self.client.get(reverse("outlets:receipt", args=[o.pk])), "1200 ALL")
 
 
 class WholeUnitTests(HotelTestCase):

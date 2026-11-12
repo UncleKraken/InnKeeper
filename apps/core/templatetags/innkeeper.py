@@ -152,3 +152,14 @@ def release_notes(text):
     if in_list:
         out.append("</ul>")
     return mark_safe("".join(out))
+
+
+@register.filter
+def foreign_cash(payment):
+    """Cash given in the second currency, e.g. "500 ALL" (whole lekë) or "12.50 USD"."""
+    from apps.finance.currency import whole_units
+
+    if not payment.foreign_currency or payment.foreign_amount is None:
+        return ""
+    fmt = ".0f" if whole_units(payment.foreign_currency) else ".2f"
+    return f"{payment.foreign_amount:{fmt}} {payment.foreign_currency}"

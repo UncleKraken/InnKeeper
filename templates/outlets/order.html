@@ -10,7 +10,7 @@
 <div class="pos" id="pos">
   <section class="menu-pane">
     <div class="row" style="margin-bottom:.9rem">
-      <div class="search spacer">{% icon "search" %}<input class="input" type="search" id="item-search" placeholder="{% translate 'Search the menu…' %}" autocomplete="off"></div>
+      <div class="search spacer">{% icon "search" %}<input class="input" type="search" id="item-search" placeholder="{% translate 'Search the menu…' %}" autocomplete="off"><button type="button" class="search-clear hidden" id="item-search-clear" aria-label="{% translate 'Clear the search' %}">×</button></div>
     </div>
     <div class="cat-tabs" id="cat-tabs">
       <button type="button" data-cat="all" class="active">{% translate "All" %}</button>
@@ -57,8 +57,10 @@
   var items = document.querySelectorAll('#items form');
   var search = document.getElementById('item-search');
   var key = 'innkeeper-cat-{{ outlet.pk }}';
+  var clear = document.getElementById('item-search-clear');
   function apply(cat) {
     var q = (search.value || '').trim().toLowerCase();
+    clear.classList.toggle('hidden', !q);
     tabs.forEach(function (t) { t.classList.toggle('active', t.dataset.cat === cat); });
     items.forEach(function (f) {
       var okCat = q || cat === 'all' || f.dataset.cat === cat;
@@ -70,7 +72,10 @@
   var current = 'all';
   try { current = sessionStorage.getItem(key) || 'all'; } catch (e) {}
   if (!document.querySelector('#cat-tabs button[data-cat="' + current + '"]')) current = 'all';
-  tabs.forEach(function (t) { t.addEventListener('click', function () { current = t.dataset.cat; apply(current); t.scrollIntoView({block: 'nearest', inline: 'center'}); }); });
+  // A visible clear button (the browser's own one shows only while the box has focus), and picking a
+  // category ends the search, so after adding a dish the waiter gets back to the full menu with one tap.
+  clear.addEventListener('click', function () { search.value = ''; apply(current); });
+  tabs.forEach(function (t) { t.addEventListener('click', function () { search.value = ''; current = t.dataset.cat; apply(current); t.scrollIntoView({block: 'nearest', inline: 'center'}); }); });
   search.addEventListener('input', function () { apply(current); });
   apply(current);
 
@@ -234,7 +239,7 @@
       picks.forEach(function (v, i) {
         var b = document.createElement('button'); b.type = 'button';
         b.textContent = i === 0 ? '{{ _("Exact")|escapejs }}' : v.toFixed(v % 1 ? 2 : 0);
-        b.onclick = function () { tendered.value = v.toFixed(2); updateChange(); };
+        b.onclick = function () { tendered.value = v.toFixed(foreign() && whole ? 0 : 2); updateChange(); };
         box.appendChild(b);
       });
     }

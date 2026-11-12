@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 23:21+0100\n"
+"POT-Creation-Date: 2026-11-12 23:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -654,7 +654,7 @@ msgid "Stock items"
 msgstr "Artikujt e stokut"
 
 #: apps/core/importer.py:55 apps/finance/tourist_tax.py:71
-#: apps/outlets/printing.py:305 templates/base.html:36
+#: apps/outlets/printing.py:307 templates/base.html:36
 #: templates/booking/checkin.html:16 templates/booking/details.html:39
 #: templates/booking/email_guest.html:14 templates/booking/status.html:31
 #: templates/finance/tourist_tax.html:29 templates/frontdesk/breakfast.html:34
@@ -2677,7 +2677,7 @@ msgstr "Norma e TVSH-së"
 msgid "With VAT"
 msgstr "Me TVSH"
 
-#: apps/finance/monthly.py:177 apps/outlets/printing.py:250
+#: apps/finance/monthly.py:177 apps/outlets/printing.py:252
 #: templates/finance/monthly.html:37 templates/frontdesk/invoice.html:39
 #: templates/outlets/receipt.html:60
 msgid "Without VAT"
@@ -3013,7 +3013,7 @@ msgstr "I regjistruar"
 msgid "Rejected"
 msgstr "I refuzuar"
 
-#: apps/fiscal/models.py:36 apps/outlets/printing.py:226
+#: apps/fiscal/models.py:36 apps/outlets/printing.py:228
 #: templates/frontdesk/invoice.html:6 templates/frontdesk/invoice.html:19
 #: templates/outlets/receipt.html:6 templates/outlets/receipt.html:40
 #: templates/outlets/receipts.html:19
@@ -5183,7 +5183,7 @@ msgid "Average cost"
 msgstr "Kosto mesatare"
 
 #: apps/inventory/views.py:83 apps/outlets/loyalty_views.py:68
-#: apps/outlets/printing.py:264 templates/inventory/count_detail.html:13
+#: apps/outlets/printing.py:266 templates/inventory/count_detail.html:13
 #: templates/inventory/item_detail.html:45 templates/inventory/stock.html:33
 #: templates/inventory/transfer_detail.html:23
 #: templates/inventory/transfers.html:14 templates/outlets/vouchers.html:24
@@ -5249,7 +5249,7 @@ msgid "Invoice / reference"
 msgstr "Fatura / referenca"
 
 #: apps/inventory/views.py:221 apps/outlets/loyalty_views.py:74
-#: apps/outlets/printing.py:312 apps/staff/views.py:130
+#: apps/outlets/printing.py:314 apps/staff/views.py:130
 #: templates/inventory/count_form.html:34 templates/inventory/counts.html:13
 #: templates/inventory/transfer_send.html:9
 #: templates/staff/person_hours.html:21
@@ -6256,7 +6256,7 @@ msgstr "rezervime tavolinash"
 msgid "Paid"
 msgstr "Paguar"
 
-#: apps/outlets/models.py:448 apps/outlets/printing.py:272
+#: apps/outlets/models.py:448 apps/outlets/printing.py:274
 #: templates/outlets/receipt.html:76
 msgid "Charged to room"
 msgstr "Kaluar në dhomë"
@@ -6361,39 +6361,39 @@ msgstr "Refuzuar"
 msgid "reason"
 msgstr "arsyeja"
 
-#: apps/outlets/printing.py:122
+#: apps/outlets/printing.py:124
 msgid "No IP address set."
 msgstr "Nuk është vendosur adresë IP."
 
-#: apps/outlets/printing.py:129
+#: apps/outlets/printing.py:131
 #, python-format
 msgid "Could not reach the printer at %(where)s (%(error)s)."
 msgstr "Printeri në %(where)s nuk u arrit (%(error)s)."
 
-#: apps/outlets/printing.py:136
+#: apps/outlets/printing.py:138
 msgid "No printer name set."
 msgstr "Nuk është vendosur emri i printerit."
 
-#: apps/outlets/printing.py:141
+#: apps/outlets/printing.py:143
 msgid "Printing to installed printers needs the InnKeeper Windows app."
 msgstr ""
 "Printimi në printerë të instaluar kërkon aplikacionin InnKeeper për Windows."
 
-#: apps/outlets/printing.py:153
+#: apps/outlets/printing.py:155
 #, python-format
 msgid "Windows could not print to “%(name)s” (%(error)s)."
 msgstr "Windows nuk printoi dot te “%(name)s” (%(error)s)."
 
-#: apps/outlets/printing.py:158
+#: apps/outlets/printing.py:160
 #, python-format
 msgid "The system could not print to “%(name)s” (%(error)s)."
 msgstr "Sistemi nuk printoi dot te “%(name)s” (%(error)s)."
 
-#: apps/outlets/printing.py:163
+#: apps/outlets/printing.py:165
 msgid "This printer is switched off in InnKeeper."
 msgstr "Ky printer është çaktivizuar në InnKeeper."
 
-#: apps/outlets/printing.py:226 templates/finance/dashboard.html:87
+#: apps/outlets/printing.py:228 templates/finance/dashboard.html:87
 #: templates/frontdesk/groups.html:13
 #: templates/frontdesk/reservation_detail.html:14
 #: templates/frontdesk/reservation_detail.html:50
@@ -6401,86 +6401,86 @@ msgstr "Ky printer është çaktivizuar në InnKeeper."
 msgid "Bill"
 msgstr "Llogaria"
 
-#: apps/outlets/printing.py:229 templates/outlets/receipt.html:43
+#: apps/outlets/printing.py:231 templates/outlets/receipt.html:43
 msgid "Served by"
 msgstr "Shërbeu"
 
-#: apps/outlets/printing.py:244 templates/outlets/_ticket.html:45
+#: apps/outlets/printing.py:246 templates/outlets/_ticket.html:45
 #: templates/outlets/receipt.html:55
 msgid "Subtotal"
 msgstr "Nëntotali"
 
-#: apps/outlets/printing.py:245 templates/outlets/_ticket.html:48
+#: apps/outlets/printing.py:247 templates/outlets/_ticket.html:48
 #: templates/outlets/_ticket.html:188 templates/outlets/receipt.html:56
 #: templates/outlets/table_order.html:42
 msgid "Discount"
 msgstr "Zbritja"
 
-#: apps/outlets/printing.py:247 templates/core/settings_hub.html:78
+#: apps/outlets/printing.py:249 templates/core/settings_hub.html:78
 #: templates/outlets/receipt.html:58
 msgid "TOTAL"
 msgstr "TOTALI"
 
-#: apps/outlets/printing.py:251 templates/outlets/receipt.html:61
+#: apps/outlets/printing.py:253 templates/outlets/receipt.html:61
 #, python-format
 msgid "VAT %(r)s%%"
 msgstr "TVSH %(r)s%%"
 
-#: apps/outlets/printing.py:254 templates/outlets/receipt.html:66
+#: apps/outlets/printing.py:256 templates/outlets/receipt.html:66
 msgid "Bill — not yet paid"
 msgstr "Llogari — ende e papaguar"
 
-#: apps/outlets/printing.py:256 templates/outlets/receipt.html:68
+#: apps/outlets/printing.py:258 templates/outlets/receipt.html:68
 msgid "VOID"
 msgstr "ANULUAR"
 
-#: apps/outlets/printing.py:262 apps/outlets/printing.py:266
+#: apps/outlets/printing.py:264 apps/outlets/printing.py:268
 #: templates/outlets/_ticket.html:118 templates/outlets/receipt.html:73
 msgid "Cash given"
 msgstr "Para të dhëna"
 
-#: apps/outlets/printing.py:263
+#: apps/outlets/printing.py:265
 msgctxt "exchange rate"
 msgid "Rate"
 msgstr "Kursi"
 
-#: apps/outlets/printing.py:267 templates/core/about.html:46
+#: apps/outlets/printing.py:269 templates/core/about.html:46
 #: templates/core/settings_hub.html:311 templates/outlets/_ticket.html:123
 #: templates/outlets/receipt.html:73 templates/staff/holidays.html:18
 msgid "Change"
 msgstr "Kusuri"
 
-#: apps/outlets/printing.py:273 templates/outlets/receipt.html:79
+#: apps/outlets/printing.py:275 templates/outlets/receipt.html:79
 msgid "Signature"
 msgstr "Nënshkrimi"
 
-#: apps/outlets/printing.py:280 templates/fiscal/_block.html:4
+#: apps/outlets/printing.py:282 templates/fiscal/_block.html:4
 #: templates/fiscal/documents.html:22
 msgid "Invoice no."
 msgstr "Nr. i faturës"
 
-#: apps/outlets/printing.py:282 templates/fiscal/_block.html:6
+#: apps/outlets/printing.py:284 templates/fiscal/_block.html:6
 msgid "will be added when the connection returns"
 msgstr "do të shtohet kur të kthehet lidhja"
 
-#: apps/outlets/printing.py:283 templates/fiscal/_block.html:8
+#: apps/outlets/printing.py:285 templates/fiscal/_block.html:8
 msgid "Operator"
 msgstr "Operatori"
 
-#: apps/outlets/printing.py:285 templates/fiscal/_block.html:9
+#: apps/outlets/printing.py:287 templates/fiscal/_block.html:9
 msgid "TEST – not valid for tax"
 msgstr "PROVË – jo e vlefshme për tatimet"
 
-#: apps/outlets/printing.py:287 templates/outlets/receipt.html:82
+#: apps/outlets/printing.py:289 templates/outlets/receipt.html:82
 msgid "This is not a fiscal receipt."
 msgstr "Ky nuk është kupon fiskal."
 
-#: apps/outlets/printing.py:289 templates/frontdesk/invoice.html:53
+#: apps/outlets/printing.py:291 templates/frontdesk/invoice.html:53
 #: templates/outlets/receipt.html:82
 msgid "Internal receipt"
 msgstr "Kupon i brendshëm"
 
-#: apps/outlets/printing.py:327
+#: apps/outlets/printing.py:329
 msgid "Test print OK"
 msgstr "Printimi provë OK"
 
@@ -10955,7 +10955,7 @@ msgstr "Anulo"
 
 #: templates/finance/expenses.html:46
 #: templates/frontdesk/reservation_detail.html:244
-#: templates/outlets/order.html:187
+#: templates/outlets/order.html:192
 msgid "Why is this entry being voided?"
 msgstr "Pse po anulohet ky regjistrim?"
 
@@ -11598,7 +11598,7 @@ msgstr "Ta heqim këtë kalendar? Rezervimet e kopjuara mbeten."
 
 #: templates/frontdesk/channels.html:48 templates/marketing/contacts.html:10
 #: templates/outlets/_ticket.html:89 templates/outlets/cards.html:13
-#: templates/outlets/order.html:50 templates/outlets/order.html:128
+#: templates/outlets/order.html:50 templates/outlets/order.html:133
 #: templates/outlets/table_order.html:72 templates/outlets/table_order.html:94
 #: templates/staff/holidays.html:33 templates/staff/payroll.html:65
 msgid "Add"
@@ -14160,17 +14160,21 @@ msgstr ""
 msgid "Search the menu…"
 msgstr "Kërko në menu…"
 
+#: templates/outlets/order.html:13
+msgid "Clear the search"
+msgstr "Pastro kërkimin"
+
 #: templates/outlets/order.html:29
 msgid ""
 "This outlet has no items yet. A manager can add them under Outlets & menus."
 msgstr ""
 "Kjo pikë nuk ka ende artikuj. Menaxheri mund t'i shtojë te Pikat & menutë."
 
-#: templates/outlets/order.html:143 templates/outlets/table_order.html:197
+#: templates/outlets/order.html:148 templates/outlets/table_order.html:197
 msgid "Choose:"
 msgstr "Zgjidhni:"
 
-#: templates/outlets/order.html:236
+#: templates/outlets/order.html:241
 msgid "Exact"
 msgstr "Shuma e saktë"
 

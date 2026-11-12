@@ -238,6 +238,9 @@ textarea.input { min-height: 90px; resize: vertical; }
 .search { position: relative; }
 .search .input { padding-left: 2.1rem; min-width: 240px; }
 .search .icon { position: absolute; left: .65rem; top: 50%; transform: translateY(-50%); color: var(--muted); }
+.search .search-clear { position: absolute; right: .3rem; top: 50%; transform: translateY(-50%); width: 2.2rem; height: 2.2rem; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 1.4rem; line-height: 1; cursor: pointer; }
+.search .search-clear:hover { background: var(--line, rgba(0,0,0,.06)); color: inherit; }
+.search:has(.search-clear) .input::-webkit-search-cancel-button { display: none; }
 
 /* ---------- Alerts ---------- */
 .messages { margin-bottom: 1.25rem; display: grid; gap: .5rem; }
@@ -890,11 +893,12 @@ dialog.sheet::backdrop { background: rgba(22, 32, 47, .45); }
 .pinpad .lang-switch button.active { color: #fff; }
 .topbar-lock { display: inline-flex; align-items: center; gap: .3rem; background: none; border: 1px solid rgba(255,255,255,.35); color: inherit; border-radius: 8px; padding: .3rem .55rem; font: inherit; font-size: .85rem; cursor: pointer; }
 .sidebar-lock { justify-content: center; }
-.kds-unlock { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); background: #c8963e; color: #16202f; border: 0; border-radius: 10px; padding: .9rem 1.2rem; font: inherit; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 6px 24px rgba(0,0,0,.35); display: inline-flex; gap: .5rem; align-items: center; z-index: 5; }
+.kds-unlock { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); background: #c8963e; color: #16202f; border: 0; border-radius: 10px; padding: .9rem 1.2rem; font: inherit; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 6px 24px rgba(0,0,0,.35); display: inline-flex; gap: .5rem; align-items: center; z-index: 5; width: max-content; max-width: calc(100vw - 32px); }
+.kds:has(.kds-unlock:not(.hidden)) { padding-bottom: 6rem; }  /* keep the last ticket's buttons above the notice */
 .kds-unlock.hidden { display: none; }
 @keyframes kds-flash { 0%, 100% { box-shadow: inset 0 0 0 0 rgba(200,150,62,0); } 30% { box-shadow: inset 0 0 0 10px rgba(200,150,62,.9); } }
 body.kds-flash { animation: kds-flash 1.2s ease-out 2; }
-.ready-toast { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 50; background: var(--success, #1f7a46); color: #fff; padding: .85rem 1.1rem; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.25); font-size: 1rem; display: flex; gap: .4rem; align-items: center; max-width: calc(100vw - 32px); }
+.ready-toast { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 50; background: var(--success, #1f7a46); color: #fff; padding: .85rem 1.1rem; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.25); font-size: 1rem; display: flex; gap: .4rem; align-items: center; width: max-content; max-width: calc(100vw - 32px); }
 .ready-toast.hidden { display: none; }
 .print-bill { display: inline-flex; }
 .print-bill .btn:first-child { border-top-right-radius: 0; border-bottom-right-radius: 0; }
@@ -1046,3 +1050,4 @@ body.kds-flash { animation: kds-flash 1.2s ease-out 2; }
 /* Two-step sign-in recovery codes */
 .recovery-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .5rem; font-size: 1.05rem; }
 .recovery-codes span { padding: .45rem .6rem; border: 1px dashed var(--border); border-radius: var(--radius-sm, 6px); text-align: center; }
+td.mono { white-space: nowrap; }  /* codes such as R000001 stay on one line on phones */

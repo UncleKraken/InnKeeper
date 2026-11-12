@@ -39,3 +39,15 @@ class ReleaseNotesTests(SimpleTestCase):
 
     def test_plain_notes_still_shown(self):
         self.assertIn("<p>Bug fixes.</p>", release_notes("Bug fixes."))
+
+
+class ForeignCashTests(SimpleTestCase):
+    def test_lek_in_whole_units_other_currencies_in_cents(self):
+        from decimal import Decimal
+        from types import SimpleNamespace
+
+        from apps.core.templatetags.innkeeper import foreign_cash
+
+        self.assertEqual(foreign_cash(SimpleNamespace(foreign_currency="ALL", foreign_amount=Decimal("500.00"))), "500 ALL")
+        self.assertEqual(foreign_cash(SimpleNamespace(foreign_currency="USD", foreign_amount=Decimal("12.5"))), "12.50 USD")
+        self.assertEqual(foreign_cash(SimpleNamespace(foreign_currency="", foreign_amount=None)), "")

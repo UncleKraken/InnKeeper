@@ -37,7 +37,7 @@
     {% for p in payments %}
       <tr class="{% if p.voided %}voided{% endif %}"><td class="nowrap">{{ p.created_at|time:"H:i" }}</td>
         <td>{% if p.order %}{{ p.order.outlet.name }} #{{ p.order.number }}{% elif p.folio %}{% translate "Room" %} {{ p.folio.reservation.room.number }}{% elif p.account %}{{ p.account.name }}{% endif %}</td>
-        <td>{{ p.get_method_display }}{% if p.foreign_currency %} · {{ p.foreign_amount|stringformat:".2f" }} {{ p.foreign_currency }}{% endif %}</td><td class="num">{{ p.amount|money }}{% if p.tip %}<br><small class="muted">+{{ p.tip|money }} {% translate "tip" %}</small>{% endif %}</td></tr>
+        <td>{{ p.get_method_display }}{% if p.foreign_currency %} · {{ p|foreign_cash }}{% endif %}</td><td class="num">{{ p.amount|money }}{% if p.tip %}<br><small class="muted">+{{ p.tip|money }} {% translate "tip" %}</small>{% endif %}</td></tr>
     {% empty %}<tr><td class="empty">{% translate "No payments in this shift." %}</td></tr>{% endfor %}
   </tbody></table></div>
 </section>
