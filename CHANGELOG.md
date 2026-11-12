@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.34.0 — privacy, support contact, backups proven
+
+**Shqip**
+
+- **Njoftimi i privatësisë:** faqet e rezervimit dhe të check-in-it online kanë tani një lidhje "Privatësia" me një tekst të qartë (çfarë ruhet, pse, kush e merr, për sa kohë, të drejtat e mysafirit). Tekstin tuaj e shkruani te Cilësimet → Rezervimi online.
+- **Fshi të dhënat personale të një mysafiri:** kur një mysafir kërkon të harrohet, menaxheri e bën nga profili i tij (duke shkruar ERASE). Faturat dhe dokumentet fiskale mbeten, siç e kërkon ligji.
+- **Fshirja automatike e të dhënave të ID-së** (numri i dokumentit, datëlindja) pas një numri vitesh që zgjidhni (Cilësimet → Të dhënat e biznesit). E fikur si parazgjedhje.
+- **Kë të telefononi për ndihmë:** emri, telefoni dhe emaili i personit që jua konfiguroi InnKeeper-in shfaqen te Ndihma dhe Rreth InnKeeper-it.
+- **Kopjet rezervë, të provuara plotësisht:** një test i ri mbush çdo tabelë, bën kopjen, fshin gjithçka dhe e rikthen, dhe krahason çdo rresht. Kopjet ruajnë tani edhe kohët deri në mikrosekondë, që rikthimi të jetë identik. Kopjet e vjetra rikthehen si më parë.
+
+**English**
+
+- **Privacy notice:** the booking and online check-in pages now link to "Privacy", a plain text on what is kept, why, who receives it, for how long and the guest's rights. Write your own under Settings → Online booking.
+- **Erase a guest's personal data:** when a guest asks to be forgotten, a manager does it from the guest's profile (typing ERASE). Bills and fiscal records stay, as the law requires.
+- **Automatic removal of ID details** (document number, date of birth) after a number of years you choose (Settings → Business details). Off by default.
+- **Who to call for help:** the name, phone and email of whoever set up InnKeeper for you are shown under Help and About.
+- **Backups, fully proven:** a new test fills every table, makes a backup, wipes everything, restores it and compares every row. Backups now keep times to the microsecond, so a restore is identical. Older backups restore as before.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.34.0.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.33.1 — company payments above 100,000 lekë
 
 **Shqip**
