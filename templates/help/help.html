@@ -9,6 +9,7 @@
     <button class="btn btn-secondary" onclick="window.print()">{% icon "print" %} {% translate "Print" %}</button>
   </div>
 </div>
+{% if hotel.support_contact %}<div class="alert alert-info no-print" style="margin-bottom:1rem">{% icon "help" %} <strong>{% translate "Who to call for help" %}:</strong> {{ hotel.support_contact|urlize|linebreaksbr }}</div>{% endif %}
 <div class="help-layout">
   <nav class="settings-nav card no-print" id="help-toc"></nav>
   <article class="card card-body help-body" id="help-body">{% include guide %}</article>

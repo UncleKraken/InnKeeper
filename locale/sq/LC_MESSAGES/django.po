@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 03:01+0100\n"
+"POT-Creation-Date: 2026-11-12 03:39+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -475,7 +475,7 @@ msgstr ""
 "Punoni pas mesnate? Shitjet deri në këtë orë llogariten në natën që u "
 "përkasin."
 
-#: apps/core/forms.py:106 apps/core/settings_views.py:65
+#: apps/core/forms.py:106 apps/core/settings_views.py:68
 msgid "Enter the VAT rate, or choose “Registered, without VAT”."
 msgstr "Vendosni normën e TVSH-së, ose zgjidhni “I regjistruar, pa TVSH”."
 
@@ -488,7 +488,7 @@ msgstr "Zgjidhni të paktën një pjesë të aplikacionit."
 msgid "The image is too large. Use one under %(kb)s KB."
 msgstr "Imazhi është shumë i madh. Përdorni një nën %(kb)s KB."
 
-#: apps/core/forms.py:122 apps/core/settings_views.py:109
+#: apps/core/forms.py:122 apps/core/settings_views.py:112
 msgid "Use a PNG, JPG, WEBP or SVG image."
 msgstr "Përdorni një imazh PNG, JPG, WEBP ose SVG."
 
@@ -782,7 +782,7 @@ msgstr ""
 "TVSH apo fiskalizim, dhe kuponat shënohen si kupona të brendshëm. Pyesni "
 "kontabilistin nëse nuk jeni të sigurt."
 
-#: apps/core/models.py:38 apps/core/models.py:625 apps/frontdesk/models.py:90
+#: apps/core/models.py:38 apps/core/models.py:640 apps/frontdesk/models.py:90
 #: apps/staff/models.py:69
 msgid "address"
 msgstr "adresa"
@@ -1009,82 +1009,118 @@ msgid "welcome text"
 msgstr "teksti i mirëseardhjes"
 
 #: apps/core/models.py:141
+msgid "who to call for help with InnKeeper"
+msgstr "kë të telefononi për ndihmë me InnKeeper"
+
+#: apps/core/models.py:143
+msgid ""
+"Name, phone and email of whoever set up InnKeeper for you. Shown under Help "
+"and About."
+msgstr ""
+"Emri, telefoni dhe emaili i personit që jua konfiguroi InnKeeper-in. Shfaqet"
+" te Ndihma dhe Rreth InnKeeper-it."
+
+#: apps/core/models.py:146
+msgid "privacy notice"
+msgstr "njoftimi i privatësisë"
+
+#: apps/core/models.py:148
+msgid ""
+"Shown to guests from the booking and online check-in pages. Leave it empty "
+"for InnKeeper's standard text."
+msgstr ""
+"Shfaqet për mysafirët nga faqet e rezervimit dhe të check-in-it online. "
+"Lëreni bosh për tekstin standard të InnKeeper-it."
+
+#: apps/core/models.py:151
+msgid "remove guests' ID details after (years)"
+msgstr "fshi të dhënat e ID-së së mysafirëve pas (vitesh)"
+
+#: apps/core/models.py:153
+msgid ""
+"Document numbers and dates of birth are cleared this many years after the "
+"stay. 0 keeps them."
+msgstr ""
+"Numrat e dokumenteve dhe datëlindjet fshihen kaq vite pas qëndrimit. 0 i "
+"ruan."
+
+#: apps/core/models.py:156
 msgid "booking conditions"
 msgstr "kushtet e rezervimit"
 
-#: apps/core/models.py:141
+#: apps/core/models.py:156
 msgid "Cancellation policy, check-in times, house rules…"
 msgstr "Politika e anulimit, oraret e check-in, rregullat e shtëpisë…"
 
-#: apps/core/models.py:144
+#: apps/core/models.py:159
 msgid "bank details for deposits"
 msgstr "të dhënat bankare për parapagimet"
 
-#: apps/core/models.py:144
+#: apps/core/models.py:159
 msgid "Bank name, IBAN and account holder."
 msgstr "Emri i bankës, IBAN dhe mbajtësi i llogarisë."
 
-#: apps/core/models.py:147
+#: apps/core/models.py:162
 msgid "public web address of InnKeeper"
 msgstr "adresa publike e InnKeeper-it"
 
-#: apps/core/models.py:149
+#: apps/core/models.py:164
 msgid ""
 "e.g. https://book.yourhotel.al — used for links in emails and the QR menu."
 msgstr ""
 "p.sh. https://book.hotelijuaj.al — përdoret për lidhjet në email dhe menunë "
 "QR."
 
-#: apps/core/models.py:152
+#: apps/core/models.py:167
 msgid "send new booking alerts to"
 msgstr "dërgo njoftimet e rezervimeve të reja te"
 
-#: apps/core/models.py:152
+#: apps/core/models.py:167
 msgid "Usually the reception email address."
 msgstr "Zakonisht adresa email e recepsionit."
 
-#: apps/core/models.py:156
+#: apps/core/models.py:171
 msgid "SMTP server"
 msgstr "Serveri SMTP"
 
-#: apps/core/models.py:156
+#: apps/core/models.py:171
 msgid "e.g. smtp.gmail.com"
 msgstr "p.sh. smtp.gmail.com"
 
-#: apps/core/models.py:157 apps/outlets/models.py:31
+#: apps/core/models.py:172 apps/outlets/models.py:31
 msgid "port"
 msgstr "porta"
 
-#: apps/core/models.py:158
+#: apps/core/models.py:173
 msgid "username"
 msgstr "emri i përdoruesit"
 
-#: apps/core/models.py:160
+#: apps/core/models.py:175
 msgid "password"
 msgstr "fjalëkalimi"
 
-#: apps/core/models.py:163
+#: apps/core/models.py:178
 msgid "For Gmail, use an app password, not your normal password."
 msgstr ""
 "Për Gmail, përdorni një fjalëkalim aplikacioni, jo fjalëkalimin e zakonshëm."
 
-#: apps/core/models.py:166
+#: apps/core/models.py:181
 msgid "security"
 msgstr "siguria"
 
-#: apps/core/models.py:168 apps/core/models.py:326
+#: apps/core/models.py:183 apps/core/models.py:341
 msgid "None"
 msgstr "Asnjë"
 
-#: apps/core/models.py:171
+#: apps/core/models.py:186
 msgid "send emails from"
 msgstr "dërgo email nga"
 
-#: apps/core/models.py:175
+#: apps/core/models.py:190
 msgid "send the daily summary to"
 msgstr "dërgo përmbledhjen ditore te"
 
-#: apps/core/models.py:178
+#: apps/core/models.py:193
 msgid ""
 "One or more email addresses, separated by commas. Leave empty to send no "
 "summary."
@@ -1092,11 +1128,11 @@ msgstr ""
 "Një ose më shumë adresa email, të ndara me presje. Lëreni bosh që të mos "
 "dërgohet përmbledhje."
 
-#: apps/core/models.py:181
+#: apps/core/models.py:196
 msgid "send it at"
 msgstr "dërgo në orën"
 
-#: apps/core/models.py:184
+#: apps/core/models.py:199
 msgid ""
 "The summary of the day before is sent at this time. It is also sent right "
 "after the day close."
@@ -1104,41 +1140,41 @@ msgstr ""
 "Përmbledhja e ditës së kaluar dërgohet në këtë orë. Dërgohet edhe menjëherë "
 "pas mbylljes së ditës."
 
-#: apps/core/models.py:189 apps/finance/models.py:166
+#: apps/core/models.py:204 apps/finance/models.py:166
 msgid "loyalty cards"
 msgstr "kartat e besnikërisë"
 
-#: apps/core/models.py:189
+#: apps/core/models.py:204
 msgid "Regulars collect a stamp for items marked “earns a loyalty stamp”."
 msgstr ""
 "Klientët e rregullt mbledhin një vulë për artikujt e shënuar “jep vulë "
 "besnikërie”."
 
-#: apps/core/models.py:192
+#: apps/core/models.py:207
 msgid "stamps for a free item"
 msgstr "vula për një artikull falas"
 
-#: apps/core/models.py:195
+#: apps/core/models.py:210
 msgid "For example 9: after nine coffees the tenth is free."
 msgstr "Për shembull 9: pas nëntë kafeve, e dhjeta është falas."
 
-#: apps/core/models.py:197 apps/finance/models.py:133
+#: apps/core/models.py:212 apps/finance/models.py:133
 msgid "gift vouchers"
 msgstr "kuponat dhuratë"
 
-#: apps/core/models.py:199
+#: apps/core/models.py:214
 msgid "vouchers are valid for (months)"
 msgstr "kuponat vlejnë për (muaj)"
 
-#: apps/core/models.py:199
+#: apps/core/models.py:214
 msgid "0: they never expire."
 msgstr "0: nuk skadojnë kurrë."
 
-#: apps/core/models.py:202
+#: apps/core/models.py:217
 msgid "email guests before they arrive"
 msgstr "dërgo email mysafirëve para mbërritjes"
 
-#: apps/core/models.py:204
+#: apps/core/models.py:219
 msgid ""
 "Confirmed bookings with an email address get your arrival information a few "
 "days before."
@@ -1146,15 +1182,15 @@ msgstr ""
 "Rezervimet e konfirmuara me adresë email marrin informacionin tuaj të "
 "mbërritjes disa ditë më parë."
 
-#: apps/core/models.py:207
+#: apps/core/models.py:222
 msgid "days before arrival"
 msgstr "ditë para mbërritjes"
 
-#: apps/core/models.py:210
+#: apps/core/models.py:225
 msgid "arrival information"
 msgstr "informacioni i mbërritjes"
 
-#: apps/core/models.py:212
+#: apps/core/models.py:227
 msgid ""
 "How to find you, parking, check-in, Wi-Fi… Write it in the language most of "
 "your guests read."
@@ -1162,11 +1198,11 @@ msgstr ""
 "Si t'ju gjejnë, parkimi, check-in, Wi-Fi… Shkruajeni në gjuhën që lexon "
 "shumica e mysafirëve tuaj."
 
-#: apps/core/models.py:215
+#: apps/core/models.py:230
 msgid "ask for a review after check-out"
 msgstr "kërko një vlerësim pas largimit"
 
-#: apps/core/models.py:217
+#: apps/core/models.py:232
 msgid ""
 "The day after they leave, guests with an email address get a thank-you with "
 "your review link."
@@ -1174,11 +1210,11 @@ msgstr ""
 "Një ditë pas largimit, mysafirët me adresë email marrin një falënderim me "
 "linkun tuaj të vlerësimeve."
 
-#: apps/core/models.py:220
+#: apps/core/models.py:235
 msgid "review link"
 msgstr "linku i vlerësimeve"
 
-#: apps/core/models.py:222
+#: apps/core/models.py:237
 msgid ""
 "Where guests leave a review: your Google Maps, TripAdvisor or Booking.com "
 "page."
@@ -1186,15 +1222,15 @@ msgstr ""
 "Ku lënë vlerësim mysafirët: faqja juaj në Google Maps, TripAdvisor ose "
 "Booking.com."
 
-#: apps/core/models.py:224
+#: apps/core/models.py:239
 msgid "thank-you text"
 msgstr "teksti i falënderimit"
 
-#: apps/core/models.py:226
+#: apps/core/models.py:241
 msgid "managers must use two-step sign-in"
 msgstr "menaxherët duhet të përdorin hyrjen me dy hapa"
 
-#: apps/core/models.py:228
+#: apps/core/models.py:243
 msgid ""
 "Managers then need a 6-digit code from a phone app after their password. "
 "Strongly recommended when InnKeeper can be reached from the internet."
@@ -1203,11 +1239,11 @@ msgstr ""
 "aplikacion në telefon. Rekomandohet fort kur InnKeeper arrihet nga "
 "interneti."
 
-#: apps/core/models.py:231
+#: apps/core/models.py:246
 msgid "let guests check in online"
 msgstr "lejo mysafirët të bëjnë check-in online"
 
-#: apps/core/models.py:233
+#: apps/core/models.py:248
 msgid ""
 "The arrival email and the booking page carry a link where guests enter their"
 " ID or passport details, and those of the people with them, before they "
@@ -1217,27 +1253,27 @@ msgstr ""
 "shkruajnë të dhënat e kartës së identitetit ose pasaportës, të tyren dhe të "
 "personave që vijnë me ta, para se të mbërrijnë. Kërkon adresën publike."
 
-#: apps/core/models.py:236
+#: apps/core/models.py:251
 msgid "send at"
 msgstr "dërgo në orën"
 
-#: apps/core/models.py:236
+#: apps/core/models.py:251
 msgid "Hour of the day, 0–23."
 msgstr "Ora e ditës, 0–23."
 
-#: apps/core/models.py:240
+#: apps/core/models.py:255
 msgid "per guest, per night"
 msgstr "për mysafir, për natë"
 
-#: apps/core/models.py:241
+#: apps/core/models.py:256
 msgid "per room, per night"
 msgstr "për dhomë, për natë"
 
-#: apps/core/models.py:244
+#: apps/core/models.py:259
 msgid "add the tourist tax to guest bills"
 msgstr "shto taksën e turizmit në faturat e mysafirëve"
 
-#: apps/core/models.py:246
+#: apps/core/models.py:261
 msgid ""
 "The tax your municipality charges on overnight stays. It is not your income "
 "and has no VAT."
@@ -1245,14 +1281,14 @@ msgstr ""
 "Taksa që vendos bashkia për qëndrimet me fjetje. Nuk është e ardhur e juaja "
 "dhe nuk ka TVSH."
 
-#: apps/core/models.py:249 apps/finance/models.py:294
+#: apps/core/models.py:264 apps/finance/models.py:294
 #: apps/finance/models.py:331 apps/finance/models.py:384
 #: apps/fiscal/models.py:116 apps/frontdesk/models.py:426
 #: apps/payments/models.py:44 apps/staff/models.py:74 apps/staff/models.py:201
 msgid "amount"
 msgstr "shuma"
 
-#: apps/core/models.py:254
+#: apps/core/models.py:269
 msgid ""
 "In your currency, as the municipality sets it for your category (e.g. "
 "Tirana: 140 lek, 4–5 stars 350 lek)."
@@ -1260,57 +1296,57 @@ msgstr ""
 "Në monedhën tuaj, siç e vendos bashkia për kategorinë tuaj (p.sh. Tirana: "
 "140 lekë, 4–5 yje 350 lekë)."
 
-#: apps/core/models.py:257
+#: apps/core/models.py:272
 msgid "charged"
 msgstr "llogaritet"
 
-#: apps/core/models.py:260
+#: apps/core/models.py:275
 msgid "children pay too"
 msgstr "paguajnë edhe fëmijët"
 
-#: apps/core/models.py:260
+#: apps/core/models.py:275
 msgid "Leave off if your municipality exempts children."
 msgstr "Lëreni të fikur nëse bashkia i përjashton fëmijët."
 
-#: apps/core/models.py:263
+#: apps/core/models.py:278
 msgid "at most (nights per stay)"
 msgstr "maksimumi (netë për qëndrim)"
 
-#: apps/core/models.py:263
+#: apps/core/models.py:278
 msgid "0: every night is charged."
 msgstr "0: llogaritet çdo natë."
 
-#: apps/core/models.py:266
+#: apps/core/models.py:281
 msgid "we serve breakfast"
 msgstr "shërbejmë mëngjes"
 
-#: apps/core/models.py:266
+#: apps/core/models.py:281
 msgid "Shows the morning breakfast list for the guests in house."
 msgstr "Shfaq listën e mëngjesit për mysafirët që ndodhen në hotel."
 
-#: apps/core/models.py:269
+#: apps/core/models.py:284
 msgid "new bookings include breakfast"
 msgstr "rezervimet e reja përfshijnë mëngjesin"
 
-#: apps/core/models.py:269
+#: apps/core/models.py:284
 msgid "Can be changed on each booking."
 msgstr "Mund të ndryshohet në çdo rezervim."
 
-#: apps/core/models.py:272
+#: apps/core/models.py:287
 msgid "breakfast price per person"
 msgstr "çmimi i mëngjesit për person"
 
-#: apps/core/models.py:277
+#: apps/core/models.py:292
 msgid "Added to the bill of guests whose booking doesn't include it."
 msgstr ""
 "Shtohet në faturën e mysafirëve që nuk e kanë mëngjesin të përfshirë në "
 "rezervim."
 
-#: apps/core/models.py:280
+#: apps/core/models.py:295
 msgid "overtime extra (%)"
 msgstr "shtesa për orët jashtë orarit (%)"
 
-#: apps/core/models.py:281
+#: apps/core/models.py:296
 msgid ""
 "For hours over the contract hours in a week. The Labour Code asks for at "
 "least 25%."
@@ -1318,11 +1354,11 @@ msgstr ""
 "Për orët mbi orët e kontratës në një javë. Kodi i Punës kërkon të paktën "
 "25%."
 
-#: apps/core/models.py:284
+#: apps/core/models.py:299
 msgid "night work extra (%)"
 msgstr "shtesa për punën e natës (%)"
 
-#: apps/core/models.py:285
+#: apps/core/models.py:300
 msgid ""
 "For hours between 22:00 and 06:00, as your contracts or collective agreement"
 " say."
@@ -1330,11 +1366,11 @@ msgstr ""
 "Për orët nga 22:00 deri në 06:00, siç thonë kontratat ose marrëveshja "
 "kolektive."
 
-#: apps/core/models.py:288
+#: apps/core/models.py:303
 msgid "pay extra for public holidays"
 msgstr "paguaj shtesë për festat zyrtare"
 
-#: apps/core/models.py:290
+#: apps/core/models.py:305
 msgid ""
 "Leave off if you're open every day (hotels, bars) and don't pay extra for "
 "public holidays. Choose the dates under Public holidays."
@@ -1342,11 +1378,11 @@ msgstr ""
 "Lëreni të fikur nëse jeni të hapur çdo ditë (hotele, bare) dhe nuk i paguani"
 " festat veçmas. Datat zgjidhen te Festat zyrtare."
 
-#: apps/core/models.py:293
+#: apps/core/models.py:308
 msgid "pay period starts on day"
 msgstr "periudha e pagës fillon në datën"
 
-#: apps/core/models.py:296
+#: apps/core/models.py:311
 msgid ""
 "1: calendar months. 26: the October pay runs from 26 September to 25 "
 "October."
@@ -1354,19 +1390,19 @@ msgstr ""
 "1: muajt kalendarikë. 26: paga e tetorit llogaritet nga 26 shtatori deri më "
 "25 tetor."
 
-#: apps/core/models.py:299
+#: apps/core/models.py:314
 msgid "public holiday extra (%)"
 msgstr "shtesa për festat zyrtare (%)"
 
-#: apps/core/models.py:300
+#: apps/core/models.py:315
 msgid "For hours worked on a public holiday, as your contracts say."
 msgstr "Për orët e punuara në një festë zyrtare, siç thonë kontratat."
 
-#: apps/core/models.py:303
+#: apps/core/models.py:318
 msgid "show “Made with InnKeeper” on public pages"
 msgstr "shfaq “Bërë me InnKeeper” në faqet publike"
 
-#: apps/core/models.py:305
+#: apps/core/models.py:320
 msgid ""
 "A small link at the bottom of your booking, menu and table pages. It helps "
 "other businesses find this free app."
@@ -1374,15 +1410,15 @@ msgstr ""
 "Një link i vogël në fund të faqeve të rezervimit, menusë dhe tavolinave. "
 "Ndihmon biznese të tjera ta gjejnë këtë program falas."
 
-#: apps/core/models.py:308
+#: apps/core/models.py:323
 msgid "public address through Cloudflare Tunnel"
 msgstr "adresë publike përmes Cloudflare Tunnel"
 
-#: apps/core/models.py:310
+#: apps/core/models.py:325
 msgid "tunnel token"
 msgstr "tokeni i tunelit"
 
-#: apps/core/models.py:313
+#: apps/core/models.py:328
 msgid ""
 "From Cloudflare Zero Trust → Networks → Tunnels → your tunnel → Install "
 "connector (the long text after --token)."
@@ -1390,35 +1426,35 @@ msgstr ""
 "Nga Cloudflare Zero Trust → Networks → Tunnels → tuneli juaj → Install "
 "connector (teksti i gjatë pas --token)."
 
-#: apps/core/models.py:316
+#: apps/core/models.py:331
 msgid "lock shared tills after"
 msgstr "kyç arkat e përbashkëta pas"
 
-#: apps/core/models.py:318
+#: apps/core/models.py:333
 msgid "Never"
 msgstr "Kurrë"
 
-#: apps/core/models.py:318
+#: apps/core/models.py:333
 msgid "1 minute"
 msgstr "1 minute"
 
-#: apps/core/models.py:318
+#: apps/core/models.py:333
 msgid "2 minutes"
 msgstr "2 minutash"
 
-#: apps/core/models.py:318
+#: apps/core/models.py:333
 msgid "3 minutes"
 msgstr "3 minutash"
 
-#: apps/core/models.py:318
+#: apps/core/models.py:333
 msgid "5 minutes"
 msgstr "5 minutash"
 
-#: apps/core/models.py:318
+#: apps/core/models.py:333
 msgid "10 minutes"
 msgstr "10 minutash"
 
-#: apps/core/models.py:319
+#: apps/core/models.py:334
 msgid ""
 "On a shared till, the screen goes back to the PIN pad after this long "
 "without a tap."
@@ -1426,43 +1462,43 @@ msgstr ""
 "Në një arkë të përbashkët, ekrani kthehet te tastiera e PIN-it pas kaq kohe "
 "pa u prekur."
 
-#: apps/core/models.py:324
+#: apps/core/models.py:339
 msgid "payment provider"
 msgstr "ofruesi i pagesave"
 
-#: apps/core/models.py:330
+#: apps/core/models.py:345
 msgid "test mode"
 msgstr "mënyra provë"
 
-#: apps/core/models.py:330
+#: apps/core/models.py:345
 msgid "Use the provider's test system. No real money is charged."
 msgstr "Përdor sistemin provë të ofruesit. Nuk tërhiqen para të vërteta."
 
-#: apps/core/models.py:332
+#: apps/core/models.py:347
 msgid "POK key ID"
 msgstr "POK key ID"
 
-#: apps/core/models.py:333
+#: apps/core/models.py:348
 msgid "POK key secret"
 msgstr "POK key secret"
 
-#: apps/core/models.py:334
+#: apps/core/models.py:349
 msgid "POK merchant ID"
 msgstr "ID e tregtarit në POK"
 
-#: apps/core/models.py:335
+#: apps/core/models.py:350
 msgid "Paysera project ID"
 msgstr "ID e projektit në Paysera"
 
-#: apps/core/models.py:336
+#: apps/core/models.py:351
 msgid "Paysera project password"
 msgstr "Fjalëkalimi i projektit në Paysera"
 
-#: apps/core/models.py:338
+#: apps/core/models.py:353
 msgid "let guests pay the deposit by card"
 msgstr "lejo mysafirët të paguajnë parapagimin me kartë"
 
-#: apps/core/models.py:340
+#: apps/core/models.py:355
 msgid ""
 "Shows a “Pay now” button on the online booking page when a payment provider "
 "is set up."
@@ -1470,85 +1506,85 @@ msgstr ""
 "Shfaq butonin “Paguaj tani” në faqen e rezervimeve online kur është "
 "konfiguruar një ofrues pagesash."
 
-#: apps/core/models.py:345
+#: apps/core/models.py:360
 msgid "fiscalize receipts and invoices"
 msgstr "fiskalizo kuponat dhe faturat"
 
-#: apps/core/models.py:347
+#: apps/core/models.py:362
 msgid ""
 "Every sale is sent to the tax authority and gets an NSLF and NIVF code with "
 "a QR code."
 msgstr "Çdo shitje dërgohet në tatime dhe merr kodet NSLF dhe NIVF me kod QR."
 
-#: apps/core/models.py:350
+#: apps/core/models.py:365
 msgid "use the tax authority's test system"
 msgstr "përdor sistemin provë të tatimeve"
 
-#: apps/core/models.py:350
+#: apps/core/models.py:365
 msgid "Turn off only when going live."
 msgstr "Çaktivizojeni vetëm kur kaloni në punë reale."
 
-#: apps/core/models.py:353
+#: apps/core/models.py:368
 msgid "business unit code"
 msgstr "kodi i njësisë së biznesit"
 
-#: apps/core/models.py:353
+#: apps/core/models.py:368
 msgid "From the self-care portal, e.g. ab123cd456."
 msgstr "Nga portali self-care, p.sh. ab123cd456."
 
-#: apps/core/models.py:356 apps/outlets/models.py:144
+#: apps/core/models.py:371 apps/outlets/models.py:144
 msgid "cash register (TCR) code"
 msgstr "kodi i arkës (TCR)"
 
-#: apps/core/models.py:359
+#: apps/core/models.py:374
 msgid "Used by reception and by outlets without their own cash register code."
 msgstr ""
 "Përdoret nga recepsioni dhe nga pikat e shitjes që nuk kanë kodin e vet të "
 "arkës."
 
-#: apps/core/models.py:361
+#: apps/core/models.py:376
 msgid "software code"
 msgstr "kodi i softuerit"
 
-#: apps/core/models.py:362
+#: apps/core/models.py:377
 msgid "maintainer code"
 msgstr "kodi i mirëmbajtësit"
 
-#: apps/core/models.py:364
+#: apps/core/models.py:379
 msgid "default operator code"
 msgstr "kodi i paracaktuar i operatorit"
 
-#: apps/core/models.py:367
+#: apps/core/models.py:382
 msgid "Used for staff members who don't have their own operator code."
 msgstr "Përdoret për stafin që nuk ka kodin e vet të operatorit."
 
-#: apps/core/models.py:369
+#: apps/core/models.py:384
 msgid "town"
 msgstr "qyteti"
 
-#: apps/core/models.py:370
+#: apps/core/models.py:385
 msgid "digital certificate"
 msgstr "certifikata dixhitale"
 
-#: apps/core/models.py:371
+#: apps/core/models.py:386
 msgid "certificate password"
 msgstr "fjalëkalimi i certifikatës"
 
-#: apps/core/models.py:373
+#: apps/core/models.py:388
 msgid "VAT rate for accommodation (%)"
 msgstr "Norma e TVSH-së për akomodimin (%)"
 
-#: apps/core/models.py:377
+#: apps/core/models.py:392
 msgid "Room nights. Food, drinks and other services use the main VAT rate."
 msgstr ""
 "Netët e qëndrimit. Ushqimi, pijet dhe shërbimet e tjera përdorin normën "
 "kryesore të TVSH-së."
 
-#: apps/core/models.py:380
+#: apps/core/models.py:395
 msgid "IBAN for bank transfers"
 msgstr "IBAN për transfertat bankare"
 
-#: apps/core/models.py:383
+#: apps/core/models.py:398
 msgid ""
 "Printed on e-invoices to companies, so they know where to pay. E.g. AL47 "
 "2121 1009 0000 0002 3569 8741."
@@ -1556,19 +1592,19 @@ msgstr ""
 "Shtypet në e-faturat për kompanitë, që të dinë ku të paguajnë. P.sh. AL47 "
 "2121 1009 0000 0002 3569 8741."
 
-#: apps/core/models.py:386
+#: apps/core/models.py:401
 msgid "days to pay an e-invoice"
 msgstr "ditë për pagesën e e-faturës"
 
-#: apps/core/models.py:386
+#: apps/core/models.py:401
 msgid "The payment due date on e-invoices to companies."
 msgstr "Afati i pagesës në e-faturat për kompanitë."
 
-#: apps/core/models.py:389
+#: apps/core/models.py:404
 msgid "exchange rate (lekë for 1 unit of your currency)"
 msgstr "kursi i këmbimit (lekë për 1 njësi të monedhës suaj)"
 
-#: apps/core/models.py:394
+#: apps/core/models.py:409
 msgid ""
 "Only if prices are not in lekë (ALL), e.g. 100.50 for EUR. Use the Bank of "
 "Albania rate."
@@ -1576,31 +1612,31 @@ msgstr ""
 "Vetëm nëse çmimet nuk janë në lekë (ALL), p.sh. 100.50 për EUR. Përdorni "
 "kursin e Bankës së Shqipërisë."
 
-#: apps/core/models.py:400
+#: apps/core/models.py:415
 msgid "Every 15 minutes"
 msgstr "Çdo 15 minuta"
 
-#: apps/core/models.py:401
+#: apps/core/models.py:416
 msgid "Every 30 minutes"
 msgstr "Çdo 30 minuta"
 
-#: apps/core/models.py:402
+#: apps/core/models.py:417
 msgid "Every hour"
 msgstr "Çdo orë"
 
-#: apps/core/models.py:403
+#: apps/core/models.py:418
 msgid "Every 4 hours"
 msgstr "Çdo 4 orë"
 
-#: apps/core/models.py:404
+#: apps/core/models.py:419
 msgid "Once a day"
 msgstr "Një herë në ditë"
 
-#: apps/core/models.py:407
+#: apps/core/models.py:422
 msgid "copy the data to another place automatically"
 msgstr "kopjo të dhënat automatikisht në një vend tjetër"
 
-#: apps/core/models.py:409
+#: apps/core/models.py:424
 msgid ""
 "A full copy is written there regularly, so a broken or stolen computer never"
 " loses your data."
@@ -1608,11 +1644,11 @@ msgstr ""
 "Aty shkruhet rregullisht një kopje e plotë, që të mos i humbni kurrë të "
 "dhënat, edhe nëse kompjuteri prishet ose vidhet."
 
-#: apps/core/models.py:412
+#: apps/core/models.py:427
 msgid "folder"
 msgstr "dosja"
 
-#: apps/core/models.py:416
+#: apps/core/models.py:431
 msgid ""
 "A USB drive (e.g. E:\\InnKeeper) or a folder that OneDrive, Google Drive or "
 "Dropbox keeps in the cloud."
@@ -1620,15 +1656,15 @@ msgstr ""
 "Një USB (p.sh. E:\\InnKeeper) ose një dosje që OneDrive, Google Drive ose "
 "Dropbox e mban në cloud."
 
-#: apps/core/models.py:419
+#: apps/core/models.py:434
 msgid "how often"
 msgstr "sa shpesh"
 
-#: apps/core/models.py:421
+#: apps/core/models.py:436
 msgid "password for the copies"
 msgstr "fjalëkalimi i kopjeve"
 
-#: apps/core/models.py:425
+#: apps/core/models.py:440
 msgid ""
 "Recommended for cloud folders: the copies are encrypted and can only be "
 "restored with this password. Write it down — without it the copies can't be "
@@ -1637,57 +1673,57 @@ msgstr ""
 "Rekomandohet për dosjet në cloud: kopjet enkriptohen dhe rikthehen vetëm me "
 "këtë fjalëkalim. Shkruajeni diku — pa të kopjet nuk hapen dot."
 
-#: apps/core/models.py:436
+#: apps/core/models.py:451
 msgid "connect to the channel manager"
 msgstr "lidhu me menaxherin e kanaleve"
 
-#: apps/core/models.py:437
+#: apps/core/models.py:452
 msgid "Channex API key"
 msgstr "Çelësi API i Channex"
 
-#: apps/core/models.py:438
+#: apps/core/models.py:453
 msgid "Channex property ID"
 msgstr "ID e pronës në Channex"
 
-#: apps/core/models.py:440
+#: apps/core/models.py:455
 msgid "use the Channex test system (staging)"
 msgstr "përdor sistemin provë të Channex (staging)"
 
-#: apps/core/models.py:440
+#: apps/core/models.py:455
 msgid "For trying it out before going live."
 msgstr "Për ta provuar para se ta përdorni realisht."
 
-#: apps/core/models.py:442
+#: apps/core/models.py:457
 msgid "send availability for (days)"
 msgstr "dërgo disponueshmërinë për (ditë)"
 
-#: apps/core/models.py:447 apps/core/models.py:448
+#: apps/core/models.py:462 apps/core/models.py:463
 msgid "hotel settings"
 msgstr "cilësimet e biznesit"
 
-#: apps/core/models.py:575
+#: apps/core/models.py:590
 msgid "action"
 msgstr "veprimi"
 
-#: apps/core/models.py:576 apps/finance/models.py:291
+#: apps/core/models.py:591 apps/finance/models.py:291
 #: apps/finance/models.py:382 apps/frontdesk/models.py:18
 #: apps/outlets/models.py:214 apps/payments/models.py:43
 msgid "description"
 msgstr "përshkrimi"
 
-#: apps/core/models.py:579 apps/outlets/models.py:393
+#: apps/core/models.py:594 apps/outlets/models.py:393
 msgid "time"
 msgstr "koha"
 
-#: apps/core/models.py:582
+#: apps/core/models.py:597
 msgid "audit entry"
 msgstr "regjistrim aktiviteti"
 
-#: apps/core/models.py:583
+#: apps/core/models.py:598
 msgid "audit log"
 msgstr "regjistri i aktivitetit"
 
-#: apps/core/models.py:623 apps/finance/models.py:81
+#: apps/core/models.py:638 apps/finance/models.py:81
 #: apps/finance/models.py:156 apps/frontdesk/models.py:16
 #: apps/frontdesk/models.py:304 apps/inventory/models.py:25
 #: apps/inventory/models.py:60 apps/marketing/models.py:31
@@ -1700,7 +1736,7 @@ msgstr "regjistri i aktivitetit"
 msgid "name"
 msgstr "emri"
 
-#: apps/core/models.py:626
+#: apps/core/models.py:641
 msgid ""
 "How this computer reaches the other InnKeeper, e.g. http://100.64.1.7:8765 "
 "(Tailscale) or https://hotel.example.com"
@@ -1708,15 +1744,15 @@ msgstr ""
 "Si e arrin ky kompjuter InnKeeper-in tjetër, p.sh. http://100.64.1.7:8765 "
 "(Tailscale) ose https://hotel.example.com"
 
-#: apps/core/models.py:628
+#: apps/core/models.py:643
 msgid "sharing key"
 msgstr "çelësi i ndarjes"
 
-#: apps/core/models.py:628
+#: apps/core/models.py:643
 msgid "From the other business: Settings → Group overview."
 msgstr "Nga biznesi tjetër: Cilësimet → Pamja e grupit."
 
-#: apps/core/models.py:629 apps/frontdesk/models.py:32
+#: apps/core/models.py:644 apps/frontdesk/models.py:32
 #: apps/outlets/models.py:74 apps/outlets/models.py:114
 #: apps/outlets/models.py:197 apps/outlets/models.py:220
 #: apps/outlets/models.py:253 apps/outlets/models.py:271
@@ -1725,7 +1761,7 @@ msgstr "Nga biznesi tjetër: Cilësimet → Pamja e grupit."
 msgid "order"
 msgstr "renditja"
 
-#: apps/core/models.py:634
+#: apps/core/models.py:649
 msgid "business in the group"
 msgstr "biznes në grup"
 
@@ -1737,88 +1773,88 @@ msgstr "U shtuan të dhënat shembull"
 msgid "Sample data removed"
 msgstr "U hoqën të dhënat shembull"
 
-#: apps/core/settings_views.py:72
+#: apps/core/settings_views.py:75
 msgid "Choose a currency different from your main one."
 msgstr "Zgjidhni një monedhë të ndryshme nga ajo kryesore."
 
-#: apps/core/settings_views.py:75
+#: apps/core/settings_views.py:78
 msgid "Enter how much 1 unit is worth in your currency."
 msgstr "Shkruani sa vlen 1 njësi në monedhën tuaj."
 
-#: apps/core/settings_views.py:83 templates/core/settings_hub.html:59
+#: apps/core/settings_views.py:86 templates/core/settings_hub.html:59
 msgid "Logo"
 msgstr "Logoja"
 
-#: apps/core/settings_views.py:85
+#: apps/core/settings_views.py:88
 msgid ""
 "PNG, JPG, WEBP or SVG, up to 400 KB. Shown on receipts, invoices and the "
 "menu."
 msgstr ""
 "PNG, JPG, WEBP ose SVG, deri në 400 KB. Shfaqet në kupona, fatura dhe menu."
 
-#: apps/core/settings_views.py:87
+#: apps/core/settings_views.py:90
 msgid "Remove the current logo"
 msgstr "Hiq logon aktuale"
 
-#: apps/core/settings_views.py:107
+#: apps/core/settings_views.py:110
 msgid "The logo is too large. Use an image under 400 KB."
 msgstr "Logoja është shumë e madhe. Përdorni një imazh nën 400 KB."
 
-#: apps/core/settings_views.py:140
+#: apps/core/settings_views.py:143
 msgid "Switch on at least one area."
 msgstr "Aktivizoni të paktën një pjesë."
 
-#: apps/core/settings_views.py:165
+#: apps/core/settings_views.py:169
 msgid "Enter a value from 0 to 100."
 msgstr "Shkruani një vlerë nga 0 deri në 100."
 
-#: apps/core/settings_views.py:189
+#: apps/core/settings_views.py:193
 msgid "Paste the tunnel token from Cloudflare (a long text)."
 msgstr "Ngjitni tokenin e tunelit nga Cloudflare (një tekst i gjatë)."
 
-#: apps/core/settings_views.py:222
+#: apps/core/settings_views.py:226
 msgid "Paste the link where guests can leave a review."
 msgstr "Ngjitni linkun ku mysafirët mund të lënë vlerësim."
 
-#: apps/core/settings_views.py:241
+#: apps/core/settings_views.py:245
 msgid "Enter the amount your municipality charges."
 msgstr "Shkruani shumën që vendos bashkia juaj."
 
-#: apps/core/settings_views.py:265
+#: apps/core/settings_views.py:269
 #, python-format
 msgid "“%(a)s” is not an email address."
 msgstr "“%(a)s” nuk është adresë email."
 
-#: apps/core/settings_views.py:296
+#: apps/core/settings_views.py:300
 #, python-format
 msgid "Needed for %(p)s."
 msgstr "E nevojshme për %(p)s."
 
-#: apps/core/settings_views.py:298
+#: apps/core/settings_views.py:302
 msgid "POK accepts only ALL and EUR. Change the currency in Business details."
 msgstr ""
 "POK pranon vetëm ALL dhe EUR. Ndryshoni monedhën te Të dhënat e biznesit."
 
-#: apps/core/settings_views.py:304
+#: apps/core/settings_views.py:308
 msgid "Digital certificate (.p12 / .pfx)"
 msgstr "Certifikata dixhitale (.p12 / .pfx)"
 
-#: apps/core/settings_views.py:306
+#: apps/core/settings_views.py:310
 msgid ""
 "The electronic seal certificate issued for fiscalization (from e-Albania / "
 "NAIS)."
 msgstr ""
 "Certifikata e vulës elektronike për fiskalizim (nga e-Albania / AKSHI)."
 
-#: apps/core/settings_views.py:336
+#: apps/core/settings_views.py:340
 msgid "This IBAN isn't valid. Check it on your bank statement."
 msgstr "Ky IBAN nuk është i saktë. Kontrollojeni në ekstraktin e bankës."
 
-#: apps/core/settings_views.py:356
+#: apps/core/settings_views.py:360
 msgid "The certificate can't be opened with this password."
 msgstr "Certifikata nuk hapet me këtë fjalëkalim."
 
-#: apps/core/settings_views.py:361 apps/core/settings_views.py:425
+#: apps/core/settings_views.py:365 apps/core/settings_views.py:429
 msgid ""
 "Fiscalization is for businesses registered with the tax authority (Business "
 "details)."
@@ -1826,7 +1862,7 @@ msgstr ""
 "Fiskalizimi është për bizneset e regjistruara në tatime (Të dhënat e "
 "biznesit)."
 
-#: apps/core/settings_views.py:363
+#: apps/core/settings_views.py:367
 msgid ""
 "Remove the sample data first (the banner at the top), then set up your own "
 "business."
@@ -1834,63 +1870,63 @@ msgstr ""
 "Hiqni fillimisht të dhënat shembull (shiriti lart), pastaj konfiguroni "
 "biznesin tuaj."
 
-#: apps/core/settings_views.py:365
+#: apps/core/settings_views.py:369
 msgid "Enter the NIPT in Business details first."
 msgstr "Vendosni fillimisht NIPT-in te Të dhënat e biznesit."
 
-#: apps/core/settings_views.py:368
+#: apps/core/settings_views.py:372
 msgid "Needed to fiscalize."
 msgstr "E nevojshme për fiskalizimin."
 
-#: apps/core/settings_views.py:370
+#: apps/core/settings_views.py:374
 msgid "Upload the certificate."
 msgstr "Ngarkoni certifikatën."
 
-#: apps/core/settings_views.py:374
+#: apps/core/settings_views.py:378
 #, python-format
 msgid "Your prices are in %(c)s: the tax authority needs the rate to lekë."
 msgstr "Çmimet tuaja janë në %(c)s: tatimet kërkojnë kursin në lekë."
 
-#: apps/core/settings_views.py:433 apps/core/settings_views.py:534
-#: apps/core/settings_views.py:682 apps/frontdesk/channel_manager.py:66
+#: apps/core/settings_views.py:437 apps/core/settings_views.py:538
+#: apps/core/settings_views.py:686 apps/frontdesk/channel_manager.py:66
 #: apps/staff/payroll_views.py:94
 msgid "Settings saved."
 msgstr "Cilësimet u ruajtën."
 
-#: apps/core/settings_views.py:468 apps/marketing/views.py:209
+#: apps/core/settings_views.py:472 apps/marketing/views.py:209
 msgid "Ana"
 msgstr "Ana"
 
-#: apps/core/settings_views.py:530
+#: apps/core/settings_views.py:534
 #, python-format
 msgid "Saved. First copy written: %(name)s"
 msgstr "U ruajt. Kopja e parë u shkrua: %(name)s"
 
-#: apps/core/settings_views.py:532
+#: apps/core/settings_views.py:536
 #, python-format
 msgid "Saved, but the copy failed: %(e)s"
 msgstr "U ruajt, por kopjimi dështoi: %(e)s"
 
-#: apps/core/settings_views.py:546
+#: apps/core/settings_views.py:550
 #, python-format
 msgid "Copy written: %(name)s"
 msgstr "Kopja u shkrua: %(name)s"
 
-#: apps/core/settings_views.py:548
+#: apps/core/settings_views.py:552
 #, python-format
 msgid "The copy failed: %(e)s"
 msgstr "Kopjimi dështoi: %(e)s"
 
-#: apps/core/settings_views.py:588
+#: apps/core/settings_views.py:592
 #, python-format
 msgid "Backup saved: %(name)s"
 msgstr "Kopja rezervë u ruajt: %(name)s"
 
-#: apps/core/settings_views.py:631
+#: apps/core/settings_views.py:635
 msgid "This file is not an InnKeeper backup."
 msgstr "Ky skedar nuk është kopje rezervë e InnKeeper-it."
 
-#: apps/core/settings_views.py:649
+#: apps/core/settings_views.py:653
 #, python-format
 msgid ""
 "Settings imported: %(o)s outlets, %(i)s menu items, %(t)s tables, %(r)s "
@@ -1899,11 +1935,11 @@ msgstr ""
 "Cilësimet u importuan: %(o)s pika, %(i)s artikuj menuje, %(t)s tavolina, "
 "%(r)s dhoma."
 
-#: apps/core/settings_views.py:657
+#: apps/core/settings_views.py:661
 msgid "Type RESTORE to confirm."
 msgstr "Shkruani RESTORE për të konfirmuar."
 
-#: apps/core/settings_views.py:667
+#: apps/core/settings_views.py:671
 #, python-format
 msgid ""
 "Backup restored. Sign in with an account from the restored data. A copy of "
@@ -1912,20 +1948,20 @@ msgstr ""
 "Kopja rezervë u rikthye. Hyni me një llogari nga të dhënat e rikthyera. Një "
 "kopje e të dhënave të mëparshme u ruajt si %(name)s."
 
-#: apps/core/settings_views.py:699 apps/core/settings_views.py:719
+#: apps/core/settings_views.py:703 apps/core/settings_views.py:723
 msgid "Fill in and save the email settings first."
 msgstr "Plotësoni dhe ruani fillimisht cilësimet e email-it."
 
-#: apps/core/settings_views.py:701
+#: apps/core/settings_views.py:705
 msgid "Add the email address the summary goes to first."
 msgstr "Shtoni fillimisht adresën email ku shkon përmbledhja."
 
-#: apps/core/settings_views.py:705
+#: apps/core/settings_views.py:709
 #, python-format
 msgid "Summary of %(d)s sent to %(to)s."
 msgstr "Përmbledhja e %(d)s u dërgua te %(to)s."
 
-#: apps/core/settings_views.py:707 apps/core/settings_views.py:726
+#: apps/core/settings_views.py:711 apps/core/settings_views.py:730
 msgid ""
 "The email could not be sent. Check the server, port, security, username and "
 "password."
@@ -1933,40 +1969,40 @@ msgstr ""
 "Email-i nuk u dërgua. Kontrolloni serverin, portën, sigurinë, emrin e "
 "përdoruesit dhe fjalëkalimin."
 
-#: apps/core/settings_views.py:721
+#: apps/core/settings_views.py:725
 msgid ""
 "Add an email address to your staff account or the business details first."
 msgstr ""
 "Shtoni fillimisht një adresë email në llogarinë tuaj ose te të dhënat e "
 "biznesit."
 
-#: apps/core/settings_views.py:722
+#: apps/core/settings_views.py:726
 msgid "InnKeeper test email"
 msgstr "Email provë nga InnKeeper"
 
-#: apps/core/settings_views.py:723
+#: apps/core/settings_views.py:727
 #, python-format
 msgid "Test email sent to %(to)s."
 msgstr "Email-i provë u dërgua te %(to)s."
 
-#: apps/core/settings_views.py:765
+#: apps/core/settings_views.py:769
 msgid "Nothing to import."
 msgstr "Asgjë për t'u importuar."
 
-#: apps/core/settings_views.py:769
+#: apps/core/settings_views.py:773
 #, python-format
 msgid "Imported: %(c)s new, %(u)s updated."
 msgstr "U importuan: %(c)s të reja, %(u)s të përditësuara."
 
-#: apps/core/settings_views.py:774
+#: apps/core/settings_views.py:778
 msgid "Choose a file."
 msgstr "Zgjidhni një skedar."
 
-#: apps/core/settings_views.py:778
+#: apps/core/settings_views.py:782
 msgid "The file is too large (5 MB at most)."
 msgstr "Skedari është shumë i madh (maksimumi 5 MB)."
 
-#: apps/core/settings_views.py:781
+#: apps/core/settings_views.py:785
 msgid ""
 "This is an old Excel file (.xls). In Excel choose File → Save as → “Excel "
 "Workbook (.xlsx)”, then upload that."
@@ -3280,7 +3316,7 @@ msgstr "Channex nuk e pranoi çelësin API."
 
 #: apps/frontdesk/channex.py:247 apps/frontdesk/ical.py:229
 #: apps/frontdesk/models.py:97 apps/frontdesk/models.py:131
-#: apps/frontdesk/models.py:423
+#: apps/frontdesk/models.py:423 apps/frontdesk/privacy.py:39
 msgid "guest"
 msgstr "mysafir"
 
@@ -4051,6 +4087,30 @@ msgstr "rezervim kanali"
 #: apps/frontdesk/models.py:435
 msgid "channel bookings"
 msgstr "rezervimet e kanaleve"
+
+#: apps/frontdesk/privacy.py:36
+msgid ""
+"This guest has a current or upcoming stay. Erase the details after they "
+"leave."
+msgstr ""
+"Ky mysafir ka një qëndrim aktual ose të ardhshëm. Fshijini të dhënat pasi të"
+" largohet."
+
+#: apps/frontdesk/privacy.py:38
+msgid "Erased"
+msgstr "I fshirë"
+
+#: apps/frontdesk/privacy.py:87
+msgid "Type ERASE to confirm."
+msgstr "Shkruani ERASE për ta konfirmuar."
+
+#: apps/frontdesk/privacy.py:94
+msgid ""
+"The guest's personal details were erased. Bills and fiscal records were "
+"kept."
+msgstr ""
+"Të dhënat personale të mysafirit u fshinë. Faturat dhe dokumentet fiskale u "
+"ruajtën."
 
 #: apps/frontdesk/public.py:29 apps/frontdesk/register.py:101
 #: templates/booking/search.html:11
@@ -6377,7 +6437,7 @@ msgctxt "exchange rate"
 msgid "Rate"
 msgstr "Kursi"
 
-#: apps/outlets/printing.py:267 templates/core/about.html:38
+#: apps/outlets/printing.py:267 templates/core/about.html:46
 #: templates/core/settings_hub.html:311 templates/outlets/_ticket.html:123
 #: templates/outlets/receipt.html:73 templates/staff/holidays.html:18
 msgid "Change"
@@ -8068,6 +8128,11 @@ msgstr "U lidh përsëri."
 msgid "Book your stay"
 msgstr "Rezervoni qëndrimin"
 
+#: templates/booking/base.html:28 templates/booking/privacy.html:3
+#: templates/booking/privacy.html:4
+msgid "Privacy"
+msgstr "Privatësia"
+
 #: templates/booking/checkin.html:3 templates/booking/checkin.html:4
 #: templates/frontdesk/reservation_detail.html:150
 msgid "Online check-in"
@@ -8247,6 +8312,103 @@ msgid "This is a test email from InnKeeper for %(name)s. Email is working."
 msgstr ""
 "Ky është një email provë nga InnKeeper për %(name)s. Email-i funksionon."
 
+#: templates/booking/privacy.html:10
+msgid "How we use your personal data"
+msgstr "Si i përdorim të dhënat tuaja personale"
+
+#: templates/booking/privacy.html:11
+#, python-format
+msgid ""
+"%(name)s is responsible for the personal data you give us when you book, "
+"check in or pay."
+msgstr ""
+"%(name)s është përgjegjës për të dhënat personale që na jepni kur rezervoni,"
+" bëni check-in ose paguani."
+
+#: templates/booking/privacy.html:12
+msgid "What we keep"
+msgstr "Çfarë ruajmë"
+
+#: templates/booking/privacy.html:13
+msgid ""
+"Your name and contact details, the details of your stay and payments, and, "
+"as the law requires for the guest register, the identity document details of"
+" each guest."
+msgstr ""
+"Emrin dhe kontaktet tuaja, të dhënat e qëndrimit dhe të pagesave, dhe, siç e"
+" kërkon ligji për regjistrin e mysafirëve, të dhënat e dokumentit të "
+"identitetit të çdo mysafiri."
+
+#: templates/booking/privacy.html:14
+msgid "Why"
+msgstr "Pse"
+
+#: templates/booking/privacy.html:15
+msgid ""
+"To take and manage your booking, to keep the guest register the law "
+"requires, and to issue receipts and invoices. We don't sell your data or use"
+" it for anything else; we send offers only if you agreed to receive them."
+msgstr ""
+"Për të marrë dhe menaxhuar rezervimin tuaj, për të mbajtur regjistrin e "
+"mysafirëve që kërkon ligji dhe për të lëshuar kupona e fatura. Nuk i shesim "
+"të dhënat tuaja dhe nuk i përdorim për asgjë tjetër; oferta ju dërgojmë "
+"vetëm nëse keni pranuar t'i merrni."
+
+#: templates/booking/privacy.html:16
+msgid "Who receives it"
+msgstr "Kush i merr"
+
+#: templates/booking/privacy.html:17
+msgid ""
+"The authorities, when the law requires it (for example the guest register "
+"and the tax office for invoices), and the payment provider when you pay "
+"online. Nobody else."
+msgstr ""
+"Autoritetet, kur e kërkon ligji (për shembull regjistri i mysafirëve dhe "
+"tatimet për faturat), dhe ofruesi i pagesave kur paguani online. Askush "
+"tjetër."
+
+#: templates/booking/privacy.html:18
+msgid "How long"
+msgstr "Për sa kohë"
+
+#: templates/booking/privacy.html:19
+msgid ""
+"Bills and invoices for as long as accounting law requires. Other details "
+"only as long as needed for your stay and our legal obligations."
+msgstr ""
+"Faturat për aq kohë sa kërkon ligji i kontabilitetit. Të dhënat e tjera "
+"vetëm për aq sa duhen për qëndrimin tuaj dhe detyrimet tona ligjore."
+
+#: templates/booking/privacy.html:19
+#, python-format
+msgid "Identity document details are removed %(n)s year after your stay."
+msgid_plural ""
+"Identity document details are removed %(n)s years after your stay."
+msgstr[0] ""
+"Të dhënat e dokumentit të identitetit fshihen %(n)s vit pas qëndrimit tuaj."
+msgstr[1] ""
+"Të dhënat e dokumentit të identitetit fshihen %(n)s vite pas qëndrimit tuaj."
+
+#: templates/booking/privacy.html:20
+msgid "Your rights"
+msgstr "Të drejtat tuaja"
+
+#: templates/booking/privacy.html:21
+msgid ""
+"You can ask to see the data we keep about you, to correct it, or to erase "
+"what the law doesn't oblige us to keep. You can also complain to the "
+"Commissioner for the Right to Information and Personal Data Protection."
+msgstr ""
+"Mund të kërkoni të shihni të dhënat që ruajmë për ju, t'i korrigjoni ose të "
+"fshini ato që ligji nuk na detyron t'i ruajmë. Mund të ankoheni edhe te "
+"Komisioneri për të Drejtën e Informimit dhe Mbrojtjen e të Dhënave "
+"Personale."
+
+#: templates/booking/privacy.html:23
+msgid "Contact"
+msgstr "Kontakti"
+
 #: templates/booking/search.html:13
 msgid "Check availability"
 msgstr "Kontrollo disponueshmërinë"
@@ -8376,31 +8538,47 @@ msgstr "Kopjo mesazhin"
 msgid "Or let them scan this with their phone."
 msgstr "Ose lërini ta skanojnë këtë kod me telefon."
 
-#: templates/core/about.html:24
+#: templates/core/about.html:25 templates/help/help.html:12
+msgid "Who to call for help"
+msgstr "Kë të telefononi për ndihmë"
+
+#: templates/core/about.html:29
+msgid ""
+"Add who to call for help with InnKeeper (whoever set it up for you), so your"
+" staff find it here."
+msgstr ""
+"Shtoni kë të telefononi për ndihmë me InnKeeper (personin që jua "
+"konfiguroi), që stafi ta gjejë këtu."
+
+#: templates/core/about.html:29
+msgid "Add it"
+msgstr "Shtojeni"
+
+#: templates/core/about.html:32
 msgid "Help and contact"
 msgstr "Ndihmë dhe kontakt"
 
-#: templates/core/about.html:27
+#: templates/core/about.html:35
 msgid "The user guide, in this app"
 msgstr "Udhëzuesi, brenda programit"
 
-#: templates/core/about.html:28
+#: templates/core/about.html:36
 msgid "InnKeeper website"
 msgstr "Faqja e InnKeeper"
 
-#: templates/core/about.html:29
+#: templates/core/about.html:37
 msgid "Download the latest version"
 msgstr "Shkarko versionin më të ri"
 
-#: templates/core/about.html:30
+#: templates/core/about.html:38
 msgid "Report a problem or ask for a feature"
 msgstr "Njoftoni një problem ose kërkoni një veçori"
 
-#: templates/core/about.html:31
+#: templates/core/about.html:39
 msgid "Source code (open)"
 msgstr "Kodi burimor (i hapur)"
 
-#: templates/core/about.html:37
+#: templates/core/about.html:45
 msgid ""
 "Your public pages (booking, menu, table orders) show a small “Made with "
 "InnKeeper” link."
@@ -8408,7 +8586,7 @@ msgstr ""
 "Faqet tuaja publike (rezervimi, menuja, porositë nga tavolina) shfaqin një "
 "link të vogël “Bërë me InnKeeper”."
 
-#: templates/core/about.html:37
+#: templates/core/about.html:45
 msgid "The “Made with InnKeeper” link on your public pages is turned off."
 msgstr "Linku “Bërë me InnKeeper” në faqet publike është i fikur."
 
@@ -11574,6 +11752,28 @@ msgstr "Ende asnjë qëndrim."
 #: templates/frontdesk/guest_list.html:16
 msgid "Company"
 msgstr "Kompania"
+
+#: templates/frontdesk/guest_detail.html:39
+msgid "Erase personal data"
+msgstr "Fshi të dhënat personale"
+
+#: templates/frontdesk/guest_detail.html:41
+msgid ""
+"When a guest asks to be forgotten: their contact, identity and address "
+"details are removed for good, also from the stays they made. Bills, receipts"
+" and fiscal invoices stay, because the law requires keeping them."
+msgstr ""
+"Kur një mysafir kërkon të harrohet: kontaktet, të dhënat e identitetit dhe "
+"adresa fshihen përgjithmonë, edhe nga qëndrimet e tij. Faturat, kuponat dhe "
+"faturat fiskale mbeten, sepse ligji kërkon që të ruhen."
+
+#: templates/frontdesk/guest_detail.html:43
+msgid "Type ERASE to confirm"
+msgstr "Shkruani ERASE për ta konfirmuar"
+
+#: templates/frontdesk/guest_detail.html:44
+msgid "Erase"
+msgstr "Fshi"
 
 #: templates/frontdesk/guest_form.html:3 templates/frontdesk/guest_form.html:5
 #: templates/frontdesk/guest_list.html:10

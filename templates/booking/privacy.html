@@ -1,0 +1,25 @@
+{% extends "booking/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Privacy" %}{% endblock %}
+{% block eyebrow %}{% translate "Privacy" %}{% endblock %}
+{% block content %}
+<section class="card card-body booking-narrow privacy-notice">
+  {% if custom %}
+    <p>{{ custom|linebreaksbr }}</p>
+  {% else %}
+    <h2 style="margin-top:0">{% translate "How we use your personal data" %}</h2>
+    <p>{% blocktranslate with name=hotel.legal_name|default:hotel.name %}{{ name }} is responsible for the personal data you give us when you book, check in or pay.{% endblocktranslate %}</p>
+    <h3>{% translate "What we keep" %}</h3>
+    <p>{% translate "Your name and contact details, the details of your stay and payments, and, as the law requires for the guest register, the identity document details of each guest." %}</p>
+    <h3>{% translate "Why" %}</h3>
+    <p>{% translate "To take and manage your booking, to keep the guest register the law requires, and to issue receipts and invoices. We don't sell your data or use it for anything else; we send offers only if you agreed to receive them." %}</p>
+    <h3>{% translate "Who receives it" %}</h3>
+    <p>{% translate "The authorities, when the law requires it (for example the guest register and the tax office for invoices), and the payment provider when you pay online. Nobody else." %}</p>
+    <h3>{% translate "How long" %}</h3>
+    <p>{% translate "Bills and invoices for as long as accounting law requires. Other details only as long as needed for your stay and our legal obligations." %}{% if hotel.guest_id_keep_years %} {% blocktranslate count n=hotel.guest_id_keep_years %}Identity document details are removed {{ n }} year after your stay.{% plural %}Identity document details are removed {{ n }} years after your stay.{% endblocktranslate %}{% endif %}</p>
+    <h3>{% translate "Your rights" %}</h3>
+    <p>{% translate "You can ask to see the data we keep about you, to correct it, or to erase what the law doesn't oblige us to keep. You can also complain to the Commissioner for the Right to Information and Personal Data Protection." %}</p>
+  {% endif %}
+  <p class="muted" style="margin-bottom:0">{% translate "Contact" %}: {{ hotel.name }}{% if hotel.email %} · <a href="mailto:{{ hotel.email }}">{{ hotel.email }}</a>{% endif %}{% if hotel.phone %} · <a href="tel:{{ hotel.phone }}">{{ hotel.phone }}</a>{% endif %}{% if hotel.address %} · {{ hotel.address }}{% endif %}</p>
+</section>
+{% endblock %}

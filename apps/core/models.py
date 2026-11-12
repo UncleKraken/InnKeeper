@@ -137,6 +137,21 @@ class HotelSettings(models.Model):
     )
     booking_max_days_ahead = models.PositiveSmallIntegerField(_("book at most (days ahead)"), default=365)
     booking_intro = models.TextField(_("welcome text"), blank=True)
+    support_contact = models.TextField(
+        _("who to call for help with InnKeeper"),
+        blank=True,
+        help_text=_("Name, phone and email of whoever set up InnKeeper for you. Shown under Help and About."),
+    )
+    privacy_notice = models.TextField(
+        _("privacy notice"),
+        blank=True,
+        help_text=_("Shown to guests from the booking and online check-in pages. Leave it empty for InnKeeper's standard text."),
+    )
+    guest_id_keep_years = models.PositiveSmallIntegerField(
+        _("remove guests' ID details after (years)"),
+        default=0,
+        help_text=_("Document numbers and dates of birth are cleared this many years after the stay. 0 keeps them."),
+    )
     booking_terms = models.TextField(
         _("booking conditions"), blank=True, help_text=_("Cancellation policy, check-in times, house rules…")
     )

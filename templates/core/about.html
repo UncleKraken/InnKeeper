@@ -20,6 +20,14 @@
     </section>
   </div>
   <div class="stack">
+    {% if hotel.support_contact %}
+    <section class="card" style="border-color:var(--primary)">
+      <div class="card-header"><h2>{% icon "help" %} {% translate "Who to call for help" %}</h2></div>
+      <div class="card-body"><p style="margin:0">{{ hotel.support_contact|urlize|linebreaksbr }}</p></div>
+    </section>
+    {% elif request.user.is_manager %}
+    <section class="card"><div class="card-body"><p style="margin:0">{% translate "Add who to call for help with InnKeeper (whoever set it up for you), so your staff find it here." %} <a href="/settings/?tab=business">{% translate "Add it" %}</a></p></div></section>
+    {% endif %}
     <section class="card">
       <div class="card-header"><h2>{% translate "Help and contact" %}</h2></div>
       <div class="card-body">

@@ -27,7 +27,7 @@ LOGO_TYPES = {"image/png", "image/jpeg", "image/webp", "image/svg+xml", "image/g
 
 
 class BusinessForm(StyledFormMixin, forms.ModelForm):
-    full_width_fields = ("address",)
+    full_width_fields = ("address", "support_contact")
 
     class Meta:
         model = HotelSettings
@@ -49,6 +49,8 @@ class BusinessForm(StyledFormMixin, forms.ModelForm):
             "day_ends_at",
             "check_in_time",
             "check_out_time",
+            "guest_id_keep_years",
+            "support_contact",
         ]
         widgets = {"check_in_time": TimeInput(), "check_out_time": TimeInput(), "tax_status": forms.RadioSelect(attrs={"data-full": "1"})}
 
@@ -57,6 +59,7 @@ class BusinessForm(StyledFormMixin, forms.ModelForm):
         if not self.instance.module_rooms:
             del self.fields["check_in_time"]
             del self.fields["check_out_time"]
+            del self.fields["guest_id_keep_years"]
 
     def clean(self):
         cleaned = super().clean()
@@ -142,7 +145,7 @@ class ModulesForm(StyledFormMixin, forms.ModelForm):
 
 
 class BookingSettingsForm(StyledFormMixin, forms.ModelForm):
-    full_width_fields = ("public_url",)
+    full_width_fields = ("public_url", "privacy_notice")
 
     class Meta:
         model = HotelSettings
@@ -156,6 +159,7 @@ class BookingSettingsForm(StyledFormMixin, forms.ModelForm):
             "booking_max_days_ahead",
             "booking_intro",
             "booking_terms",
+            "privacy_notice",
             "bank_details",
         ]
 

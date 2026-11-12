@@ -34,5 +34,17 @@
       <dt>{% translate "Address" %}</dt><dd>{{ guest.address|default:"—" }}</dd>
     </dl>{% if guest.notes %}<p style="margin:1rem 0 0; white-space:pre-line">{{ guest.notes }}</p>{% endif %}</div>
   </section>
+  {% if request.user.is_manager %}
+  <details class="card">
+    <summary class="card-header" style="cursor:pointer"><h3>{% icon "lock" %} {% translate "Erase personal data" %}</h3></summary>
+    <form method="post" action="{% url 'frontdesk:guest_erase' guest.pk %}" class="card-body">{% csrf_token %}
+      <p class="help" style="margin-top:0">{% translate "When a guest asks to be forgotten: their contact, identity and address details are removed for good, also from the stays they made. Bills, receipts and fiscal invoices stay, because the law requires keeping them." %}</p>
+      <div class="row" style="gap:.6rem; align-items:end; flex-wrap:wrap">
+        <div class="field" style="margin:0"><label for="erase-confirm">{% translate "Type ERASE to confirm" %}</label><input class="input" id="erase-confirm" name="confirm" autocomplete="off"></div>
+        <button class="btn btn-danger">{% translate "Erase" %}</button>
+      </div>
+    </form>
+  </details>
+  {% endif %}
 </div>
 {% endblock %}

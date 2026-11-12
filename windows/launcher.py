@@ -176,6 +176,11 @@ def daily_jobs(log, stop: threading.Event) -> None:
                 n = night_audit()
                 state.write_text(today)
                 log(f"Room charges posted for {n} stay(s).")
+                from apps.frontdesk.privacy import remove_old_id_details
+
+                n = remove_old_id_details()
+                if n:
+                    log(f"Old ID details removed for {n} guest(s).")
         except Exception as e:
             log(f"Daily job error: {e}")
         try:
