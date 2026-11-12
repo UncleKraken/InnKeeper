@@ -11,6 +11,7 @@ Backups and moving to another computer.
 Files are gzip-compressed JSON (`.innkeeper`), readable by any future version.
 """
 
+import datetime as dt
 import gzip
 import json
 from datetime import datetime
@@ -20,6 +21,7 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.sessions.models import Session
 from django.core import serializers
+from django.core.serializers.json import DjangoJSONEncoder
 from django.core.management.color import no_style
 from django.db import connection, transaction
 from django.utils import timezone
@@ -211,10 +213,23 @@ def filename(kind: str) -> str:
 # ---------- Full backup ----------
 
 
+class _ExactEncoder(DjangoJSONEncoder):
+    """Like Django's encoder, but times keep their microseconds (Django's cuts them to milliseconds),
+    so a restored business is exactly the one that was saved."""
+
+    def default(self, o):
+        if isinstance(o, dt.datetime):
+            r = o.isoformat()
+            return r[:-6] + "Z" if r.endswith("+00:00") else r
+        if isinstance(o, dt.time) and o.utcoffset() is None:
+            return o.isoformat()
+        return super().default(o)
+
+
 def _full_data() -> list:
     data = []
     for model in _models(FULL_MODELS):
-        data.extend(json.loads(serializers.serialize("json", model._default_manager.all().order_by("pk"))))
+        data.extend(json.loads(serializers.serialize("json", model._default_manager.all().order_by("pk"), cls=_ExactEncoder)))
     return data
 
 
