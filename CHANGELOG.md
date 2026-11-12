@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.34.1 — fixes from a full test day
+
+**Shqip**
+
+- **Check-out i vonuar:** kur data e largimit ka kaluar dhe mysafiri nuk është nxjerrë, InnKeeper pyet tani: "U largua më {data}, siç ishte rezervuar" apo "Qëndroi deri sot". Më parë llogariste pa pyetur të gjitha netët deri sot.
+- **Kuzhina:** koha e pritjes shfaqet në orë ose ditë kur është e gjatë (p.sh. "3h", "2d") në vend të minutave të shumta.
+- **Harruat të dilni nga turni?** Nëse dikush është ende "në turn" nga një ditë më parë, butoni në menu bëhet i kuq dhe tregon që kur.
+- **Kopjet rezervë:** ora e krijimit të kopjes shfaqet në orën lokale.
+- Adresa /housekeeping/ hap tani tabelën e dhomave.
+
+**English**
+
+- **Late check-out:** when the departure date has passed and the guest wasn't checked out, InnKeeper now asks: "Left on {date}, as booked" or "Stayed until today". Before, it charged every night up to today without asking.
+- **Kitchen:** long waits show in hours or days (e.g. "3h", "2d") instead of a huge number of minutes.
+- **Forgot to clock out?** If someone is still clocked in from an earlier day, the sidebar button turns red and shows since when.
+- **Backups:** the time a backup was made is shown in local time.
+- The /housekeeping/ address now opens the room board.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.34.1.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.34.0 — privacy, support contact, backups proven
 
 **Shqip**
