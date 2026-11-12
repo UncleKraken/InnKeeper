@@ -60,3 +60,28 @@ class ForgottenCheckOutTests(HotelTestCase):
         self.assertContains(r, f'action="{reverse("frontdesk:check_out", args=[res.pk])}" class="inline"', count=1)
 
 
+
+
+class SmallFixesFromTheSimulatedDayTests(HotelTestCase):
+    def test_kitchen_ages_and_housekeeping_address(self):
+        from apps.outlets.kitchen import _age
+
+        self.assertEqual([_age(5), _age(119), _age(130), _age(32966)], ["5′", "119′", "2h", "22d"])
+        self.client.login(username="boss", password=PASSWORD)
+        r = self.client.get("/housekeeping/")
+        self.assertEqual((r.status_code, r["Location"]), (302, reverse("housekeeping:board")))
+
+    def test_forgotten_clock_out_shows_in_the_sidebar(self):
+        from apps.staff.models import TimeEntry
+
+        TimeEntry.objects.create(user=self.manager, clock_in=timezone.now() - timedelta(hours=20))
+        self.client.login(username="boss", password=PASSWORD)
+        r = self.client.get(reverse("core:dashboard"))
+        self.assertContains(r, "btn btn-danger btn-sm btn-block")
+
+    def test_backup_summary_shows_local_time(self):
+        from apps.core import backup
+
+        s = backup.summarize({"kind": "settings", "created": "2026-11-12T22:19:00+00:00", "data": {}})
+        self.assertEqual(s["created_at"].strftime("%H:%M"), timezone.localtime(s["created_at"]).strftime("%H:%M"))
+        self.assertEqual(s["created_at"].utcoffset() == timedelta(0), timezone.localtime().utcoffset() == timedelta(0))

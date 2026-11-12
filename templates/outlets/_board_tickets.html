@@ -5,7 +5,7 @@
   <article class="kds-ticket s-{{ t.status }}{% if x.late %} late{% elif x.slow %} slow{% endif %}">
     <header>
       <div><strong class="kds-table">{{ t.order.display_name }}</strong><small>{{ t.order.outlet }} · #{{ t.order.number }}{% if t.sent_by %} · {{ t.sent_by.first_name|default:t.sent_by.username }}{% endif %}</small></div>
-      <span class="kds-time">{{ x.minutes }}′</span>
+      <span class="kds-time">{{ x.age }}</span>
     </header>
     <ul>
       {% for l in t.lines.all %}

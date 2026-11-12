@@ -252,6 +252,22 @@ def export_full_with_digest() -> tuple[bytes, str]:
     return _wrap("full", data), digest
 
 
+def _local_time(value: str):
+    """The backup's creation time in the business's time zone (it is stored in UTC)."""
+    from django.utils import timezone
+    from django.utils.dateparse import parse_datetime
+
+    try:
+        moment = parse_datetime(value)
+    except (TypeError, ValueError):
+        return None
+    if moment is None:
+        return None
+    if timezone.is_naive(moment):
+        moment = timezone.make_aware(moment, dt.timezone.utc)
+    return timezone.localtime(moment)
+
+
 def summarize(doc: dict) -> dict:
     counts: dict[str, int] = {}
     if doc["kind"] == "full":
@@ -269,6 +285,7 @@ def summarize(doc: dict) -> dict:
     return {
         "kind": doc["kind"],
         "created": doc.get("created", ""),
+        "created_at": _local_time(doc.get("created", "")),
         "version": doc.get("version", ""),
         "name": name,
         "counts": counts,

@@ -42,7 +42,7 @@ def _board_tickets(station: Station):
     tickets = []
     for t in qs:
         minutes = int((now - t.sent_at).total_seconds() // 60)
-        tickets.append({"t": t, "minutes": minutes, "late": minutes >= 20, "slow": 10 <= minutes < 20})
+        tickets.append({"t": t, "minutes": minutes, "age": _age(minutes), "late": minutes >= 20, "slow": 10 <= minutes < 20})
     return tickets
 
 
@@ -130,3 +130,12 @@ def floor_signature(request, pk):
             "ready": sorted(f"{o.pk}:{o.display_name}" for o in ready_orders),
         }
     )
+
+
+def _age(minutes: int) -> str:
+    """How long a ticket has waited: 45′, 3h, 2d (a ticket left over from another day shouldn't read 32966′)."""
+    if minutes < 120:
+        return f"{minutes}′"
+    if minutes < 48 * 60:
+        return f"{minutes // 60}h"
+    return f"{minutes // 1440}d"

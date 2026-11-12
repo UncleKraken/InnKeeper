@@ -9,7 +9,7 @@
   <div class="card-body">
     <dl class="dl">
       <dt>{% translate "Business" %}</dt><dd>{{ summary.name|default:"—" }}</dd>
-      <dt>{% translate "Created" %}</dt><dd>{{ summary.created|slice:":16"|cut:"T"|default:"—" }}</dd>
+      <dt>{% translate "Created" %}</dt><dd>{% if summary.created_at %}{{ summary.created_at|date:"d.m.Y H:i" }}{% else %}{{ summary.created|slice:":16"|cut:"T"|default:"—" }}{% endif %}</dd>
       <dt>{% translate "Version" %}</dt><dd>{{ summary.version }}</dd>
     </dl>
     <table class="table table-sm" style="margin-top:1rem"><tbody>

@@ -91,7 +91,8 @@
     <div class="sidebar-foot">
       {% if shared_till %}<form method="post" action="{% url 'accounts:lock' %}" id="lock-form" style="margin-bottom:.75rem">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button type="submit" class="btn btn-block sidebar-lock">{% icon "lock" %} {% translate "Lock / switch user" %}</button></form>{% endif %}
       <form method="post" action="{% url 'staff:clock' %}" class="sidebar-clock">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
-        {% if clocked_in %}<button class="btn btn-secondary btn-sm btn-block" title="{% translate 'Clock out' %}">{% icon "history" %} {% blocktranslate with t=clocked_in.clock_in|date:"H:i" %}Clock out · in since {{ t }}{% endblocktranslate %}</button>
+        {% if clocked_in and clocked_in.forgotten %}<button class="btn btn-danger btn-sm btn-block" title="{% translate 'Clock out' %}">{% icon "alert" %} {% blocktranslate with t=clocked_in.clock_in|date:"d.m H:i" %}Forgot to clock out? In since {{ t }}{% endblocktranslate %}</button><small class="muted" style="display:block; margin-top:.3rem; color:#9aa4b2">{% translate "A manager can correct the time under Attendance." %}</small>
+        {% elif clocked_in %}<button class="btn btn-secondary btn-sm btn-block" title="{% translate 'Clock out' %}">{% icon "history" %} {% blocktranslate with t=clocked_in.clock_in|date:"H:i" %}Clock out · in since {{ t }}{% endblocktranslate %}</button>
         {% else %}<button class="btn btn-sm btn-block">{% icon "history" %} {% translate "Clock in" %}</button>{% endif %}
       </form>
       <div class="who">{{ request.user }}</div>
