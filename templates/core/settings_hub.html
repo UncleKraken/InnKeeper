@@ -145,6 +145,8 @@
         <details class="help-body" style="margin-top:.75rem"><summary>{% translate "A device can't open it?" %}</summary>
           <ul>
             <li>{% translate "Check that the device is on the same Wi-Fi, not mobile data or a guest Wi-Fi." %}</li>
+            <li>{% translate "Some Wi-Fi networks keep devices apart, so they reach the internet but not each other (often in cafés, hotels, shared buildings or routers managed by the internet provider; called client or AP isolation). The phone then says the site can't be reached. Use the business's own Wi-Fi, or turn off isolation in the router's settings." %}</li>
+            <li>{% translate "Type the address exactly as shown, starting with http:// (not https://). Some browsers, such as Brave, change it to https by themselves: turn that off for this address, or open it in Chrome or Samsung Internet." %}</li>
             <li>{% translate "If Windows asked whether to allow InnKeeper on the network and the answer was Cancel: open Windows Security → Firewall & network protection → Allow an app through firewall, and tick InnKeeper. (Installing InnKeeper with administrator rights sets this up by itself.)" %}</li>
             <li>{% translate "Keep this computer on and stop it from going to sleep (Windows Settings → System → Power)." %}</li>
             <li>{% translate "The address changes when the router gives this computer a new one, for example after a power cut. To keep it the same, reserve the address for this computer in the router's settings (often called DHCP reservation or Static lease). The InnKeeper window always shows the current address." %}</li>
@@ -348,12 +350,13 @@
       <div class="card-header"><h2>{% translate "Fiscalization" %}</h2>{% if hotel.fiscal_configured %}{% if hotel.fiscal_test %}{% translate "Test system" as l %}{% status_badge "warning" l %}{% else %}{% translate "Live" as l %}{% status_badge "success" l %}{% endif %}{% endif %}</div>
       <div class="card-body">
         <p class="muted" style="margin-top:0">{% translate "InnKeeper sends every paid bill and every guest bill directly to the tax authority (DPT), signed with your certificate, and prints the NSLF, NIVF and QR code on it. Without internet the receipt is printed with its NSLF and sent automatically later (within 48 hours)." %}</p>
+        <div class="alert alert-warning" style="margin-bottom:1rem">{% icon "alert" %} <span><strong>{% translate "Certified software required." %}</strong> {% translate "In Albania, software that issues fiscal receipts must first be certified by AKSHI and the tax office (VKM 239/2020), which gives its software and maintainer codes. InnKeeper is not certified yet: use the tax authority's test system, or the codes of a certified fiscal provider that has taken InnKeeper on. Without a certified software code the tax office rejects every receipt (error 42)." %}</span></div>
         {% if certificate %}<div class="alert alert-info" style="margin-bottom:1rem">{% icon "check" %} {% translate "Certificate" %}: {{ certificate.subject }} · {% translate "valid until" %} {{ certificate.not_after|date:"d.m.Y" }}</div>{% elif certificate_error %}<div class="alert alert-error" style="margin-bottom:1rem">{{ certificate_error }}</div>{% endif %}
         {% include "includes/form_fields.html" %}
         <details class="help-body" style="margin-top:1rem"><summary>{% translate "Where do I get these codes?" %}</summary>
           <ol>
             <li>{% translate "Apply for the electronic seal certificate for fiscalization (via e-Albania) and download the .p12 file." %}</li>
-            <li>{% translate "In the tax authority's self-care portal, register the business unit (premises), the software (InnKeeper, as in-house/own software) to get the software and maintainer codes, each cash register (TCR) and each operator. Copy the codes here." %}</li>
+            <li>{% translate "The software and maintainer codes come only with a certified fiscal software (see the notice above). With them, register in the tax authority's self-care portal the business unit (premises), each cash register (TCR) and each operator, and copy the codes here." %}</li>
             <li>{% translate "Keep “Use the tax authority's test system” on and make a few sales: they must appear as Registered under Finance → Fiscal. Then turn it off to go live." %}</li>
             <li>{% translate "Give every staff member who takes payments their own operator code (Staff → edit). Outlets with their own cash register get their own TCR code (Outlets & menus → edit)." %}</li>
           </ol>

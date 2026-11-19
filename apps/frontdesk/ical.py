@@ -176,6 +176,8 @@ def parse(text: str) -> list[Event]:
 
 
 def fetch(url: str) -> str:
+    if not url.lower().startswith(("http://", "https://")):
+        raise ValueError(_("The address must start with http:// or https://"))
     req = urllib.request.Request(url, headers={"User-Agent": "InnKeeper calendar sync"})
     with urllib.request.urlopen(req, timeout=20) as resp:  # noqa: S310  (links are entered by managers)
         data = resp.read(MAX_BYTES + 1)

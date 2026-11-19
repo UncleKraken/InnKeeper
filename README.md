@@ -106,6 +106,7 @@ Run the tests with `python manage.py test`.
 `/admin/` (Django admin) is available to superusers for advanced fixes; the ledger is read-only there.
 
 ### Before using it for real money in Albania
+- **Certified fiscal software.** Software that issues fiscal receipts in Albania must be certified by a commission of AKSHI and the tax office (VKM 239/2020, amended by VKM 433/2021); the certificate gives the software and maintainer codes. **InnKeeper is not certified yet.** Its fiscalization and e-invoice code follows the tax office's specifications and is validated against the official schemas, but live use needs a certified fiscal provider that takes InnKeeper on. Until then use the test system, or run with fiscalization off. Without a certified software code every receipt is rejected (error 42).
 - **Fiscalisation.** Enable *Settings → Fiscalization* with the electronic seal certificate and the self-care codes (business unit, TCR, software, maintainer, operators). Test on the tax authority's test system first; *Finance → Fiscal* lists every document and its status. `python manage.py fiscal_resend` sends waiting documents (the Windows app and Docker do this every minute). The built-in help has a full go-live checklist.
 - **Personal data.** Guest IDs and contact details are personal data under Law 124/2024 on personal data protection. Limit staff access, keep backups secure, and set a retention period.
 

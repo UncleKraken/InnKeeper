@@ -27,6 +27,19 @@ from .models import CashDeposit, FiscalCounter, FiscalDocument
 from .signing import Certificate, CertificateError, iic
 
 log = logging.getLogger(__name__)
+
+
+def _explain(e) -> str:
+    """The tax office's error, plus a plain explanation for the ones that need action outside InnKeeper."""
+    code = str(getattr(e, "code", "") or "").strip()
+    text = f"{code} {e}".strip()
+    hints = {
+        "42": _("The software code is not an active, certified fiscal software. Live fiscalization needs certified software (VKM 239/2020): see Settings → Fiscalization."),
+        "63": _("The business has no registered cash register yet, which needs a certified software code. See Settings → Fiscalization."),
+    }
+    if code in hints:
+        text = f"{text} — {hints[code]}"
+    return text[:500]
 _offline_until = None  # after a failed connection, don't make every sale wait for the timeout
 CENT = Decimal("0.01")
 UNIT = "copë"
@@ -221,7 +234,7 @@ def transmit(doc: FiscalDocument) -> FiscalDocument:
         doc.last_error = _("No connection to the tax authority (%(e)s). It will be sent automatically.") % {"e": e}
     except (cis.CISError, CertificateError) as e:
         doc.status = FiscalDocument.Status.FAILED
-        doc.last_error = f"{getattr(e, 'code', '')} {e}".strip()
+        doc.last_error = _explain(e)
         log.warning("Fiscal document %s rejected: %s", doc.inv_num, doc.last_error)
     except Exception as e:  # anything else (bad data, unexpected reply): one document must never block the queue
         doc.status = FiscalDocument.Status.FAILED
@@ -259,7 +272,7 @@ def send_einvoice(doc: FiscalDocument) -> FiscalDocument:
         doc.einvoice_error = _("No connection to the e-invoice service (%(e)s). It will be sent automatically.") % {"e": e}
     except (cis.CISError, CertificateError) as e:
         doc.einvoice_status = EINVOICE_FAILED
-        doc.einvoice_error = f"{getattr(e, 'code', '')} {e}".strip()
+        doc.einvoice_error = _explain(e)
         log.warning("E-invoice for %s rejected: %s", doc.inv_num, doc.einvoice_error)
     except Exception as e:  # never block the queue
         doc.einvoice_status = EINVOICE_FAILED
@@ -418,7 +431,7 @@ def register_cash(
             raise
         return dep
     except cis.CISError as e:
-        dep.status, dep.last_error = "failed", f"{e.code} {e}".strip()
+        dep.status, dep.last_error = "failed", _explain(e)
     dep.save()
     audit(user, "fiscal.cash", f"{tcr} {operation} {dep.amount} {dep.status}", dep)
     return dep

@@ -14,6 +14,7 @@ from lxml import etree
 
 from apps.core.models import HotelSettings
 from apps.core.testing import PASSWORD, HotelTestCase
+from django.test import SimpleTestCase
 from apps.fiscal import cis, services, signing
 from apps.fiscal.models import CashDeposit, FiscalDocument
 from apps.frontdesk import services as fd
@@ -410,3 +411,13 @@ class FiscalAuditFixTests(HotelTestCase):
         self.assertEqual(FiscalDocument.objects.count(), 2)
         backup.restore_full(backup.read_file(backup.export_full()))
         self.assertEqual(FiscalDocument.objects.count(), 2)
+
+
+class PlainErrorTests(SimpleTestCase):
+    def test_uncertified_software_code_is_explained(self):
+        from apps.fiscal.services import _explain
+
+        text = _explain(cis.CISError("SoftCode is not registered", "42"))
+        self.assertTrue(text.startswith("42 SoftCode is not registered"))
+        self.assertIn("VKM 239/2020", text)
+        self.assertEqual(_explain(cis.CISError("Invalid IIC", "11")), "11 Invalid IIC")

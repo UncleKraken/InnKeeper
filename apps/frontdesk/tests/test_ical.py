@@ -127,3 +127,12 @@ class CalendarSyncTests(HotelTestCase):
         self.assertTrue(Reservation.objects.filter(feed=feed, source="airbnb").exists())
         self.client.login(username="desk", password=PASSWORD)
         self.assertEqual(self.client.get(reverse("frontdesk:channels")).status_code, 403)
+
+
+class FetchOnlyWebAddressesTests(HotelTestCase):
+    def test_file_and_ftp_links_are_refused(self):
+        from apps.frontdesk.ical import fetch
+
+        for url in ("file:///etc/passwd", "ftp://example.com/cal.ics"):
+            with self.assertRaises(ValueError):
+                fetch(url)
