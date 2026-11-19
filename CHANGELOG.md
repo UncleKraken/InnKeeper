@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.34.3 — honest fiscal setup, Wi-Fi tips for phones
+
+**Shqip**
+
+- **Fiskalizimi, i shpjeguar saktë:** te Cilësimet → Fiskalizimi dhe në Ndihmë, InnKeeper thotë tani qartë që softueri fiskal në Shqipëri duhet të certifikohet nga AKSHI dhe tatimet (VKM 239/2020) dhe që InnKeeper nuk është ende i certifikuar. Deri atëherë përdorni sistemin test, ose kodet e një ofruesi fiskal të certifikuar. (Më parë udhëzimi thoshte gabimisht që mjafton ta regjistroni si softuer të vetë biznesit.)
+- **Gabimet 42 dhe 63 të tatimeve** shpjegohen me fjalë të thjeshta te dokumenti i refuzuar.
+- **Telefoni nuk e hap InnKeeper-in?** Te Cilësimet → Qasja nga larg ka dy këshilla të reja: rrjetet Wi-Fi që i mbajnë pajisjet të ndara (kafene, hotele, routera të kompanisë së internetit) dhe shfletuesit si Brave që e kthejnë vetë adresën në https.
+- Lidhjet e kalendarëve (iCal) pranohen vetëm me http:// ose https://.
+- Teste të reja për faqet e pastrimit dhe të mirëmbajtjes.
+
+**English**
+
+- **Fiscalization, explained correctly:** Settings → Fiscalization and Help now say plainly that fiscal software in Albania must be certified by AKSHI and the tax office (VKM 239/2020) and that InnKeeper is not certified yet. Until then use the test system, or the codes of a certified fiscal provider. (Before, the guide wrongly said registering it as the business's own software was enough.)
+- **Tax office errors 42 and 63** are explained in plain words on the rejected document.
+- **A phone can't open InnKeeper?** Settings → Phones, tablets & remote access has two new tips: Wi-Fi networks that keep devices apart (cafés, hotels, routers run by the internet provider) and browsers such as Brave that switch the address to https by themselves.
+- Calendar (iCal) links are accepted only with http:// or https://.
+- New tests for the housekeeping and maintenance pages.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.34.3.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.34.2 — fixes from the phone tests
 
 **Shqip**
