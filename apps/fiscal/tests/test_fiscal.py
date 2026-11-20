@@ -9,12 +9,12 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography.x509.oid import NameOID
+from django.test import SimpleTestCase
 from django.urls import reverse
 from lxml import etree
 
 from apps.core.models import HotelSettings
 from apps.core.testing import PASSWORD, HotelTestCase
-from django.test import SimpleTestCase
 from apps.fiscal import cis, services, signing
 from apps.fiscal.models import CashDeposit, FiscalDocument
 from apps.frontdesk import services as fd
@@ -421,3 +421,93 @@ class PlainErrorTests(SimpleTestCase):
         self.assertTrue(text.startswith("42 SoftCode is not registered"))
         self.assertIn("VKM 239/2020", text)
         self.assertEqual(_explain(cis.CISError("Invalid IIC", "11")), "11 Invalid IIC")
+
+
+class FiscalPagesTests(HotelTestCase):
+    """The Fiscal documents page: list, filter, resend one or all, cash deposits."""
+
+    def setUp(self):
+        from django.conf import settings
+
+        configure()
+        self.cis = FakeCIS(fail="offline")
+        p = mock.patch.object(cis, "send", self.cis)
+        p.start()
+        self.addCleanup(p.stop)
+        services._offline_until = None
+        self.client.cookies[settings.LANGUAGE_COOKIE_NAME] = "en"
+        self.client.login(username="money", password=PASSWORD)
+
+    def offline_sale(self):
+        order = pos.open_order(self.restaurant, table=self.table, user=self.waiter)
+        pos.add_item(order, self.dish, user=self.waiter)
+        with self.captureOnCommitCallbacks(execute=True):
+            pos.pay_order(order, method="card", user=self.waiter)
+        return order.fiscal_documents.get()
+
+    def test_list_and_filter(self):
+        doc = self.offline_sale()
+        self.assertEqual(doc.status, FiscalDocument.Status.PENDING)
+        r = self.client.get(reverse("fiscal:documents"))
+        self.assertEqual(r.context["waiting"], 1)
+        self.assertIn("cd456cd456", r.context["tcrs"])
+        r = self.client.get(reverse("fiscal:documents") + "?status=registered")
+        self.assertEqual(len(r.context["page_obj"]), 0)
+
+    def test_resend_one_after_the_connection_returns(self):
+        doc = self.offline_sale()
+        self.cis.fail = None
+        services._offline_until = None
+        r = self.client.post(reverse("fiscal:resend", args=[doc.pk]), follow=True)
+        doc.refresh_from_db()
+        self.assertEqual(doc.status, FiscalDocument.Status.REGISTERED)
+        self.assertContains(r, doc.fic)
+
+    def test_rejected_document_shows_the_reason_and_can_be_retried(self):
+        doc = self.offline_sale()
+        self.cis.fail = "reject"
+        services._offline_until = None
+        r = self.client.post(reverse("fiscal:resend", args=[doc.pk]), follow=True)
+        doc.refresh_from_db()
+        self.assertEqual(doc.status, FiscalDocument.Status.FAILED)
+        self.assertContains(r, "Invalid IIC")
+        self.cis.fail = None
+        self.client.post(reverse("fiscal:resend", args=[doc.pk]))
+        doc.refresh_from_db()
+        self.assertEqual(doc.status, FiscalDocument.Status.REGISTERED)
+
+    def test_resend_all(self):
+        self.offline_sale()
+        self.offline_sale()
+        self.cis.fail = None
+        services._offline_until = None
+        r = self.client.post(reverse("fiscal:resend_all"), follow=True)
+        self.assertEqual(FiscalDocument.objects.filter(status=FiscalDocument.Status.REGISTERED).count(), 2)
+        self.assertContains(r, "2 document(s) registered")
+
+    def test_cash_deposit_form(self):
+        self.cis.fail = None
+        url = reverse("fiscal:cash")
+        r = self.client.post(url, {"operation": "INITIAL", "amount": "50,00"}, follow=True)
+        self.assertContains(r, "Reported to the tax authority")
+        self.assertTrue(CashDeposit.objects.filter(amount=Decimal("50.00"), status="registered").exists())
+        r = self.client.post(url, {"operation": "INITIAL", "amount": "abc"}, follow=True)
+        self.assertContains(r, "zero or more")
+        r = self.client.post(url, {"operation": "STEAL", "amount": "5"}, follow=True)
+        self.assertContains(r, "zero or more")
+        self.cis.fail = "reject"
+        services._offline_until = None
+        r = self.client.post(url, {"operation": "WITHDRAW", "amount": "10"}, follow=True)
+        self.assertContains(r, "Not registered")
+
+    def test_cash_deposit_when_fiscalization_is_off(self):
+        HotelSettings.objects.filter(pk=1).update(fiscal_enabled=False)
+        from apps.core.models import clear_settings_cache
+
+        clear_settings_cache()
+        r = self.client.post(reverse("fiscal:cash"), {"operation": "INITIAL", "amount": "1"}, follow=True)
+        self.assertContains(r, "not set up")
+
+    def test_waiter_cannot_open_fiscal_pages(self):
+        self.client.login(username="waiter", password=PASSWORD)
+        self.assertIn(self.client.get(reverse("fiscal:documents")).status_code, (302, 403))

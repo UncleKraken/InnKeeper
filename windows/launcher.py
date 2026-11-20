@@ -11,6 +11,7 @@ or reinstalling the app never touches it.
 Run with --selftest to start, check /health/, and exit (used by the build).
 """
 
+import logging
 import os
 import secrets
 import socket
@@ -452,6 +453,16 @@ def run_selftest() -> int:
     return 1
 
 
+def attach_file_logging(path: Path) -> logging.Handler:
+    """Send the app's own warnings and errors (failed fiscal sends, sync problems, page crashes) to the
+    monthly log file. A windowed .exe has no console, so without this they would be lost."""
+    handler = logging.FileHandler(path, encoding="utf-8")
+    handler.setLevel(logging.WARNING)
+    handler.setFormatter(logging.Formatter("%(asctime)s  %(levelname)s %(name)s: %(message)s", "%Y-%m-%d %H:%M:%S"))
+    logging.getLogger().addHandler(handler)
+    return handler
+
+
 def main() -> int:
     # A windowed .exe has no console; give Python somewhere harmless to write.
     if sys.stdout is None:
@@ -492,6 +503,7 @@ def main() -> int:
     except Exception as e:
         log(f"Could not prepare the database: {e}")
         raise
+    attach_file_logging(data / "logs" / f"{datetime.now():%Y-%m}.log")  # after Django set up its logging
 
     stop = threading.Event()
     ready = threading.Event()

@@ -1,5 +1,6 @@
 """Rooms & rates → Channel manager: connect to Channex, link room types, see what arrived."""
 
+import logging
 import threading
 
 from django import forms
@@ -131,7 +132,7 @@ def channex_webhook(request, token):
             channex.pull()
             channex.push()
         except Exception:  # the regular loop will retry
-            pass
+            logging.getLogger(__name__).exception("Channel manager sync failed; it will retry")
         finally:
             connection.close()
 

@@ -96,7 +96,7 @@ def _warnings() -> list[str]:
         if low:
             out.append(ngettext("%(n)s stock item is running low.", "%(n)s stock items are running low.", low) % {"n": low})
     except Exception:  # inventory is optional for the summary
-        pass
+        log.exception("Daily summary: could not count low stock")
     if hs.fiscal_on:
         from apps.fiscal.models import FiscalDocument
 

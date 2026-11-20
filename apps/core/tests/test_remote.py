@@ -4,7 +4,7 @@ import threading
 from pathlib import Path
 from unittest import mock
 
-from django.test import RequestFactory
+from django.test import RequestFactory, SimpleTestCase
 from django.urls import reverse
 
 from apps.core import remote
@@ -140,3 +140,24 @@ class ConnectDevicesTests(HotelTestCase):
         matrix = launcher.qr_matrix("http://192.168.1.20:8765/")
         self.assertEqual(len(matrix), len(matrix[0]))
         self.assertGreaterEqual(len(matrix), 21)
+
+
+class LauncherLogFileTests(SimpleTestCase):
+    def test_app_warnings_reach_the_monthly_log_file(self):
+        import logging
+        import tempfile
+
+        sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "windows"))
+        import launcher
+
+        path = Path(tempfile.mkdtemp()) / "2026-11.log"
+        handler = launcher.attach_file_logging(path)
+        try:
+            logging.getLogger("apps.fiscal.services").warning("Fiscal document 7 not sent: timed out")
+            logging.getLogger("apps.fiscal.services").info("chatty detail")
+        finally:
+            logging.getLogger().removeHandler(handler)
+            handler.close()
+        text = path.read_text(encoding="utf-8")
+        self.assertIn("WARNING apps.fiscal.services: Fiscal document 7 not sent: timed out", text)
+        self.assertNotIn("chatty detail", text)

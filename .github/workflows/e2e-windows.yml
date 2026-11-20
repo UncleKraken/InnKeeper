@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt -r requirements-windows.txt
+          pip install -r requirements.txt -r requirements-windows.txt -c constraints-windows.txt
       - name: Collect static files
         env:
           DJANGO_DEBUG: "0"

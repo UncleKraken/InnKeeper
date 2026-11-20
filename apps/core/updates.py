@@ -49,7 +49,8 @@ def latest_release() -> dict | None:
                     "size": asset.get("size") or 0,
                     "sha256": (asset.get("digest") or "").removeprefix("sha256:"),
                 }
-    except Exception:
+    except Exception as e:
+        logging.getLogger(__name__).warning("Update check failed: %s", e)
         info = {}
     cache.set(CACHE_KEY, info, CHECK_EVERY)
     return info or None
