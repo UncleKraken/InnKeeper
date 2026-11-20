@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.34.4 — reliability: log file, tested tills, fixed build versions
+
+**Shqip**
+
+- **Skedari i ditarit (log) mbledh tani edhe gabimet e vetë programit:** kupona fiskalë që nuk u dërguan, probleme me sinkronizimin e kanaleve, kontrolli i përditësimeve. Më parë në Windows këto humbisnin. Skedari është te dosja e të dhënave të InnKeeper → logs, një për çdo muaj.
+- **Teste të reja për arkën** (porositë, pagesat, kusuri, pagesat e ndara, kalimi në dhomë, zbritjet, anulimet) dhe për faqen e dokumenteve fiskale.
+- **Versione të fiksuara të paketave** për ndërtimin në Windows, që çdo version i ri të ndërtohet njësoj si ai i testuari.
+
+**English**
+
+- **The log file now also collects the program's own errors:** fiscal receipts that weren't sent, channel sync problems, the update check. Before, on Windows these were lost. The file is in InnKeeper's data folder → logs, one per month.
+- **New tests for the till** (orders, payments, change, split bills, charge to room, discounts, voids) and for the fiscal documents page.
+- **Fixed package versions** for the Windows build, so every new release is built the same way as the tested one.
+
+### Install or update on Windows
+1. In InnKeeper 2.7.0 or newer: **Settings → Updates → Update now**. Otherwise download **InnKeeper-Setup-2.34.4.exe** below and run it. Updating keeps all your data; a backup is made first.
+2. Windows may show "Windows protected your PC" because the installer is not code-signed. Click **More info → Run anyway** ([step-by-step guide](https://github.com/UncleKraken/InnKeeper/blob/master/docs/windows-install.md)).
+
 ## 2.34.3 — honest fiscal setup, Wi-Fi tips for phones
 
 **Shqip**
